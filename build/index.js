@@ -56,6 +56,81 @@ const TestDemoUCSC = () => {
 
 /***/ }),
 
+/***/ "./src/blocks/TestDemoUCSC2.js":
+/*!*************************************!*\
+  !*** ./src/blocks/TestDemoUCSC2.js ***!
+  \*************************************/
+/***/ (function(__unused_webpack_module, __webpack_exports__, __webpack_require__) {
+
+__webpack_require__.r(__webpack_exports__);
+/* harmony import */ var _wordpress_element__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! @wordpress/element */ "@wordpress/element");
+/* harmony import */ var _wordpress_element__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(_wordpress_element__WEBPACK_IMPORTED_MODULE_0__);
+/* harmony import */ var _components_Hello__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../components/Hello */ "./src/components/Hello.js");
+
+
+
+const TestDemoUCSC = () => {
+  wp.blocks.registerBlockType("ucscblocks/block2", {
+    title: "Test Demo 2 UCSC",
+    icon: "smiley",
+    category: "common",
+    attributes: {
+      skyColor: {
+        type: "string"
+      },
+      grassColor: {
+        type: "string"
+      }
+    },
+    edit: ({
+      setAttributes,
+      attributes
+    }) => {
+      return (0,_wordpress_element__WEBPACK_IMPORTED_MODULE_0__.createElement)(_wordpress_element__WEBPACK_IMPORTED_MODULE_0__.Fragment, null, (0,_wordpress_element__WEBPACK_IMPORTED_MODULE_0__.createElement)(_components_Hello__WEBPACK_IMPORTED_MODULE_1__["default"], null), (0,_wordpress_element__WEBPACK_IMPORTED_MODULE_0__.createElement)("input", {
+        type: "text",
+        placeholder: "sky",
+        value: attributes.skyColor,
+        onChange: e => setAttributes({
+          skyColor: e.target.value
+        })
+      }), (0,_wordpress_element__WEBPACK_IMPORTED_MODULE_0__.createElement)("input", {
+        type: "text",
+        placeholder: "grass",
+        value: attributes.grassColor,
+        onChange: e => setAttributes({
+          grassColor: e.target.value
+        })
+      }));
+    },
+    save: props => {
+      return null;
+    }
+  });
+};
+
+/* harmony default export */ __webpack_exports__["default"] = (TestDemoUCSC);
+
+/***/ }),
+
+/***/ "./src/components/Hello.js":
+/*!*********************************!*\
+  !*** ./src/components/Hello.js ***!
+  \*********************************/
+/***/ (function(__unused_webpack_module, __webpack_exports__, __webpack_require__) {
+
+__webpack_require__.r(__webpack_exports__);
+/* harmony import */ var _wordpress_element__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! @wordpress/element */ "@wordpress/element");
+/* harmony import */ var _wordpress_element__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(_wordpress_element__WEBPACK_IMPORTED_MODULE_0__);
+
+
+const Hello = () => {
+  return (0,_wordpress_element__WEBPACK_IMPORTED_MODULE_0__.createElement)("div", null, (0,_wordpress_element__WEBPACK_IMPORTED_MODULE_0__.createElement)("p", null, "Hello"));
+};
+
+/* harmony default export */ __webpack_exports__["default"] = (Hello);
+
+/***/ }),
+
 /***/ "@wordpress/element":
 /*!*********************************!*\
   !*** external ["wp","element"] ***!
@@ -142,8 +217,11 @@ var __webpack_exports__ = {};
   \**********************/
 __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _blocks_TestDemoUCSC__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./blocks/TestDemoUCSC */ "./src/blocks/TestDemoUCSC.js");
+/* harmony import */ var _blocks_TestDemoUCSC2__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./blocks/TestDemoUCSC2 */ "./src/blocks/TestDemoUCSC2.js");
+
 
 (0,_blocks_TestDemoUCSC__WEBPACK_IMPORTED_MODULE_0__["default"])();
+(0,_blocks_TestDemoUCSC2__WEBPACK_IMPORTED_MODULE_1__["default"])();
 }();
 /******/ })()
 ;
