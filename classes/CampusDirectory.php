@@ -12,18 +12,18 @@ class CampusDirectory
   function settings()
   {
     add_settings_section('cd_first_section', null, null, 'campus-directory-settings-page');
-    add_settings_field('campus_directory_deptartment', 'Campus Directory Deptartment', array($this, 'apikeyHTML'), 'campus-directory-settings-page', 'cd_first_section');
-    register_setting('campus_directory_settings', 'campus_directory_deptartment', array('sanitize_callback' => 'sanitize_text_field', 'default' => ''));
+    add_settings_field('campus_directory_department', 'Campus Directory Department', array($this, 'apikeyHTML'), 'campus-directory-settings-page', 'cd_first_section');
+    register_setting('campus_directory_settings', 'campus_directory_department', array('sanitize_callback' => 'sanitize_text_field', 'default' => ''));
   }
 
   function apikeyHTML()
   { ?>
-    <input type="text" name="campus_directory_deptartment" value="<?php echo esc_attr(get_option('campus_directory_deptartment')) ?>" />
+    <input type="text" name="campus_directory_department" value="<?php echo esc_attr(get_option('campus_directory_department')) ?>" />
   <?php }
 
   function settingsLink()
   {
-    add_options_page('Test KWA Plugin Settings', 'Campus Directory Settings', 'manage_options', 'campus-directory-settings-page', array($this, 'settingsPageHTML'));
+    add_options_page('Campus Directory Settings', 'Campus Directory Settings', 'manage_options', 'campus-directory-settings-page', array($this, 'settingsPageHTML'));
   }
 
   function settingsPageHTML()

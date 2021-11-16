@@ -13,6 +13,7 @@ include(plugin_dir_path(__FILE__) . 'classes/UCSCGutenbergDemoBlock1.php');
 include(plugin_dir_path(__FILE__) . 'classes/UCSCGutenbergDemoBlock2.php');
 include(plugin_dir_path(__FILE__) . 'classes/ContentSharer.php');
 include(plugin_dir_path(__FILE__) . 'classes/CampusDirectory.php');
+include(plugin_dir_path(__FILE__) . 'classes/ClassSchedule.php');
 
 wp_register_script('ucscblocks', plugin_dir_url(__FILE__) . 'build/index.js', array('wp-blocks','wp-element', 'wp-components'));
 
@@ -20,3 +21,4 @@ $UCSCGutenbergDemoBlock1 = new UCSCGutenbergDemoBlock1();
 $UCSCGutenbergDemoBlock2 = new UCSCGutenbergDemoBlock2();
 $ContentSharer = new ContentSharer();
 $CampusDirectory = new CampusDirectory();
+$ClassSchedule = new ClassSchedule();
