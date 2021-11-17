@@ -98,4 +98,10 @@ This commit show's how to create a Dynamic Block vs a Static block. There are ma
 
 ### How To Contribute
 
-TBD
+- Create Feature branch `git checkout -b "feature/site-level-admin-form"`
+- Write code
+- Check `git diff` to see files that have been modified.
+- Git add the files you have modified or added: `git add <filename> <filename> <filename>` or use `git add .` if all the modified files need to be checked in
+- Commit with a good message `git commit -m "feat: ✨ Updating README"`
+- push code to github: `git push origin feature/site-level-admin-form`
+- In GitHub create a PR into the main branch
