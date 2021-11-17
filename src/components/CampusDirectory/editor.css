@@ -1,0 +1,32 @@
+#introParagraph {
+  width: 100%;
+}
+
+.vertical_radio .components-base-control__field {
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+  flex: 1;
+}
+
+.vertical_radio .components-base-control__field .components-radio-control__option {
+  padding: 0 2em 0 0;
+  display: flex;
+}
+
+.vertical_radio .components-base-control__field label:first-child {
+  flex: 0 0 100%;
+  font-weight: normal;
+}
+
+.flex-labels .components-base-control__field {
+  display: flex;
+}
+
+.flex-checkboxes {
+  display: flex;
+}
+
+.cd-sublabel i {
+  font-size: 0.75714rem;
+}
