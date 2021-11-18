@@ -14,12 +14,12 @@ class CourseCatalog
     });
   }
 
-  
+
   function settingsLink()
   {
     add_options_page('Course Catalog Settings', 'Course Catalog', 'manage_options', 'course-catalog-settings-page', array($this, 'settingsPageHTML'));
   }
-  
+
   function settings()
   {
     add_settings_section('course-catalog-section', null, null, 'course-catalog-settings-page');
@@ -32,7 +32,7 @@ class CourseCatalog
     <input type="text" name="course-catalog-subject" value="<?php echo esc_attr(get_option('course-catalog-subject')) ?>" />
   <?php }
 
-  
+
 
   function settingsPageHTML()
   { ?>
@@ -91,7 +91,7 @@ class CourseCatalog
       );
       $response = wp_remote_post("https://my.prd.ais.aws.ucsc.edu:443/PSIGW/HttpListeningConnector", $args);
       $body = wp_remote_retrieve_body($response);
-      
+
       if (is_multisite()) {
         set_site_transient('course-catalog-' . $lowerTitle, $body, WEEK_IN_SECONDS);
       } else {
@@ -101,7 +101,7 @@ class CourseCatalog
     $xmlBody = simplexml_load_string($body);
     return $xmlBody;
   }
-  function getCourses() 
+  function getCourses()
   {
     $subject = strtolower(get_site_option('course-catalog-subject'));
     if (!strlen($subject)) {
@@ -111,9 +111,10 @@ class CourseCatalog
     $cachedData = $this->getCachedCourses($subject);
     return $cachedData;
   }
-  
+
   function theHTML($attributes)
   {
+    ob_start();
     $subject = strtolower(get_site_option('course-catalog-subject'));
     if (!strlen($subject)) {
       // if no key is found at network level, get key from site level
@@ -122,12 +123,16 @@ class CourseCatalog
     $courses = $this->getCourses();
 
     echo '<table>';
-    echo '<tr><th>Course #</th><th>Course Title</th><th>Course Level</th><th>Units</th></thr>'; 
+    echo '<tr><th>Course #</th><th>Course Title</th><th>Course Level</th><th>Units</th></thr>';
     foreach ($courses->course as $course) {
       echo '<tr><td>' . $course->crse_id . '</td><td>' . $course->title . '</td><td>' . $course->level . '</td><td>' . $course->units . '</td></tr>';
     }
     echo '</table>';
-    
+
+    $output = ob_get_contents(); // collect output
+    ob_end_clean(); // Turn off ouput buffer
+
+    return $output;
   }
 
 }
