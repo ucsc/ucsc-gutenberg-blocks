@@ -7,6 +7,18 @@ class CampusDirectory
     add_action('init', array($this, 'renderFrontend'));
     add_action('admin_menu', array($this, 'settingsLink'));
     add_action('admin_init', array($this, 'settings'));
+    add_filter('query_vars', function($query_vars) {
+      $query_vars[] = 'cruzid';
+      return $query_vars;
+    });
+
+    add_action('template_include', function ($template) {
+      if (get_query_var('cruzid') == false || get_query_var('cruzid') == '') {
+        return $template;
+      }
+
+      return plugin_dir_path(__FILE__) . '../templates/DirectoryProfileTemplate.php';
+    });
   }
 
   function settings()
@@ -53,13 +65,14 @@ class CampusDirectory
       'editor_style' => 'ucscblocks-editor',
       'render_callback' => array($this, 'theHTML'),
     ));
+    add_rewrite_rule('directoryprofile/(.*)/?', 'index.php?cruzid=$matches[1]', 'top');
   }
 
   function theHTML($attributes)
   {
+    $path = plugin_dir_path(__FILE__);
     ob_start();
-
-    echo "<h2>Campus Directory Frontend Output: " . plugin_dir_path(__FILE__) . "</h2>";
+    include(plugin_dir_path(__FILE__) . '../templates/CampusDirectoryTemplate.php');
 
     $output = ob_get_contents(); // collect output
     ob_end_clean(); // Turn off ouput buffer
