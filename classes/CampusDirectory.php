@@ -19,8 +19,12 @@ class CampusDirectory
 
       return plugin_dir_path(__FILE__) . '../templates/DirectoryProfileTemplate.php';
     });
+    add_action('wp_enqueue_scripts', array($this, 'register_plugin_styles'));
   }
-
+  public function register_plugin_styles() {
+    wp_register_style( 'directoryprofile', '../src/components/CampusDirectory/directoryprofile.css' );
+    wp_enqueue_style( 'directoryprofile');
+  }
   function settings()
   {
     add_settings_section('cd_first_section', null, null, 'campus-directory-settings-page');
@@ -66,6 +70,12 @@ class CampusDirectory
       'render_callback' => array($this, 'theHTML'),
     ));
     add_rewrite_rule('directoryprofile/(.*)/?', 'index.php?cruzid=$matches[1]', 'top');
+    wp_register_style(
+      'directoryprofile',
+      plugins_url('../src/components/CampusDirectory/directoryprofile.css', __FILE__),
+      array(),
+      filemtime(plugin_dir_path(__FILE__) . '../src/components/CampusDirectory/directoryprofile.css')
+    );
   }
 
   function theHTML($attributes)
@@ -75,7 +85,7 @@ class CampusDirectory
     include(plugin_dir_path(__FILE__) . '../templates/CampusDirectoryTemplate.php');
 
     $output = ob_get_contents(); // collect output
-    ob_end_clean(); // Turn off ouput buffer
+    ob_end_clean(); // Turn off output buffer
 
     return $output;
   }
