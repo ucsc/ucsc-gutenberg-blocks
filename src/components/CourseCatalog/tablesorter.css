@@ -1,0 +1,44 @@
+.table-sortable {
+    border-collapse: collapse;
+}
+
+.table-sortable th, .pointer {
+    cursor: pointer;
+}
+
+.table-sortable .th-sort-asc::after {
+    content: "\25b4";
+}
+
+.hidden td p {
+    max-height: 0;
+    padding: 0 10px;
+    margin: 0;
+    box-sizing: border-box;
+    overflow: hidden;
+    transition: max-height 0.3s, padding 0.3s;
+}
+
+.hidden.active td p {
+    max-height: 600px;
+    padding: 10px 10px;
+    transition: max-height 0.6s, padding 0.6s;
+}
+
+.table-sortable .th-sort-desc::after {
+    content: "\25be";
+}
+
+.table-sortable .th-sort-asc::after,
+.table-sortable .th-sort-desc::after {
+    margin-left: 5px;
+}
+
+.table-sortable .th-sort-asc,
+.table-sortable .th-sort-desc {
+    background: rgba(0, 0, 0, 0.1);
+}
+
+.table-sortable tr, .table-sortable td {
+    padding: 0;
+}

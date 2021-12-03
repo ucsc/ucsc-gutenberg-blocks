@@ -22,7 +22,10 @@ class CampusDirectory
     add_action('wp_enqueue_scripts', array($this, 'register_plugin_styles'));
   }
   public function register_plugin_styles() {
-    wp_register_style( 'directoryprofile', '../src/components/CampusDirectory/directoryprofile.css' );
+    wp_register_style( 'directoryprofile',
+        plugins_url('../src/components/CampusDirectory/directoryprofile.css', __FILE__),
+        array(),
+        filemtime(plugin_dir_path(__FILE__) . '../src/components/CampusDirectory/directoryprofile.css'));
     wp_enqueue_style( 'directoryprofile');
   }
   function settings()
