@@ -4,7 +4,6 @@ th {
 th, td {
   border-left-style: hidden!important;
   border-right-style: hidden!important;
-  /*border-top-style: hidden!important;*/
 }
 tr.hidden {
   border-top-style: hidden!important;
