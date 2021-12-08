@@ -143,13 +143,15 @@ class CourseCatalog
             $subject = strtolower(get_option('course-catalog-subject'));
         }
         $courses = $this->getCourses();
-        echo '<div>
+        echo '<div id="courseCatalog"><div>
     <label>
-      Search:<input type="text" id="Search" onkeyup="tableSearch()"
+      Search Dept Courses:<input type="text" id="Search" onkeyup="tableSearch()"
         placeholder="search table">
-    </label>
+    </label><br/>
+    View titles & course descriptions for department course offerings<br/>
+    Click a course\'s title to read its description.
     <label>
-      <button id="expandAll">Expand All</button>
+      <button id="expandAll">View All</button>
     </label>
     <label>
       <button id="collapseAll">Collapse All</button>
@@ -160,10 +162,10 @@ class CourseCatalog
         echo '<tbody>';
         foreach ($courses->course as $course) {
             error_log("DEBUG: course" . print_r($course, true));
-            echo '<tr class="pointer"><td>' . $course->subject . ' ' . $course->catalog_nbr . '</td><td>' . $course->title . '</td><td>' . $course->level . '</td><td>' . $course->units . ' Units</td></tr>';
+            echo '<tr class="pointer"><td>' . $course->subject . '  <span class="intsort">' .$course->catalog_nbr .'</span></td><td>' . $course->title . '</td><td>' . $course->level . '</td><td>' . $course->units . ' Units</td></tr>';
             echo '<tr class="hidden"><td colspan="4"><p>' . $course->description . '</p></td></tr>';
         }
-        echo '</tbody></table>';
+        echo '</tbody></table></div>';
 
         $output = ob_get_contents(); // collect output
         ob_end_clean(); // Turn off ouput buffer

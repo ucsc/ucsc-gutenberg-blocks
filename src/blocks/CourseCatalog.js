@@ -12,7 +12,6 @@ const CourseCatalog = () => {
       },
     },
     edit: ({ setAttributes, attributes }) => {
-        console.log('here')
         console.log(attributes)
     //   const { siteid, postType } = attributes;
 

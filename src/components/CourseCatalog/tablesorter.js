@@ -21,15 +21,21 @@ function sortTableByColumn(table, column, asc = true) {
 
     // Sort each row
     const sortedLinkedRows = rowsLinkedToDesc.sort((a, b) => {
-        const aColText = a.row.querySelector(`td:nth-child(${ column + 1 })`).textContent.trim();
-        const bColText = b.row.querySelector(`td:nth-child(${ column + 1 })`).textContent.trim();
-
-        return aColText > bColText ? (1 * dirModifier) : (-1 * dirModifier);
+        var special =  a.row.querySelector(`td:nth-child(${ column + 1 }) span`) !== null;
+        //if needed, the span can have a type to enable special sorting beyond integer
+        if (special) {
+            const aColVal = parseInt(a.row.querySelector(`td:nth-child(${ column + 1 }) span`).textContent.trim());
+            const bColVal = parseInt(a.row.querySelector(`td:nth-child(${ column + 1 }) span`).textContent.trim());
+            return aColVal > bColVal ? (1 * dirModifier) : (-1 * dirModifier);
+        } else {
+            const aColText = a.row.querySelector(`td:nth-child(${ column + 1 })`).textContent.trim();
+            const bColText = b.row.querySelector(`td:nth-child(${ column + 1 })`).textContent.trim();
+            return aColText > bColText ? (1 * dirModifier) : (-1 * dirModifier);
+        }
     });
 
     const sortedRows = [];
     for(var i = 0; i <= sortedLinkedRows.length; i++) {
-        console.log(sortedLinkedRows[i]);
         if (sortedLinkedRows[i]){
             sortedRows.push(sortedLinkedRows[i].row);
             sortedRows.push(sortedLinkedRows[i].description);
@@ -55,16 +61,14 @@ document.querySelectorAll(".table-sortable th").forEach((headerCell, headerIndex
     headerCell.addEventListener("click", () => {
         const tableElement = headerCell.parentElement.parentElement.parentElement;
         const currentIsAscending = headerCell.classList.contains("th-sort-asc");
-
         sortTableByColumn(tableElement, headerIndex, !currentIsAscending);
     });
 });
 
-document.querySelectorAll(".table-sortable").forEach((tableSortable, index) => {
+document.querySelectorAll(".table-sortable td").forEach((tableSortable, index) => {
     tableSortable.addEventListener("click", (event) => {
         event.stopPropagation();
-        var tr  = event.target.closest("tr").nextElementSibling;
-
+        var tr = event.target.closest("tr").nextElementSibling;
         tr.classList.toggle('active');
     });
 });
