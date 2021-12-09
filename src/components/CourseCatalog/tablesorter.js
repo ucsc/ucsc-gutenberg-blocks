@@ -24,8 +24,14 @@ function sortTableByColumn(table, column, asc = true) {
         var special =  a.row.querySelector(`td:nth-child(${ column + 1 }) span`) !== null;
         //if needed, the span can have a type to enable special sorting beyond integer
         if (special) {
-            const aColVal = parseInt(a.row.querySelector(`td:nth-child(${ column + 1 }) span`).textContent.trim());
-            const bColVal = parseInt(b.row.querySelector(`td:nth-child(${ column + 1 }) span`).textContent.trim());
+            const aColText = a.row.querySelector(`td:nth-child(${ column + 1 }) span`).textContent.trim();
+            const bColText = b.row.querySelector(`td:nth-child(${ column + 1 }) span`).textContent.trim();
+            let aColVal = parseInt(aColText);
+            let bColVal = parseInt(bColText);
+            if (aColVal === bColVal) {
+                aColVal = aColText.replace(/[0-9]/g, '');
+                bColVal = bColText.replace(/[0-9]/g, '');
+            }
             return aColVal > bColVal ? (1 * dirModifier) : (-1 * dirModifier);
         } else {
             const aColText = a.row.querySelector(`td:nth-child(${ column + 1 })`).textContent.trim();
