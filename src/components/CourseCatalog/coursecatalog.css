@@ -14,3 +14,6 @@ tr.hidden {
   font-size: 11px;
   padding: 0;
 }
+span.secret {
+  display: none;
+}

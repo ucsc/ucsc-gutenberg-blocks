@@ -161,7 +161,19 @@ class CourseCatalog
         echo '<thead><tr><th>Course #</th><th>Course Title</th><th>Course Level</th><th>Units</th></tr></thead>';
         echo '<tbody>';
         foreach ($courses->course as $course) {
-            echo '<tr class="pointer"><td>' . $course->subject . '  <span class="intsort">' .$course->catalog_nbr .'</span></td><td>' . $course->title . '</td><td>' . $course->level . '</td><td>' . $course->units . ' Units</td></tr>';
+            switch ($course->level) {
+                case 'Lower Division':
+                    $lvlval = 1;
+                    break;
+                case 'Upper Division':
+                    $lvlval = 2;
+                    break;
+                case 'Graduate':
+                    $lvlval = 3;
+                    break;
+            }
+
+            echo '<tr class="pointer"><td>' . $course->subject . '  <span class="intsort">' .$course->catalog_nbr .'</span></td><td>' . $course->title . '</td><td>' . $course->level . '<span class="secret">' . $lvlval . '</span></td><td>' . $course->units . ' Units</td></tr>';
             echo '<tr class="hidden"><td colspan="4"><p>' . $course->description . '</p></td></tr>';
         }
         echo '</tbody></table></div>';
