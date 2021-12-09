@@ -25,7 +25,7 @@ function sortTableByColumn(table, column, asc = true) {
         //if needed, the span can have a type to enable special sorting beyond integer
         if (special) {
             const aColVal = parseInt(a.row.querySelector(`td:nth-child(${ column + 1 }) span`).textContent.trim());
-            const bColVal = parseInt(a.row.querySelector(`td:nth-child(${ column + 1 }) span`).textContent.trim());
+            const bColVal = parseInt(b.row.querySelector(`td:nth-child(${ column + 1 }) span`).textContent.trim());
             return aColVal > bColVal ? (1 * dirModifier) : (-1 * dirModifier);
         } else {
             const aColText = a.row.querySelector(`td:nth-child(${ column + 1 })`).textContent.trim();
