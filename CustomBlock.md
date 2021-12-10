@@ -28,6 +28,8 @@ will combine all the files referenced in src/index.js .
 At this point you should follow the conventions for the code that is already there in another block and name your files in a similar fashion.
 ### classes/Whatever.php
 This is where you declare the class for your block that you're including and instantiating in index.php. EVERYTHING else stems from this.
+
+Any data you fetch from an API must be cached to work with CampusPress code standards.
 #### Constructor
 This is where you tell WordPress about your block's features and what it should do in default cases.
 ```phpregexp

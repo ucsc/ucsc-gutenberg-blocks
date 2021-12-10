@@ -161,6 +161,7 @@ class CourseCatalog
         echo '<thead><tr><th>Course #</th><th>Course Title</th><th>Course Level</th><th>Units</th></tr></thead>';
         echo '<tbody>';
         foreach ($courses->course as $course) {
+            // build a value for the course level to enable logical sorting instead of alphanumeric
             switch ($course->level) {
                 case 'Lower Division':
                     $lvlval = 1;
@@ -172,7 +173,8 @@ class CourseCatalog
                     $lvlval = 3;
                     break;
             }
-
+            // the class 'intsort' isn't really necessary at this point, in the future it could signal a type of sorting
+            // the class 'secret' is used to include a value, but not display it. the name is such because 'hidden' was already used
             echo '<tr class="pointer"><td>' . $course->subject . '  <span class="intsort">' .$course->catalog_nbr .'</span></td><td>' . $course->title . '</td><td>' . $course->level . '<span class="secret">' . $lvlval . '</span></td><td>' . $course->units . ' Units</td></tr>';
             echo '<tr class="hidden"><td colspan="4"><p>' . $course->description . '</p></td></tr>';
         }
