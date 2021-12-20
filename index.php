@@ -18,7 +18,12 @@ include(plugin_dir_path(__FILE__) . 'classes/ClassSchedule.php');
 include(plugin_dir_path(__FILE__) . 'classes/SiteSettings.php');
 
 
-wp_register_script('ucscblocks', plugin_dir_url(__FILE__) . 'build/index.js', array('wp-blocks','wp-element', 'wp-components'));
+add_action('admin_enqueue_scripts', 'registerJSBuild');
+
+function registerJSBuild() {
+  wp_register_script('ucscblocks', plugin_dir_url(__FILE__) . 'build/index.js', array('wp-blocks','wp-element', 'wp-components'));
+}
+
 
 $UCSCGutenbergDemoBlock1 = new UCSCGutenbergDemoBlock1();
 $UCSCGutenbergDemoBlock2 = new UCSCGutenbergDemoBlock2();

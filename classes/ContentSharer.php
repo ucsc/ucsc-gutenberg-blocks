@@ -6,18 +6,30 @@ class ContentSharer
     add_action('rest_api_init', function () {
       register_rest_route('ucscgutenbergblocks/v1', '/sites/', array(
         'methods' => 'GET',
-        'callback' => array($this, 'get_sites')
+        'callback' => array($this, 'get_sites'),
+        'permission_callback' => array($this, 'restPermissionsCheck')
       ));
       register_rest_route('ucscgutenbergblocks/v1', '/posttypes', array(
         'methods' => 'GET',
-        'callback' => array($this, 'get_posttypes')
+        'callback' => array($this, 'get_posttypes'),
+        'permission_callback' => array($this, 'restPermissionsCheck')
       ));
       register_rest_route('ucscgutenbergblocks/v1', '/post', array(
         'methods' => 'GET',
-        'callback' => array($this, 'get_post')
+        'callback' => array($this, 'get_post'),
+        'permission_callback' => array($this, 'restPermissionsCheck')
       ));
     });
     add_action('init', array($this, 'renderFrontend'));
+  }
+
+  function restPermissionsCheck() {
+    // Restrict endpoint to only users who have the edit_posts capability.
+    if ( ! current_user_can( 'edit_posts' ) ) {
+        return new WP_Error( 'rest_forbidden', esc_html__( 'You can not view private data.', 'my-text-domain' ), array( 'status' => 401 ) );
+    }
+
+    return true;
   }
 
   function renderFrontend()

@@ -7,10 +7,20 @@ class CourseCatalog
         add_action('rest_api_init', function () {
             register_rest_route('ucscgutenbergblocks/v1', '/course-catalog/', array(
                 'methods' => 'GET',
-                'callback' => array($this, 'getCourses')
+                'callback' => array($this, 'getCourses'),
+                'permission_callback' => array($this, 'restPermissionsCheck')
             ));
         });
         add_action('wp_enqueue_scripts', array($this, 'register_plugin_styles'));
+    }
+
+    function restPermissionsCheck() {
+        // Restrict endpoint to only users who have the edit_posts capability.
+        if ( ! current_user_can( 'edit_posts' ) ) {
+            return new WP_Error( 'rest_forbidden', esc_html__( 'You can not view private data.', 'my-text-domain' ), array( 'status' => 401 ) );
+        }
+
+        return true;
     }
 
     public function register_plugin_styles() {
@@ -52,7 +62,6 @@ class CourseCatalog
         $lowerTitle = strtolower($subject);
         $body = get_transient('course-catalog-' . $lowerTitle);
         if (!$body) {
-            print_r("NOT CACHED!!!");
             $request_body = '<!--?xml version="1.0"?-->
       <catalog>
           <subject>' . $subject . '</subject>
