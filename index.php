@@ -15,6 +15,8 @@ include(plugin_dir_path(__FILE__) . 'classes/ContentSharer.php');
 include(plugin_dir_path(__FILE__) . 'classes/CourseCatalog.php');
 include(plugin_dir_path(__FILE__) . 'classes/CampusDirectory.php');
 include(plugin_dir_path(__FILE__) . 'classes/ClassSchedule.php');
+include(plugin_dir_path(__FILE__) . 'classes/SiteSettings.php');
+
 
 wp_register_script('ucscblocks', plugin_dir_url(__FILE__) . 'build/index.js', array('wp-blocks','wp-element', 'wp-components'));
 
@@ -24,3 +26,4 @@ $ContentSharer = new ContentSharer();
 $CourseCatalog = new CourseCatalog();
 $CampusDirectory = new CampusDirectory();
 $ClassSchedule = new ClassSchedule();
+$SiteSettings = new SiteSettings();

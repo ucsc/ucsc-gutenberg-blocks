@@ -1,12 +1,13 @@
 <?php
 
+
+include(plugin_dir_path(__FILE__) . 'CampusDirectoryAPI.php');
+
 class CampusDirectory
 {
   function __construct()
   {
     add_action('init', array($this, 'renderFrontend'));
-    add_action('admin_menu', array($this, 'settingsLink'));
-    add_action('admin_init', array($this, 'settings'));
     add_filter('query_vars', function($query_vars) {
       $query_vars[] = 'cruzid';
       return $query_vars;
@@ -27,6 +28,15 @@ class CampusDirectory
         array(),
         filemtime(plugin_dir_path(__FILE__) . '../src/components/CampusDirectory/directoryprofile.css'));
     wp_enqueue_style( 'directoryprofile');
+
+    $file = '../src/components/CampusDirectory/campusdirectory.css';
+    wp_register_style(
+            'campusdirectory',
+            plugins_url($file, __FILE__),
+            array(),
+            filemtime(plugin_dir_path(__FILE__) .$file)
+    );
+    wp_enqueue_style('campusdirectory');
   }
   function settings()
   {
@@ -84,6 +94,12 @@ class CampusDirectory
   function theHTML($attributes)
   {
     $path = plugin_dir_path(__FILE__);
+    $attributes['objFacultyTypes'] = json_decode($attributes['strFacultyTypes'], true);
+    $attributes['objStaffTypes'] = json_decode($attributes['strStaffTypes'], true);
+    $attributes['objGradTypes'] = json_decode($attributes['strGradTypes'], true);
+    $attributes['objInformationTypes'] = json_decode($attributes['strInformationTypes'], true);
+    $campusDirectoryAPI = new CampusDirectoryAPI($attributes);
+    $items = $campusDirectoryAPI->setDirectoryData();
     ob_start();
     include(plugin_dir_path(__FILE__) . '../templates/CampusDirectoryTemplate.php');
 

@@ -4,38 +4,28 @@ class ClassSchedule
 {
   function __construct()
   {
-    add_action('admin_menu', array($this, 'settingsLink'));
-    add_action('admin_init', array($this, 'settings'));
+    add_action('init', array($this, 'adminAssets'));
   }
 
-  function settings()
+  function adminAssets()
   {
-    add_settings_section('cs_first_section', null, null, 'class-schedule-settings-page');
-    add_settings_field('class_schedule_department', 'Class Schedule Department', array($this, 'apikeyHTML'), 'class-schedule-settings-page', 'cs_first_section');
-    register_setting('class_schedule_settings', 'class_schedule_department', array('sanitize_callback' => 'sanitize_text_field', 'default' => ''));
+    register_block_type('ucscblocks/classschedule', array(
+      'editor_script' => 'ucscblocks',
+      'render_callback' => array($this, 'theHTML')
+    ));
   }
 
-  function apikeyHTML()
-  { ?>
-    <input type="text" name="class_schedule_department" value="<?php echo esc_attr(get_option('class_schedule_department')) ?>" />
-  <?php }
-
-  function settingsLink()
+  function theHTML($attributes)
   {
-    add_options_page('Class Schedule Settings', 'Class Schedule Settings', 'manage_options', 'class-schedule-settings-page', array($this, 'settingsPageHTML'));
-  }
+    $markup = '
+      <link rel="stylesheet" href="https://webapps.ucsc.edu/wcsi/css/app.css">
+      <div id="wcsi">
 
-  function settingsPageHTML()
-  { ?>
-    <div class="wrap">
-      <h1>Class Schedule Settings</h1>
-      <form action="options.php" method="POST">
-        <?php
-        settings_fields('class_schedule_settings');
-        do_settings_sections('class-schedule-settings-page');
-        submit_button();
-        ?>
-      </form>
-    </div>
-<?php }
+      </div>
+      <script src="https://cdn.polyfill.io/v2/polyfill.min.js?features=default,Promise,Object.assign,Object.values,Array.prototype.find,Array.prototype.findIndex,Array.prototype.includes,String.prototype.includes,String.prototype.startsWith,String.prototype.endsWith"></script>
+      <script src="https://webapps.ucsc.edu/wcsi/js/manifest.js"></script>
+      <script src="https://webapps.ucsc.edu/wcsi/js/vendor.js"></script>
+      <script src="https://webapps.ucsc.edu/wcsi/js/app.js"></script>';
+    return $markup;
+  }
 }

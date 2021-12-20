@@ -133,6 +133,39 @@ const CampusDirectory = () => {
 
 /***/ }),
 
+/***/ "./src/blocks/ClassSchedule.js":
+/*!*************************************!*\
+  !*** ./src/blocks/ClassSchedule.js ***!
+  \*************************************/
+/***/ (function(__unused_webpack_module, __webpack_exports__, __webpack_require__) {
+
+__webpack_require__.r(__webpack_exports__);
+/* harmony import */ var _wordpress_element__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! @wordpress/element */ "@wordpress/element");
+/* harmony import */ var _wordpress_element__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(_wordpress_element__WEBPACK_IMPORTED_MODULE_0__);
+
+
+const ClassSchedule = () => {
+  wp.blocks.registerBlockType("ucscblocks/classschedule", {
+    title: "Class",
+    icon: "smiley",
+    category: "common",
+    attributes: {},
+    edit: ({
+      setAttributes,
+      attributes
+    }) => {
+      return (0,_wordpress_element__WEBPACK_IMPORTED_MODULE_0__.createElement)(_wordpress_element__WEBPACK_IMPORTED_MODULE_0__.Fragment, null, (0,_wordpress_element__WEBPACK_IMPORTED_MODULE_0__.createElement)("h2", null, "Class Schedule Edit Block"));
+    },
+    save: props => {
+      return null;
+    }
+  });
+};
+
+/* harmony default export */ __webpack_exports__["default"] = (ClassSchedule);
+
+/***/ }),
+
 /***/ "./src/blocks/ContentSharer.js":
 /*!*************************************!*\
   !*** ./src/blocks/ContentSharer.js ***!
@@ -287,7 +320,6 @@ const CourseCatalog = () => {
       setAttributes,
       attributes
     }) => {
-      console.log('here');
       console.log(attributes); //   const { siteid, postType } = attributes;
       //   let selectedSite, setSelectedSite;
       //   if (typeof siteid === 'undefined') {
@@ -1145,6 +1177,8 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _blocks_ContentSharer__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./blocks/ContentSharer */ "./src/blocks/ContentSharer.js");
 /* harmony import */ var _blocks_CourseCatalog__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ./blocks/CourseCatalog */ "./src/blocks/CourseCatalog.js");
 /* harmony import */ var _blocks_CampusDirectory__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ./blocks/CampusDirectory */ "./src/blocks/CampusDirectory.js");
+/* harmony import */ var _blocks_ClassSchedule__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! ./blocks/ClassSchedule */ "./src/blocks/ClassSchedule.js");
+
 
 
 
@@ -1155,6 +1189,7 @@ __webpack_require__.r(__webpack_exports__);
 (0,_blocks_ContentSharer__WEBPACK_IMPORTED_MODULE_2__["default"])();
 (0,_blocks_CourseCatalog__WEBPACK_IMPORTED_MODULE_3__["default"])();
 (0,_blocks_CampusDirectory__WEBPACK_IMPORTED_MODULE_4__["default"])();
+(0,_blocks_ClassSchedule__WEBPACK_IMPORTED_MODULE_5__["default"])();
 }();
 /******/ })()
 ;
