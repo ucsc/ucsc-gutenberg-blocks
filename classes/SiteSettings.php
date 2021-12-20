@@ -68,17 +68,16 @@ class SiteSettings
 
   function settings()
   {
-    add_settings_section('class_schedule_section', null, null, 'ucsc_gutenberg_blocks_settings_page');
-    add_settings_field('class_schedule_department', 'Class Schedule Department', array($this, 'classScheduleHTML'), 'ucsc_gutenberg_blocks_settings_page', 'class_schedule_section');
-    register_setting('class_schedule_settings', 'class_schedule_department', array('sanitize_callback' => 'sanitize_text_field', 'default' => ''));
+    add_settings_section('ucsc_gutenberg_blocks_section', null, null, 'ucsc_gutenberg_blocks_settings_page');
 
-    add_settings_section('campus_directory_section', null, null, 'ucsc_gutenberg_blocks_settings_page');
-    add_settings_field('campus_directory_department', 'Campus Directory Department', array($this, 'campusDirectoryHTML'), 'ucsc_gutenberg_blocks_settings_page', 'campus_directory_section');
-    register_setting('campus_directory_settings', 'campus_directory_department', array('sanitize_callback' => 'sanitize_text_field', 'default' => ''));
+    add_settings_field('class_schedule_department', 'Class Schedule Department', array($this, 'classScheduleHTML'), 'ucsc_gutenberg_blocks_settings_page', 'ucsc_gutenberg_blocks_section');
+    register_setting('ucsc_gutenberg_blocks', 'class_schedule_department', array('sanitize_callback' => 'sanitize_text_field', 'default' => ''));
 
-    add_settings_section('course_catalog_section', null, null, 'ucsc_gutenberg_blocks_settings_page');
-    add_settings_field('course_catalog_subject', 'Course Catalog Subject', array($this, 'subjectHTML'), 'ucsc_gutenberg_blocks_settings_page', 'course_catalog_section');
-    register_setting('course_catalog', 'course_catalog_subject', array('sanitize_callback' => 'sanitize_text_field', 'default' => ''));
+    add_settings_field('campus_directory_department', 'Campus Directory Department', array($this, 'campusDirectoryHTML'), 'ucsc_gutenberg_blocks_settings_page', 'ucsc_gutenberg_blocks_section');
+    register_setting('ucsc_gutenberg_blocks', 'campus_directory_department', array('sanitize_callback' => 'sanitize_text_field', 'default' => ''));
+
+    add_settings_field('course_catalog_subject', 'Course Catalog Subject', array($this, 'subjectHTML'), 'ucsc_gutenberg_blocks_settings_page', 'ucsc_gutenberg_blocks_section');
+    register_setting('ucsc_gutenberg_blocks', 'course_catalog_subject', array('sanitize_callback' => 'sanitize_text_field', 'default' => ''));
 
     // add_settings_section('tkp_first_section', null, null, 'ucsc_gutenberg_blocks_settings_page');
     // add_settings_field('tkp_omdb_api_key', 'OMDb API Key', array($this, 'apikeyHTML'), 'ucsc_gutenberg_blocks_settings_page', 'tkp_first_section');
@@ -111,9 +110,7 @@ class SiteSettings
       <h1>UCSC Gutenberg Blocks Settings</h1>
       <form action="options.php" method="POST">
         <?php
-        settings_fields('class_schedule_settings');
-        settings_fields('campus_directory_settings');
-        settings_fields('course_catalog');
+        settings_fields('ucsc_gutenberg_blocks');
         do_settings_sections('ucsc_gutenberg_blocks_settings_page');
         submit_button();
         ?>
