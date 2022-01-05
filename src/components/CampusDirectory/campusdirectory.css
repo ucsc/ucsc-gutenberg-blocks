@@ -1,0 +1,490 @@
+@media all and (max-width: 767px) {
+    .tiled-page .section-item .item-body,
+    .list-page .section-item .item-body {
+        padding: .5em .25em;
+        width: 100%;
+    }
+    .list-page .section-item .item-body .item-info {
+        padding: 0;
+        margin: 0;
+    }
+    .list-page .section-item .item-body .item-name {
+        font-size: 1.15em;
+        margin: 0 0 .25em;
+    }
+    .list-page .section-item .item-body .item-info {
+        font-size: .9em;
+    }
+    .list-page .section-item .item-body .item-info>li {
+        padding: 0;
+        margin: 0;
+        list-style: none;
+        display: flex;
+        flex-direction: column;
+        align-items: left;
+        display: -webkit-flex;
+        -webkit-flex-direction: column;
+        border-bottom: 1px solid rgba(0, 0, 0, 0.12);
+    }
+    .list-page .section-item .item-body .item-info>li:last-of-type {
+        border-bottom: 0;
+    }
+    .list-page .section-item .item-body .item-info li span {
+        flex-basis: auto;
+        text-align: left;
+        display: inline;
+    }
+    .list-page .section-item .item-image {
+        margin: 0;
+    }
+    .tiled-page .section-item,
+    .list-page .section-item {
+        padding: .5em;
+        display: table-cell;
+        width: 100%;
+        min-width: 184px;
+        display: -webkit-flex;
+        -webkit-flex-direction: column-reverse;
+        display: flex;
+        flex-direction: column-reverse;
+        margin-right: .5em;
+    }
+    .list-page .section-body {
+        display: -webkit-flex;
+        -webkit-flex-direction: row wrap;
+        display: flex;
+        flex-flow: row wrap;
+    }
+    .person .section-item {
+        -webkit-flex-direction: column;
+        flex-direction: column;
+    }
+}
+
+@media all and (min-width: 768px) {
+    .list-page .section-item .item-body .item-info>li {
+        align-items: flex-start;
+        flex-direction: row;
+        -webkit-flex-direction: row;
+        border-bottom: 1px solid rgba(0, 0, 0, 0.12);
+    }
+    .list-page .section-item .item-body .item-info>li:last-of-type {
+        border-bottom: 0;
+    }
+    .list-page .section-item .item-body .item-info li strong {
+        flex: 0 0 150px;
+        text-align: right;
+        padding-right: 1.5em;
+    }
+    .list-page .section-item .item-body .item-info li span {
+        flex: 0 1 auto;
+    }
+}
+
+
+/* general styles */
+
+
+/* this is default now in production */
+
+.phpContent {
+    overflow-x: auto;
+}
+
+.section-body tr,
+.section-body td,
+.section-body p,
+.section-body ul,
+.section-body li,
+.section-item .item-body .item-info {
+    padding: 0;
+    margin: 0;
+}
+
+.section-container {
+    margin: 1em 2em;
+}
+
+
+/* general section header styles */
+
+.section-header a,
+.section-header {
+    font-size: 1.6em;
+    font-weight: 500;
+    border-bottom: 1px solid #ddd;
+    padding: 0.20em;
+    text-decoration: none;
+    outline-width: 0 !important;
+    margin: 0;
+    margin-bottom: 0.25em;
+}
+
+.section-container.sub .section-header a,
+.section-container.sub .section-header {
+    background-color: #e8e5cf !important;
+    font-size: 1.4em;
+    font-weight: 400;
+    padding: 0.25em;
+    margin: 0;
+    padding-bottom: 0.15em;
+    margin-bottom: 0.25em;
+    border-bottom: .10em solid #ddd;
+    text-decoration: none;
+    outline-width: 0 !important;
+}
+
+.section-header>a,
+.section-container.sub .section-header>a {
+    font-size: inherit;
+    color: inherit;
+    padding: 0;
+    border: 0;
+}
+
+.sub .section-header {
+    border-radius: 5px;
+}
+
+
+/* section header styles for show/hide (aka expand/collapse) functionality */
+
+.allapsible {
+    font-size: 1em;
+    margin-top: .15em;
+}
+
+.allapsible.allapsed,
+.section-container .collapsible.collapsed,
+.section-container.sub .collapsible.collapsed {
+    background: url(//static.ucsc.edu/images/5e5e5e-right-arrow-120x120.png) no-repeat .1em 50%;
+    cursor: pointer;
+    padding-left: .75em;
+    background-size: .55em;
+}
+
+.allapsible,
+.section-container .collapsible,
+.section-container.sub .collapsible {
+    background: url(//static.ucsc.edu/images/5e5e5e-down-arrow-120x120.png) no-repeat .1em 50%;
+    cursor: pointer;
+    padding-left: .75em;
+    background-size: .55em;
+}
+
+.section-container.sub .section-header:focus,
+.section-header:focus {
+    background-color: #fff !important;
+    border-radius: 5px;
+}
+
+.item-image>.u-url:focus {
+    outline-width: 15px;
+}
+
+.section-description {
+    margin: 0 0 1.25em;
+    font-size: 1.1em;
+}
+
+.section-item {
+    border-bottom: 1px solid #ddd;
+    background-color: #fff;
+    padding: .5em 1em;
+    display: flex;
+    margin-bottom: 1em;
+    border-radius: 5px;
+}
+
+.section-item .item-image {
+    max-width: 160px;
+    margin-left: 1em;
+}
+
+.section-item .item-image img {
+    width: 160px;
+    padding: 0;
+}
+
+.section-item .item-body {
+    padding: 0;
+    width: calc(100% - 160px);
+    flex-grow: 1;
+}
+
+.section-item .item-body .item-name {
+    margin: 0 0 .25em;
+}
+
+.section-item .item-body .item-info li {
+    display: flex;
+    flex-direction: column;
+}
+
+.section-item .item-body .item-info li strong,
+.section-item .item-body .item-info li span {
+    display: inline-block;
+    line-height: 1.5;
+}
+
+.section-item .item-body .item-info li strong {
+    line-height: 1.5;
+    flex: 0 1 auto;
+    font-weight: 600;
+    text-align: left;
+}
+
+.section-item .item-body .item-info li span {
+    flex: 1 0 auto;
+}
+
+
+/* individual profile (person) styles */
+
+.person .section-item {
+    padding-top: 1em;
+    padding-bottom: 1em;
+}
+
+.person .section-item .item-body .item-info li {
+    padding: .1em 0 .1em 0;
+}
+
+div.item-expertise>ul li {
+    background: url(https://wcms.ucsc.edu/static/images/bullet.gif) no-repeat left 10px;
+    list-style: none;
+    /* top right bottom left */
+    padding: 0px 0px 0px 15px !important;
+}
+
+.person div.item-expertise>h3 {
+    padding-top: .5em;
+    padding-bottom: .25em;
+    margin-top: 0;
+    margin-bottom: 0;
+}
+
+.expertise {
+    columns: 2;
+    column-gap: .75em;
+    -moz-column-count: 2;
+    -moz-column-gap: .75em;
+    -webkit-column-count: 2;
+    -webkit-column-gap: .75em;
+}
+
+@media all and (max-width: 767px) {
+    .expertise {
+        columns: 1;
+        -moz-column-count: 1;
+        -webkit-column-count: 1;
+    }
+}
+
+.item-expertise {
+    -webkit-column-break-inside: avoid;
+    page-break-inside: avoid;
+    break-inside: avoid;
+}
+
+.person .section-item .item-image {
+    margin-left: 0;
+    margin-right: 1em;
+    padding: 0;
+}
+
+
+/* for condensed list of names */
+
+.condensed-page h3 {
+    font-size: 1.25em;
+    margin: .6em 0;
+}
+
+
+/* tiled layout specific styles */
+
+.square-img {
+    width: 160px;
+    height: 160px;
+    overflow: hidden;
+    border-radius: 5px;
+}
+
+.tiled-page {
+    display: table;
+    width: 100%;
+}
+
+.tiled-page .section-item .item-body .item-info {
+    padding: 0;
+    margin: 0;
+}
+
+.tiled-page .section-item .item-body .item-name {
+    font-size: 1.15em;
+    margin: 0 0 .25em;
+}
+
+.tiled-page .section-item .item-body .item-info {
+    font-size: .9em;
+}
+
+.tiled-page .section-item .item-body .item-info>li {
+    padding: 0;
+    margin: 0;
+    list-style: none;
+    align-items: left;
+    display: flex;
+    flex-direction: column;
+    display: -webkit-flex;
+    -webkit-flex-direction: column;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.12);
+}
+
+.tiled-page .section-item .item-body .item-info>li:last-of-type {
+    border-bottom: 0;
+}
+
+.tiled-page .section-item .item-body .item-info li span {
+    flex-basis: auto;
+    text-align: left;
+    display: inline;
+}
+
+.tiled-page .section-item .item-image {
+    margin: 0;
+}
+
+@media all and (min-width: 768px) {
+    .tiled-page .section-item .item-body {
+        padding: .5em .25em;
+        width: 160px;
+    }
+    .tiled-page .section-item {
+        padding: .25em;
+        display: table-cell;
+        width: 23%;
+        min-width: 184px;
+        display: -webkit-flex;
+        -webkit-flex-direction: column-reverse;
+        display: flex;
+        flex-direction: column-reverse;
+        margin-right: 10px;
+    }
+}
+
+.tiled-page .section-body {
+    display: -webkit-flex;
+    -webkit-flex-direction: row wrap;
+    display: flex;
+    flex-flow: row wrap;
+    max-width: 780px;
+}
+
+table .section-body tr td strong,
+.tiled-page .section-item .item-body .item-info li strong {
+    display: none;
+}
+
+
+/* for tables */
+
+table .section-body {
+    font-size: 1em;
+}
+
+.table-wrapper .section-body tr.item-body>td {
+    vertical-align: top;
+    padding-right: 1em;
+}
+
+.table-wrapper .section-body tr.item-body>td:nth-child(1) {
+    padding-left: 1em;
+}
+
+.table-wrapper .section-body>tr:last-of-type td {
+    border-bottom: 0;
+}
+
+div.table-wrapper {
+    padding-top: 0;
+    padding-bottom: 0;
+}
+
+table .section-description,
+table .section-header {
+    border: 0;
+}
+
+td.section-header {
+    /* border-collapse feature causes this to remove previous border */
+    /* border-top: .1em solid #f5f4eb; */
+    border-top: .5em solid #fff;
+    margin: 0;
+    padding: 0;
+}
+
+table .sub .section-header {
+    /* important so that div color does not fill td */
+    /* background-color: #f5f4eb !important; */
+    background-color: #fff !important;
+    /* this one is also to create space */
+    /* border-top: .35em solid #f5f4eb; */
+    border-top: 1em solid #fff;
+    padding-left: 0 !important;
+    padding-right: 0 !important;
+    margin-left: 0;
+}
+
+table .sub .section-header div {
+    padding-left: .25em;
+    margin-left: 0;
+    border-bottom: 1px solid #ddd;
+    /* background-color: #eae6d3; */
+    background-color: #e8e5cf;
+    border-radius: 5px;
+}
+
+
+/* force intro color to remain the same since the table shares the style
+and other white elements will show if the background changes */
+
+.content-box {
+    background-color: #fff;
+}
+
+.section-wrapper .content-box {
+    margin-bottom: .3em;
+}
+
+.table-wrapper .section-body tr td .inline-list ul,
+.table-wrapper .section-body tr td ul,
+.section-item .item-body .item-info ul {
+    list-style: none;
+    align-items: left;
+}
+
+table .section-body tr td .inline-list,
+.section-item .item-body .item-info .inline-list {
+    margin-bottom: 0;
+}
+
+table .section-body tr td .inline-list {
+    margin-top: 0;
+}
+
+table .section-body tr td .inline-list li,
+.section-item .item-body .item-info .p-note li,
+.section-item .item-body .item-info .inline-list li {
+    border-bottom: 0;
+    line-height: 1.5;
+}
+
+div.table-wrapper {
+    margin-top: .25em;
+}
+
+.intro-paragraph {
+    padding: 0 2.5em 0 2.5em;
+}

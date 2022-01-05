@@ -1,14 +1,43 @@
 <?php
 
+
+include(plugin_dir_path(__FILE__) . 'CampusDirectoryAPI.php');
+
 class CampusDirectory
 {
   function __construct()
   {
     add_action('init', array($this, 'renderFrontend'));
-    add_action('admin_menu', array($this, 'settingsLink'));
-    add_action('admin_init', array($this, 'settings'));
-  }
+    add_filter('query_vars', function($query_vars) {
+      $query_vars[] = 'cruzid';
+      return $query_vars;
+    });
 
+    add_action('template_include', function ($template) {
+      if (get_query_var('cruzid') == false || get_query_var('cruzid') == '') {
+        return $template;
+      }
+
+      return plugin_dir_path(__FILE__) . '../templates/DirectoryProfileTemplate.php';
+    });
+    add_action('wp_enqueue_scripts', array($this, 'register_plugin_styles'));
+  }
+  public function register_plugin_styles() {
+    wp_register_style( 'directoryprofile',
+        plugins_url('../src/components/CampusDirectory/directoryprofile.css', __FILE__),
+        array(),
+        filemtime(plugin_dir_path(__FILE__) . '../src/components/CampusDirectory/directoryprofile.css'));
+    wp_enqueue_style( 'directoryprofile');
+
+    $file = '../src/components/CampusDirectory/campusdirectory.css';
+    wp_register_style(
+            'campusdirectory',
+            plugins_url($file, __FILE__),
+            array(),
+            filemtime(plugin_dir_path(__FILE__) .$file)
+    );
+    wp_enqueue_style('campusdirectory');
+  }
   function settings()
   {
     add_settings_section('cd_first_section', null, null, 'campus-directory-settings-page');
@@ -53,16 +82,29 @@ class CampusDirectory
       'editor_style' => 'ucscblocks-editor',
       'render_callback' => array($this, 'theHTML'),
     ));
+    add_rewrite_rule('directoryprofile/(.*)/?', 'index.php?cruzid=$matches[1]', 'top');
+    wp_register_style(
+      'directoryprofile',
+      plugins_url('../src/components/CampusDirectory/directoryprofile.css', __FILE__),
+      array(),
+      filemtime(plugin_dir_path(__FILE__) . '../src/components/CampusDirectory/directoryprofile.css')
+    );
   }
 
   function theHTML($attributes)
   {
+    $path = plugin_dir_path(__FILE__);
+    $attributes['objFacultyTypes'] = json_decode($attributes['strFacultyTypes'], true);
+    $attributes['objStaffTypes'] = json_decode($attributes['strStaffTypes'], true);
+    $attributes['objGradTypes'] = json_decode($attributes['strGradTypes'], true);
+    $attributes['objInformationTypes'] = json_decode($attributes['strInformationTypes'], true);
+    $campusDirectoryAPI = new CampusDirectoryAPI($attributes);
+    $items = $campusDirectoryAPI->setDirectoryData();
     ob_start();
-
-    echo "<h2>Campus Directory Frontend Output: " . plugin_dir_path(__FILE__) . "</h2>";
+    include(plugin_dir_path(__FILE__) . '../templates/CampusDirectoryTemplate.php');
 
     $output = ob_get_contents(); // collect output
-    ob_end_clean(); // Turn off ouput buffer
+    ob_end_clean(); // Turn off output buffer
 
     return $output;
   }

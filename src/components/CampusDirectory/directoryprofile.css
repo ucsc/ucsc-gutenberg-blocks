@@ -1,0 +1,38 @@
+#directoryprofile {
+  display: grid;
+  grid-gap: 5px;
+  grid-template-columns: repeat(10, 1fr);
+}
+.pname {
+  grid-column: span 10;
+  font-size: 34px;
+  font-weight: 600;
+}
+.photo {
+  grid-column: span 3;
+}
+.details {
+  grid-column: 4 / -1;
+}
+li{
+  list-style: none;
+}
+.details>ul>li {
+  border-bottom: 1px solid dimgray;
+  display: grid;
+  grid-template-columns: 150px 1fr;
+  grid-gap: 1.5em;
+}
+.details>ul>li>strong{
+  text-align: right;
+  grid-column: 1;
+}
+.details>ul>li>ul{
+  padding-left: 0;
+}
+.items-expertise {
+  grid-column: span 5;
+}
+.items-expertise ul{
+  padding-left: 0;
+}

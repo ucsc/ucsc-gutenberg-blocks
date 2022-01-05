@@ -20,7 +20,6 @@ class UCSCGutenbergDemoBlock2
 
   function theHTML($attributes)
   {
-    error_log("hello theHTML: " . $attributes['grassColor']);
     return '<p>Today, in block 2, the sky is ' . $attributes['skyColor'] . '  and the grass is ' . $attributes['grassColor'] . '!!!</p>';
   }
 }

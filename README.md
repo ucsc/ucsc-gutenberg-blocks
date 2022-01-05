@@ -100,6 +100,7 @@ This commit show's how to create a Dynamic Block vs a Static block. There are ma
 
 - Create Feature branch `git checkout -b "feature/site-level-admin-form"`
 - Write code
+  - See [Anatomy of a Custom Block](CustomBlock.md)
 - Check `git diff` to see files that have been modified.
 - Git add the files you have modified or added: `git add <filename> <filename> <filename>` or use `git add .` if all the modified files need to be checked in
 - Commit with a good message `git commit -m "feat: ✨ Updating README"`
