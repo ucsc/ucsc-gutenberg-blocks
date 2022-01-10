@@ -9,12 +9,12 @@ class CampusDirectory
   {
     add_action('init', array($this, 'renderFrontend'));
     add_filter('query_vars', function($query_vars) {
-      $query_vars[] = 'cruzid';
+      $query_vars[] = 'directoryprofilecruzid';
       return $query_vars;
     });
 
     add_action('template_include', function ($template) {
-      if (get_query_var('cruzid') == false || get_query_var('cruzid') == '') {
+      if (get_query_var('directoryprofilecruzid') == false || get_query_var('directoryprofilecruzid') == '') {
         return $template;
       }
 
@@ -82,7 +82,6 @@ class CampusDirectory
       'editor_style' => 'ucscblocks-editor',
       'render_callback' => array($this, 'theHTML'),
     ));
-    add_rewrite_rule('directoryprofile/(.*)/?', 'index.php?cruzid=$matches[1]', 'top');
     wp_register_style(
       'directoryprofile',
       plugins_url('../src/components/CampusDirectory/directoryprofile.css', __FILE__),

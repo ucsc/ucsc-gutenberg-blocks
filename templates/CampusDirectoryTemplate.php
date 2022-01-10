@@ -24,7 +24,7 @@
                 for($i = 0; $i < count($people); $i++) {
                   echo '<tr class="item-body">';
                     echo '<td class="item-name">';
-                      if ($items['linkToProfile']) echo '<a class="u-url" href="/directoryprofile/' . $people[$i]['uid'] . '">';
+                      if ($items['linkToProfile']) echo '<a class="u-url" href="/?directoryprofilecruzid=' . $people[$i]['uid'] . '">';
                         echo '<span class="p-name" style="white-space: nowrap;">' . $people[$i]['cn'] . '</span>';
                       if ($items['linkToProfile']) echo '</a>';
                     echo '</td>';
@@ -64,7 +64,7 @@
                   <h3 class="item-name">
                     <?php
                       if ($items['linkToProfile']) {
-                        echo '<a class="u-url" href="/directoryprofile/' . $people[$i]['uid'] . '">';
+                        echo '<a class="u-url" href="?directoryprofilecruzid=' . $people[$i]['uid'] . '">';
                       }
                       echo '<span class="p-name">' . $people[$i]['cn'] . '</span>';
                       if ($items['linkToProfile']) {
