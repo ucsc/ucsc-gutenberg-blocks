@@ -369,9 +369,12 @@ var CampusDirectory = function CampusDirectory() {
 "use strict";
 __webpack_require__.r(__webpack_exports__);
 <<<<<<< Updated upstream
+<<<<<<< Updated upstream
 /* harmony import */ var _wordpress_element__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! @wordpress/element */ "@wordpress/element");
 /* harmony import */ var _wordpress_element__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(_wordpress_element__WEBPACK_IMPORTED_MODULE_0__);
 =======
+=======
+>>>>>>> Stashed changes
 /* harmony import */ var _babel_runtime_helpers_slicedToArray__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! @babel/runtime/helpers/slicedToArray */ "./node_modules/@babel/runtime/helpers/slicedToArray.js");
 /* harmony import */ var _babel_runtime_helpers_slicedToArray__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(_babel_runtime_helpers_slicedToArray__WEBPACK_IMPORTED_MODULE_0__);
 /* harmony import */ var _wordpress_element__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! @wordpress/element */ "@wordpress/element");
@@ -379,6 +382,7 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _wordpress_components__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! @wordpress/components */ "@wordpress/components");
 /* harmony import */ var _wordpress_components__WEBPACK_IMPORTED_MODULE_2___default = /*#__PURE__*/__webpack_require__.n(_wordpress_components__WEBPACK_IMPORTED_MODULE_2__);
 
+<<<<<<< Updated upstream
 >>>>>>> Stashed changes
 
 
@@ -400,6 +404,8 @@ var ClassSchedule = function ClassSchedule() {
 };
 
 /* harmony default export */ __webpack_exports__["default"] = (ClassSchedule);
+=======
+>>>>>>> Stashed changes
 
 /***/ }),
 
@@ -420,10 +426,13 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _wordpress_components__WEBPACK_IMPORTED_MODULE_2___default = /*#__PURE__*/__webpack_require__.n(_wordpress_components__WEBPACK_IMPORTED_MODULE_2__);
 
 
+<<<<<<< Updated upstream
 
 <<<<<<< Updated upstream
 
 
+=======
+>>>>>>> Stashed changes
 =======
 >>>>>>> Stashed changes
 var TestDemoUCSC = function TestDemoUCSC() {
@@ -601,7 +610,10 @@ var CourseCatalog = function CourseCatalog() {
       var setAttributes = _ref.setAttributes,
           attributes = _ref.attributes;
 <<<<<<< Updated upstream
+<<<<<<< Updated upstream
 =======
+=======
+>>>>>>> Stashed changes
       console.log('here');
 >>>>>>> Stashed changes
       console.log(attributes); //   const { siteid, postType } = attributes;
@@ -952,8 +964,11 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _wordpress_components__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! @wordpress/components */ "@wordpress/components");
 /* harmony import */ var _wordpress_components__WEBPACK_IMPORTED_MODULE_3___default = /*#__PURE__*/__webpack_require__.n(_wordpress_components__WEBPACK_IMPORTED_MODULE_3__);
 <<<<<<< Updated upstream
+<<<<<<< Updated upstream
 =======
 
+>>>>>>> Stashed changes
+=======
 >>>>>>> Stashed changes
 
 
@@ -962,6 +977,9 @@ __webpack_require__.r(__webpack_exports__);
 
 <<<<<<< Updated upstream
 
+<<<<<<< Updated upstream
+=======
+>>>>>>> Stashed changes
 =======
 >>>>>>> Stashed changes
 var InformationToDisplay = function InformationToDisplay(_ref) {
@@ -1054,7 +1072,10 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _wordpress_components__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! @wordpress/components */ "@wordpress/components");
 /* harmony import */ var _wordpress_components__WEBPACK_IMPORTED_MODULE_2___default = /*#__PURE__*/__webpack_require__.n(_wordpress_components__WEBPACK_IMPORTED_MODULE_2__);
 <<<<<<< Updated upstream
+<<<<<<< Updated upstream
 
+=======
+>>>>>>> Stashed changes
 =======
 >>>>>>> Stashed changes
 
@@ -1062,6 +1083,10 @@ __webpack_require__.r(__webpack_exports__);
 
 
 <<<<<<< Updated upstream
+<<<<<<< Updated upstream
+=======
+
+>>>>>>> Stashed changes
 =======
 
 >>>>>>> Stashed changes
@@ -1163,11 +1188,18 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _wordpress_element__WEBPACK_IMPORTED_MODULE_1___default = /*#__PURE__*/__webpack_require__.n(_wordpress_element__WEBPACK_IMPORTED_MODULE_1__);
 /* harmony import */ var _wordpress_components__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! @wordpress/components */ "@wordpress/components");
 /* harmony import */ var _wordpress_components__WEBPACK_IMPORTED_MODULE_2___default = /*#__PURE__*/__webpack_require__.n(_wordpress_components__WEBPACK_IMPORTED_MODULE_2__);
+<<<<<<< Updated upstream
+
+=======
+>>>>>>> Stashed changes
 
 
 
 
+<<<<<<< Updated upstream
+=======
 
+>>>>>>> Stashed changes
 var PageLayout = function PageLayout(_ref) {
   var pageLayout = _ref.pageLayout,
       setAttributes = _ref.setAttributes;
@@ -1239,8 +1271,11 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _wordpress_components__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! @wordpress/components */ "@wordpress/components");
 /* harmony import */ var _wordpress_components__WEBPACK_IMPORTED_MODULE_4___default = /*#__PURE__*/__webpack_require__.n(_wordpress_components__WEBPACK_IMPORTED_MODULE_4__);
 <<<<<<< Updated upstream
+<<<<<<< Updated upstream
 =======
 
+>>>>>>> Stashed changes
+=======
 >>>>>>> Stashed changes
 
 
@@ -1250,6 +1285,9 @@ __webpack_require__.r(__webpack_exports__);
 
 <<<<<<< Updated upstream
 
+<<<<<<< Updated upstream
+=======
+>>>>>>> Stashed changes
 =======
 >>>>>>> Stashed changes
 var PeopleAndInformation = function PeopleAndInformation(_ref) {
@@ -1532,8 +1570,11 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _blocks_CourseCatalog__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ./blocks/CourseCatalog */ "./src/blocks/CourseCatalog.js");
 /* harmony import */ var _blocks_CampusDirectory__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ./blocks/CampusDirectory */ "./src/blocks/CampusDirectory.js");
 <<<<<<< Updated upstream
+<<<<<<< Updated upstream
 /* harmony import */ var _blocks_ClassSchedule__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! ./blocks/ClassSchedule */ "./src/blocks/ClassSchedule.js");
 
+=======
+>>>>>>> Stashed changes
 =======
 >>>>>>> Stashed changes
 
@@ -1547,7 +1588,10 @@ Object(_blocks_ContentSharer__WEBPACK_IMPORTED_MODULE_2__["default"])();
 Object(_blocks_CourseCatalog__WEBPACK_IMPORTED_MODULE_3__["default"])();
 Object(_blocks_CampusDirectory__WEBPACK_IMPORTED_MODULE_4__["default"])();
 <<<<<<< Updated upstream
+<<<<<<< Updated upstream
 Object(_blocks_ClassSchedule__WEBPACK_IMPORTED_MODULE_5__["default"])();
+=======
+>>>>>>> Stashed changes
 =======
 >>>>>>> Stashed changes
 
