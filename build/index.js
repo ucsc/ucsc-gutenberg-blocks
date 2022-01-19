@@ -368,22 +368,8 @@ var CampusDirectory = function CampusDirectory() {
 
 "use strict";
 __webpack_require__.r(__webpack_exports__);
-<<<<<<< Updated upstream
-<<<<<<< Updated upstream
 /* harmony import */ var _wordpress_element__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! @wordpress/element */ "@wordpress/element");
 /* harmony import */ var _wordpress_element__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(_wordpress_element__WEBPACK_IMPORTED_MODULE_0__);
-=======
-=======
->>>>>>> Stashed changes
-/* harmony import */ var _babel_runtime_helpers_slicedToArray__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! @babel/runtime/helpers/slicedToArray */ "./node_modules/@babel/runtime/helpers/slicedToArray.js");
-/* harmony import */ var _babel_runtime_helpers_slicedToArray__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(_babel_runtime_helpers_slicedToArray__WEBPACK_IMPORTED_MODULE_0__);
-/* harmony import */ var _wordpress_element__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! @wordpress/element */ "@wordpress/element");
-/* harmony import */ var _wordpress_element__WEBPACK_IMPORTED_MODULE_1___default = /*#__PURE__*/__webpack_require__.n(_wordpress_element__WEBPACK_IMPORTED_MODULE_1__);
-/* harmony import */ var _wordpress_components__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! @wordpress/components */ "@wordpress/components");
-/* harmony import */ var _wordpress_components__WEBPACK_IMPORTED_MODULE_2___default = /*#__PURE__*/__webpack_require__.n(_wordpress_components__WEBPACK_IMPORTED_MODULE_2__);
-
-<<<<<<< Updated upstream
->>>>>>> Stashed changes
 
 
 var ClassSchedule = function ClassSchedule() {
@@ -404,8 +390,6 @@ var ClassSchedule = function ClassSchedule() {
 };
 
 /* harmony default export */ __webpack_exports__["default"] = (ClassSchedule);
-=======
->>>>>>> Stashed changes
 
 /***/ }),
 
@@ -426,15 +410,9 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _wordpress_components__WEBPACK_IMPORTED_MODULE_2___default = /*#__PURE__*/__webpack_require__.n(_wordpress_components__WEBPACK_IMPORTED_MODULE_2__);
 
 
-<<<<<<< Updated upstream
-
-<<<<<<< Updated upstream
 
 
-=======
->>>>>>> Stashed changes
-=======
->>>>>>> Stashed changes
+
 var TestDemoUCSC = function TestDemoUCSC() {
   wp.blocks.registerBlockType("ucscblocks/contentsharer", {
     title: "Content Sharer",
@@ -609,13 +587,6 @@ var CourseCatalog = function CourseCatalog() {
     edit: function edit(_ref) {
       var setAttributes = _ref.setAttributes,
           attributes = _ref.attributes;
-<<<<<<< Updated upstream
-<<<<<<< Updated upstream
-=======
-=======
->>>>>>> Stashed changes
-      console.log('here');
->>>>>>> Stashed changes
       console.log(attributes); //   const { siteid, postType } = attributes;
       //   let selectedSite, setSelectedSite;
       //   if (typeof siteid === 'undefined') {
@@ -689,6 +660,196 @@ var CourseCatalog = function CourseCatalog() {
 };
 
 /* harmony default export */ __webpack_exports__["default"] = (CourseCatalog);
+
+/***/ }),
+
+/***/ "./src/blocks/FeedbackForm.js":
+/*!************************************!*\
+  !*** ./src/blocks/FeedbackForm.js ***!
+  \************************************/
+/*! exports provided: default */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony import */ var _wordpress_element__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! @wordpress/element */ "@wordpress/element");
+/* harmony import */ var _wordpress_element__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(_wordpress_element__WEBPACK_IMPORTED_MODULE_0__);
+
+
+var FeedbackForm = function FeedbackForm() {
+  wp.blocks.registerBlockType("ucscblocks/feedback", {
+    title: "Feedback Form",
+    icon: "smiley",
+    category: "common",
+    attributes: {
+      name: {
+        type: "string"
+      },
+      namePlaceholder: {
+        type: "string"
+      },
+      email: {
+        type: "string"
+      },
+      emailPlaceholder: {
+        type: "string"
+      },
+      affiliation: {
+        type: "string"
+      },
+      affiliationPlaceholder: {
+        type: "string"
+      },
+      topic: {
+        type: "string"
+      },
+      topicPlaceholder: {
+        type: "string"
+      },
+      message: {
+        type: "string"
+      },
+      messagePlaceholder: {
+        type: "string"
+      },
+      to: {
+        type: "string"
+      }
+    },
+    edit: function edit(_ref) {
+      var setAttributes = _ref.setAttributes,
+          attributes = _ref.attributes;
+      return Object(_wordpress_element__WEBPACK_IMPORTED_MODULE_0__["createElement"])(_wordpress_element__WEBPACK_IMPORTED_MODULE_0__["Fragment"], null, Object(_wordpress_element__WEBPACK_IMPORTED_MODULE_0__["createElement"])("h4", null, "Change the wording of the text field titles"), Object(_wordpress_element__WEBPACK_IMPORTED_MODULE_0__["createElement"])("div", null, Object(_wordpress_element__WEBPACK_IMPORTED_MODULE_0__["createElement"])("label", null, "Name: "), Object(_wordpress_element__WEBPACK_IMPORTED_MODULE_0__["createElement"])("div", {
+        id: "name-input"
+      }, Object(_wordpress_element__WEBPACK_IMPORTED_MODULE_0__["createElement"])("input", {
+        style: {
+          margin: 3
+        },
+        type: "text",
+        id: "name",
+        placeholder: "Name",
+        value: attributes.name,
+        onChange: function onChange(e) {
+          return setAttributes({
+            name: e.target.value
+          });
+        }
+      }), Object(_wordpress_element__WEBPACK_IMPORTED_MODULE_0__["createElement"])("input", {
+        style: {
+          margin: 3
+        },
+        type: "text",
+        id: "namePlaceholder",
+        placeholder: "Name Placeholder",
+        value: attributes.namePlaceholder,
+        onChange: function onChange(e) {
+          return setAttributes({
+            namePlaceholder: e.target.value
+          });
+        }
+      }))), Object(_wordpress_element__WEBPACK_IMPORTED_MODULE_0__["createElement"])("div", null, Object(_wordpress_element__WEBPACK_IMPORTED_MODULE_0__["createElement"])("label", null, "Email: "), Object(_wordpress_element__WEBPACK_IMPORTED_MODULE_0__["createElement"])("div", {
+        id: "email-input"
+      }, Object(_wordpress_element__WEBPACK_IMPORTED_MODULE_0__["createElement"])("input", {
+        style: {
+          margin: 3
+        },
+        type: "text",
+        placeholder: "Email",
+        value: attributes.email,
+        onChange: function onChange(e) {
+          return setAttributes({
+            email: e.target.value
+          });
+        }
+      }), Object(_wordpress_element__WEBPACK_IMPORTED_MODULE_0__["createElement"])("input", {
+        style: {
+          margin: 3
+        },
+        type: "text",
+        placeholder: "Email Placeholder",
+        value: attributes.emailPlaceholder,
+        onChange: function onChange(e) {
+          return setAttributes({
+            emailPlaceholder: e.target.value
+          });
+        }
+      }))), Object(_wordpress_element__WEBPACK_IMPORTED_MODULE_0__["createElement"])("div", null, Object(_wordpress_element__WEBPACK_IMPORTED_MODULE_0__["createElement"])("label", null, "Affiliation: "), Object(_wordpress_element__WEBPACK_IMPORTED_MODULE_0__["createElement"])("div", {
+        id: "affiliation-input"
+      }, Object(_wordpress_element__WEBPACK_IMPORTED_MODULE_0__["createElement"])("input", {
+        style: {
+          margin: 3
+        },
+        type: "text",
+        placeholder: "Affiliation",
+        value: attributes.affiliation,
+        onChange: function onChange(e) {
+          return setAttributes({
+            affiliation: e.target.value
+          });
+        }
+      }))), Object(_wordpress_element__WEBPACK_IMPORTED_MODULE_0__["createElement"])("div", null, Object(_wordpress_element__WEBPACK_IMPORTED_MODULE_0__["createElement"])("label", null, "Topic: "), Object(_wordpress_element__WEBPACK_IMPORTED_MODULE_0__["createElement"])("div", {
+        id: "topic-input"
+      }, Object(_wordpress_element__WEBPACK_IMPORTED_MODULE_0__["createElement"])("input", {
+        style: {
+          margin: 3
+        },
+        type: "text",
+        placeholder: "Topic",
+        value: attributes.topic,
+        onChange: function onChange(e) {
+          return setAttributes({
+            topic: e.target.value
+          });
+        }
+      }))), Object(_wordpress_element__WEBPACK_IMPORTED_MODULE_0__["createElement"])("div", null, Object(_wordpress_element__WEBPACK_IMPORTED_MODULE_0__["createElement"])("label", null, "Message: "), Object(_wordpress_element__WEBPACK_IMPORTED_MODULE_0__["createElement"])("div", {
+        id: "message-input"
+      }, Object(_wordpress_element__WEBPACK_IMPORTED_MODULE_0__["createElement"])("input", {
+        style: {
+          margin: 3
+        },
+        type: "text",
+        placeholder: "Message",
+        value: attributes.message,
+        onChange: function onChange(e) {
+          return setAttributes({
+            message: e.target.value
+          });
+        }
+      }), Object(_wordpress_element__WEBPACK_IMPORTED_MODULE_0__["createElement"])("input", {
+        style: {
+          margin: 3
+        },
+        type: "text",
+        placeholder: "Message Placeholder",
+        value: attributes.messagePlaceholder,
+        onChange: function onChange(e) {
+          return setAttributes({
+            messagePlaceholder: e.target.value
+          });
+        }
+      }))), Object(_wordpress_element__WEBPACK_IMPORTED_MODULE_0__["createElement"])("div", null, Object(_wordpress_element__WEBPACK_IMPORTED_MODULE_0__["createElement"])("label", null, "Who is receiving the email"), Object(_wordpress_element__WEBPACK_IMPORTED_MODULE_0__["createElement"])("div", {
+        id: "to-input"
+      }, Object(_wordpress_element__WEBPACK_IMPORTED_MODULE_0__["createElement"])("input", {
+        style: {
+          margin: 3
+        },
+        type: "text",
+        placeholder: "email1, email2, email3...",
+        value: attributes.to,
+        onChange: function onChange(e) {
+          return setAttributes({
+            to: e.target.value
+          });
+        }
+      }))));
+    },
+    save: function save(props) {
+      return null;
+    }
+  });
+};
+
+/* harmony default export */ __webpack_exports__["default"] = (FeedbackForm);
 
 /***/ }),
 
@@ -963,25 +1124,12 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _CheckboxGroupControl__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./CheckboxGroupControl */ "./src/components/CampusDirectory/CheckboxGroupControl.js");
 /* harmony import */ var _wordpress_components__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! @wordpress/components */ "@wordpress/components");
 /* harmony import */ var _wordpress_components__WEBPACK_IMPORTED_MODULE_3___default = /*#__PURE__*/__webpack_require__.n(_wordpress_components__WEBPACK_IMPORTED_MODULE_3__);
-<<<<<<< Updated upstream
-<<<<<<< Updated upstream
-=======
-
->>>>>>> Stashed changes
-=======
->>>>>>> Stashed changes
 
 
 
 
 
-<<<<<<< Updated upstream
 
-<<<<<<< Updated upstream
-=======
->>>>>>> Stashed changes
-=======
->>>>>>> Stashed changes
 var InformationToDisplay = function InformationToDisplay(_ref) {
   var setAttributes = _ref.setAttributes,
       linkToProfile = _ref.linkToProfile,
@@ -1071,25 +1219,11 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _wordpress_element__WEBPACK_IMPORTED_MODULE_1___default = /*#__PURE__*/__webpack_require__.n(_wordpress_element__WEBPACK_IMPORTED_MODULE_1__);
 /* harmony import */ var _wordpress_components__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! @wordpress/components */ "@wordpress/components");
 /* harmony import */ var _wordpress_components__WEBPACK_IMPORTED_MODULE_2___default = /*#__PURE__*/__webpack_require__.n(_wordpress_components__WEBPACK_IMPORTED_MODULE_2__);
-<<<<<<< Updated upstream
-<<<<<<< Updated upstream
-
-=======
->>>>>>> Stashed changes
-=======
->>>>>>> Stashed changes
 
 
 
 
-<<<<<<< Updated upstream
-<<<<<<< Updated upstream
-=======
 
->>>>>>> Stashed changes
-=======
-
->>>>>>> Stashed changes
 var IntroParagraph = function IntroParagraph(_ref) {
   var boolIntroParagraph = _ref.boolIntroParagraph,
       introParagraph = _ref.introParagraph,
@@ -1188,18 +1322,11 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _wordpress_element__WEBPACK_IMPORTED_MODULE_1___default = /*#__PURE__*/__webpack_require__.n(_wordpress_element__WEBPACK_IMPORTED_MODULE_1__);
 /* harmony import */ var _wordpress_components__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! @wordpress/components */ "@wordpress/components");
 /* harmony import */ var _wordpress_components__WEBPACK_IMPORTED_MODULE_2___default = /*#__PURE__*/__webpack_require__.n(_wordpress_components__WEBPACK_IMPORTED_MODULE_2__);
-<<<<<<< Updated upstream
-
-=======
->>>>>>> Stashed changes
 
 
 
 
-<<<<<<< Updated upstream
-=======
 
->>>>>>> Stashed changes
 var PageLayout = function PageLayout(_ref) {
   var pageLayout = _ref.pageLayout,
       setAttributes = _ref.setAttributes;
@@ -1270,26 +1397,13 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _InformationToDisplay__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ./InformationToDisplay */ "./src/components/CampusDirectory/InformationToDisplay.js");
 /* harmony import */ var _wordpress_components__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! @wordpress/components */ "@wordpress/components");
 /* harmony import */ var _wordpress_components__WEBPACK_IMPORTED_MODULE_4___default = /*#__PURE__*/__webpack_require__.n(_wordpress_components__WEBPACK_IMPORTED_MODULE_4__);
-<<<<<<< Updated upstream
-<<<<<<< Updated upstream
-=======
-
->>>>>>> Stashed changes
-=======
->>>>>>> Stashed changes
 
 
 
 
 
 
-<<<<<<< Updated upstream
 
-<<<<<<< Updated upstream
-=======
->>>>>>> Stashed changes
-=======
->>>>>>> Stashed changes
 var PeopleAndInformation = function PeopleAndInformation(_ref) {
   var setAttributes = _ref.setAttributes,
       automatedFeeds = _ref.automatedFeeds,
@@ -1569,14 +1683,10 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _blocks_ContentSharer__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./blocks/ContentSharer */ "./src/blocks/ContentSharer.js");
 /* harmony import */ var _blocks_CourseCatalog__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ./blocks/CourseCatalog */ "./src/blocks/CourseCatalog.js");
 /* harmony import */ var _blocks_CampusDirectory__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ./blocks/CampusDirectory */ "./src/blocks/CampusDirectory.js");
-<<<<<<< Updated upstream
-<<<<<<< Updated upstream
 /* harmony import */ var _blocks_ClassSchedule__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! ./blocks/ClassSchedule */ "./src/blocks/ClassSchedule.js");
+/* harmony import */ var _blocks_FeedbackForm__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! ./blocks/FeedbackForm */ "./src/blocks/FeedbackForm.js");
 
-=======
->>>>>>> Stashed changes
-=======
->>>>>>> Stashed changes
+
 
 
 
@@ -1587,13 +1697,8 @@ Object(_blocks_TestDemoUCSC2__WEBPACK_IMPORTED_MODULE_1__["default"])();
 Object(_blocks_ContentSharer__WEBPACK_IMPORTED_MODULE_2__["default"])();
 Object(_blocks_CourseCatalog__WEBPACK_IMPORTED_MODULE_3__["default"])();
 Object(_blocks_CampusDirectory__WEBPACK_IMPORTED_MODULE_4__["default"])();
-<<<<<<< Updated upstream
-<<<<<<< Updated upstream
 Object(_blocks_ClassSchedule__WEBPACK_IMPORTED_MODULE_5__["default"])();
-=======
->>>>>>> Stashed changes
-=======
->>>>>>> Stashed changes
+Object(_blocks_FeedbackForm__WEBPACK_IMPORTED_MODULE_6__["default"])();
 
 /***/ }),
 
