@@ -1,8 +1,11 @@
 <?php
+require_once ABSPATH . 'wp-admin/includes/class-wp-filesystem-base.php';
+require_once ABSPATH . 'wp-admin/includes/class-wp-filesystem-direct.php';
 
 class CampusDirectoryAPI {
   public $nodeContent;
   public $allStaffTypes;
+  public $ldap_password;
 
   function __construct($content = [])
   {
@@ -12,6 +15,8 @@ class CampusDirectoryAPI {
       "Researcher",
       "Postdoctoral Scholar"
     ];
+    $this->ldap_password = get_site_option('ldap_api_key');
+    if (!$this->ldap_password) $this->ldap_password = get_option('ldap_api_key');
   }
 
   public function setDirectoryData()
@@ -23,9 +28,7 @@ class CampusDirectoryAPI {
     $variables['introParagraph'] = $this->nodeContent["introParagraph"];
     $variables['informationToDisplay'] = $this->getInformationToDisplay();
 
-    $ldap_password = get_site_option('ldap_api_key');
-
-    $variables['items'] = $this->getCampusDirData($strCruzids, $ldap_password);
+    $variables['items'] = $this->getCampusDirData($strCruzids);
     return $variables;
   }
 
@@ -57,7 +60,7 @@ class CampusDirectoryAPI {
     return $returnDictionary;
   }
 
-  public function getCampusDirData($strCruzids, $ldap_password, $profileView = false)
+  public function getCampusDirData($strCruzids, $profileView = false)
   {
     if ($profileView || !$this->nodeContent['automatedFeeds']) {
       $arrCruzids = explode(",", $strCruzids);
@@ -70,15 +73,21 @@ class CampusDirectoryAPI {
     } else {
       $q = $this->buildFilterString();
     }
-    $rli = ldap_connect("ldaps://ldap-blue.ucsc.edu/");
-    if ($rli) {
-      ldap_set_option($rli, LDAP_OPT_TIMELIMIT, 90);
-      ldap_set_option($rli, LDAP_OPT_PROTOCOL_VERSION, 3);
+    // check to see if $q is in cache
+    $md5_q = md5($q);
+    $people = get_transient($md5_q);
+    if (!$people) {
+      $rli = ldap_connect("ldaps://ldap-blue.ucsc.edu/");
+      if ($rli) {
+        ldap_set_option($rli, LDAP_OPT_TIMELIMIT, 90);
+        ldap_set_option($rli, LDAP_OPT_PROTOCOL_VERSION, 3);
 
-      if (ldap_bind($rli, "cn=pantheon-webapps,ou=apps,dc=ucsc,dc=edu", $ldap_password)) {
-        $sr = ldap_search($rli, "ou=people,dc=ucsc,dc=edu", "(|{$q})");
-        $people = $this->processSearchResults($rli, $sr);
-        ldap_close($rli);
+        if (ldap_bind($rli, "cn=pantheon-webapps,ou=apps,dc=ucsc,dc=edu", $this->ldap_password)) {
+          $sr = ldap_search($rli, "ou=people,dc=ucsc,dc=edu", "(|{$q})");
+          $people = $this->processSearchResults($rli, $sr);
+          set_transient($md5_q, $people, 600);
+          ldap_close($rli);
+        }
       }
     }
     return $people;
@@ -161,10 +170,8 @@ class CampusDirectoryAPI {
 
   public function processDeptDivFilterString(&$filterString, &$count)
   {
-    // $department = $this->config->get('ucscldapdepartment');
-    // $division = $this->config->get('ucscldapdivision');
-
-    $department = 'History Department';
+    $department = get_option('campus_directory_department');
+    $division = get_option('campus_directory_division');
 
     if ($count > 0) {
       if ($count > 1) $filterString = "(|$filterString)";
@@ -228,25 +235,27 @@ class CampusDirectoryAPI {
           $values = ldap_get_values($rli, $entry, $attr);
           $person[$attr] = $values;
         }
-        array_push($people, $this->flattenPersonStructure($person));
+        array_push($people, $this->uploadImages($person));
       }
     }
     return $people;
   }
 
-  public function flattenPersonStructure($person)
+  public function uploadImages($person)
   {
-    $flatPerson = [];
-    foreach ($person as $attributeName => $arrVal) {
-      $flatPerson[$attributeName] = $arrVal[0];
+    if (array_key_exists('jpegphoto', $person)) {
+      $person['b64image'] = true;
+      $upload_dir = wp_upload_dir();
+
+      $dir = trailingslashit( $upload_dir['basedir'] ) . 'directoryimages/';
+      $wp_filesystem = new WP_Filesystem_Direct(null);
+      if(!$wp_filesystem->is_dir($dir) )
+      {
+          $wp_filesystem->mkdir( $dir );
+      }
+      $wp_filesystem->put_contents($dir . $person['uid'][0] . ".jpg", $person['jpegphoto'][0]);
     }
-    // if (array_key_exists('jpegphoto', $flatPerson)) {
-    //   $flatPerson['b64image'] = true;
-    //   $file_system = \Drupal::service('file_system');
-    //   $directory = 'public://cache/directory/';
-    //   $file_system->prepareDirectory($directory, FileSystemInterface::CREATE_DIRECTORY);
-    //   file_save_data($flatPerson['jpegphoto'], "public://cache/directory/" . $flatPerson['uid'] . ".jpg", 1);
-    // }
-    return $flatPerson;
+
+    return $person;
   }
 }

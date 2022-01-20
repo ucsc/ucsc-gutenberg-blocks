@@ -76,11 +76,15 @@ class SiteSettings
     add_settings_field('campus_directory_department', 'Campus Directory Department', array($this, 'campusDirectoryHTML'), 'ucsc_gutenberg_blocks_settings_page', 'ucsc_gutenberg_blocks_section');
     register_setting('ucsc_gutenberg_blocks', 'campus_directory_department', array('sanitize_callback' => 'sanitize_text_field', 'default' => ''));
 
+    add_settings_field('campus_directory_division', 'Campus Directory Division', array($this, 'campusDirectoryDivisionHTML'), 'ucsc_gutenberg_blocks_settings_page', 'ucsc_gutenberg_blocks_section');
+    register_setting('ucsc_gutenberg_blocks', 'campus_directory_division', array('sanitize_callback' => 'sanitize_text_field', 'default' => ''));
+
+    add_settings_field('ldap_api_key', 'LDAP API Key', array($this, 'ldapKeyHTML'), 'ucsc_gutenberg_blocks_settings_page', 'ucsc_gutenberg_blocks_section');
+    register_setting('ucsc_gutenberg_blocks', 'ldap_api_key', array('sanitize_callback' => 'sanitize_text_field', 'default' => ''));
+
     add_settings_field('course_catalog_subject', 'Course Catalog Subject', array($this, 'subjectHTML'), 'ucsc_gutenberg_blocks_settings_page', 'ucsc_gutenberg_blocks_section');
     register_setting('ucsc_gutenberg_blocks', 'course_catalog_subject', array('sanitize_callback' => 'sanitize_text_field', 'default' => ''));
 
-    // add_settings_section('tkp_first_section', null, null, 'ucsc_gutenberg_blocks_settings_page');
-    // add_settings_field('tkp_omdb_api_key', 'OMDb API Key', array($this, 'apikeyHTML'), 'ucsc_gutenberg_blocks_settings_page', 'tkp_first_section');
     register_setting('ucsc_network_settings', 'ldap_api_key', array('sanitize_callback' => 'sanitize_text_field', 'default' => ''));
   }
 
@@ -92,6 +96,16 @@ class SiteSettings
   function campusDirectoryHTML()
   { ?>
     <input type="text" name="campus_directory_department" value="<?php echo esc_attr(get_option('campus_directory_department')) ?>" />
+  <?php }
+
+  function campusDirectoryDivisionHTML()
+  { ?>
+    <input type="text" name="campus_directory_division" value="<?php echo esc_attr(get_option('campus_directory_division')) ?>" />
+  <?php }
+
+  function ldapKeyHTML()
+  { ?>
+    <input type="text" name="ldap_api_key" value="<?php echo esc_attr(get_option('ldap_api_key')) ?>" />
   <?php }
 
   function classScheduleHTML()

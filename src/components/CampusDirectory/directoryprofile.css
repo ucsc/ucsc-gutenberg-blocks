@@ -36,3 +36,10 @@ li{
 .items-expertise ul{
   padding-left: 0;
 }
+#wrapper {
+  margin: 0 55px 0 55px;
+}
+
+.p-tel {
+  white-space: nowrap;
+}
