@@ -5,6 +5,29 @@ class ClassSchedule
   function __construct()
   {
     add_action('init', array($this, 'adminAssets'));
+    add_filter( 'the_content', array($this, 'mainLoop'));
+  }
+
+  function mainLoop ($content) {
+    // Check if we're inside the main loop in a single Post.
+    if ( is_singular() && in_the_loop() && is_main_query() ) {
+      if (has_block("ucscblocks/classschedule")) {
+        $sub = (isset($_GET["sub"]) && strlen(trim($_GET["sub"])) > 0);
+        if (!$sub) {
+          global $wp;
+          $currentUrl = home_url( $wp->request );
+          // return $content . esc_html__( "strpos: " . strpos($currentUrl, "?") , 'wporg');
+          $sub = get_option('class_schedule_department');
+          if (strpos($currentUrl, "?") >= 0) $currentUrl = $currentUrl . "&sub=" . $sub;
+          else $currentUrl = $currentUrl . "?sub=" . $sub;
+          // wp_safe_redirect( "https://my-wordpress-blog.local/2022/02/03/45/?sub=HIS" );
+          // exit;
+          return $content . esc_html__( "URL: " . $currentUrl , 'wporg');
+        }
+      }
+    }
+
+    return $content;
   }
 
   function adminAssets()

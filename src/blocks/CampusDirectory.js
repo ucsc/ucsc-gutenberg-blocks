@@ -1,3 +1,4 @@
+import { useEffect, useState } from '@wordpress/element'
 import { Panel, PanelBody, PanelRow } from '@wordpress/components';
 
 import IntroParagraph from '../components/CampusDirectory/IntroParagraph';
@@ -72,43 +73,81 @@ const CampusDirectory = () => {
         strInformationTypes,
       } = attributes;
 
+      const [configuredCorrectly, setConfiguredCorrectly] = useState(true);
+      const [resp, setResp] = useState({});
+
+      useEffect(() => {
+        fetch('/wp-json/ucscgutenbergblocks/v1/campusdirectoryrequirements')
+          .then(res => res.text())
+          .then((text) => {
+            const resp = JSON.parse(text);
+            if (!resp.ldap_pass || !resp.deptdiv) setConfiguredCorrectly(false);
+            setResp(resp);
+          });
+      }, []);
+
       return (
         <>
-          <Panel header="Directory Block">
-            <PanelBody title="Intro Paragraph">
-              <IntroParagraph
-                setAttributes={setAttributes}
-                boolIntroParagraph={boolIntroParagraph}
-                introParagraph={introParagraph}
-              />
-            </PanelBody>
-            <PanelBody title="Page Layout" initialOpen>
-              <PanelRow>
-                <PageLayout
+          {configuredCorrectly && (
+            <Panel header="Directory Block">
+              <PanelBody title="Intro Paragraph">
+                <IntroParagraph
                   setAttributes={setAttributes}
-                  pageLayout={pageLayout}
+                  boolIntroParagraph={boolIntroParagraph}
+                  introParagraph={introParagraph}
                 />
-              </PanelRow>
-            </PanelBody>
-            <PanelBody title="People and Information to Display" initialOpen>
-            <PanelRow>
-              <PeopleAndInformation
-                setAttributes={setAttributes}
-                automatedFeeds={automatedFeeds}
-                cruzidList={cruzidList}
-                strFacultyTypes={strFacultyTypes}
-                strStaffTypes={strStaffTypes}
-                strGradTypes={strGradTypes}
-                manualAdd={manualAdd}
-                addCruzids={addCruzids}
-                excludeCruzids={excludeCruzids}
-                displayDeptartmentAffiliates={displayDeptartmentAffiliates}
-                linkToProfile={linkToProfile}
-                strInformationTypes={strInformationTypes}
-              />
-            </PanelRow>
-          </PanelBody>
-          </Panel>
+              </PanelBody>
+              <PanelBody title="Page Layout" initialOpen>
+                <PanelRow>
+                  <PageLayout
+                    setAttributes={setAttributes}
+                    pageLayout={pageLayout}
+                  />
+                </PanelRow>
+              </PanelBody>
+              <PanelBody title="People and Information to Display" initialOpen>
+                <PanelRow>
+                  <PeopleAndInformation
+                    setAttributes={setAttributes}
+                    automatedFeeds={automatedFeeds}
+                    cruzidList={cruzidList}
+                    strFacultyTypes={strFacultyTypes}
+                    strStaffTypes={strStaffTypes}
+                    strGradTypes={strGradTypes}
+                    manualAdd={manualAdd}
+                    addCruzids={addCruzids}
+                    excludeCruzids={excludeCruzids}
+                    displayDeptartmentAffiliates={displayDeptartmentAffiliates}
+                    linkToProfile={linkToProfile}
+                    strInformationTypes={strInformationTypes}
+                  />
+                </PanelRow>
+              </PanelBody>
+            </Panel>
+          )}
+          {!configuredCorrectly && (
+            <>
+              <h2>This Block is not Configured Correctly</h2>
+              {!resp.deptdiv && (
+                <h4>
+                  The Department or Division needs to be set <a target="_blank" href="/wp-admin/options-general.php?page=ucsc_gutenberg_blocks_settings_page">here.</a>
+                </h4>
+              )}
+              {!resp.ldap_pass && resp.multisite && (
+                <>
+                  <h4>
+                    The LDAP password can be set at the network level <a target="_blank" href="/wp-admin/network/settings.php?page=ucsc-gutenberg-blocks-network-settings">here.</a>
+                  </h4>
+                  <h6>Or the LDAP password can be set at the site level below.</h6>
+                </>
+              )}
+              {!resp.ldap_pass && (
+                <h4>
+                  The LDAP password needs to be set here <a target="_blank" href="/wp-admin/options-general.php?page=ucsc_gutenberg_blocks_settings_page">here.</a>
+                </h4>
+              )}
+            </>
+          )}
         </>
       )
     },

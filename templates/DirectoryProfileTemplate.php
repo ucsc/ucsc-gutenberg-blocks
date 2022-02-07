@@ -6,9 +6,6 @@ $campusDirectoryAPI = new CampusDirectoryAPI($attributes);
 $profileData = $campusDirectoryAPI->getCampusDirData($cruzid,true);
 if (count($profileData)) {
   $profileData = $profileData[0];
-  echo "<pre>";
-  echo print_r($profileData, true);
-  echo "</pre>";
   ?>
     <div id="wrapper">
         <div id='directoryprofile'>

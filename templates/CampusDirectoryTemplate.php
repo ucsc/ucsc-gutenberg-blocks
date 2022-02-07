@@ -1,7 +1,3 @@
-<?php
-  // print_r($items['items']);
-?>
-
 <div class="intro-paragraph">
   <?php echo $items["introParagraph"] ?>
 </div>

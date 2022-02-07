@@ -52,7 +52,7 @@ class FeedbackForm
   function theHTML($attributes)
   {
     ob_start(); ?>
-  
+
     <div class="feedback-div">
       <div id="feedback-error" style="display:none;padding-bottom: 25px;">
         <h4 id="missing-fields" style="color:red;"></h4>
@@ -116,7 +116,6 @@ class FeedbackForm
     $sanitized_fields = [];
     $response = [];
     $data = $request->get_params();
-    error_log(print_r($data, true));
 
     // validate the request data
     foreach ($fields as $field) {

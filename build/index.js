@@ -238,13 +238,17 @@ module.exports["default"] = module.exports, module.exports.__esModule = true;
 
 "use strict";
 __webpack_require__.r(__webpack_exports__);
-/* harmony import */ var _wordpress_element__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! @wordpress/element */ "@wordpress/element");
-/* harmony import */ var _wordpress_element__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(_wordpress_element__WEBPACK_IMPORTED_MODULE_0__);
-/* harmony import */ var _wordpress_components__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! @wordpress/components */ "@wordpress/components");
-/* harmony import */ var _wordpress_components__WEBPACK_IMPORTED_MODULE_1___default = /*#__PURE__*/__webpack_require__.n(_wordpress_components__WEBPACK_IMPORTED_MODULE_1__);
-/* harmony import */ var _components_CampusDirectory_IntroParagraph__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ../components/CampusDirectory/IntroParagraph */ "./src/components/CampusDirectory/IntroParagraph.js");
-/* harmony import */ var _components_CampusDirectory_PageLayout__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ../components/CampusDirectory/PageLayout */ "./src/components/CampusDirectory/PageLayout.js");
-/* harmony import */ var _components_CampusDirectory_PeopleAndInformation__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ../components/CampusDirectory/PeopleAndInformation */ "./src/components/CampusDirectory/PeopleAndInformation.js");
+/* harmony import */ var _babel_runtime_helpers_slicedToArray__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! @babel/runtime/helpers/slicedToArray */ "./node_modules/@babel/runtime/helpers/slicedToArray.js");
+/* harmony import */ var _babel_runtime_helpers_slicedToArray__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(_babel_runtime_helpers_slicedToArray__WEBPACK_IMPORTED_MODULE_0__);
+/* harmony import */ var _wordpress_element__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! @wordpress/element */ "@wordpress/element");
+/* harmony import */ var _wordpress_element__WEBPACK_IMPORTED_MODULE_1___default = /*#__PURE__*/__webpack_require__.n(_wordpress_element__WEBPACK_IMPORTED_MODULE_1__);
+/* harmony import */ var _wordpress_components__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! @wordpress/components */ "@wordpress/components");
+/* harmony import */ var _wordpress_components__WEBPACK_IMPORTED_MODULE_2___default = /*#__PURE__*/__webpack_require__.n(_wordpress_components__WEBPACK_IMPORTED_MODULE_2__);
+/* harmony import */ var _components_CampusDirectory_IntroParagraph__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ../components/CampusDirectory/IntroParagraph */ "./src/components/CampusDirectory/IntroParagraph.js");
+/* harmony import */ var _components_CampusDirectory_PageLayout__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ../components/CampusDirectory/PageLayout */ "./src/components/CampusDirectory/PageLayout.js");
+/* harmony import */ var _components_CampusDirectory_PeopleAndInformation__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! ../components/CampusDirectory/PeopleAndInformation */ "./src/components/CampusDirectory/PeopleAndInformation.js");
+
+
 
 
 
@@ -317,24 +321,44 @@ var CampusDirectory = function CampusDirectory() {
           displayDeptartmentAffiliates = attributes.displayDeptartmentAffiliates,
           linkToProfile = attributes.linkToProfile,
           strInformationTypes = attributes.strInformationTypes;
-      return Object(_wordpress_element__WEBPACK_IMPORTED_MODULE_0__["createElement"])(_wordpress_element__WEBPACK_IMPORTED_MODULE_0__["Fragment"], null, Object(_wordpress_element__WEBPACK_IMPORTED_MODULE_0__["createElement"])(_wordpress_components__WEBPACK_IMPORTED_MODULE_1__["Panel"], {
+
+      var _useState = Object(_wordpress_element__WEBPACK_IMPORTED_MODULE_1__["useState"])(true),
+          _useState2 = _babel_runtime_helpers_slicedToArray__WEBPACK_IMPORTED_MODULE_0___default()(_useState, 2),
+          configuredCorrectly = _useState2[0],
+          setConfiguredCorrectly = _useState2[1];
+
+      var _useState3 = Object(_wordpress_element__WEBPACK_IMPORTED_MODULE_1__["useState"])({}),
+          _useState4 = _babel_runtime_helpers_slicedToArray__WEBPACK_IMPORTED_MODULE_0___default()(_useState3, 2),
+          resp = _useState4[0],
+          setResp = _useState4[1];
+
+      Object(_wordpress_element__WEBPACK_IMPORTED_MODULE_1__["useEffect"])(function () {
+        fetch('/wp-json/ucscgutenbergblocks/v1/campusdirectoryrequirements').then(function (res) {
+          return res.text();
+        }).then(function (text) {
+          var resp = JSON.parse(text);
+          if (!resp.ldap_pass || !resp.deptdiv) setConfiguredCorrectly(false);
+          setResp(resp);
+        });
+      }, []);
+      return Object(_wordpress_element__WEBPACK_IMPORTED_MODULE_1__["createElement"])(_wordpress_element__WEBPACK_IMPORTED_MODULE_1__["Fragment"], null, configuredCorrectly && Object(_wordpress_element__WEBPACK_IMPORTED_MODULE_1__["createElement"])(_wordpress_components__WEBPACK_IMPORTED_MODULE_2__["Panel"], {
         header: "Directory Block"
-      }, Object(_wordpress_element__WEBPACK_IMPORTED_MODULE_0__["createElement"])(_wordpress_components__WEBPACK_IMPORTED_MODULE_1__["PanelBody"], {
+      }, Object(_wordpress_element__WEBPACK_IMPORTED_MODULE_1__["createElement"])(_wordpress_components__WEBPACK_IMPORTED_MODULE_2__["PanelBody"], {
         title: "Intro Paragraph"
-      }, Object(_wordpress_element__WEBPACK_IMPORTED_MODULE_0__["createElement"])(_components_CampusDirectory_IntroParagraph__WEBPACK_IMPORTED_MODULE_2__["default"], {
+      }, Object(_wordpress_element__WEBPACK_IMPORTED_MODULE_1__["createElement"])(_components_CampusDirectory_IntroParagraph__WEBPACK_IMPORTED_MODULE_3__["default"], {
         setAttributes: setAttributes,
         boolIntroParagraph: boolIntroParagraph,
         introParagraph: introParagraph
-      })), Object(_wordpress_element__WEBPACK_IMPORTED_MODULE_0__["createElement"])(_wordpress_components__WEBPACK_IMPORTED_MODULE_1__["PanelBody"], {
+      })), Object(_wordpress_element__WEBPACK_IMPORTED_MODULE_1__["createElement"])(_wordpress_components__WEBPACK_IMPORTED_MODULE_2__["PanelBody"], {
         title: "Page Layout",
         initialOpen: true
-      }, Object(_wordpress_element__WEBPACK_IMPORTED_MODULE_0__["createElement"])(_wordpress_components__WEBPACK_IMPORTED_MODULE_1__["PanelRow"], null, Object(_wordpress_element__WEBPACK_IMPORTED_MODULE_0__["createElement"])(_components_CampusDirectory_PageLayout__WEBPACK_IMPORTED_MODULE_3__["default"], {
+      }, Object(_wordpress_element__WEBPACK_IMPORTED_MODULE_1__["createElement"])(_wordpress_components__WEBPACK_IMPORTED_MODULE_2__["PanelRow"], null, Object(_wordpress_element__WEBPACK_IMPORTED_MODULE_1__["createElement"])(_components_CampusDirectory_PageLayout__WEBPACK_IMPORTED_MODULE_4__["default"], {
         setAttributes: setAttributes,
         pageLayout: pageLayout
-      }))), Object(_wordpress_element__WEBPACK_IMPORTED_MODULE_0__["createElement"])(_wordpress_components__WEBPACK_IMPORTED_MODULE_1__["PanelBody"], {
+      }))), Object(_wordpress_element__WEBPACK_IMPORTED_MODULE_1__["createElement"])(_wordpress_components__WEBPACK_IMPORTED_MODULE_2__["PanelBody"], {
         title: "People and Information to Display",
         initialOpen: true
-      }, Object(_wordpress_element__WEBPACK_IMPORTED_MODULE_0__["createElement"])(_wordpress_components__WEBPACK_IMPORTED_MODULE_1__["PanelRow"], null, Object(_wordpress_element__WEBPACK_IMPORTED_MODULE_0__["createElement"])(_components_CampusDirectory_PeopleAndInformation__WEBPACK_IMPORTED_MODULE_4__["default"], {
+      }, Object(_wordpress_element__WEBPACK_IMPORTED_MODULE_1__["createElement"])(_wordpress_components__WEBPACK_IMPORTED_MODULE_2__["PanelRow"], null, Object(_wordpress_element__WEBPACK_IMPORTED_MODULE_1__["createElement"])(_components_CampusDirectory_PeopleAndInformation__WEBPACK_IMPORTED_MODULE_5__["default"], {
         setAttributes: setAttributes,
         automatedFeeds: automatedFeeds,
         cruzidList: cruzidList,
@@ -347,7 +371,16 @@ var CampusDirectory = function CampusDirectory() {
         displayDeptartmentAffiliates: displayDeptartmentAffiliates,
         linkToProfile: linkToProfile,
         strInformationTypes: strInformationTypes
-      })))));
+      })))), !configuredCorrectly && Object(_wordpress_element__WEBPACK_IMPORTED_MODULE_1__["createElement"])(_wordpress_element__WEBPACK_IMPORTED_MODULE_1__["Fragment"], null, Object(_wordpress_element__WEBPACK_IMPORTED_MODULE_1__["createElement"])("h2", null, "This Block is not Configured Correctly"), !resp.deptdiv && Object(_wordpress_element__WEBPACK_IMPORTED_MODULE_1__["createElement"])("h4", null, "The Department or Division needs to be set ", Object(_wordpress_element__WEBPACK_IMPORTED_MODULE_1__["createElement"])("a", {
+        target: "_blank",
+        href: "/wp-admin/options-general.php?page=ucsc_gutenberg_blocks_settings_page"
+      }, "here.")), !resp.ldap_pass && resp.multisite && Object(_wordpress_element__WEBPACK_IMPORTED_MODULE_1__["createElement"])(_wordpress_element__WEBPACK_IMPORTED_MODULE_1__["Fragment"], null, Object(_wordpress_element__WEBPACK_IMPORTED_MODULE_1__["createElement"])("h4", null, "The LDAP password can be set at the network level ", Object(_wordpress_element__WEBPACK_IMPORTED_MODULE_1__["createElement"])("a", {
+        target: "_blank",
+        href: "/wp-admin/network/settings.php?page=ucsc-gutenberg-blocks-network-settings"
+      }, "here.")), Object(_wordpress_element__WEBPACK_IMPORTED_MODULE_1__["createElement"])("h6", null, "Or the LDAP password can be set at the site level below.")), !resp.ldap_pass && Object(_wordpress_element__WEBPACK_IMPORTED_MODULE_1__["createElement"])("h4", null, "The LDAP password needs to be set here ", Object(_wordpress_element__WEBPACK_IMPORTED_MODULE_1__["createElement"])("a", {
+        target: "_blank",
+        href: "/wp-admin/options-general.php?page=ucsc_gutenberg_blocks_settings_page"
+      }, "here."))));
     },
     save: function save(props) {
       return null;
