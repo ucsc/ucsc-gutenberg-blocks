@@ -1,45 +1,84 @@
-#directoryprofile {
-  display: grid;
-  grid-gap: 5px;
-  grid-template-columns: repeat(10, 1fr);
-}
-.pname {
-  grid-column: span 10;
-  font-size: 34px;
-  font-weight: 600;
-}
-.photo {
-  grid-column: span 3;
-}
-.details {
-  grid-column: 4 / -1;
-}
-li{
-  list-style: none;
-}
-.details>ul>li {
-  border-bottom: 1px solid dimgray;
-  display: grid;
-  grid-template-columns: 150px 1fr;
-  grid-gap: 1.5em;
-}
-.details>ul>li>strong{
-  text-align: right;
-  grid-column: 1;
-}
-.details>ul>li>ul{
-  padding-left: 0;
-}
-.items-expertise {
-  grid-column: span 5;
-}
-.items-expertise ul{
-  padding-left: 0;
-}
 #wrapper {
-  margin: 0 55px 0 55px;
+  max-width: 67.5em;
+  margin-left: auto;
+  margin-right: auto;
 }
 
-.p-tel {
-  white-space: nowrap;
+#profilehead {
+  width: 100%;
+  border-bottom: 1px solid #ECE9D8;
+  background: #f5f5f5;
+  padding: 30px;
+  color: #555;
+  display: grid;
+  grid-template-columns: 1fr 3fr 3fr;
+}
+.profileheadimage {
+  width: 125px;
+  height: 125px;
+  overflow: hidden;
+  display: inline-block;
+  position: relative;
+}
+.profileheadimage img {
+  width: 100%;
+}
+.svg-inline--fa {
+  width: 1em;
+  height: 1em;
+  display: inline-block;
+}
+
+.profileheaditem h2{
+  color: #5e5e5e;
+  margin: 0 !important;
+  padding: 0;
+  font-size: 23.2px;
+  font-weight: 400;
+}
+.profileheaditem p {
+  margin: 3px 0;
+  padding: 0;
+  font-size: 1em;
+  line-height: 1.5;
+}
+.altemail {
+  font-size: 14px !important;
+  padding-left: 20px !important;
+}
+
+.altemail svg {
+  padding-right: 5px;
+}
+
+#profilebody {
+  width: 100%;
+  background-color: #f9f9f9;
+  margin: 0;
+  padding: 30px;
+  font-size: 14px;
+  color: #555;
+  border-bottom: 1px solid #ECE9D8;
+  column-count: 2;
+  column-gap: 30px;
+}
+#profilebody div {
+  margin-bottom: 25px;
+  break-inside: avoid;
+  page-break-inside: avoid;
+  -webkit-column-break-inside: avoid;
+}
+#profilebody p label {
+  display: block;
+  font-weight: bold;
+}
+
+
+@media only screen and (max-width: 58em) {
+  #profilehead {
+    grid-template-columns: 1fr;
+  }
+  #profilebody {
+    column-count: 1;
+  }
 }

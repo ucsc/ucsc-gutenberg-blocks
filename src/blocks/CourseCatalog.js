@@ -12,85 +12,27 @@ const CourseCatalog = () => {
       },
     },
     edit: ({ setAttributes, attributes }) => {
-        console.log(attributes)
-    //   const { siteid, postType } = attributes;
+      const [dept, setDept] = useState("");
 
-
-    //   let selectedSite, setSelectedSite;
-    //   if (typeof siteid === 'undefined') {
-    //     setAttributes({
-    //       siteid: 1
-    //     });
-    //     [selectedSite, setSelectedSite] = useState(1);
-    //   } else {
-    //     [selectedSite, setSelectedSite] = useState(siteid);
-    //   }
-
-    //   let selectedPostType, setSelectedPostType;
-    //   if (typeof postType === 'undefined') {
-    //     setAttributes({
-    //       postType: ""
-    //     });
-    //     [selectedPostType, setSelectedPostType] = useState("");
-    //   } else {
-    //     [selectedPostType, setSelectedPostType] = useState(postType);
-    //   }
-
-    //   const [sites, setSites] = useState([]);
-    //   const [postTypes, setPostTypes] = useState([]);
-
-    //   const fetchPostTypes = (siteid) => {
-    //     fetch('/wp-json/ucscgutenbergblocks/v1/posttypes?siteid=' + siteid)
-    //       .then(res => res.text())
-    //       .then((text) => {
-    //         const postTypes = JSON.parse(text);
-    //         const pTypes = [];
-    //         Object.keys(postTypes).map(type => {
-    //           pTypes.push({
-    //             label: type,
-    //             value: type
-    //           })
-    //         })
-    //         setPostTypes(pTypes);
-    //       })
-    //   }
-
-    //   useEffect(() => {
-    //     fetch('/wp-json/ucscgutenbergblocks/v1/sites')
-    //       .then(res => res.text())
-    //       .then((text) => {
-    //         setSites(JSON.parse(text));
-    //       });
-    //     fetchPostTypes(selectedSite);
-    //   }, []);
-
-    //   const options = sites.map(site => {
-    //     return {
-    //       label: site.domain,
-    //       value: site.blog_id
-    //     }
-    //   })
-
-    //   const userSelectedASite = (e) => {
-    //     setSelectedSite(e.target.value);
-    //     setAttributes({
-    //       siteid: e.target.value
-    //     });
-    //     fetchPostTypes(e.target.value);
-    //   }
-
-    //   const userSelectedAPostType = (e) => {
-    //     setSelectedPostType(e.target.value);
-    //     setAttributes({
-    //       postType: e.target.value
-    //     });
-    //   }
+      useEffect(() => {
+        fetch('/wp-json/ucscgutenbergblocks/v1/coursecatalogdept')
+          .then(res => res.text())
+          .then((text) => {
+            const resp = JSON.parse(text);
+            setDept(resp.dept);
+          });
+      }, []);
 
       return (
         <>
-          <h2>Course Catalog</h2>
-          <h4>subject</h4>
-         
+          <h2>Course Catalog Block</h2>
+          {dept === "" && (
+            <>
+              <h4>
+                The Course Catalog Dept needs to be set here <a target="_blank" href="/wp-admin/options-general.php?page=ucsc_gutenberg_blocks_settings_page">here.</a>
+              </h4>
+            </>
+          )}
         </>
       );
     },

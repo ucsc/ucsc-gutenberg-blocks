@@ -401,20 +401,41 @@ var CampusDirectory = function CampusDirectory() {
 
 "use strict";
 __webpack_require__.r(__webpack_exports__);
-/* harmony import */ var _wordpress_element__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! @wordpress/element */ "@wordpress/element");
-/* harmony import */ var _wordpress_element__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(_wordpress_element__WEBPACK_IMPORTED_MODULE_0__);
+/* harmony import */ var _babel_runtime_helpers_slicedToArray__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! @babel/runtime/helpers/slicedToArray */ "./node_modules/@babel/runtime/helpers/slicedToArray.js");
+/* harmony import */ var _babel_runtime_helpers_slicedToArray__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(_babel_runtime_helpers_slicedToArray__WEBPACK_IMPORTED_MODULE_0__);
+/* harmony import */ var _wordpress_element__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! @wordpress/element */ "@wordpress/element");
+/* harmony import */ var _wordpress_element__WEBPACK_IMPORTED_MODULE_1___default = /*#__PURE__*/__webpack_require__.n(_wordpress_element__WEBPACK_IMPORTED_MODULE_1__);
+
+
 
 
 var ClassSchedule = function ClassSchedule() {
   wp.blocks.registerBlockType("ucscblocks/classschedule", {
-    title: "Class",
+    title: "Class Schedule",
     icon: "smiley",
     category: "common",
     attributes: {},
     edit: function edit(_ref) {
       var setAttributes = _ref.setAttributes,
           attributes = _ref.attributes;
-      return Object(_wordpress_element__WEBPACK_IMPORTED_MODULE_0__["createElement"])(_wordpress_element__WEBPACK_IMPORTED_MODULE_0__["Fragment"], null, Object(_wordpress_element__WEBPACK_IMPORTED_MODULE_0__["createElement"])("h2", null, "Class Schedule Edit Block"));
+
+      var _useState = Object(_wordpress_element__WEBPACK_IMPORTED_MODULE_1__["useState"])(""),
+          _useState2 = _babel_runtime_helpers_slicedToArray__WEBPACK_IMPORTED_MODULE_0___default()(_useState, 2),
+          dept = _useState2[0],
+          setDept = _useState2[1];
+
+      Object(_wordpress_element__WEBPACK_IMPORTED_MODULE_1__["useEffect"])(function () {
+        fetch('/wp-json/ucscgutenbergblocks/v1/classscheduledept').then(function (res) {
+          return res.text();
+        }).then(function (text) {
+          var resp = JSON.parse(text);
+          setDept(resp.dept);
+        });
+      }, []);
+      return Object(_wordpress_element__WEBPACK_IMPORTED_MODULE_1__["createElement"])(_wordpress_element__WEBPACK_IMPORTED_MODULE_1__["Fragment"], null, Object(_wordpress_element__WEBPACK_IMPORTED_MODULE_1__["createElement"])("h2", null, "Class Schedule Block"), dept === "" && Object(_wordpress_element__WEBPACK_IMPORTED_MODULE_1__["createElement"])(_wordpress_element__WEBPACK_IMPORTED_MODULE_1__["Fragment"], null, Object(_wordpress_element__WEBPACK_IMPORTED_MODULE_1__["createElement"])("h4", null, "The Class Schedule Dept needs to be set here ", Object(_wordpress_element__WEBPACK_IMPORTED_MODULE_1__["createElement"])("a", {
+        target: "_blank",
+        href: "/wp-admin/options-general.php?page=ucsc_gutenberg_blocks_settings_page"
+      }, "here."))));
     },
     save: function save(props) {
       return null;
@@ -599,10 +620,13 @@ var TestDemoUCSC = function TestDemoUCSC() {
 
 "use strict";
 __webpack_require__.r(__webpack_exports__);
-/* harmony import */ var _wordpress_element__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! @wordpress/element */ "@wordpress/element");
-/* harmony import */ var _wordpress_element__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(_wordpress_element__WEBPACK_IMPORTED_MODULE_0__);
-/* harmony import */ var _wordpress_components__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! @wordpress/components */ "@wordpress/components");
-/* harmony import */ var _wordpress_components__WEBPACK_IMPORTED_MODULE_1___default = /*#__PURE__*/__webpack_require__.n(_wordpress_components__WEBPACK_IMPORTED_MODULE_1__);
+/* harmony import */ var _babel_runtime_helpers_slicedToArray__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! @babel/runtime/helpers/slicedToArray */ "./node_modules/@babel/runtime/helpers/slicedToArray.js");
+/* harmony import */ var _babel_runtime_helpers_slicedToArray__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(_babel_runtime_helpers_slicedToArray__WEBPACK_IMPORTED_MODULE_0__);
+/* harmony import */ var _wordpress_element__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! @wordpress/element */ "@wordpress/element");
+/* harmony import */ var _wordpress_element__WEBPACK_IMPORTED_MODULE_1___default = /*#__PURE__*/__webpack_require__.n(_wordpress_element__WEBPACK_IMPORTED_MODULE_1__);
+/* harmony import */ var _wordpress_components__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! @wordpress/components */ "@wordpress/components");
+/* harmony import */ var _wordpress_components__WEBPACK_IMPORTED_MODULE_2___default = /*#__PURE__*/__webpack_require__.n(_wordpress_components__WEBPACK_IMPORTED_MODULE_2__);
+
 
 
 
@@ -620,71 +644,24 @@ var CourseCatalog = function CourseCatalog() {
     edit: function edit(_ref) {
       var setAttributes = _ref.setAttributes,
           attributes = _ref.attributes;
-      console.log(attributes); //   const { siteid, postType } = attributes;
-      //   let selectedSite, setSelectedSite;
-      //   if (typeof siteid === 'undefined') {
-      //     setAttributes({
-      //       siteid: 1
-      //     });
-      //     [selectedSite, setSelectedSite] = useState(1);
-      //   } else {
-      //     [selectedSite, setSelectedSite] = useState(siteid);
-      //   }
-      //   let selectedPostType, setSelectedPostType;
-      //   if (typeof postType === 'undefined') {
-      //     setAttributes({
-      //       postType: ""
-      //     });
-      //     [selectedPostType, setSelectedPostType] = useState("");
-      //   } else {
-      //     [selectedPostType, setSelectedPostType] = useState(postType);
-      //   }
-      //   const [sites, setSites] = useState([]);
-      //   const [postTypes, setPostTypes] = useState([]);
-      //   const fetchPostTypes = (siteid) => {
-      //     fetch('/wp-json/ucscgutenbergblocks/v1/posttypes?siteid=' + siteid)
-      //       .then(res => res.text())
-      //       .then((text) => {
-      //         const postTypes = JSON.parse(text);
-      //         const pTypes = [];
-      //         Object.keys(postTypes).map(type => {
-      //           pTypes.push({
-      //             label: type,
-      //             value: type
-      //           })
-      //         })
-      //         setPostTypes(pTypes);
-      //       })
-      //   }
-      //   useEffect(() => {
-      //     fetch('/wp-json/ucscgutenbergblocks/v1/sites')
-      //       .then(res => res.text())
-      //       .then((text) => {
-      //         setSites(JSON.parse(text));
-      //       });
-      //     fetchPostTypes(selectedSite);
-      //   }, []);
-      //   const options = sites.map(site => {
-      //     return {
-      //       label: site.domain,
-      //       value: site.blog_id
-      //     }
-      //   })
-      //   const userSelectedASite = (e) => {
-      //     setSelectedSite(e.target.value);
-      //     setAttributes({
-      //       siteid: e.target.value
-      //     });
-      //     fetchPostTypes(e.target.value);
-      //   }
-      //   const userSelectedAPostType = (e) => {
-      //     setSelectedPostType(e.target.value);
-      //     setAttributes({
-      //       postType: e.target.value
-      //     });
-      //   }
 
-      return Object(_wordpress_element__WEBPACK_IMPORTED_MODULE_0__["createElement"])(_wordpress_element__WEBPACK_IMPORTED_MODULE_0__["Fragment"], null, Object(_wordpress_element__WEBPACK_IMPORTED_MODULE_0__["createElement"])("h2", null, "Course Catalog"), Object(_wordpress_element__WEBPACK_IMPORTED_MODULE_0__["createElement"])("h4", null, "subject"));
+      var _useState = Object(_wordpress_element__WEBPACK_IMPORTED_MODULE_1__["useState"])(""),
+          _useState2 = _babel_runtime_helpers_slicedToArray__WEBPACK_IMPORTED_MODULE_0___default()(_useState, 2),
+          dept = _useState2[0],
+          setDept = _useState2[1];
+
+      Object(_wordpress_element__WEBPACK_IMPORTED_MODULE_1__["useEffect"])(function () {
+        fetch('/wp-json/ucscgutenbergblocks/v1/coursecatalogdept').then(function (res) {
+          return res.text();
+        }).then(function (text) {
+          var resp = JSON.parse(text);
+          setDept(resp.dept);
+        });
+      }, []);
+      return Object(_wordpress_element__WEBPACK_IMPORTED_MODULE_1__["createElement"])(_wordpress_element__WEBPACK_IMPORTED_MODULE_1__["Fragment"], null, Object(_wordpress_element__WEBPACK_IMPORTED_MODULE_1__["createElement"])("h2", null, "Course Catalog Block"), dept === "" && Object(_wordpress_element__WEBPACK_IMPORTED_MODULE_1__["createElement"])(_wordpress_element__WEBPACK_IMPORTED_MODULE_1__["Fragment"], null, Object(_wordpress_element__WEBPACK_IMPORTED_MODULE_1__["createElement"])("h4", null, "The Course Catalog Dept needs to be set here ", Object(_wordpress_element__WEBPACK_IMPORTED_MODULE_1__["createElement"])("a", {
+        target: "_blank",
+        href: "/wp-admin/options-general.php?page=ucsc_gutenberg_blocks_settings_page"
+      }, "here."))));
     },
     save: function save(props) {
       return null;

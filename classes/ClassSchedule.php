@@ -5,29 +5,19 @@ class ClassSchedule
   function __construct()
   {
     add_action('init', array($this, 'adminAssets'));
-    add_filter( 'the_content', array($this, 'mainLoop'));
+    add_action('rest_api_init', function () {
+      register_rest_route('ucscgutenbergblocks/v1', '/classscheduledept/', array(
+        'methods' => 'GET',
+        'callback' => array($this, 'classscheduledept')
+      ));
+    });
   }
 
-  function mainLoop ($content) {
-    // Check if we're inside the main loop in a single Post.
-    if ( is_singular() && in_the_loop() && is_main_query() ) {
-      if (has_block("ucscblocks/classschedule")) {
-        $sub = (isset($_GET["sub"]) && strlen(trim($_GET["sub"])) > 0);
-        if (!$sub) {
-          global $wp;
-          $currentUrl = home_url( $wp->request );
-          // return $content . esc_html__( "strpos: " . strpos($currentUrl, "?") , 'wporg');
-          $sub = get_option('class_schedule_department');
-          if (strpos($currentUrl, "?") >= 0) $currentUrl = $currentUrl . "&sub=" . $sub;
-          else $currentUrl = $currentUrl . "?sub=" . $sub;
-          // wp_safe_redirect( "https://my-wordpress-blog.local/2022/02/03/45/?sub=HIS" );
-          // exit;
-          return $content . esc_html__( "URL: " . $currentUrl , 'wporg');
-        }
-      }
-    }
+  function classscheduledept() {
+    $resp = [];
+    $resp["dept"] = get_option('class_schedule_department');
 
-    return $content;
+    return new WP_REST_Response($resp);
   }
 
   function adminAssets()
@@ -36,13 +26,19 @@ class ClassSchedule
       'editor_script' => 'ucscblocks',
       'render_callback' => array($this, 'theHTML')
     ));
+    wp_register_style(
+      'ucscblocks-editor',
+      plugins_url('https://webapps.ucsc.edu/wcsi/css/app.css', __FILE__),
+      array('wp-edit-blocks'),
+      filemtime('https://webapps.ucsc.edu/wcsi/css/app.css')
+    );
   }
 
   function theHTML($attributes)
   {
     $markup = '
       <link rel="stylesheet" href="https://webapps.ucsc.edu/wcsi/css/app.css">
-      <div id="wcsi">
+      <div id="wcsi"  department="' . get_option('class_schedule_department') . '" >
 
       </div>
       <script src="https://cdn.polyfill.io/v2/polyfill.min.js?features=default,Promise,Object.assign,Object.values,Array.prototype.find,Array.prototype.findIndex,Array.prototype.includes,String.prototype.includes,String.prototype.startsWith,String.prototype.endsWith"></script>
