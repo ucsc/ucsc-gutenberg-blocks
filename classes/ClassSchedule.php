@@ -5,6 +5,19 @@ class ClassSchedule
   function __construct()
   {
     add_action('init', array($this, 'adminAssets'));
+    add_action('rest_api_init', function () {
+      register_rest_route('ucscgutenbergblocks/v1', '/classscheduledept/', array(
+        'methods' => 'GET',
+        'callback' => array($this, 'classscheduledept')
+      ));
+    });
+  }
+
+  function classscheduledept() {
+    $resp = [];
+    $resp["dept"] = get_option('class_schedule_department');
+
+    return new WP_REST_Response($resp);
   }
 
   function adminAssets()
@@ -13,13 +26,19 @@ class ClassSchedule
       'editor_script' => 'ucscblocks',
       'render_callback' => array($this, 'theHTML')
     ));
+    wp_register_style(
+      'ucscblocks-editor',
+      plugins_url('https://webapps.ucsc.edu/wcsi/css/app.css', __FILE__),
+      array('wp-edit-blocks'),
+      filemtime('https://webapps.ucsc.edu/wcsi/css/app.css')
+    );
   }
 
   function theHTML($attributes)
   {
     $markup = '
       <link rel="stylesheet" href="https://webapps.ucsc.edu/wcsi/css/app.css">
-      <div id="wcsi">
+      <div id="wcsi"  department="' . get_option('class_schedule_department') . '" >
 
       </div>
       <script src="https://cdn.polyfill.io/v2/polyfill.min.js?features=default,Promise,Object.assign,Object.values,Array.prototype.find,Array.prototype.findIndex,Array.prototype.includes,String.prototype.includes,String.prototype.startsWith,String.prototype.endsWith"></script>

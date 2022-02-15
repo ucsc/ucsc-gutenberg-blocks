@@ -10,8 +10,20 @@ class CourseCatalog
                 'callback' => array($this, 'getCourses'),
                 'permission_callback' => array($this, 'restPermissionsCheck')
             ));
+            register_rest_route('ucscgutenbergblocks/v1', '/coursecatalogdept/', array(
+                'methods' => 'GET',
+                'callback' => array($this, 'coursecatalogdept')
+            ));
         });
+
         add_action('wp_enqueue_scripts', array($this, 'register_plugin_styles'));
+    }
+
+    function coursecatalogdept() {
+        $resp = [];
+        $resp["dept"] = get_option('course_catalog_subject');
+
+        return new WP_REST_Response($resp);
     }
 
     function restPermissionsCheck() {
@@ -41,14 +53,6 @@ class CourseCatalog
                 filemtime(plugin_dir_path(__FILE__) .$file)
         );
         wp_enqueue_style('tablesorter');
-        $file = '../src/components/CourseCatalog/coursecatalog.css';
-        wp_register_style(
-            'coursecatalog',
-            plugins_url($file, __FILE__),
-            array(),
-            filemtime(plugin_dir_path(__FILE__) .$file)
-        );
-        wp_enqueue_style('coursecatalog');
     }
 
     function renderFrontend() {
@@ -100,20 +104,26 @@ class CourseCatalog
             $subject = strtolower(get_option('course-catalog-subject'));
         }
         $courses = $this->getCourses();
-        echo '<div id="courseCatalog"><div>
-    <label>
-      Search Dept Courses:<input type="text" id="Search" onkeyup="tableSearch()"
-        placeholder="search table">
-    </label><br/>
-    View titles & course descriptions for department course offerings<br/>
-    Click a course\'s title to read its description.
-    <label>
-      <button id="expandAll">View All</button>
-    </label>
-    <label>
-      <button id="collapseAll">Collapse All</button>
-    </label>
-  </div>';
+        echo '<div id="courseCatalog">
+    <h1>Course Catalog</h1>
+    <div class="introText">
+        <label>
+        Search Dept Courses:<input type="text" id="search" onkeyup="tableSearch()"
+            placeholder="search table">
+        </label>
+    </div>
+    <div class="introText">
+        <label>
+        View titles & course descriptions for department course offerings
+        </label>
+    </div>
+    <div class="introText clickText">
+        <label>
+            Click a course\'s title to read its description.
+            <a id="expandAll" class="collapseExpandLinks pointer">View All</a>
+            <a id="collapseAll" class="collapseExpandLinks pointer">Collapse All</a>
+        </label>
+    </div>';
         echo '<table class="table-sortable" id="tableSorter">';
         echo '<thead><tr><th>Course #</th><th>Course Title</th><th>Course Level</th><th>Units</th></tr></thead>';
         echo '<tbody>';
@@ -132,7 +142,7 @@ class CourseCatalog
             }
             // the class 'intsort' isn't really necessary at this point, in the future it could signal a type of sorting
             // the class 'secret' is used to include a value, but not display it. the name is such because 'hidden' was already used
-            echo '<tr class="pointer"><td>' . $course->subject . '  <span class="intsort">' .$course->catalog_nbr .'</span></td><td>' . $course->title . '</td><td>' . $course->level . '<span class="secret">' . $lvlval . '</span></td><td>' . $course->units . ' Units</td></tr>';
+            echo '<tr class="pointer"><td>' . $course->subject . '  <span class="intsort">' .$course->catalog_nbr .'</span></td><td class="collapseExpandText">' . $course->title . '</td><td>' . $course->level . '<span class="secret">' . $lvlval . '</span></td><td>' . $course->units . ' Units</td></tr>';
             echo '<tr class="hidden"><td colspan="4"><p>' . $course->description . '</p></td></tr>';
         }
         echo '</tbody></table></div>';

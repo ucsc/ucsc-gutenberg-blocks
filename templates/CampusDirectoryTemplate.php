@@ -1,6 +1,9 @@
-<div class="intro-paragraph">
-  <?php echo $items["introParagraph"] ?>
-</div>
+<h1>Faculty Directory</h1>
+<?php if (strlen($items["introParagraph"])) { ?>
+  <div class="intro-paragraph">
+    <?php echo $items["introParagraph"] ?>
+  </div>
+<?php } ?>
 <?php
   if ($items['dirLayout'] == "table") {
   ?>
@@ -24,16 +27,16 @@
                 for($i = 0; $i < count($people); $i++) {
                   echo '<tr class="item-body">';
                     echo '<td class="item-name">';
-                      if ($items['linkToProfile']) echo '<a class="u-url" href="/?directoryprofilecruzid=' . $people[$i]['uid'] . '">';
-                        echo '<span class="p-name" style="white-space: nowrap;">' . $people[$i]['cn'] . '</span>';
+                      if ($items['linkToProfile']) echo '<a class="u-url" href="/?directoryprofilecruzid=' . $people[$i]['uid'][0] . '">';
+                        echo '<span class="p-name" style="white-space: nowrap;">' . $people[$i]['cn'][0] . '</span>';
                       if ($items['linkToProfile']) echo '</a>';
                     echo '</td>';
                     foreach($items['informationToDisplay'] as $disItem) {
                       foreach($disItem as $key => $value) {
                         echo '<td class="item-info table-renderer">';
-                          echo '<strong>' . $people[$i][$key] . '</strong>';
+                          echo '<strong>' . $people[$i][$key][0] . '</strong>';
                           echo '<ul class="inline-list">';
-                            echo '<li>' . $people[$i][$key] . '</li>';
+                            echo '<li>' . $people[$i][$key][0] . '</li>';
                           echo '</ul>';
                         echo '</td>';
                       }
@@ -64,9 +67,9 @@
                   <h3 class="item-name">
                     <?php
                       if ($items['linkToProfile']) {
-                        echo '<a class="u-url" href="?directoryprofilecruzid=' . $people[$i]['uid'] . '">';
+                        echo '<a class="u-url" href="?directoryprofilecruzid=' . $people[$i]['uid'][0] . '">';
                       }
-                      echo '<span class="p-name">' . $people[$i]['cn'] . '</span>';
+                      echo '<span class="p-name">' . $people[$i]['cn'][0] . '</span>';
                       if ($items['linkToProfile']) {
                         echo '</a>';
                       }
@@ -76,11 +79,23 @@
                     <?php
                       foreach($items['informationToDisplay'] as $disItem) {
                         foreach($disItem as $key => $value){
-                          if ($people[$i][$key]) {
+                          if ($people[$i][$key][0]) {
                             echo "<li>";
                               echo "<strong>{$disItem[$key]}</strong>";
                               echo '<ul class="inline-list">';
-                                echo "<li>{$people[$i][$key]}</li>";
+                                if ($disItem[$key] == "Email") {
+                                  for($j=0; $j<count($people[$i]["mail"]); $j++) {
+                                      echo "<li><span class=\"u-email\"><a href=\"{$people[$i]['mail'][$j]}\">{$people[$i]['mail'][$j]}</a></span></li>";
+                                  }
+                                  for($j=0; $j<count($people[$i]["ucscpersonpubalternatemail"]); $j++) {
+                                      echo "<li><span class=\"u-email\"><a href=\"{$people[$i]['mail'][$j]}\">{$people[$i]['ucscpersonpubalternatemail'][$j]}</a></span></li>";
+                                  }
+                                } else if ($disItem[$key] == "Office Location") {
+                                  echo "<li>{$people[$i]['ucscprimarylocationpubofficialname'][0]}, {$people[$i]['ucscpersonpubofficelocationdetail'][0]}</li>";
+
+                                } else {
+                                  echo "<li>{$people[$i][$key][0]}</li>";
+                                }
                               echo '</ul>';
                             echo "</li>";
                           }
@@ -92,11 +107,11 @@
                 <?php
                   $imgUrl = "//static.ucsc.edu/images/icon-slug.jpg";
                   if ($people[$i]['b64image']) {
-                    $imgUrl = "/sites/default/files/cache/directory/" . $people[$i]['uid'] . ".jpg";
+                    $imgUrl = "/wp-content/uploads/directoryimages/" . $people[$i]['uid'][0] . ".jpg";
                   }
                   echo '<div class="item-image square-img imgLiquid imgLiquid_bgSize imgLiquid_ready" style=\'background-image: url("' . $imgUrl . '"); background-size: cover; background-position: center center; background-repeat: no-repeat;\'>';
-                    if ($items['linkToProfile']) echo '<a class="u-url" href="/directoryprofile/' . $people[$i]['uid'] . '" style="display: block; width: 100%; height: 100%;">';
-                    echo '<img src="" alt="Individual profile page for ' . $people[$i]['cn'] . '" style="display: none;">';
+                    if ($items['linkToProfile']) echo '<a class="u-url" href="/?directoryprofilecruzid=' . $people[$i]['uid'][0] . '" style="display: block; width: 100%; height: 100%;">';
+                    echo '<img src="" alt="Individual profile page for ' . $people[$i]['cn'][0] . '" style="display: none;">';
                     if ($items['linkToProfile']) echo '</a>';
                   echo '</div>';
                 ?>

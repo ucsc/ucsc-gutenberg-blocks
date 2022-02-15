@@ -21,6 +21,24 @@ class CampusDirectory
       return plugin_dir_path(__FILE__) . '../templates/DirectoryProfileTemplate.php';
     });
     add_action('wp_enqueue_scripts', array($this, 'register_plugin_styles'));
+    add_action('rest_api_init', function () {
+      register_rest_route('ucscgutenbergblocks/v1', '/campusdirectoryrequirements/', array(
+        'methods' => 'GET',
+        'callback' => array($this, 'requirements')
+      ));
+    });
+  }
+  function requirements(){
+    $resp = [];
+    $ldap_password = get_site_option('ldap_api_key');
+    if (!$ldap_password) $ldap_password = get_option('ldap_api_key');
+    $resp["ldap_pass"] = strlen($ldap_password) > 0;
+    $department = get_option('campus_directory_department');
+    $division = get_option('campus_directory_division');
+    $resp["deptdiv"] = strlen($department) > 0 || strlen($division) > 0;
+    $resp["multisite"] = is_multisite();
+
+    return new WP_REST_Response($resp);
   }
   public function register_plugin_styles() {
     wp_register_style( 'directoryprofile',
@@ -38,36 +56,6 @@ class CampusDirectory
     );
     wp_enqueue_style('campusdirectory');
   }
-  function settings()
-  {
-    add_settings_section('cd_first_section', null, null, 'campus-directory-settings-page');
-    add_settings_field('campus_directory_department', 'Campus Directory Department', array($this, 'apikeyHTML'), 'campus-directory-settings-page', 'cd_first_section');
-    register_setting('campus_directory_settings', 'campus_directory_department', array('sanitize_callback' => 'sanitize_text_field', 'default' => ''));
-  }
-
-  function apikeyHTML()
-  { ?>
-    <input type="text" name="campus_directory_department" value="<?php echo esc_attr(get_option('campus_directory_department')) ?>" />
-  <?php }
-
-  function settingsLink()
-  {
-    add_options_page('Campus Directory Settings', 'Campus Directory Settings', 'manage_options', 'campus-directory-settings-page', array($this, 'settingsPageHTML'));
-  }
-
-  function settingsPageHTML()
-  { ?>
-    <div class="wrap">
-      <h1>Campus Directory Settings</h1>
-      <form action="options.php" method="POST">
-        <?php
-        settings_fields('campus_directory_settings');
-        do_settings_sections('campus-directory-settings-page');
-        submit_button();
-        ?>
-      </form>
-    </div>
-<?php }
 
   function renderFrontend()
   {

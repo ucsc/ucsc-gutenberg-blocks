@@ -238,13 +238,17 @@ module.exports["default"] = module.exports, module.exports.__esModule = true;
 
 "use strict";
 __webpack_require__.r(__webpack_exports__);
-/* harmony import */ var _wordpress_element__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! @wordpress/element */ "@wordpress/element");
-/* harmony import */ var _wordpress_element__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(_wordpress_element__WEBPACK_IMPORTED_MODULE_0__);
-/* harmony import */ var _wordpress_components__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! @wordpress/components */ "@wordpress/components");
-/* harmony import */ var _wordpress_components__WEBPACK_IMPORTED_MODULE_1___default = /*#__PURE__*/__webpack_require__.n(_wordpress_components__WEBPACK_IMPORTED_MODULE_1__);
-/* harmony import */ var _components_CampusDirectory_IntroParagraph__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ../components/CampusDirectory/IntroParagraph */ "./src/components/CampusDirectory/IntroParagraph.js");
-/* harmony import */ var _components_CampusDirectory_PageLayout__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ../components/CampusDirectory/PageLayout */ "./src/components/CampusDirectory/PageLayout.js");
-/* harmony import */ var _components_CampusDirectory_PeopleAndInformation__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ../components/CampusDirectory/PeopleAndInformation */ "./src/components/CampusDirectory/PeopleAndInformation.js");
+/* harmony import */ var _babel_runtime_helpers_slicedToArray__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! @babel/runtime/helpers/slicedToArray */ "./node_modules/@babel/runtime/helpers/slicedToArray.js");
+/* harmony import */ var _babel_runtime_helpers_slicedToArray__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(_babel_runtime_helpers_slicedToArray__WEBPACK_IMPORTED_MODULE_0__);
+/* harmony import */ var _wordpress_element__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! @wordpress/element */ "@wordpress/element");
+/* harmony import */ var _wordpress_element__WEBPACK_IMPORTED_MODULE_1___default = /*#__PURE__*/__webpack_require__.n(_wordpress_element__WEBPACK_IMPORTED_MODULE_1__);
+/* harmony import */ var _wordpress_components__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! @wordpress/components */ "@wordpress/components");
+/* harmony import */ var _wordpress_components__WEBPACK_IMPORTED_MODULE_2___default = /*#__PURE__*/__webpack_require__.n(_wordpress_components__WEBPACK_IMPORTED_MODULE_2__);
+/* harmony import */ var _components_CampusDirectory_IntroParagraph__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ../components/CampusDirectory/IntroParagraph */ "./src/components/CampusDirectory/IntroParagraph.js");
+/* harmony import */ var _components_CampusDirectory_PageLayout__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ../components/CampusDirectory/PageLayout */ "./src/components/CampusDirectory/PageLayout.js");
+/* harmony import */ var _components_CampusDirectory_PeopleAndInformation__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! ../components/CampusDirectory/PeopleAndInformation */ "./src/components/CampusDirectory/PeopleAndInformation.js");
+
+
 
 
 
@@ -317,24 +321,44 @@ var CampusDirectory = function CampusDirectory() {
           displayDeptartmentAffiliates = attributes.displayDeptartmentAffiliates,
           linkToProfile = attributes.linkToProfile,
           strInformationTypes = attributes.strInformationTypes;
-      return Object(_wordpress_element__WEBPACK_IMPORTED_MODULE_0__["createElement"])(_wordpress_element__WEBPACK_IMPORTED_MODULE_0__["Fragment"], null, Object(_wordpress_element__WEBPACK_IMPORTED_MODULE_0__["createElement"])(_wordpress_components__WEBPACK_IMPORTED_MODULE_1__["Panel"], {
+
+      var _useState = Object(_wordpress_element__WEBPACK_IMPORTED_MODULE_1__["useState"])(true),
+          _useState2 = _babel_runtime_helpers_slicedToArray__WEBPACK_IMPORTED_MODULE_0___default()(_useState, 2),
+          configuredCorrectly = _useState2[0],
+          setConfiguredCorrectly = _useState2[1];
+
+      var _useState3 = Object(_wordpress_element__WEBPACK_IMPORTED_MODULE_1__["useState"])({}),
+          _useState4 = _babel_runtime_helpers_slicedToArray__WEBPACK_IMPORTED_MODULE_0___default()(_useState3, 2),
+          resp = _useState4[0],
+          setResp = _useState4[1];
+
+      Object(_wordpress_element__WEBPACK_IMPORTED_MODULE_1__["useEffect"])(function () {
+        fetch('/wp-json/ucscgutenbergblocks/v1/campusdirectoryrequirements').then(function (res) {
+          return res.text();
+        }).then(function (text) {
+          var resp = JSON.parse(text);
+          if (!resp.ldap_pass || !resp.deptdiv) setConfiguredCorrectly(false);
+          setResp(resp);
+        });
+      }, []);
+      return Object(_wordpress_element__WEBPACK_IMPORTED_MODULE_1__["createElement"])(_wordpress_element__WEBPACK_IMPORTED_MODULE_1__["Fragment"], null, configuredCorrectly && Object(_wordpress_element__WEBPACK_IMPORTED_MODULE_1__["createElement"])(_wordpress_components__WEBPACK_IMPORTED_MODULE_2__["Panel"], {
         header: "Directory Block"
-      }, Object(_wordpress_element__WEBPACK_IMPORTED_MODULE_0__["createElement"])(_wordpress_components__WEBPACK_IMPORTED_MODULE_1__["PanelBody"], {
+      }, Object(_wordpress_element__WEBPACK_IMPORTED_MODULE_1__["createElement"])(_wordpress_components__WEBPACK_IMPORTED_MODULE_2__["PanelBody"], {
         title: "Intro Paragraph"
-      }, Object(_wordpress_element__WEBPACK_IMPORTED_MODULE_0__["createElement"])(_components_CampusDirectory_IntroParagraph__WEBPACK_IMPORTED_MODULE_2__["default"], {
+      }, Object(_wordpress_element__WEBPACK_IMPORTED_MODULE_1__["createElement"])(_components_CampusDirectory_IntroParagraph__WEBPACK_IMPORTED_MODULE_3__["default"], {
         setAttributes: setAttributes,
         boolIntroParagraph: boolIntroParagraph,
         introParagraph: introParagraph
-      })), Object(_wordpress_element__WEBPACK_IMPORTED_MODULE_0__["createElement"])(_wordpress_components__WEBPACK_IMPORTED_MODULE_1__["PanelBody"], {
+      })), Object(_wordpress_element__WEBPACK_IMPORTED_MODULE_1__["createElement"])(_wordpress_components__WEBPACK_IMPORTED_MODULE_2__["PanelBody"], {
         title: "Page Layout",
         initialOpen: true
-      }, Object(_wordpress_element__WEBPACK_IMPORTED_MODULE_0__["createElement"])(_wordpress_components__WEBPACK_IMPORTED_MODULE_1__["PanelRow"], null, Object(_wordpress_element__WEBPACK_IMPORTED_MODULE_0__["createElement"])(_components_CampusDirectory_PageLayout__WEBPACK_IMPORTED_MODULE_3__["default"], {
+      }, Object(_wordpress_element__WEBPACK_IMPORTED_MODULE_1__["createElement"])(_wordpress_components__WEBPACK_IMPORTED_MODULE_2__["PanelRow"], null, Object(_wordpress_element__WEBPACK_IMPORTED_MODULE_1__["createElement"])(_components_CampusDirectory_PageLayout__WEBPACK_IMPORTED_MODULE_4__["default"], {
         setAttributes: setAttributes,
         pageLayout: pageLayout
-      }))), Object(_wordpress_element__WEBPACK_IMPORTED_MODULE_0__["createElement"])(_wordpress_components__WEBPACK_IMPORTED_MODULE_1__["PanelBody"], {
+      }))), Object(_wordpress_element__WEBPACK_IMPORTED_MODULE_1__["createElement"])(_wordpress_components__WEBPACK_IMPORTED_MODULE_2__["PanelBody"], {
         title: "People and Information to Display",
         initialOpen: true
-      }, Object(_wordpress_element__WEBPACK_IMPORTED_MODULE_0__["createElement"])(_wordpress_components__WEBPACK_IMPORTED_MODULE_1__["PanelRow"], null, Object(_wordpress_element__WEBPACK_IMPORTED_MODULE_0__["createElement"])(_components_CampusDirectory_PeopleAndInformation__WEBPACK_IMPORTED_MODULE_4__["default"], {
+      }, Object(_wordpress_element__WEBPACK_IMPORTED_MODULE_1__["createElement"])(_wordpress_components__WEBPACK_IMPORTED_MODULE_2__["PanelRow"], null, Object(_wordpress_element__WEBPACK_IMPORTED_MODULE_1__["createElement"])(_components_CampusDirectory_PeopleAndInformation__WEBPACK_IMPORTED_MODULE_5__["default"], {
         setAttributes: setAttributes,
         automatedFeeds: automatedFeeds,
         cruzidList: cruzidList,
@@ -347,7 +371,16 @@ var CampusDirectory = function CampusDirectory() {
         displayDeptartmentAffiliates: displayDeptartmentAffiliates,
         linkToProfile: linkToProfile,
         strInformationTypes: strInformationTypes
-      })))));
+      })))), !configuredCorrectly && Object(_wordpress_element__WEBPACK_IMPORTED_MODULE_1__["createElement"])(_wordpress_element__WEBPACK_IMPORTED_MODULE_1__["Fragment"], null, Object(_wordpress_element__WEBPACK_IMPORTED_MODULE_1__["createElement"])("h2", null, "This Block is not Configured Correctly"), !resp.deptdiv && Object(_wordpress_element__WEBPACK_IMPORTED_MODULE_1__["createElement"])("h4", null, "The Department or Division needs to be set ", Object(_wordpress_element__WEBPACK_IMPORTED_MODULE_1__["createElement"])("a", {
+        target: "_blank",
+        href: "/wp-admin/options-general.php?page=ucsc_gutenberg_blocks_settings_page"
+      }, "here.")), !resp.ldap_pass && resp.multisite && Object(_wordpress_element__WEBPACK_IMPORTED_MODULE_1__["createElement"])(_wordpress_element__WEBPACK_IMPORTED_MODULE_1__["Fragment"], null, Object(_wordpress_element__WEBPACK_IMPORTED_MODULE_1__["createElement"])("h4", null, "The LDAP password can be set at the network level ", Object(_wordpress_element__WEBPACK_IMPORTED_MODULE_1__["createElement"])("a", {
+        target: "_blank",
+        href: "/wp-admin/network/settings.php?page=ucsc-gutenberg-blocks-network-settings"
+      }, "here.")), Object(_wordpress_element__WEBPACK_IMPORTED_MODULE_1__["createElement"])("h6", null, "Or the LDAP password can be set at the site level below.")), !resp.ldap_pass && Object(_wordpress_element__WEBPACK_IMPORTED_MODULE_1__["createElement"])("h4", null, "The LDAP password needs to be set here ", Object(_wordpress_element__WEBPACK_IMPORTED_MODULE_1__["createElement"])("a", {
+        target: "_blank",
+        href: "/wp-admin/options-general.php?page=ucsc_gutenberg_blocks_settings_page"
+      }, "here."))));
     },
     save: function save(props) {
       return null;
@@ -368,34 +401,41 @@ var CampusDirectory = function CampusDirectory() {
 
 "use strict";
 __webpack_require__.r(__webpack_exports__);
-<<<<<<< Updated upstream
-<<<<<<< Updated upstream
-/* harmony import */ var _wordpress_element__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! @wordpress/element */ "@wordpress/element");
-/* harmony import */ var _wordpress_element__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(_wordpress_element__WEBPACK_IMPORTED_MODULE_0__);
-=======
-=======
->>>>>>> Stashed changes
 /* harmony import */ var _babel_runtime_helpers_slicedToArray__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! @babel/runtime/helpers/slicedToArray */ "./node_modules/@babel/runtime/helpers/slicedToArray.js");
 /* harmony import */ var _babel_runtime_helpers_slicedToArray__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(_babel_runtime_helpers_slicedToArray__WEBPACK_IMPORTED_MODULE_0__);
 /* harmony import */ var _wordpress_element__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! @wordpress/element */ "@wordpress/element");
 /* harmony import */ var _wordpress_element__WEBPACK_IMPORTED_MODULE_1___default = /*#__PURE__*/__webpack_require__.n(_wordpress_element__WEBPACK_IMPORTED_MODULE_1__);
-/* harmony import */ var _wordpress_components__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! @wordpress/components */ "@wordpress/components");
-/* harmony import */ var _wordpress_components__WEBPACK_IMPORTED_MODULE_2___default = /*#__PURE__*/__webpack_require__.n(_wordpress_components__WEBPACK_IMPORTED_MODULE_2__);
 
-<<<<<<< Updated upstream
->>>>>>> Stashed changes
+
 
 
 var ClassSchedule = function ClassSchedule() {
   wp.blocks.registerBlockType("ucscblocks/classschedule", {
-    title: "Class",
+    title: "Class Schedule",
     icon: "smiley",
     category: "common",
     attributes: {},
     edit: function edit(_ref) {
       var setAttributes = _ref.setAttributes,
           attributes = _ref.attributes;
-      return Object(_wordpress_element__WEBPACK_IMPORTED_MODULE_0__["createElement"])(_wordpress_element__WEBPACK_IMPORTED_MODULE_0__["Fragment"], null, Object(_wordpress_element__WEBPACK_IMPORTED_MODULE_0__["createElement"])("h2", null, "Class Schedule Edit Block"));
+
+      var _useState = Object(_wordpress_element__WEBPACK_IMPORTED_MODULE_1__["useState"])(""),
+          _useState2 = _babel_runtime_helpers_slicedToArray__WEBPACK_IMPORTED_MODULE_0___default()(_useState, 2),
+          dept = _useState2[0],
+          setDept = _useState2[1];
+
+      Object(_wordpress_element__WEBPACK_IMPORTED_MODULE_1__["useEffect"])(function () {
+        fetch('/wp-json/ucscgutenbergblocks/v1/classscheduledept').then(function (res) {
+          return res.text();
+        }).then(function (text) {
+          var resp = JSON.parse(text);
+          setDept(resp.dept);
+        });
+      }, []);
+      return Object(_wordpress_element__WEBPACK_IMPORTED_MODULE_1__["createElement"])(_wordpress_element__WEBPACK_IMPORTED_MODULE_1__["Fragment"], null, Object(_wordpress_element__WEBPACK_IMPORTED_MODULE_1__["createElement"])("h2", null, "Class Schedule Block"), dept === "" && Object(_wordpress_element__WEBPACK_IMPORTED_MODULE_1__["createElement"])(_wordpress_element__WEBPACK_IMPORTED_MODULE_1__["Fragment"], null, Object(_wordpress_element__WEBPACK_IMPORTED_MODULE_1__["createElement"])("h4", null, "The Class Schedule Dept needs to be set here ", Object(_wordpress_element__WEBPACK_IMPORTED_MODULE_1__["createElement"])("a", {
+        target: "_blank",
+        href: "/wp-admin/options-general.php?page=ucsc_gutenberg_blocks_settings_page"
+      }, "here."))));
     },
     save: function save(props) {
       return null;
@@ -404,8 +444,6 @@ var ClassSchedule = function ClassSchedule() {
 };
 
 /* harmony default export */ __webpack_exports__["default"] = (ClassSchedule);
-=======
->>>>>>> Stashed changes
 
 /***/ }),
 
@@ -426,15 +464,9 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _wordpress_components__WEBPACK_IMPORTED_MODULE_2___default = /*#__PURE__*/__webpack_require__.n(_wordpress_components__WEBPACK_IMPORTED_MODULE_2__);
 
 
-<<<<<<< Updated upstream
-
-<<<<<<< Updated upstream
 
 
-=======
->>>>>>> Stashed changes
-=======
->>>>>>> Stashed changes
+
 var TestDemoUCSC = function TestDemoUCSC() {
   wp.blocks.registerBlockType("ucscblocks/contentsharer", {
     title: "Content Sharer",
@@ -588,10 +620,13 @@ var TestDemoUCSC = function TestDemoUCSC() {
 
 "use strict";
 __webpack_require__.r(__webpack_exports__);
-/* harmony import */ var _wordpress_element__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! @wordpress/element */ "@wordpress/element");
-/* harmony import */ var _wordpress_element__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(_wordpress_element__WEBPACK_IMPORTED_MODULE_0__);
-/* harmony import */ var _wordpress_components__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! @wordpress/components */ "@wordpress/components");
-/* harmony import */ var _wordpress_components__WEBPACK_IMPORTED_MODULE_1___default = /*#__PURE__*/__webpack_require__.n(_wordpress_components__WEBPACK_IMPORTED_MODULE_1__);
+/* harmony import */ var _babel_runtime_helpers_slicedToArray__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! @babel/runtime/helpers/slicedToArray */ "./node_modules/@babel/runtime/helpers/slicedToArray.js");
+/* harmony import */ var _babel_runtime_helpers_slicedToArray__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(_babel_runtime_helpers_slicedToArray__WEBPACK_IMPORTED_MODULE_0__);
+/* harmony import */ var _wordpress_element__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! @wordpress/element */ "@wordpress/element");
+/* harmony import */ var _wordpress_element__WEBPACK_IMPORTED_MODULE_1___default = /*#__PURE__*/__webpack_require__.n(_wordpress_element__WEBPACK_IMPORTED_MODULE_1__);
+/* harmony import */ var _wordpress_components__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! @wordpress/components */ "@wordpress/components");
+/* harmony import */ var _wordpress_components__WEBPACK_IMPORTED_MODULE_2___default = /*#__PURE__*/__webpack_require__.n(_wordpress_components__WEBPACK_IMPORTED_MODULE_2__);
+
 
 
 
@@ -609,78 +644,24 @@ var CourseCatalog = function CourseCatalog() {
     edit: function edit(_ref) {
       var setAttributes = _ref.setAttributes,
           attributes = _ref.attributes;
-<<<<<<< Updated upstream
-<<<<<<< Updated upstream
-=======
-=======
->>>>>>> Stashed changes
-      console.log('here');
->>>>>>> Stashed changes
-      console.log(attributes); //   const { siteid, postType } = attributes;
-      //   let selectedSite, setSelectedSite;
-      //   if (typeof siteid === 'undefined') {
-      //     setAttributes({
-      //       siteid: 1
-      //     });
-      //     [selectedSite, setSelectedSite] = useState(1);
-      //   } else {
-      //     [selectedSite, setSelectedSite] = useState(siteid);
-      //   }
-      //   let selectedPostType, setSelectedPostType;
-      //   if (typeof postType === 'undefined') {
-      //     setAttributes({
-      //       postType: ""
-      //     });
-      //     [selectedPostType, setSelectedPostType] = useState("");
-      //   } else {
-      //     [selectedPostType, setSelectedPostType] = useState(postType);
-      //   }
-      //   const [sites, setSites] = useState([]);
-      //   const [postTypes, setPostTypes] = useState([]);
-      //   const fetchPostTypes = (siteid) => {
-      //     fetch('/wp-json/ucscgutenbergblocks/v1/posttypes?siteid=' + siteid)
-      //       .then(res => res.text())
-      //       .then((text) => {
-      //         const postTypes = JSON.parse(text);
-      //         const pTypes = [];
-      //         Object.keys(postTypes).map(type => {
-      //           pTypes.push({
-      //             label: type,
-      //             value: type
-      //           })
-      //         })
-      //         setPostTypes(pTypes);
-      //       })
-      //   }
-      //   useEffect(() => {
-      //     fetch('/wp-json/ucscgutenbergblocks/v1/sites')
-      //       .then(res => res.text())
-      //       .then((text) => {
-      //         setSites(JSON.parse(text));
-      //       });
-      //     fetchPostTypes(selectedSite);
-      //   }, []);
-      //   const options = sites.map(site => {
-      //     return {
-      //       label: site.domain,
-      //       value: site.blog_id
-      //     }
-      //   })
-      //   const userSelectedASite = (e) => {
-      //     setSelectedSite(e.target.value);
-      //     setAttributes({
-      //       siteid: e.target.value
-      //     });
-      //     fetchPostTypes(e.target.value);
-      //   }
-      //   const userSelectedAPostType = (e) => {
-      //     setSelectedPostType(e.target.value);
-      //     setAttributes({
-      //       postType: e.target.value
-      //     });
-      //   }
 
-      return Object(_wordpress_element__WEBPACK_IMPORTED_MODULE_0__["createElement"])(_wordpress_element__WEBPACK_IMPORTED_MODULE_0__["Fragment"], null, Object(_wordpress_element__WEBPACK_IMPORTED_MODULE_0__["createElement"])("h2", null, "Course Catalog"), Object(_wordpress_element__WEBPACK_IMPORTED_MODULE_0__["createElement"])("h4", null, "subject"));
+      var _useState = Object(_wordpress_element__WEBPACK_IMPORTED_MODULE_1__["useState"])(""),
+          _useState2 = _babel_runtime_helpers_slicedToArray__WEBPACK_IMPORTED_MODULE_0___default()(_useState, 2),
+          dept = _useState2[0],
+          setDept = _useState2[1];
+
+      Object(_wordpress_element__WEBPACK_IMPORTED_MODULE_1__["useEffect"])(function () {
+        fetch('/wp-json/ucscgutenbergblocks/v1/coursecatalogdept').then(function (res) {
+          return res.text();
+        }).then(function (text) {
+          var resp = JSON.parse(text);
+          setDept(resp.dept);
+        });
+      }, []);
+      return Object(_wordpress_element__WEBPACK_IMPORTED_MODULE_1__["createElement"])(_wordpress_element__WEBPACK_IMPORTED_MODULE_1__["Fragment"], null, Object(_wordpress_element__WEBPACK_IMPORTED_MODULE_1__["createElement"])("h2", null, "Course Catalog Block"), dept === "" && Object(_wordpress_element__WEBPACK_IMPORTED_MODULE_1__["createElement"])(_wordpress_element__WEBPACK_IMPORTED_MODULE_1__["Fragment"], null, Object(_wordpress_element__WEBPACK_IMPORTED_MODULE_1__["createElement"])("h4", null, "The Course Catalog Dept needs to be set here ", Object(_wordpress_element__WEBPACK_IMPORTED_MODULE_1__["createElement"])("a", {
+        target: "_blank",
+        href: "/wp-admin/options-general.php?page=ucsc_gutenberg_blocks_settings_page"
+      }, "here."))));
     },
     save: function save(props) {
       return null;
@@ -689,6 +670,196 @@ var CourseCatalog = function CourseCatalog() {
 };
 
 /* harmony default export */ __webpack_exports__["default"] = (CourseCatalog);
+
+/***/ }),
+
+/***/ "./src/blocks/FeedbackForm.js":
+/*!************************************!*\
+  !*** ./src/blocks/FeedbackForm.js ***!
+  \************************************/
+/*! exports provided: default */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony import */ var _wordpress_element__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! @wordpress/element */ "@wordpress/element");
+/* harmony import */ var _wordpress_element__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(_wordpress_element__WEBPACK_IMPORTED_MODULE_0__);
+
+
+var FeedbackForm = function FeedbackForm() {
+  wp.blocks.registerBlockType("ucscblocks/feedback", {
+    title: "Feedback Form",
+    icon: "smiley",
+    category: "common",
+    attributes: {
+      name: {
+        type: "string"
+      },
+      namePlaceholder: {
+        type: "string"
+      },
+      email: {
+        type: "string"
+      },
+      emailPlaceholder: {
+        type: "string"
+      },
+      affiliation: {
+        type: "string"
+      },
+      affiliationPlaceholder: {
+        type: "string"
+      },
+      topic: {
+        type: "string"
+      },
+      topicPlaceholder: {
+        type: "string"
+      },
+      message: {
+        type: "string"
+      },
+      messagePlaceholder: {
+        type: "string"
+      },
+      to: {
+        type: "string"
+      }
+    },
+    edit: function edit(_ref) {
+      var setAttributes = _ref.setAttributes,
+          attributes = _ref.attributes;
+      return Object(_wordpress_element__WEBPACK_IMPORTED_MODULE_0__["createElement"])(_wordpress_element__WEBPACK_IMPORTED_MODULE_0__["Fragment"], null, Object(_wordpress_element__WEBPACK_IMPORTED_MODULE_0__["createElement"])("h4", null, "Change the wording of the text field titles"), Object(_wordpress_element__WEBPACK_IMPORTED_MODULE_0__["createElement"])("div", null, Object(_wordpress_element__WEBPACK_IMPORTED_MODULE_0__["createElement"])("label", null, "Name: "), Object(_wordpress_element__WEBPACK_IMPORTED_MODULE_0__["createElement"])("div", {
+        id: "name-input"
+      }, Object(_wordpress_element__WEBPACK_IMPORTED_MODULE_0__["createElement"])("input", {
+        style: {
+          margin: 3
+        },
+        type: "text",
+        id: "name",
+        placeholder: "Name",
+        value: attributes.name,
+        onChange: function onChange(e) {
+          return setAttributes({
+            name: e.target.value
+          });
+        }
+      }), Object(_wordpress_element__WEBPACK_IMPORTED_MODULE_0__["createElement"])("input", {
+        style: {
+          margin: 3
+        },
+        type: "text",
+        id: "namePlaceholder",
+        placeholder: "Name Placeholder",
+        value: attributes.namePlaceholder,
+        onChange: function onChange(e) {
+          return setAttributes({
+            namePlaceholder: e.target.value
+          });
+        }
+      }))), Object(_wordpress_element__WEBPACK_IMPORTED_MODULE_0__["createElement"])("div", null, Object(_wordpress_element__WEBPACK_IMPORTED_MODULE_0__["createElement"])("label", null, "Email: "), Object(_wordpress_element__WEBPACK_IMPORTED_MODULE_0__["createElement"])("div", {
+        id: "email-input"
+      }, Object(_wordpress_element__WEBPACK_IMPORTED_MODULE_0__["createElement"])("input", {
+        style: {
+          margin: 3
+        },
+        type: "text",
+        placeholder: "Email",
+        value: attributes.email,
+        onChange: function onChange(e) {
+          return setAttributes({
+            email: e.target.value
+          });
+        }
+      }), Object(_wordpress_element__WEBPACK_IMPORTED_MODULE_0__["createElement"])("input", {
+        style: {
+          margin: 3
+        },
+        type: "text",
+        placeholder: "Email Placeholder",
+        value: attributes.emailPlaceholder,
+        onChange: function onChange(e) {
+          return setAttributes({
+            emailPlaceholder: e.target.value
+          });
+        }
+      }))), Object(_wordpress_element__WEBPACK_IMPORTED_MODULE_0__["createElement"])("div", null, Object(_wordpress_element__WEBPACK_IMPORTED_MODULE_0__["createElement"])("label", null, "Affiliation: "), Object(_wordpress_element__WEBPACK_IMPORTED_MODULE_0__["createElement"])("div", {
+        id: "affiliation-input"
+      }, Object(_wordpress_element__WEBPACK_IMPORTED_MODULE_0__["createElement"])("input", {
+        style: {
+          margin: 3
+        },
+        type: "text",
+        placeholder: "Affiliation",
+        value: attributes.affiliation,
+        onChange: function onChange(e) {
+          return setAttributes({
+            affiliation: e.target.value
+          });
+        }
+      }))), Object(_wordpress_element__WEBPACK_IMPORTED_MODULE_0__["createElement"])("div", null, Object(_wordpress_element__WEBPACK_IMPORTED_MODULE_0__["createElement"])("label", null, "Topic: "), Object(_wordpress_element__WEBPACK_IMPORTED_MODULE_0__["createElement"])("div", {
+        id: "topic-input"
+      }, Object(_wordpress_element__WEBPACK_IMPORTED_MODULE_0__["createElement"])("input", {
+        style: {
+          margin: 3
+        },
+        type: "text",
+        placeholder: "Topic",
+        value: attributes.topic,
+        onChange: function onChange(e) {
+          return setAttributes({
+            topic: e.target.value
+          });
+        }
+      }))), Object(_wordpress_element__WEBPACK_IMPORTED_MODULE_0__["createElement"])("div", null, Object(_wordpress_element__WEBPACK_IMPORTED_MODULE_0__["createElement"])("label", null, "Message: "), Object(_wordpress_element__WEBPACK_IMPORTED_MODULE_0__["createElement"])("div", {
+        id: "message-input"
+      }, Object(_wordpress_element__WEBPACK_IMPORTED_MODULE_0__["createElement"])("input", {
+        style: {
+          margin: 3
+        },
+        type: "text",
+        placeholder: "Message",
+        value: attributes.message,
+        onChange: function onChange(e) {
+          return setAttributes({
+            message: e.target.value
+          });
+        }
+      }), Object(_wordpress_element__WEBPACK_IMPORTED_MODULE_0__["createElement"])("input", {
+        style: {
+          margin: 3
+        },
+        type: "text",
+        placeholder: "Message Placeholder",
+        value: attributes.messagePlaceholder,
+        onChange: function onChange(e) {
+          return setAttributes({
+            messagePlaceholder: e.target.value
+          });
+        }
+      }))), Object(_wordpress_element__WEBPACK_IMPORTED_MODULE_0__["createElement"])("div", null, Object(_wordpress_element__WEBPACK_IMPORTED_MODULE_0__["createElement"])("label", null, "Who is receiving the email"), Object(_wordpress_element__WEBPACK_IMPORTED_MODULE_0__["createElement"])("div", {
+        id: "to-input"
+      }, Object(_wordpress_element__WEBPACK_IMPORTED_MODULE_0__["createElement"])("input", {
+        style: {
+          margin: 3
+        },
+        type: "text",
+        placeholder: "email1, email2, email3...",
+        value: attributes.to,
+        onChange: function onChange(e) {
+          return setAttributes({
+            to: e.target.value
+          });
+        }
+      }))));
+    },
+    save: function save(props) {
+      return null;
+    }
+  });
+};
+
+/* harmony default export */ __webpack_exports__["default"] = (FeedbackForm);
 
 /***/ }),
 
@@ -963,25 +1134,12 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _CheckboxGroupControl__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./CheckboxGroupControl */ "./src/components/CampusDirectory/CheckboxGroupControl.js");
 /* harmony import */ var _wordpress_components__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! @wordpress/components */ "@wordpress/components");
 /* harmony import */ var _wordpress_components__WEBPACK_IMPORTED_MODULE_3___default = /*#__PURE__*/__webpack_require__.n(_wordpress_components__WEBPACK_IMPORTED_MODULE_3__);
-<<<<<<< Updated upstream
-<<<<<<< Updated upstream
-=======
-
->>>>>>> Stashed changes
-=======
->>>>>>> Stashed changes
 
 
 
 
 
-<<<<<<< Updated upstream
 
-<<<<<<< Updated upstream
-=======
->>>>>>> Stashed changes
-=======
->>>>>>> Stashed changes
 var InformationToDisplay = function InformationToDisplay(_ref) {
   var setAttributes = _ref.setAttributes,
       linkToProfile = _ref.linkToProfile,
@@ -1071,25 +1229,11 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _wordpress_element__WEBPACK_IMPORTED_MODULE_1___default = /*#__PURE__*/__webpack_require__.n(_wordpress_element__WEBPACK_IMPORTED_MODULE_1__);
 /* harmony import */ var _wordpress_components__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! @wordpress/components */ "@wordpress/components");
 /* harmony import */ var _wordpress_components__WEBPACK_IMPORTED_MODULE_2___default = /*#__PURE__*/__webpack_require__.n(_wordpress_components__WEBPACK_IMPORTED_MODULE_2__);
-<<<<<<< Updated upstream
-<<<<<<< Updated upstream
-
-=======
->>>>>>> Stashed changes
-=======
->>>>>>> Stashed changes
 
 
 
 
-<<<<<<< Updated upstream
-<<<<<<< Updated upstream
-=======
 
->>>>>>> Stashed changes
-=======
-
->>>>>>> Stashed changes
 var IntroParagraph = function IntroParagraph(_ref) {
   var boolIntroParagraph = _ref.boolIntroParagraph,
       introParagraph = _ref.introParagraph,
@@ -1188,18 +1332,11 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _wordpress_element__WEBPACK_IMPORTED_MODULE_1___default = /*#__PURE__*/__webpack_require__.n(_wordpress_element__WEBPACK_IMPORTED_MODULE_1__);
 /* harmony import */ var _wordpress_components__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! @wordpress/components */ "@wordpress/components");
 /* harmony import */ var _wordpress_components__WEBPACK_IMPORTED_MODULE_2___default = /*#__PURE__*/__webpack_require__.n(_wordpress_components__WEBPACK_IMPORTED_MODULE_2__);
-<<<<<<< Updated upstream
-
-=======
->>>>>>> Stashed changes
 
 
 
 
-<<<<<<< Updated upstream
-=======
 
->>>>>>> Stashed changes
 var PageLayout = function PageLayout(_ref) {
   var pageLayout = _ref.pageLayout,
       setAttributes = _ref.setAttributes;
@@ -1270,26 +1407,13 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _InformationToDisplay__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ./InformationToDisplay */ "./src/components/CampusDirectory/InformationToDisplay.js");
 /* harmony import */ var _wordpress_components__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! @wordpress/components */ "@wordpress/components");
 /* harmony import */ var _wordpress_components__WEBPACK_IMPORTED_MODULE_4___default = /*#__PURE__*/__webpack_require__.n(_wordpress_components__WEBPACK_IMPORTED_MODULE_4__);
-<<<<<<< Updated upstream
-<<<<<<< Updated upstream
-=======
-
->>>>>>> Stashed changes
-=======
->>>>>>> Stashed changes
 
 
 
 
 
 
-<<<<<<< Updated upstream
 
-<<<<<<< Updated upstream
-=======
->>>>>>> Stashed changes
-=======
->>>>>>> Stashed changes
 var PeopleAndInformation = function PeopleAndInformation(_ref) {
   var setAttributes = _ref.setAttributes,
       automatedFeeds = _ref.automatedFeeds,
@@ -1569,14 +1693,10 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _blocks_ContentSharer__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./blocks/ContentSharer */ "./src/blocks/ContentSharer.js");
 /* harmony import */ var _blocks_CourseCatalog__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ./blocks/CourseCatalog */ "./src/blocks/CourseCatalog.js");
 /* harmony import */ var _blocks_CampusDirectory__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ./blocks/CampusDirectory */ "./src/blocks/CampusDirectory.js");
-<<<<<<< Updated upstream
-<<<<<<< Updated upstream
 /* harmony import */ var _blocks_ClassSchedule__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! ./blocks/ClassSchedule */ "./src/blocks/ClassSchedule.js");
+/* harmony import */ var _blocks_FeedbackForm__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! ./blocks/FeedbackForm */ "./src/blocks/FeedbackForm.js");
 
-=======
->>>>>>> Stashed changes
-=======
->>>>>>> Stashed changes
+
 
 
 
@@ -1587,13 +1707,8 @@ Object(_blocks_TestDemoUCSC2__WEBPACK_IMPORTED_MODULE_1__["default"])();
 Object(_blocks_ContentSharer__WEBPACK_IMPORTED_MODULE_2__["default"])();
 Object(_blocks_CourseCatalog__WEBPACK_IMPORTED_MODULE_3__["default"])();
 Object(_blocks_CampusDirectory__WEBPACK_IMPORTED_MODULE_4__["default"])();
-<<<<<<< Updated upstream
-<<<<<<< Updated upstream
 Object(_blocks_ClassSchedule__WEBPACK_IMPORTED_MODULE_5__["default"])();
-=======
->>>>>>> Stashed changes
-=======
->>>>>>> Stashed changes
+Object(_blocks_FeedbackForm__WEBPACK_IMPORTED_MODULE_6__["default"])();
 
 /***/ }),
 

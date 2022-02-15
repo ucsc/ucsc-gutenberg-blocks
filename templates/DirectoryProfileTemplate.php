@@ -1,243 +1,142 @@
 <?php
 
 get_header();
-$cruzid = get_query_var('cruzid');
-echo "<h1>Hello Profile Page $cruzid</h1>";
-?>
-    <div id='directoryprofile'>
-        <div class="pname">Mayanthi L Fernando</div>
-        <div class="photo"><img src="https://anthro.ucsc.edu/cache/directory/mfernan3.jpg" alt="Mayanthi L Fernando">
-        </div>
-        <div class="details">
-            <ul>
-                <li><strong>Title</strong>
-                    <ul>
-                        <li>Associate Professor of Anthropology</li>
-                        <li>Director, Center for Cultural Studies</li>
-                        <li>Director of Graduate Studies, Anthropology</li>
-                    </ul>
-                </li>
-                <li><strong>Division</strong> Social Sciences Division</li>
-                <li><strong>Department</strong>
-                    <ul>
-                        <li>Anthropology Department</li>
-                    </ul>
-                </li>
-                <li><strong>Affiliations</strong> Humanities Division, Feminist Studies Department, History of
-                    Consciousness
-                    Department
-                </li>
-                <li><strong>Phone</strong>
-                    <div><span style="white-space: nowrap" class="p-tel">831-459-2240</span></div>
-                </li>
-                <li><strong>Email</strong>
-                    <ul>
-                        <li><span class="u-email"><a href="mailto:mfernan3@ucsc.edu">mfernan3@ucsc.edu</a></span></li>
-                    </ul>
-                </li>
-                <li><strong>Office Location</strong>
-                    <ul>
-                        <li><span class="p-extended-address">Social Sciences 1,  347 </span></li>
-                    </ul>
-                </li>
-                <li><strong>Mail Stop</strong> Social Sciences 1 Faculty Services</li>
-                <li><strong>Mailing Address</strong>
-                    <ul>
-                        <li>1156 High Street</li>
-                        <li>Santa Cruz CA 95064</li>
-                    </ul>
-                </li>
-                <li><strong>Faculty Areas of Expertise</strong> <span class="p-label">Religion and Secularism, Gender Studies, Feminist Theory, Sexuality</span>
-                </li>
-                <li><strong>Courses</strong> ANTH 238: Bodies, Senses, Selves; ANTH 238: Human/Non-Human Entanglements;
-                    ANTH
-                    238: Secularity, Science, Religion; ANTH 130T Religion and Politics in the Muslim World; ANTH 130O
-                    Postcolonial Britain and France; ANTH 197G Religion, Gender, Sexuality; ANTH 255 Anthropology of
-                    Secularism; ANTH 260 Anthropology of Freedom; ANTH 259 Regulating Religion/Sex; ANTH 200B Graduate
-                    Core
-                    Course II
-                </li>
-            </ul>
-        </div>
-        <div class="items-expertise">
-            <div class="item-expertise"><h3>Summary of Expertise</h3>
-                <p>Areas of Research: secularism, Islam, human/non-human entanglements, post-humanism, religious
-                    minorities
-                    in
-                    France/Europe, political pluralism<br> <br><br></p></div>
-            <div class="item-expertise"><h3>Research Interests</h3>
-                <p>I am currently working on a second book on the secularity of the post-humanist turn that asks whether
-                    “natureculture” – a reversal of the distinction between nature and the human – might be extended to
-                    “supernatureculture.” First, I examine how, as work on multispecies worlds and indigenous ontologies
-                    expands
-                    the conventional separation of nature and humanity, it also reproduces the separation between
-                    natural
-                    and
-                    supernatural by delimiting other-than-humans to phenomena previously understood as natural. Second,
-                    I
-                    try to
-                    rethink what counts as nature – and to blur the distinction between natural and supernatural – by
-                    using
-                    insights from Islamic sciences of the unseen&nbsp;(<em>‘ilm al-ghayb</em>)<em>&nbsp;</em>and other
-                    non-Western traditions to reconsider how we might think about and know non-material beings with whom
-                    many
-                    humans are also in relation.</p>
-                <p>&nbsp;</p>
-                <p>My first book, <a
-                            href="http://www.amazon.com/The-Republic-Unsettled-Contradictions-Secularism/dp/0822357488">The
-                        Republic Unsettled: Muslim French and the Contradictions of Secularism</a>&nbsp;(Duke University
-                    Press,
-                    2014), alternates between an analysis of Muslim French politics, ethics, and social life and the
-                    contradictions of French secularity (laïcité) that this new Muslim subjectivity reflects and
-                    refracts.
-                    It
-                    explores how Muslim French draw on both Islamic and secular-republican traditions as they create new
-                    modes
-                    of ethical and political engagement, reconfiguring those traditions to imagine a future for France.
-                    It
-                    also
-                    examines how the institutions, political and legal practices, and dominant discourses that comprise
-                    French
-                    secularity regulate and govern--and profoundly disrupt--Muslim life. In so doing, it traces a series
-                    of
-                    long-standing tensions immanent to laïcité, tensions not so much generated as precipitated by the
-                    presence
-                    of Muslim French. It argues, ultimately, that “the Muslim question” is actually a question about
-                    secularism.<br>
-                    <br>I have also&nbsp;been working on the nexus of sex and religion in the articulation of modern
-                    secularity,
-                    analyzing how the secular state’s project of regulating and transforming religious life is
-                    interwoven
-                    with
-                    its project of sexual normalization, i.e. the production of secular, sexually “normal” citizens. I
-                    am
-                    interested, in other words, in how proper religion and proper sexuality are mutually constituted
-                    (often
-                    in
-                    opposition to each other) by secular rule.</p></div>
-            <div class="item-expertise"><h3>Biography, Education and Training</h3>
-                <p>B.A., Harvard University <br> M.A., Ph.D., University of Chicago</p></div>
-        </div>
-        <div class="items-expertise">
-            <div class="item-expertise"><h3>Honors, Awards and Grants</h3>
-                <p>2018-19 Weatherhead Fellow, School for Advanced Research, Santa Fe, NM</p>
-                <p>2015-2017 PI, Institute for Humanities Research cluster on "Race, Violence, Inequality, and the
-                    Anthropocene", UC Santa Cruz</p>
-                <p>2014-15 Administrative PI, UCHRI Humanities Studio on Regulating Sex/Religion</p>
-                <p>2011-12 Hellman Fellow, UC Santa Cruz</p>
-                <p>2010-2011 Member, Institute for Advanced Study, Princeton, NJ</p>
-                <p>2010-2011 U.S. Fulbright Scholar Program</p>
-                <p>2010-2011 UC President's Faculty Fellowship</p>
-                <p>2010 UC Center for New Racial Studies research grant</p></div>
-            <div class="item-expertise"><h3>Selected Publications</h3>
-                <ul>
-                    <li>
-                        <p class="MsoNormal" style="mso-margin-top-alt: auto; mso-margin-bottom-alt: auto;"><a
-                                    href="https://read.dukeupress.edu/critical-times/article/2/1/13/139235/Critique-as-Care">“Critique
-                                as Care: Saba Mahmood, in memorium.”&nbsp;</a>Critical Times 2(1): 13-22. (2019)&nbsp;
-                            &nbsp;&nbsp;
-                        </p>
-                    </li>
-                    <li>
-                        <p class="MsoNormal" style="mso-margin-top-alt: auto; mso-margin-bottom-alt: auto;">&nbsp;<a
-                                    href="https://tif.ssrc.org/2017/12/11/supernatureculture/">“Supernatureculture.”</a>
-                            Forum
-                            on “Is This All There Is?”&nbsp;<em>The Immanent Frame</em>. (2017)</p>
-                    </li>
-                    <li>
-                        <p class="MsoNormal" style="mso-margin-top-alt: auto; mso-margin-bottom-alt: auto;">&nbsp;<a
-                                    href="https://tif.ssrc.org/2017/07/27/secularism-and-the-animist-indigene/">“Secularism
-                                and
-                                the Animist Indigene.”</a> Forum on “Indigeneity and Secularity.”&nbsp;<em>The Immanent
-                                Frame</em>. (2017)&nbsp;</p>
-                    </li>
-                    <li>
-                        <p class="MsoNormal" style="mso-margin-top-alt: auto; mso-margin-bottom-alt: auto;">&nbsp;(with
-                            Catherine Raissiguier) <a
-                                    href="https://online.liverpooluniversitypress.co.uk/doi/abs/10.3828/cfc.2016.7">“The
-                                Impossible Subject of&nbsp;<em>Charlie Hebdo</em>.”&nbsp;</a><em>Contemporary French
-                                Civilization</em>&nbsp;41(2): 125-144. (Introduction to the special issue) (2016)</p>
-                    </li>
-                    <li>
-                        <p class="MsoNormal" style="mso-margin-top-alt: auto; mso-margin-bottom-alt: auto;">&nbsp;<a
-                                    href="https://www.dissentmagazine.org/article/liberte-egalite-feminisme-muslim-feminists-france">“Liberté,
-                                Egalité, Féminisme?”&nbsp;</a><em>Dissent</em>&nbsp;(special issue on Feminist
-                            Strategies)
-                            63(4): 38-47. (2016)</p>
-                    </li>
-                    <li>
-                        <p class="MsoNormal" style="mso-margin-top-alt: auto; mso-margin-bottom-alt: auto;">&nbsp;(with
-                            Nadia
-                            Fadil) <a href="https://www.haujournal.org/index.php/hau/article/view/hau5.2.005">“Rediscovering
-                                the
-                                ‘Everyday Muslim’: Notes on an Anthropological Divide.”&nbsp;</a><em>HAU: Journal of
-                                Anthropological Theory</em>&nbsp;5(2): 59-88. (2015)</p>
-                    </li>
-                    <li>
-                        <p class="MsoNormal" style="mso-margin-top-alt: auto; mso-margin-bottom-alt: auto;">&nbsp;<a
-                                    href="https://journals.sagepub.com/doi/abs/10.1177/0921374014526025?journalCode=cdya">“Ethnography
-                                and the Politics of Silence.”&nbsp;</a><em>Cultural Dynamics</em>&nbsp;26(2): 235-244.
-                            (2014)
-                        </p>
-                    </li>
-                    <li>
-                        <p class="MsoNormal" style="mso-margin-top-alt: auto; mso-margin-bottom-alt: auto;">&nbsp;<a
-                                    href="https://www.journals.uchicago.edu/doi/abs/10.1086/674207">“Intimacy Surveiled:
-                                Religion, Sex, and Secular Cunning.”</a>&nbsp;<em>Signs: Journal of Women in Culture and
-                                Society</em>. 39(3): 685-708. (2014)</p>
-                    </li>
-                    <li>
-                        <p class="MsoNormal" style="mso-margin-top-alt: auto; mso-margin-bottom-alt: auto;">&nbsp;<a
-                                    href="https://www.dukeupress.edu/the-republic-unsettled">The Republic Unsettled:
-                                Muslim
-                                French the Contradictions of Secularism</a> (Duke University Press, 2014)</p>
-                    </li>
-                    <li>
-                        <p class="MsoNormal" style="mso-margin-top-alt: auto; mso-margin-bottom-alt: auto;">&nbsp;<a
-                                    href="https://www.tandfonline.com/doi/pdf/10.1080/09639489.2013.776733#.UcjcvD773Fg">“Save
-                                the Muslim Woman, Save the Republic: Ni Putes Ni Soumises and the Ruse of Neo-liberal
-                                Sovereignty.”</a> Modern &amp; Contemporary France 21 (2): 147-165. (2013)</p>
-                    </li>
-                    <li>
-                        <p class="MsoNormal" style="mso-margin-top-alt: auto; mso-margin-bottom-alt: auto;">&nbsp;“Belief
-                            and/in
-                            the Law.” Method &amp; Theory in the Study of Religion 24(1): 71-80. (2012)</p>
-                    </li>
-                    <li>
-                        <p class="MsoNormal" style="mso-margin-top-alt: auto; mso-margin-bottom-alt: auto;">&nbsp;<a
-                                    href="https://anthrosource.onlinelibrary.wiley.com/doi/abs/10.1111/j.1548-1425.2010.01239.x">“Reconfiguring
-                                Freedom: Muslim Piety and the Limits of Secular Law and Public Discourse in France.”</a>
-                            American Ethnologist 37 (1): 19-35. (2010)</p>
-                    </li>
-                    <li>
-                        <p class="MsoNormal" style="mso-margin-top-alt: auto; mso-margin-bottom-alt: auto;">&nbsp;<a
-                                    href="https://anthrosource.onlinelibrary.wiley.com/doi/abs/10.1111/j.1548-1425.2010.01239.x">“Exceptional
-                                Citizens: Secular Muslim Women and the Politics of Difference in France.”</a> Social
-                            Anthropology/Anthropologie Sociale 17 (3): 379-392. (2009)</p>
-                    </li>
-                    <li>
-                        <p class="MsoNormal" style="mso-margin-top-alt: auto; mso-margin-bottom-alt: auto;">&nbsp;“Droit,
-                            laïcité et diversité culturelle. De quelques contradictions françaises” (with C. Eberhardt
-                            and
-                            N.
-                            Gafsia). Revue Interdisciplinaire d’Études Juridiques 54 (2005), pp. 129-169.</p>
-                    </li>
-                    <li>
-                        <p class="MsoNormal" style="mso-margin-top-alt: auto; mso-margin-bottom-alt: auto;">&nbsp;<a
-                                    href="https://merip.org/2005/06/the-republics-second-religion/">“The Republic’s
-                                ‘Second
-                                Religion’: Recognizing Islam in France.”</a> Middle East Report 235: 12-17. (2005)</p>
-                        <p class="MsoBodyTextIndent2" style="margin-left: .5in; text-indent: -.5in;">&nbsp;</p>
-                    </li>
-                </ul>
+$cruzid = get_query_var('directoryprofilecruzid');
+$campusDirectoryAPI = new CampusDirectoryAPI($attributes);
+$profileData = $campusDirectoryAPI->getCampusDirData($cruzid,true);
+
+function linkify($key, $str) {
+    if ($key == "ucscpersonpubwebsite") {
+        $website = explode(" ", $str);
+        $str = "<a target='_blank' href='{$website[0]}'>{$website[1]}</a>";
+    }
+    return $str;
+}
+if (count($profileData)) {
+  $profileData = $profileData[0];
+  ?>
+    <div id="wrapper">
+        <div id="profilehead">
+            <div class="profileheaditem">
+                <div class="profileheadimage">
+                    <img src="<?php echo "/wp-content/uploads/directoryimages/{$profileData['uid'][0]}.jpg"; ?>" alt="<?php echo $profileData["cn"][0]; ?>">
+                </div>
             </div>
-            <div class="item-expertise"><h3>Teaching Interests</h3>
-                <p>Teaching Specialties: secularism and secularity; human/non-human entanglements; religious studies;
-                    anthropology of Islam; religion and gender/sexuality; modernity and difference; postcolonial Britain
-                    and
-                    France; anthropology of liberalism; anthropology of Western Europe; multiculturalism</p></div>
+            <div class="profileheaditem">
+                <h2>
+                    <svg class="svg-inline--fa fa-user-circle fa-w-16" title="User" aria-labelledby="svg-inline--fa-title-1" data-prefix="fa" data-icon="user-circle" role="img" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" data-fa-i2svg=""><title id="svg-inline--fa-title-1">User</title><path fill="currentColor" d="M8 256C8 119.033 119.033 8 256 8s248 111.033 248 248-111.033 248-248 248S8 392.967 8 256zm72.455 125.868C119.657 436.446 183.673 472 256 472s136.343-35.554 175.545-90.132c-3.141-26.99-22.667-49.648-49.538-56.366l-32.374-8.093C323.565 339.79 290.722 352 256 352s-67.565-12.21-93.634-34.591l-32.374 8.093c-26.87 6.718-46.396 29.376-49.537 56.366zM144 208c0 61.856 50.144 112 112 112s112-50.144 112-112S317.856 96 256 96s-112 50.144-112 112z"></path></svg>
+                    <?php echo $profileData["cn"][0]; ?>
+                </h2>
+                <?php
+                    for($i=1; $i<count($profileData["cn"])-1; $i++) {
+                        echo "<p>{$profileData['cn'][$i]}</p>";
+                    }
+                ?>
+                <p>
+                    <svg class="svg-inline--fa fa-address-book fa-w-14" title="User" aria-labelledby="svg-inline--fa-title-2" data-prefix="fa" data-icon="address-book" role="img" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512" data-fa-i2svg=""><title id="svg-inline--fa-title-2">User</title><path fill="currentColor" d="M436 160c6.627 0 12-5.373 12-12v-40c0-6.627-5.373-12-12-12h-20V48c0-26.51-21.49-48-48-48H48C21.49 0 0 21.49 0 48v416c0 26.51 21.49 48 48 48h320c26.51 0 48-21.49 48-48v-48h20c6.627 0 12-5.373 12-12v-40c0-6.627-5.373-12-12-12h-20v-64h20c6.627 0 12-5.373 12-12v-40c0-6.627-5.373-12-12-12h-20v-64h20zm-228-32c44.183 0 80 35.817 80 80s-35.817 80-80 80-80-35.817-80-80 35.817-80 80-80zm128 232c0 13.255-10.745 24-24 24H104c-13.255 0-24-10.745-24-24v-18.523c0-22.026 14.99-41.225 36.358-46.567l35.657-8.914c29.101 20.932 74.509 26.945 111.97 0l35.657 8.914C321.01 300.252 336 319.452 336 341.477V360z"></path></svg>
+                    <?php
+                        for($i=0; $i<count($profileData["title"]); $i++) {
+                            echo "{$profileData['title'][$i]}";
+                            break;
+                        }
+                    ?>
+                </p>
+            </div>
+            <div class="profileheaditem">
+                <?php
+                    for($i=0; $i<count($profileData["telephonenumber"])-1; $i++) {
+                        echo "<p>";
+                            echo '<svg class="svg-inline--fa fa-phone fa-w-16" title="User" aria-labelledby="svg-inline--fa-title-3" data-prefix="fa" data-icon="phone" role="img" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" data-fa-i2svg=""><title id="svg-inline--fa-title-3">User</title><path fill="currentColor" d="M493.397 24.615l-104-23.997c-11.314-2.611-22.879 3.252-27.456 13.931l-48 111.997a24 24 0 0 0 6.862 28.029l60.617 49.596c-35.973 76.675-98.938 140.508-177.249 177.248l-49.596-60.616a24 24 0 0 0-28.029-6.862l-111.997 48C3.873 366.516-1.994 378.08.618 389.397l23.997 104C27.109 504.204 36.748 512 48 512c256.087 0 464-207.532 464-464 0-11.176-7.714-20.873-18.603-23.385z"></path></svg>';
+                            echo "{$profileData['telephonenumber'][$i]}";
+                        echo "</p>";
+                    }
+                    for($i=0; $i<count($profileData["facsimiletelephonenumber"])-1; $i++) {
+                        echo "<p>";
+                            echo '<svg class="svg-inline--fa fa-phone fa-w-16" title="User" aria-labelledby="svg-inline--fa-title-3" data-prefix="fa" data-icon="phone" role="img" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" data-fa-i2svg=""><title id="svg-inline--fa-title-3">User</title><path fill="currentColor" d="M493.397 24.615l-104-23.997c-11.314-2.611-22.879 3.252-27.456 13.931l-48 111.997a24 24 0 0 0 6.862 28.029l60.617 49.596c-35.973 76.675-98.938 140.508-177.249 177.248l-49.596-60.616a24 24 0 0 0-28.029-6.862l-111.997 48C3.873 366.516-1.994 378.08.618 389.397l23.997 104C27.109 504.204 36.748 512 48 512c256.087 0 464-207.532 464-464 0-11.176-7.714-20.873-18.603-23.385z"></path></svg>';
+                            echo "{$profileData['facsimiletelephonenumber'][$i]} (Fax)";
+                        echo "</p>";
+                    }
+                ?>
+                <p>
+                    <svg class="svg-inline--fa fa-envelope fa-w-16" title="User" aria-labelledby="svg-inline--fa-title-4" data-prefix="fas" data-icon="envelope" role="img" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" data-fa-i2svg=""><title id="svg-inline--fa-title-4">User</title><path fill="currentColor" d="M502.3 190.8c3.9-3.1 9.7-.2 9.7 4.7V400c0 26.5-21.5 48-48 48H48c-26.5 0-48-21.5-48-48V195.6c0-5 5.7-7.8 9.7-4.7 22.4 17.4 52.1 39.5 154.1 113.6 21.1 15.4 56.7 47.8 92.2 47.6 35.7.3 72-32.8 92.3-47.6 102-74.1 131.6-96.3 154-113.7zM256 320c23.2.4 56.6-29.2 73.4-41.4 132.7-96.3 142.8-104.7 173.4-128.7 5.8-4.5 9.2-11.5 9.2-18.9v-19c0-26.5-21.5-48-48-48H48C21.5 64 0 85.5 0 112v19c0 7.4 3.4 14.3 9.2 18.9 30.6 23.9 40.7 32.4 173.4 128.7 16.8 12.2 50.2 41.8 73.4 41.4z"></path></svg>
+                    <?php
+                        for($i=0; $i<count($profileData["mail"]); $i++) {
+                            echo "<a href=\"{$profileData['mail'][$i]}\">{$profileData['mail'][$i]}</a>";
+                        }
+                    ?>
+                </p>
+
+
+                    <?php
+                        for($i=0; $i<count($profileData["ucscpersonpubalternatemail"]) - 1; $i++) {
+                            echo "<p class='altemail'>";
+                            echo '<svg class="svg-inline--fa fa-envelope fa-w-16" title="User" aria-labelledby="svg-inline--fa-title-5" data-prefix="far" data-icon="envelope" role="img" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" data-fa-i2svg=""><title id="svg-inline--fa-title-5">User</title><path fill="currentColor" d="M464 64H48C21.49 64 0 85.49 0 112v288c0 26.51 21.49 48 48 48h416c26.51 0 48-21.49 48-48V112c0-26.51-21.49-48-48-48zm0 48v40.805c-22.422 18.259-58.168 46.651-134.587 106.49-16.841 13.247-50.201 45.072-73.413 44.701-23.208.375-56.579-31.459-73.413-44.701C106.18 199.465 70.425 171.067 48 152.805V112h416zM48 400V214.398c22.914 18.251 55.409 43.862 104.938 82.646 21.857 17.205 60.134 55.186 103.062 54.955 42.717.231 80.509-37.199 103.053-54.947 49.528-38.783 82.032-64.401 104.947-82.653V400H48z"></path></svg>';
+                                echo "<a href=\"{$profileData['mail'][$i]}\">{$profileData['ucscpersonpubalternatemail'][$i]}</a>";
+                            echo "</p>";
+                        }
+                    ?>
+
+            </div>
+        </div>
+        <div id="profilebody">
+            <?php
+                $bodyfields = [
+                    "ucscpersonpubpronouns" => "Pronouns",
+                    "ucscpersonpubdivision" => "Division",
+                    "ucscpersonpubdivision" => "Department/College/Unit",
+                    "title" => "Title",
+                    "ucscpersonpubaffiliation" => "Affiliation",
+                    "ucscpersonpubaffiliateddepartment" => "Other UCSC Campus Affiliation",
+                    "ucscpersonpubstafftype" => "Staff Type",
+                    "ucscpersonpubwebsite" => "Web Site",
+                    "ucscprimarylocationpubofficialname|ucscpersonpubofficelocationdetail" => "Primary Office Location",
+                    "roomnumber" => "Additional Location(s)",
+                    "ucscpersonpubofficehours" => "Office Hours",
+                    "ucscpersonpubmailstop" => "Mail Stop",
+                    "ucscpersonpubdescription" => "Biography, Education and Training",
+                    "ucscpersonpubareaofexpertise" => "Summary of Expertise",
+                    "ucscpersonpubresearchinterest" => "Research Interests",
+                    "ucscpersonpubteachinginterest" => "Teaching Interests",
+                    "ucscpersonpubawardshonorsgrants" => "Awards, Honors and Grants",
+                    "ucscpersonpubselectedexhibition" => "Selected Exhibitions",
+                    "ucscpersonpubselectedperformance" => "Selected Performances",
+                    "ucscpersonpubselectedpresentation" => "Selected Presentations",
+                    "ucscpersonpubselectedpublication" => "Selected Publications",
+                    "ucscpersonpubselectedrecording" => "Selected Recordings"
+                ];
+                foreach ($bodyfields as $key => $title) {
+                    $arrKey = explode("|", $key);
+                    if (count($arrKey) == 1) {
+                        if ($profileData[$key]['count']) {
+                            echo "<div><p>";
+                                echo "<label>{$title}</label>";
+                                for ($i = 0; $i < $profileData[$key]['count']; $i++) {
+                                    echo linkify($key, $profileData[$key][$i]);
+                                    if (($i + 1) < $profileData[$key]['count']) echo "<br />";
+                                }
+                            echo "</p></div>";
+                        }
+                    } else {
+                        if ($profileData[$arrKey[0]]['count'] || $profileData[$arrKey[1]]['count']) {
+                            echo "<div><p>";
+                                echo "<label>{$title}</label>";
+                                for ($i = 0; $i < $profileData[$arrKey[0]]['count']; $i++) {
+                                    echo $profileData[$arrKey[0]][$i];
+                                }
+                                echo "<br />";
+                                for ($i = 0; $i < $profileData[$arrKey[1]]['count']; $i++) {
+                                    echo $profileData[$arrKey[1]][$i];
+                                }
+                            echo "</p></div>";
+                        }
+                    }
+                }
+            ?>
         </div>
     </div>
-<?php
+    <?php
+} else {
+  echo "<div id=\"wrapper\"><h3>CruzID: $cruzid not found.</h3></div>";
+}
 get_footer();
 
