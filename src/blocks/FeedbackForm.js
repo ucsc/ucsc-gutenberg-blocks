@@ -6,6 +6,7 @@ const FeedbackForm = () => {
     attributes: {
       name: {
         type: "string",
+        placeholder: "Your Name"
       },
       namePlaceholder: {
         type: "string",
@@ -19,13 +20,19 @@ const FeedbackForm = () => {
       affiliation: {
         type: "string",
       },
-      affiliationPlaceholder: {
+      affiliationOther: {
+        type: "string",
+      },
+      affiliationOtherPlaceholder: {
         type: "string",
       },
       topic: {
         type: "string",
       },
-      topicPlaceholder: {
+      topicOther: {
+        type: "string",
+      },
+      topicOtherPlaceholder: {
         type: "string",
       },
       message: {
@@ -41,7 +48,8 @@ const FeedbackForm = () => {
     edit: ({ setAttributes, attributes }) => {
       return (
         <>
-          <h4>Change the wording of the text field titles</h4>
+          <h3>Change the wording of the form fields</h3>
+          <p>Leave the fields blank for default values</p>
           <div>
             <label>Name: </label>
             <div id="name-input">
@@ -90,6 +98,21 @@ const FeedbackForm = () => {
                 onChange={e => setAttributes({ affiliation: e.target.value })}
               />
             </div>
+            <label>Affiliation other option: </label>
+            <div id="affiliation-other-input">
+              <input style={{ margin: 3 }}
+                type="text"
+                placeholder="Affiliation other"
+                value={attributes.affiliationOther}
+                onChange={e => setAttributes({ affiliationOther: e.target.value })}
+              />
+              <input style={{ margin: 3 }}
+                type="text"
+                placeholder="Affiliation other placeholder"
+                value={attributes.affiliationOtherPlaceholder}
+                onChange={e => setAttributes({ affiliationOtherPlaceholder: e.target.value })}
+              />
+            </div>
           </div>
 
           <div>
@@ -100,6 +123,21 @@ const FeedbackForm = () => {
                 placeholder="Topic"
                 value={attributes.topic}
                 onChange={e => setAttributes({ topic: e.target.value })}
+              />
+            </div>
+            <label>Topic other option: </label>
+            <div id="topic-other-input">
+              <input style={{ margin: 3 }}
+                type="text"
+                placeholder="Topic other"
+                value={attributes.topicOther}
+                onChange={e => setAttributes({ topicOther: e.target.value })}
+              />
+              <input style={{ margin: 3 }}
+                type="text"
+                placeholder="Topic other placeholder"
+                value={attributes.topicOtherPlaceholder}
+                onChange={e => setAttributes({ topicOtherPlaceholder: e.target.value })}
               />
             </div>
           </div>

@@ -1,8 +1,121 @@
 #something {
-    background-color: blue;
+  background-color: blue;
+}
+
+label {
+  background-color: transparent;
+  border: none;
+  border-bottom-color: currentcolor;
+  border-bottom-style: none;
+  border-bottom-width: medium;
+  border-bottom: 1px solid #efefef;
+  padding: 1em 2em 1em 0;
+  text-align: right;
+  vertical-align: middle;
+}
+
+.form-input {
+  vertical-align: middle;
+  font: Roboto, sans-serif;
+  font-size: 16px;
+  border: 1px solid #ccc;
+  border-radius: 3px;
+  margin: 0;
+  padding: 0.5em;
+  min-width: 75%;
+  max-width: 100%;
+}
+
+button {
+  background-color: #003c6c;
+  color: #fff;
+  margin: 0 0 1em;
+  padding: 0.5em;
+  max-width: 100%;
+}
+
+.container {
+  text-align: left;
+  display: grid;
+  grid-template-columns: 0.3fr 0.5fr;
+  grid-template-rows: auto;
+  grid-template-areas:
+    "label-1 input-1"
+    "label-2 input-2"
+    "label-3 input-3"
+    "label-4 input-4"
+    "label-5 input-5"
+    ". submit";
+}
+
+.label-1 {
+  grid-area: label-1;
+  text-align: right;
+  padding: 16px 32px 16px 0;
+}
+
+.input-1 {
+  grid-area: input-1;
+  text-align: left;
+  padding: 16px 0;
+}
+
+.label-2 {
+  grid-area: label-2;
+  text-align: right;
+  padding: 16px 32px 16px 0;
+}
+
+.input-2 {
+  grid-area: input-2;
+  text-align: left;
+  padding: 16px 0;
+}
+
+.label-3 {
+  grid-area: label-3;
+  text-align: right;
+  padding: 16px 32px 16px 0;
+}
+
+.input-3 {
+  grid-area: input-3;
+  text-align: left;
+  padding: 16px 0;
+}
+
+.label-4 {
+  grid-area: label-4;
+  text-align: right;
+  padding: 16px 32px 16px 0;
+}
+
+.input-4 {
+  grid-area: input-4;
+  text-align: left;
+  padding: 16px 0;
+}
+
+.label-5 {
+  grid-area: label-5;
+  text-align: right;
+  padding: 16px 32px 16px 0;
+}
+
+.input-5 {
+  grid-area: input-5;
+  text-align: left;
+  padding: 16px 0;
+}
+
+.submit {
+  grid-area: submit;
+  text-align: left;
+  padding: 16px 0;
 }
 
 .form-group {
-    margin-bottom: 1rem;
-
+  margin-bottom: 1rem;
+  font-size: 1em;
+  line-height: 1.5;
 }

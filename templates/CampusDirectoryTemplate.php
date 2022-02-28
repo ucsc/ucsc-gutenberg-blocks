@@ -1,9 +1,6 @@
-<h1>Faculty Directory</h1>
-<?php if (strlen($items["introParagraph"])) { ?>
-  <div class="intro-paragraph">
-    <?php echo $items["introParagraph"] ?>
-  </div>
-<?php } ?>
+<div class="intro-paragraph">
+  <?php echo $items["introParagraph"] ?>
+</div>
 <?php
   if ($items['dirLayout'] == "table") {
   ?>
@@ -83,19 +80,7 @@
                             echo "<li>";
                               echo "<strong>{$disItem[$key]}</strong>";
                               echo '<ul class="inline-list">';
-                                if ($disItem[$key] == "Email") {
-                                  for($j=0; $j<count($people[$i]["mail"]); $j++) {
-                                      echo "<li><span class=\"u-email\"><a href=\"{$people[$i]['mail'][$j]}\">{$people[$i]['mail'][$j]}</a></span></li>";
-                                  }
-                                  for($j=0; $j<count($people[$i]["ucscpersonpubalternatemail"]); $j++) {
-                                      echo "<li><span class=\"u-email\"><a href=\"{$people[$i]['mail'][$j]}\">{$people[$i]['ucscpersonpubalternatemail'][$j]}</a></span></li>";
-                                  }
-                                } else if ($disItem[$key] == "Office Location") {
-                                  echo "<li>{$people[$i]['ucscprimarylocationpubofficialname'][0]}, {$people[$i]['ucscpersonpubofficelocationdetail'][0]}</li>";
-
-                                } else {
-                                  echo "<li>{$people[$i][$key][0]}</li>";
-                                }
+                                echo "<li>{$people[$i][$key][0]}</li>";
                               echo '</ul>';
                             echo "</li>";
                           }

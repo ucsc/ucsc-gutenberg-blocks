@@ -1,15 +1,18 @@
-function is_other(val, input_box) {
-  var element = document.getElementById(input_box);
-
-  if (val == 'other') {
-    element.style.display = 'block';
+function is_other(element, other) {
+  if (element.target.value === 'other') {
+    other.style.display = 'block';
   } else {
-    element.style.display = 'none';
+    other.style.display = 'none';
   }
 }
 
+var affiliation = document.getElementById('affiliations');
+affiliation.addEventListener('change', e => { is_other(e, document.getElementById('affiliation_other_div')) });
+
+var topic = document.getElementById('topic');
+topic.addEventListener('change', e => { is_other(e, document.getElementById('topic_other_div')) });
+
 var feedbackform = document.getElementById('feedback-form');
-console.log(feedbackform);
 feedbackform.addEventListener("submit", function (e) {
   e.preventDefault();
   var formData = new FormData(feedbackform);
@@ -32,3 +35,4 @@ feedbackform.addEventListener("submit", function (e) {
   };
   xhr.send(formData);
 });
+

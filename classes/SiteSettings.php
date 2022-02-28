@@ -85,8 +85,16 @@ class SiteSettings
     add_settings_field('course_catalog_subject', 'Course Catalog Subject', array($this, 'subjectHTML'), 'ucsc_gutenberg_blocks_settings_page', 'ucsc_gutenberg_blocks_section');
     register_setting('ucsc_gutenberg_blocks', 'course_catalog_subject', array('sanitize_callback' => 'sanitize_text_field', 'default' => ''));
 
+    add_settings_field('feedbackform_email_to', 'Feedback Form Default Email To', array($this, 'feedbackFormEmailToHTML'), 'ucsc_gutenberg_blocks_settings_page', 'ucsc_gutenberg_blocks_section');
+    register_setting('ucsc_gutenberg_blocks', 'feedbackform_email_to', array('sanitize_callback' => 'sanitize_text_field', 'default' => ''));
+
     register_setting('ucsc_network_settings', 'ldap_api_key', array('sanitize_callback' => 'sanitize_text_field', 'default' => ''));
   }
+
+  function feedbackformEmailToHTML()
+  { ?>
+    <input type="email" name="feedbackform_email_to" value="<?php echo esc_attr(get_option('feedbackform_email_to')); ?>" />
+  <?php }
 
   function subjectHTML()
   { ?>

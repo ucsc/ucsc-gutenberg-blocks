@@ -15,17 +15,17 @@ function sortTableByColumn(table, column, asc = true) {
     for (var i = 0; i < rows.length; i += 2) {
         rowsLinkedToDesc.push({
             row: rows[i],
-            description: rows[i + 1]
+            description: rows[i+1]
         })
     }
 
     // Sort each row
     const sortedLinkedRows = rowsLinkedToDesc.sort((a, b) => {
-        var special = a.row.querySelector(`td:nth-child(${column + 1}) span`) !== null;
+        var special =  a.row.querySelector(`td:nth-child(${ column + 1 }) span`) !== null;
         //if needed, the span can have a type to enable special sorting beyond integer
         if (special) {
-            const aColText = a.row.querySelector(`td:nth-child(${column + 1}) span`).textContent.trim();
-            const bColText = b.row.querySelector(`td:nth-child(${column + 1}) span`).textContent.trim();
+            const aColText = a.row.querySelector(`td:nth-child(${ column + 1 }) span`).textContent.trim();
+            const bColText = b.row.querySelector(`td:nth-child(${ column + 1 }) span`).textContent.trim();
             let aColVal = parseInt(aColText);
             let bColVal = parseInt(bColText);
             if (aColVal === bColVal) {
@@ -34,15 +34,15 @@ function sortTableByColumn(table, column, asc = true) {
             }
             return aColVal > bColVal ? (1 * dirModifier) : (-1 * dirModifier);
         } else {
-            const aColText = a.row.querySelector(`td:nth-child(${column + 1})`).textContent.trim();
-            const bColText = b.row.querySelector(`td:nth-child(${column + 1})`).textContent.trim();
+            const aColText = a.row.querySelector(`td:nth-child(${ column + 1 })`).textContent.trim();
+            const bColText = b.row.querySelector(`td:nth-child(${ column + 1 })`).textContent.trim();
             return aColText > bColText ? (1 * dirModifier) : (-1 * dirModifier);
         }
     });
 
     const sortedRows = [];
-    for (var i = 0; i <= sortedLinkedRows.length; i++) {
-        if (sortedLinkedRows[i]) {
+    for(var i = 0; i <= sortedLinkedRows.length; i++) {
+        if (sortedLinkedRows[i]){
             sortedRows.push(sortedLinkedRows[i].row);
             sortedRows.push(sortedLinkedRows[i].description);
         }
@@ -59,8 +59,8 @@ function sortTableByColumn(table, column, asc = true) {
 
     // Remember how the column is currently sorted
     table.querySelectorAll("th").forEach(th => th.classList.remove("th-sort-asc", "th-sort-desc"));
-    table.querySelector(`th:nth-child(${column + 1})`).classList.toggle("th-sort-asc", asc);
-    table.querySelector(`th:nth-child(${column + 1})`).classList.toggle("th-sort-desc", !asc);
+    table.querySelector(`th:nth-child(${ column + 1})`).classList.toggle("th-sort-asc", asc);
+    table.querySelector(`th:nth-child(${ column + 1})`).classList.toggle("th-sort-desc", !asc);
 }
 
 document.querySelectorAll(".table-sortable th").forEach((headerCell, headerIndex) => {
@@ -82,13 +82,13 @@ document.querySelectorAll(".table-sortable td").forEach((tableSortable, index) =
 function tableSearch() {
     // Declare variables
     var input, filter, table, tr, td;
-    input = document.getElementById("search");
+    input = document.getElementById("Search");
     filter = input.value.toUpperCase();
     table = document.getElementById("tableSorter");
     tr = table.getElementsByTagName("tr");
 
     // Loop through all table rows, and hide those who don't match the search query
-    for (var i = 1; i < tr.length; i += 2) {
+    for (var i = 1; i < tr.length; i+=2) {
         td = tr[i].getElementsByTagName("td");
         var matched = "none";
         for (var j = 0; j < td.length; j++) {
@@ -98,7 +98,7 @@ function tableSearch() {
             }
         }
         if (matched !== "") {
-            td = tr[i + 1].getElementsByTagName("td");
+            td = tr[i+1].getElementsByTagName("td");
             for (var j = 0; j < td.length; j++) {
                 if (td[j].innerHTML.toUpperCase().indexOf(filter) > -1) {
                     matched = "";
@@ -107,7 +107,7 @@ function tableSearch() {
             }
         }
         tr[i].style.display = matched;
-        tr[i + 1].style.display = matched;
+        tr[i+1].style.display = matched;
     }
 }
 
