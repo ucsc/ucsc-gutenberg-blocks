@@ -15,24 +15,29 @@ topic.addEventListener('change', e => { is_other(e, document.getElementById('top
 var feedbackform = document.getElementById('feedback-form');
 feedbackform.addEventListener("submit", function (e) {
   e.preventDefault();
-  var formData = new FormData(feedbackform);
-  var xhr = new XMLHttpRequest();
-  xhr.open('POST', '/wp-json/ucscgutenbergblocks/v1/feedbackform/', true);
-  xhr.onload = function () {
-    if (this.status == 200) {
-      var response = JSON.parse(this.responseText);
-      console.log(response);
-      if (response.success) {
-        feedbackform.reset();
-        feedbackform.style.display = 'none';
-        document.getElementById('feedback-success').style.display = 'block';
-      } else {
-        document.getElementById('feedback-error').style.display = 'block';
-        var missingFields = document.getElementById("missing-fields");
-        missingFields.textContent = response.message;
-      }
-    }
-  };
-  xhr.send(formData);
-});
+  grecaptcha.ready(function () {
+    grecaptcha.execute('6LegGaceAAAAAAK4bYxcVAPjPzv4UYsLIZqS5fgK', { action: 'submit' }).then(function (token) {
+      document.getElementById('feedbackform_token').value = token;
 
+      var formData = new FormData(feedbackform);
+      var xhr = new XMLHttpRequest();
+      xhr.open('POST', '/wp-json/ucscgutenbergblocks/v1/feedbackform/', true);
+      xhr.onload = function () {
+        if (this.status == 200) {
+          var response = JSON.parse(this.responseText);
+          if (response.success) {
+            feedbackform.reset();
+            feedbackform.style.display = 'none';
+            document.getElementById('feedback-success').style.display = 'block';
+          } else {
+            document.getElementById('feedback-error').style.display = 'block';
+            var missingFields = document.getElementById("missing-fields");
+            missingFields.textContent = response.message;
+          }
+        }
+      };
+      xhr.send(formData);
+    });
+  });
+
+});

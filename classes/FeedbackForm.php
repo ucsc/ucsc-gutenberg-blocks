@@ -1,5 +1,7 @@
 <?php
 
+define('SECRET_KEY', '6LegGaceAAAAAE6q7ZQEaYeYZ1K9-sCBwudqbl5e');
+
 const defaults = array(
   'name' => 'Name',
   'namePlaceholder' => 'Your name',
@@ -75,6 +77,9 @@ class FeedbackForm
   {
     ob_start(); ?>
 
+    <script src="https://www.google.com/recaptcha/api.js?render=6LegGaceAAAAAAK4bYxcVAPjPzv4UYsLIZqS5fgK"></script>
+
+
     <div id="feedback-error" style="display:none;padding-bottom: 25px;">
       <h4 id="missing-fields" style="color:red;"></h4>
     </div>
@@ -139,9 +144,10 @@ class FeedbackForm
         </div>
 
         <input type="hidden" name="block_level_to" value="<?php echo $attributes['to']; ?>" />
+        <input type="hidden" id="feedbackform_token" name="feedbackform_token" value="" />
 
         <div class="submit">
-          <button class="form-input" type="submit" class="btn btn-primary">Submit</button>
+          <button id="feedbackform-submit" class="form-input" type="submit" class="btn btn-primary">Submit</button>
         </div>
 
       </div>
@@ -160,12 +166,27 @@ class FeedbackForm
   function submit_feedback($request)
   {
     $pass = true;
-    $fields = ["name", "email", "affiliations", "affiliation_other", "topic", "topic_other", "message", "block_level_to"];
-    $skip_validation = ["affiliation_other", "topic_other", "block_level_to"];
+    $fields = ["name", "email", "affiliations", "affiliation_other", "topic", "topic_other", "message", "block_level_to", "feedbackform_token"];
+    $skip_validation = ["affiliation_other", "topic_other", "block_level_to", "feedbackform_token"];
     $empty_fields = [];
     $sanitized_fields = [];
     $response = [];
     $data = $request->get_params();
+
+    if (isset($data['feedbackform_token'])) {
+      $token = sanitize_text_field($data['feedbackform_token']);
+      $ch = curl_init();
+      curl_setopt($ch, CURLOPT_URL, "https://www.google.com/recaptcha/api/siteverify");
+      curl_setopt($ch, CURLOPT_POST, 1);
+      curl_setopt($ch, CURLOPT_POSTFIELDS, http_build_query(array('secret' => SECRET_KEY, 'response' => $token)));
+      curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+      $curl_response = curl_exec($ch);
+      curl_close($ch);
+      $decoded = json_decode($curl_response, true);
+    } else {
+      $pass = false;
+      $response['message'] = "Something went wrong, please try again.";
+    }
 
     // validate the request data
     foreach ($fields as $field) {
@@ -219,7 +240,7 @@ class FeedbackForm
       $headers = array('Content-Type: text/plain; charset=UTF-8');
 
       if (wp_get_environment_type() == 'production') {
-        if (!wp_mail($to, $subject, $message, $headers)) {
+        if ($decoded['score'] >= 0.5 && !wp_mail($to, $subject, $message, $headers)) {
           $response['message'] = 'There was an error sending your email. Please try again later.';
           $pass = false;
         }
