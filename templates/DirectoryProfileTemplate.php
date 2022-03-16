@@ -19,7 +19,15 @@ if (count($profileData)) {
         <div id="profilehead">
             <div class="profileheaditem">
                 <div class="profileheadimage">
-                    <img src="<?php echo "/wp-content/uploads/directoryimages/{$profileData['uid'][0]}.jpg"; ?>" alt="<?php echo $profileData["cn"][0]; ?>">
+                    <?php
+                        $imgSrc = "";
+                        if (array_key_exists('jpegphoto', $profileData)) {
+                            $imgSrc = 'data:image/jpeg;base64, ' . base64_encode($profileData['jpegphoto'][0]);
+                        } else {
+                            $imgSrc = '//static.ucsc.edu/images/icon-slug.jpg';
+                        }
+                    ?>
+                    <img src="<?php echo $imgSrc ?>" alt="<?php echo $profileData["cn"][0]; ?>">
                 </div>
             </div>
             <div class="profileheaditem">
