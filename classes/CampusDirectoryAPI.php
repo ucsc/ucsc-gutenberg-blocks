@@ -228,34 +228,16 @@ class CampusDirectoryAPI {
       $attrs = ldap_get_attributes($rli, $entry);
       $person = array();
       if ((!empty($attrs["ucscPersonPubDisplay"]) && $attrs["ucscPersonPubDisplay"][0] === "TRUE") ||
-        (!empty($attrs["ucscpersonpubdisplay"]) && $attrs["ucscpersonpubdisplay"][0] === "TRUE")
+       (!empty($attrs["ucscpersonpubdisplay"]) && $attrs["ucscpersonpubdisplay"][0] === "TRUE")
       ) {
         for ($attr = ldap_first_attribute($rli, $entry); $attr != false; $attr = ldap_next_attribute($rli, $entry)) {
           $attr = strtolower($attr);
           $values = ldap_get_values($rli, $entry, $attr);
           $person[$attr] = $values;
         }
-        array_push($people, $this->uploadImages($person));
+        array_push($people, $person);
       }
     }
     return $people;
-  }
-
-  public function uploadImages($person)
-  {
-    if (array_key_exists('jpegphoto', $person)) {
-      $person['b64image'] = true;
-      $upload_dir = wp_upload_dir();
-
-      $dir = trailingslashit( $upload_dir['basedir'] ) . 'directoryimages/';
-      $wp_filesystem = new WP_Filesystem_Direct(null);
-      if(!$wp_filesystem->is_dir($dir) )
-      {
-          $wp_filesystem->mkdir( $dir );
-      }
-      $wp_filesystem->put_contents($dir . $person['uid'][0] . ".jpg", $person['jpegphoto'][0]);
-    }
-
-    return $person;
   }
 }

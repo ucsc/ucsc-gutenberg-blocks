@@ -84,11 +84,15 @@
                               echo "<strong>{$disItem[$key]}</strong>";
                               echo '<ul class="inline-list">';
                                 if ($disItem[$key] == "Email") {
-                                  for($j=0; $j<count($people[$i]["mail"]); $j++) {
-                                      echo "<li><span class=\"u-email\"><a href=\"{$people[$i]['mail'][$j]}\">{$people[$i]['mail'][$j]}</a></span></li>";
+                                  if (array_key_exists("mail", $people[$i])) {
+                                    for($j=0; $j<count($people[$i]["mail"]); $j++) {
+                                        echo "<li><span class=\"u-email\"><a href=\"{$people[$i]['mail'][$j]}\">{$people[$i]['mail'][$j]}</a></span></li>";
+                                    }
                                   }
-                                  for($j=0; $j<count($people[$i]["ucscpersonpubalternatemail"]); $j++) {
-                                      echo "<li><span class=\"u-email\"><a href=\"{$people[$i]['mail'][$j]}\">{$people[$i]['ucscpersonpubalternatemail'][$j]}</a></span></li>";
+                                  if (array_key_exists("ucscpersonpubalternatemail", $people[$i])) {
+                                    for($j=0; $j<count($people[$i]["ucscpersonpubalternatemail"]); $j++) {
+                                        echo "<li><span class=\"u-email\"><a href=\"{$people[$i]['mail'][$j]}\">{$people[$i]['ucscpersonpubalternatemail'][$j]}</a></span></li>";
+                                    }
                                   }
                                 } else if ($disItem[$key] == "Office Location") {
                                   echo "<li>{$people[$i]['ucscprimarylocationpubofficialname'][0]}, {$people[$i]['ucscpersonpubofficelocationdetail'][0]}</li>";
@@ -105,15 +109,14 @@
                   </ul>
                 </div>
                 <?php
-                  $imgUrl = "//static.ucsc.edu/images/icon-slug.jpg";
-                  if ($people[$i]['b64image']) {
-                    $imgUrl = "/wp-content/uploads/directoryimages/" . $people[$i]['uid'][0] . ".jpg";
+                  if (array_key_exists('jpegphoto', $people[$i])) {
+                    $imgSrc = "data:image/jpeg;base64, " .  base64_encode($people[$i]['jpegphoto'][0]);
+                  } else {
+                    $imgSrc = "//static.ucsc.edu/images/icon-slug.jpg";
                   }
-                  echo '<div class="item-image square-img imgLiquid imgLiquid_bgSize imgLiquid_ready" style=\'background-image: url("' . $imgUrl . '"); background-size: cover; background-position: center center; background-repeat: no-repeat;\'>';
-                    if ($items['linkToProfile']) echo '<a class="u-url" href="/?directoryprofilecruzid=' . $people[$i]['uid'][0] . '" style="display: block; width: 100%; height: 100%;">';
-                    echo '<img src="" alt="Individual profile page for ' . $people[$i]['cn'][0] . '" style="display: none;">';
-                    if ($items['linkToProfile']) echo '</a>';
-                  echo '</div>';
+                  if ($items['linkToProfile']) echo '<a class="u-url" href="?directoryprofilecruzid=' . $people[$i]['uid'][0] . '">';
+                  echo "<img src='" . $imgSrc . "' class='item-image square-img imgLiquid imgLiquid_bgSize imgLiquid_ready' style='object-fit: cover;' />";
+                  if ($items['linkToProfile']) echo '</a>';
                 ?>
               </div>
               <?php
