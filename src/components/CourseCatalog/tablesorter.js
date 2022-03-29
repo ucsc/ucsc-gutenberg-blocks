@@ -112,9 +112,9 @@ function tableSearch() {
 }
 
 document.getElementById('expandAll').addEventListener('click', () => {
-    document.querySelectorAll('.hidden').forEach((hiddenRow, index) => hiddenRow.classList.add("active"));
+    document.querySelectorAll('.hide').forEach((hiddenRow, index) => hiddenRow.classList.add("active"));
 });
 
 document.getElementById('collapseAll').addEventListener('click', () => {
-    document.querySelectorAll('.hidden').forEach((hiddenRow, index) => hiddenRow.classList.remove("active"));
+    document.querySelectorAll('.hide').forEach((hiddenRow, index) => hiddenRow.classList.remove("active"));
 });

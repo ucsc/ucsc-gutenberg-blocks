@@ -1,5 +1,6 @@
 .table-sortable {
     border-collapse: collapse;
+    width: 85%;
 }
 
 .table-sortable th, .pointer {
@@ -10,7 +11,7 @@
     content: "\25b4";
 }
 
-.hidden td p {
+.hide td p {
     max-height: 0;
     padding: 0 10px;
     margin: 0;
@@ -19,7 +20,7 @@
     transition: max-height 0.3s, padding 0.3s;
 }
 
-.hidden.active td p {
+.hide.active td p {
     max-height: 600px;
     padding: 10px 10px;
     transition: max-height 0.6s, padding 0.6s;
@@ -56,7 +57,7 @@ th, td {
   border-left-style: hidden!important;
   border-right-style: hidden!important;
 }
-tr.hidden {
+tr.hide {
   border-top-style: hidden!important;
   border-bottom: 1px solid black;
 }
