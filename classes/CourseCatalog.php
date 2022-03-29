@@ -143,7 +143,7 @@ class CourseCatalog
             // the class 'intsort' isn't really necessary at this point, in the future it could signal a type of sorting
             // the class 'secret' is used to include a value, but not display it. the name is such because 'hidden' was already used
             echo '<tr class="pointer"><td>' . $course->subject . '  <span class="intsort">' .$course->catalog_nbr .'</span></td><td class="collapseExpandText">' . $course->title . '</td><td>' . $course->level . '<span class="secret">' . $lvlval . '</span></td><td>' . $course->units . ' Units</td></tr>';
-            echo '<tr class="hidden"><td colspan="4"><p>' . $course->description . '</p></td></tr>';
+            echo '<tr class="hide"><td colspan="4"><p>' . $course->description . '</p></td></tr>';
         }
         echo '</tbody></table></div>';
 
