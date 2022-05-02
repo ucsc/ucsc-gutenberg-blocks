@@ -5,6 +5,13 @@
   </div>
 <?php } ?>
 <?php
+// echo "<pre>";
+// echo print_r($items['q'], true);
+// echo "</pre>";
+// echo "<pre>";
+// echo print_r($items['nodeContent'], true);
+// echo "</pre>";
+
   if ($items['dirLayout'] == "table") {
   ?>
     <div class="section-container table-page">

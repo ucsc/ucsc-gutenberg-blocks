@@ -28,7 +28,11 @@ class CampusDirectoryAPI {
     $variables['introParagraph'] = $this->nodeContent["introParagraph"];
     $variables['informationToDisplay'] = $this->getInformationToDisplay();
 
-    $variables['items'] = $this->getCampusDirData($strCruzids);
+    $campusDirData = $this->getCampusDirData($strCruzids);
+    $variables['items'] = $campusDirData[0];
+    $variables['q'] = $campusDirData[1];
+    $variables['nodeContent'] = $this->nodeContent;
+
     return $variables;
   }
 
@@ -90,7 +94,7 @@ class CampusDirectoryAPI {
         }
       }
     }
-    return $people;
+    return [$people, $q];
   }
 
   public function buildFilterString()
@@ -141,7 +145,7 @@ class CampusDirectoryAPI {
       $filterString .= "(ucscpersonpubaffiliation=Staff)";
       $count++;
     } else {
-      $affiliation = "(ucscpersonpubaffiliation=Staff)";
+      $affiliation = "";
       $typeCount = 0;
       $typeList = "";
 
@@ -163,6 +167,7 @@ class CampusDirectoryAPI {
         }
         if ($typeCount > 1) $typeList = "(|$typeList)";
       }
+      if ($typeCount > 0) $affiliation = "(ucscpersonpubaffiliation=Staff)";
       $filterString .= "(&$affiliation$typeList)";
       $count++;
     }
