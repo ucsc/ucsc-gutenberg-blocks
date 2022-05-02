@@ -110,11 +110,12 @@ function tableSearch() {
         tr[i + 1].style.display = matched;
     }
 }
-
-document.getElementById('expandAll').addEventListener('click', () => {
+const expandAll = document.getElementById('expandAll')
+if (expandAll) expandAll.addEventListener('click', () => {
     document.querySelectorAll('.hide').forEach((hiddenRow, index) => hiddenRow.classList.add("active"));
 });
 
-document.getElementById('collapseAll').addEventListener('click', () => {
+const collapseAll = document.getElementById('collapseAll');
+if (collapseAll) collapseAll.addEventListener('click', () => {
     document.querySelectorAll('.hide').forEach((hiddenRow, index) => hiddenRow.classList.remove("active"));
 });

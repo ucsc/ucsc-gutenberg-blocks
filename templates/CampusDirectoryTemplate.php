@@ -6,7 +6,7 @@
 <?php } ?>
 <?php
 // echo "<pre>";
-// echo print_r($items['q'], true);
+// echo print_r($items['people'], true);
 // echo "</pre>";
 // echo "<pre>";
 // echo print_r($items['nodeContent'], true);
@@ -121,7 +121,7 @@
                   } else {
                     $imgSrc = "//static.ucsc.edu/images/icon-slug.jpg";
                   }
-                  if ($items['linkToProfile']) echo '<a class="u-url" href="?directoryprofilecruzid=' . $people[$i]['uid'][0] . '">';
+                  if ($items['linkToProfile']) echo '<a class="u-url square-img" href="?directoryprofilecruzid=' . $people[$i]['uid'][0] . '">';
                   echo "<img src='" . $imgSrc . "' class='item-image square-img imgLiquid imgLiquid_bgSize imgLiquid_ready' style='object-fit: cover;' />";
                   if ($items['linkToProfile']) echo '</a>';
                 ?>

@@ -3,7 +3,7 @@
 get_header();
 $cruzid = get_query_var('directoryprofilecruzid');
 $campusDirectoryAPI = new CampusDirectoryAPI($attributes);
-$profileData = $campusDirectoryAPI->getCampusDirData($cruzid,true);
+$profileData = $campusDirectoryAPI->getCampusDirData($cruzid,true)[0];
 
 function linkify($key, $str) {
     if ($key == "ucscpersonpubwebsite") {

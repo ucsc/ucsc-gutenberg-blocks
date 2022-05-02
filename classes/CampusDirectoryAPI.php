@@ -69,9 +69,9 @@ class CampusDirectoryAPI {
     if ($profileView || !$this->nodeContent['automatedFeeds']) {
       $arrCruzids = explode(",", $strCruzids);
       $q = '(|';
-      foreach ($arrCruzids as $cruzid) {
-        $cruzid = trim($cruzid);
-        $q .= "(uid={$cruzid})";
+      for ($i = 0; $i < count($arrCruzids); $i++) {
+        $arrCruzids[$i] = trim($arrCruzids[$i]);
+        $q .= "(uid={$arrCruzids[$i]})";
       }
       $q .= ")";
     } else {
@@ -89,12 +89,55 @@ class CampusDirectoryAPI {
         if (ldap_bind($rli, "cn=pantheon-webapps,ou=apps,dc=ucsc,dc=edu", $this->ldap_password)) {
           $sr = ldap_search($rli, "ou=people,dc=ucsc,dc=edu", "(|{$q})");
           $people = $this->processSearchResults($rli, $sr);
+          $people = $this->addVacantPositions($people, $this->nodeContent['automatedFeeds'], $arrCruzids);
           set_transient($md5_q, $people, 600);
           ldap_close($rli);
         }
       }
     }
     return [$people, $q];
+  }
+
+  public function addVacantPositions($people, $automatedFeed, $arrCruzids)
+  {
+    $retArr = [];
+    if ($automatedFeed) {
+      $retArr = $people;
+      if (strlen($this->nodeContent['addCruzids'])) {
+        $arrCruzids = explode(",", $this->nodeContent['addCruzids']);
+        for ($i = 0; $i < count($arrCruzids); $i++) {
+          $arrCruzids[$i] = trim($arrCruzids[$i]);
+          if (substr($arrCruzids[$i], 0, 1) == "%") {
+            array_push($retArr, $this->addVacantPosition($arrCruzids[$i]));
+          }
+        }
+      }
+    } else {
+      $cruzidToPersion = [];
+      foreach($people as $person) {
+        $cruzidToPersion[$person["uid"][0]] = $person;
+      }
+      for ($i = 0; $i < count($arrCruzids); $i++) {
+        if (strlen($arrCruzids[$i])) {
+          if (substr($arrCruzids[$i], 0, 1) == "%") {
+            array_push($retArr, $this->addVacantPosition($arrCruzids[$i]));
+          } elseif (array_key_exists($arrCruzids[$i], $cruzidToPersion)) {
+            array_push($retArr, $cruzidToPersion[$arrCruzids[$i]]);
+          }
+        }
+      }
+    }
+
+    return $retArr;
+  }
+
+  public function addVacantPosition($position) {
+    $trimmedPosition = trim($position, "%");
+    $arrPosition = explode("%", $trimmedPosition);
+    return [
+      "cn" => [$arrPosition[0]],
+      "title" => [$arrPosition[1]]
+    ];
   }
 
   public function buildFilterString()
