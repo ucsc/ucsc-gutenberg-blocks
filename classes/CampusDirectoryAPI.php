@@ -224,8 +224,10 @@ class CampusDirectoryAPI {
 
   public function processSearchResults($rli, $sr)
   {
-    @ldap_sort($rli, $sr, "givenname");
-    @ldap_sort($rli, $sr, "sn");
+    if ($this->nodeContent['automatedFeeds']) {
+      @ldap_sort($rli, $sr, "givenname");
+      @ldap_sort($rli, $sr, "sn");
+    }
 
     $people = [];
 
