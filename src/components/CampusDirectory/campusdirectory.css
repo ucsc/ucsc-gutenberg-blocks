@@ -1,20 +1,25 @@
 @media all and (max-width: 767px) {
+
     .tiled-page .section-item .item-body,
     .list-page .section-item .item-body {
         padding: .5em .25em;
         width: 100%;
     }
+
     .list-page .section-item .item-body .item-info {
         padding: 0;
         margin: 0;
     }
+
     .list-page .section-item .item-body .item-name {
         font-size: 1.15em;
         margin: 0 0 .25em;
     }
+
     .list-page .section-item .item-body .item-info {
         font-size: .9em;
     }
+
     .list-page .section-item .item-body .item-info>li {
         padding: 0;
         margin: 0;
@@ -26,17 +31,21 @@
         -webkit-flex-direction: column;
         border-bottom: 1px solid rgba(0, 0, 0, 0.12);
     }
+
     .list-page .section-item .item-body .item-info>li:last-of-type {
         border-bottom: 0;
     }
+
     .list-page .section-item .item-body .item-info li span {
         flex-basis: auto;
         text-align: left;
         display: inline;
     }
+
     .list-page .section-item .item-image {
         margin: 0;
     }
+
     .tiled-page .section-item,
     .list-page .section-item {
         padding: .5em;
@@ -49,12 +58,14 @@
         flex-direction: column-reverse;
         margin-right: .5em;
     }
+
     .list-page .section-body {
         display: -webkit-flex;
         -webkit-flex-direction: row wrap;
         display: flex;
         flex-flow: row wrap;
     }
+
     .person .section-item {
         -webkit-flex-direction: column;
         flex-direction: column;
@@ -68,14 +79,17 @@
         -webkit-flex-direction: row;
         border-bottom: 1px solid rgba(0, 0, 0, 0.12);
     }
+
     .list-page .section-item .item-body .item-info>li:last-of-type {
         border-bottom: 0;
     }
+
     .list-page .section-item .item-body .item-info li strong {
         flex: 0 0 150px;
         text-align: right;
         padding-right: 1.5em;
     }
+
     .list-page .section-item .item-body .item-info li span {
         flex: 0 1 auto;
     }
@@ -361,6 +375,7 @@ div.item-expertise>ul li {
         padding: .5em .25em;
         width: 160px;
     }
+
     .tiled-page .section-item {
         padding: .25em;
         display: table-cell;
@@ -370,7 +385,6 @@ div.item-expertise>ul li {
         -webkit-flex-direction: column-reverse;
         display: flex;
         flex-direction: column-reverse;
-        margin-right: 10px;
     }
 }
 
