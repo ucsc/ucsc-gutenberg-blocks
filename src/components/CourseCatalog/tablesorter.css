@@ -3,7 +3,8 @@
     width: 85%;
 }
 
-.table-sortable th, .pointer {
+.table-sortable th,
+.pointer {
     cursor: pointer;
 }
 
@@ -40,41 +41,54 @@
     background: rgba(0, 0, 0, 0.1);
 }
 
-.table-sortable tr, .table-sortable td {
+.table-sortable tr,
+.table-sortable td {
     padding: 0;
 }
 
-.table-sortable th, .pointer  td{
-   padding: 6px 0 6px 0;
+.table-sortable th,
+.pointer td {
+    padding: 6px 0 6px 0;
 }
+
 .table-sortable thead th {
     text-align: left;
     border-bottom: 1px solid black;
     color: #5585A2;
 }
 
-th, td {
-  border-left-style: hidden!important;
-  border-right-style: hidden!important;
+th,
+td {
+    border-left-style: hidden !important;
+    border-right-style: hidden !important;
 }
+
 tr.hide {
-  border-top-style: hidden!important;
-  border-bottom: 1px solid black;
+    border-top-style: hidden !important;
+    border-bottom: 1px solid black;
 }
+
 #search {
     padding: 0.25em 0;
+    margin: 0 0 0 5px;
 }
-#courseCatalog, #courseCatalog button, #courseCatalog label{
-  font-family: Roboto, sans-serif;
-  font-size: 11px;
-  padding: 0;
+
+#courseCatalog,
+#courseCatalog button,
+#courseCatalog label {
+    font-family: Roboto, sans-serif;
+    font-size: 11px;
+    padding: 0;
 }
+
 span.secret {
-  display: none;
+    display: none;
 }
+
 .introText {
     height: 30px;
 }
+
 .clickText {
     font-style: italic;
 }
