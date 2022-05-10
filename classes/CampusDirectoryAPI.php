@@ -6,6 +6,7 @@ class CampusDirectoryAPI {
   public $nodeContent;
   public $allStaffTypes;
   public $ldap_password;
+  public $count;
 
   function __construct($content = [])
   {
@@ -32,6 +33,7 @@ class CampusDirectoryAPI {
     $variables['items'] = $campusDirData[0];
     $variables['q'] = $campusDirData[1];
     $variables['nodeContent'] = $this->nodeContent;
+    $variables['count'] = $this->count;
 
     return $variables;
   }
@@ -144,27 +146,27 @@ class CampusDirectoryAPI {
   {
     $filterString = "";
     $vacancies = array();
-    $count = 0;
+    $this->count = 0;
     if ($this->nodeContent["objGradTypes"]["Grad Students"]) {
       $filterString .= "(ucscpersonpubaffiliation=Graduate)";
-      $count++;
+      $this->count++;
     }
-    $this->processFacultyFilterString($filterString, $count);
-    $this->processStaffFilterString($filterString, $count);
-    $this->processDeptDivFilterString($filterString, $count);
-    $this->processAddExcludeFilterString($filterString, $count);
+    $this->processFacultyFilterString($filterString);
+    $this->processStaffFilterString($filterString);
+    $this->processDeptDivFilterString($filterString);
+    $this->processAddExcludeFilterString($filterString);
 
     return $filterString;
   }
 
-  public function processFacultyFilterString(&$filterString, &$count)
+  public function processFacultyFilterString(&$filterString)
   {
     if (!empty($this->nodeContent["objFacultyTypes"])) {
       $facultyTypes = $this->nodeContent["objFacultyTypes"];
       if ($facultyTypes['All']) {
         $filterString .= "(ucscpersonpubaffiliation=Faculty)";
-        $count++;
-      } else {
+        $this->count++;
+      } else if (array_sum($facultyTypes) > 0) {
         $affiliation = "(ucscpersonpubaffiliation=Faculty)";
         $typeCount = 0;
         $typeList = "";
@@ -176,18 +178,18 @@ class CampusDirectoryAPI {
         }
         if ($typeCount > 1) $typeList = "(|$typeList)";
         $filterString .= "(&$affiliation$typeList)";
-        $count++;
+        $this->count++;
       }
     }
   }
 
-  public function processStaffFilterString(&$filterString, &$count)
+  public function processStaffFilterString(&$filterString)
   {
     $staffTypes = $this->nodeContent["objStaffTypes"];
     if (array_sum($this->nodeContent["objStaffTypes"]) == 3) {
       $filterString .= "(ucscpersonpubaffiliation=Staff)";
-      $count++;
-    } else {
+      $this->count++;
+    } else if (array_sum($staffTypes) > 0)  {
       $affiliation = "";
       $typeCount = 0;
       $typeList = "";
@@ -212,17 +214,17 @@ class CampusDirectoryAPI {
       }
       if ($typeCount > 0) $affiliation = "(ucscpersonpubaffiliation=Staff)";
       $filterString .= "(&$affiliation$typeList)";
-      $count++;
+      $this->count++;
     }
   }
 
-  public function processDeptDivFilterString(&$filterString, &$count)
+  public function processDeptDivFilterString(&$filterString)
   {
     $department = get_option('campus_directory_department');
     $division = get_option('campus_directory_division');
 
-    if ($count > 0) {
-      if ($count > 1) $filterString = "(|$filterString)";
+    if ($this->count > 0) {
+      if ($this->count > 1) $filterString = "(|$filterString)";
 
       if (!empty($department) || !empty($division)) {
         if ($this->nodeContent['displayDeptartmentAffiliates']) {
@@ -236,7 +238,7 @@ class CampusDirectoryAPI {
     }
   }
 
-  public function processAddExcludeFilterString(&$filterString, &$count)
+  public function processAddExcludeFilterString(&$filterString)
   {
     if ($this->nodeContent['manualAdd']) {
       if (strlen($this->nodeContent['excludeCruzids'])) {
