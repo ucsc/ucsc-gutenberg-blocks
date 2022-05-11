@@ -58,7 +58,8 @@ class CampusDirectoryAPI {
     );
 
     $returnDictionary = array();
-    foreach ($this->nodeContent['objInformationTypes'] as $label => $isSet) {
+    $informationTypes = $this->nodeContent["pageLayout"] === "table" ? $this->nodeContent['objInformationTypesTable'] : $this->nodeContent['objInformationTypes'];
+    foreach ($informationTypes as $label => $isSet) {
       if ($isSet) {
         array_push($returnDictionary, [$dictFieldInformation[$label] => $label]);
       }
