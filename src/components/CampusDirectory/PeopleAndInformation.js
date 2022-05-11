@@ -1,5 +1,6 @@
 import AutomatedFeeds from './AutomatedFeeds';
 import InformationToDisplay from './InformationToDisplay';
+import InformationToDisplayTable from './InformationToDisplayTable';
 
 import { RadioControl, TextareaControl, CheckboxControl } from '@wordpress/components';
 import { useState } from '@wordpress/element';
@@ -17,6 +18,8 @@ const PeopleAndInformation = ({
   displayDeptartmentAffiliates,
   linkToProfile,
   strInformationTypes,
+  strInformationTypesTable,
+  pageLayout
 }) => {
   let localAutomatedFeeds;
   let setLocalAutomatedFeeds;
@@ -206,11 +209,19 @@ const PeopleAndInformation = ({
           </div>
         </div>
       )}
-      <InformationToDisplay
-        setAttributes={setAttributes}
-        linkToProfile={linkToProfile}
-        strInformationTypes={strInformationTypes}
-      />
+      {pageLayout !== "table" ? (
+        <InformationToDisplay
+          setAttributes={setAttributes}
+          linkToProfile={linkToProfile}
+          strInformationTypes={strInformationTypes}
+        />
+      ) : (
+        <InformationToDisplayTable
+          setAttributes={setAttributes}
+          linkToProfile={linkToProfile}
+          strInformationTypesTable={strInformationTypesTable}
+        />
+      )}
     </div>
   );
 }

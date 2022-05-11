@@ -6,7 +6,7 @@ import { useState } from '@wordpress/element';
 const InformationToDisplay = ({
   setAttributes,
   linkToProfile,
-  strInformationTypes,
+  strInformationTypesTable,
 }) => {
   let localLinkToProfile;
   let setLocalLinkToProfile;
@@ -27,7 +27,6 @@ const InformationToDisplay = ({
   // List of checkbox labels/values
   const arrInformationToDisplay = [
     'Pronouns',
-    'Photo',
     'Title',
     'Department',
     'Phone',
@@ -43,14 +42,10 @@ const InformationToDisplay = ({
   ];
 
   const checkedByDefault = [
-    'Photo',
     'Title',
     'Department',
     'Phone',
     'Email',
-    'Website',
-    'Office Location',
-    'Office Hours',
   ];
 
   return (
@@ -78,9 +73,9 @@ const InformationToDisplay = ({
         <h5>List Layout Information to Display</h5>
         <CheckboxGroupControl
           setAttributes={setAttributes}
-          currentAttributes={strInformationTypes}
+          currentAttributes={strInformationTypesTable}
           arrOfLabels={arrInformationToDisplay}
-          attributeStr="strInformationTypes"
+          attributeStr="strInformationTypesTable"
           checkedByDefault={checkedByDefault}
         />
       </div>

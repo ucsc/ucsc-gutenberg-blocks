@@ -1,4 +1,3 @@
-<h1>Faculty Directory</h1>
 <?php if (strlen($items["introParagraph"])) { ?>
   <div class="intro-paragraph">
     <?php echo $items["introParagraph"] ?>
@@ -6,7 +5,7 @@
 <?php } ?>
 <?php
 // echo "<pre>";
-// echo print_r($items['people'], true);
+// echo print_r($items['informationToDisplay'], true);
 // echo "</pre>";
 // echo "<pre>";
 // echo print_r($items['nodeContent'], true);
@@ -104,6 +103,13 @@
                                 } else if ($disItem[$key] == "Office Location") {
                                   echo "<li>{$people[$i]['ucscprimarylocationpubofficialname'][0]}, {$people[$i]['ucscpersonpubofficelocationdetail'][0]}</li>";
 
+                                } else if ($disItem[$key] == "Website") {
+                                  for($j=0; $j<$people[$i]["ucscpersonpubwebsite"]["count"]; $j++) {
+                                    $arrWebsite = explode(" ", $people[$i]["ucscpersonpubwebsite"][$j]);
+                                    $url = array_shift($arrWebsite);
+                                    $label = implode(" ", $arrWebsite);
+                                    echo "<li><a href='{$url}'>{$label}</a></li>";
+                                  }
                                 } else {
                                   echo "<li>{$people[$i][$key][0]}</li>";
                                 }

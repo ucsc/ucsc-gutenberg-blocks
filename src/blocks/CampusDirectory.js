@@ -54,6 +54,9 @@ const CampusDirectory = () => {
       strInformationTypes: {
         type: 'string',
       },
+      strInformationTypesTable: {
+        type: 'string',
+      },
     },
     edit: ({ setAttributes, attributes }) => {
       const {
@@ -71,6 +74,7 @@ const CampusDirectory = () => {
         displayDeptartmentAffiliates,
         linkToProfile,
         strInformationTypes,
+        strInformationTypesTable
       } = attributes;
 
       const [configuredCorrectly, setConfiguredCorrectly] = useState(true);
@@ -120,6 +124,8 @@ const CampusDirectory = () => {
                     displayDeptartmentAffiliates={displayDeptartmentAffiliates}
                     linkToProfile={linkToProfile}
                     strInformationTypes={strInformationTypes}
+                    strInformationTypesTable={strInformationTypesTable}
+                    pageLayout={pageLayout}
                   />
                 </PanelRow>
               </PanelBody>
