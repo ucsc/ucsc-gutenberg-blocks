@@ -97,6 +97,7 @@ span.secret {
     text-align: center;
     padding: 0 25px;
     font-style: normal;
+    text-decoration: underline;
 }
 
 .collapseExpandText {
