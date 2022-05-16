@@ -192,6 +192,14 @@
     border-radius: 5px;
 }
 
+.u-url {
+    text-decoration: none;
+}
+
+.u-url:hover {
+    text-decoration-thickness: 4.32px;
+}
+
 .item-image>.u-url:focus {
     outline-width: 15px;
 }
