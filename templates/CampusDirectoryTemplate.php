@@ -42,7 +42,11 @@
                         echo '<td class="item-info table-renderer">';
                           echo '<strong>' . $people[$i][$key][0] . '</strong>';
                           echo '<ul class="inline-list">';
-                            echo '<li>' . $people[$i][$key][0] . '</li>';
+                            if ($value == "Email") {
+                              echo '<li><a href="mailto:' . $people[$i][$key][0] . '">' . $people[$i][$key][0] . '</a></li>';
+                            } else {
+                              echo '<li>' . $people[$i][$key][0] . '</li>';
+                            }
                           echo '</ul>';
                         echo '</td>';
                       }

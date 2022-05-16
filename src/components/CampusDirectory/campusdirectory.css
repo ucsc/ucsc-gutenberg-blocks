@@ -411,7 +411,9 @@ table .section-body tr td strong,
 
 
 /* for tables */
-
+.table-wrapper {
+    border-collapse: collapse;
+}
 table .section-body {
     font-size: 1em;
 }
@@ -421,8 +423,30 @@ table .section-body {
     padding-right: 1em;
 }
 
-.table-wrapper .section-body tr.item-body>td:nth-child(1) {
-    padding-left: 1em;
+.table-wrapper .section-body tr th {
+    text-align: left;
+}
+
+.table-wrapper .section-body tr {
+    border-bottom: 1px solid #d3d2d1;
+    box-sizing: border-box;
+}
+
+.table-wrapper .section-body tr:last-child {
+    border-bottom: none;
+}
+
+.table-wrapper .section-body tr td a {
+    text-decoration: underline;
+    text-decoration-color: #ffc500;
+    text-decoration-skip-ink: auto;
+    text-decoration-thickness: 2.24px;
+    text-underline-offset: 1.6px;
+}
+
+.table-wrapper .section-body tr td a:hover {
+    text-decoration-thickness: 2.88px;
+    text-underline-offset: 1.92px;
 }
 
 .table-wrapper .section-body>tr:last-of-type td {
