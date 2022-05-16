@@ -105,7 +105,6 @@ class CourseCatalog
         }
         $courses = $this->getCourses();
         echo '<div id="courseCatalog">
-    <h1>Course Catalog</h1>
     <div class="introText">
         <label>
         Search Dept Courses:<input type="text" id="search" onkeyup="tableSearch()">
