@@ -50,9 +50,9 @@ const InformationToDisplay = ({
 
   return (
     <div>
-      <h5 style={{ marginBottom: "0px" }}>Link Name to Individual Profile?</h5>
-      <p style={{ marginTop: "0px" }}>
-        <i style={{ fontSize: "0.85714rem" }}>
+      <h5>Link Name to Individual Profile?</h5>
+      <p>
+        <i>
           In a small number of cases, units do not want a person's name to link
           to a more detailed profile page.
         </i>

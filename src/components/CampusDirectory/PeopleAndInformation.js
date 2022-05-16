@@ -121,7 +121,7 @@ const PeopleAndInformation = ({
       {!localAutomatedFeeds && (
         <div>
           <h5>List Individuals (Enter CruzIDs separated by commas)</h5>
-          <p>List individuals in the order you'd like them to appear on the page.</p>
+          <p><i>List individuals in the order you'd like them to appear on the page.</i></p>
           <TextareaControl
             value={cruzidListState}
             onChange={newCruzidListState => {
@@ -184,11 +184,11 @@ const PeopleAndInformation = ({
             </div>
           )}
           <div>
-            <h5 style={{ marginBottom: "0px" }}>
+            <h5>
               Display Department Affiliates? (Rare for administrative units.)
             </h5>
-            <p style={{ marginTop: "0px" }}>
-              <i style={{ fontSize: "0.85714rem" }}>
+            <p>
+              <i>
                 For example, a faculty member is officially associated with the
                 History Department but is also affiliated with College Nine
                 because they teach a College Nine Core Course.

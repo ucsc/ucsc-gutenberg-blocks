@@ -93,7 +93,7 @@ const CampusDirectory = () => {
       return (
         <>
           {configuredCorrectly && (
-            <Panel header="Directory Block">
+            <Panel className="directory-block" header="Directory Block">
               <PanelBody title="Intro Paragraph">
                 <IntroParagraph
                   setAttributes={setAttributes}
