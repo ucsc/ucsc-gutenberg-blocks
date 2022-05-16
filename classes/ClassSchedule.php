@@ -32,6 +32,11 @@ class ClassSchedule
       array('wp-edit-blocks'),
       filemtime('https://webapps.ucsc.edu/wcsi/css/app.css')
     );
+    wp_register_style( 'classschedule',
+      plugins_url('../src/components/ClassSchedule/classschedule.css', __FILE__),
+      array(),
+      filemtime(plugin_dir_path(__FILE__) . '../src/components/ClassSchedule/classschedule.css'));
+    wp_enqueue_style( 'classschedule');
   }
 
   function theHTML($attributes)
