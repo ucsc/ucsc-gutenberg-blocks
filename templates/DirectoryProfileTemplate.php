@@ -1,7 +1,7 @@
 <?php
 
-if ( file_exists( get_theme_file_path( 'header-dynamic.php' ) ) ) {
-	get_header( 'dynamic' );
+if ( file_exists( get_theme_file_path( 'header-plugin.php' ) ) ) {
+	get_header( 'plugin' );
 }
 $cruzid = get_query_var('directoryprofilecruzid');
 $campusDirectoryAPI = new CampusDirectoryAPI($attributes);
@@ -148,7 +148,7 @@ if (count($profileData)) {
 } else {
   echo "<div id=\"wrapper\"><h3>CruzID: $cruzid not found.</h3></div>";
 }
-if ( file_exists( get_theme_file_path( 'footer-dynamic.php' ) ) ) {
-	get_footer( 'dynamic' );
+if ( file_exists( get_theme_file_path( 'footer-plugin.php' ) ) ) {
+	get_footer( 'plugin' );
 }
 
