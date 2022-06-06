@@ -188,8 +188,12 @@
     border-radius: 5px;
 }
 
-.u-url {
+.u-url, .u-email, .u-website {
     text-decoration: none;
+}
+
+.u-email:hover, .u-website:hover {
+    text-decoration-thickness: 2.88px;
 }
 
 .u-url:hover {
