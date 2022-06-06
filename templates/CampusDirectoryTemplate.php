@@ -96,12 +96,12 @@
                                 if ($disItem[$key] == "Email") {
                                   if (array_key_exists("mail", $people[$i])) {
                                     for($j=0; $j<count($people[$i]["mail"]); $j++) {
-                                        echo "<li><span class=\"u-email\"><a href=\"{$people[$i]['mail'][$j]}\">{$people[$i]['mail'][$j]}</a></span></li>";
+                                        echo "<li><span><a class=\"u-email\" href=\"{$people[$i]['mail'][$j]}\">{$people[$i]['mail'][$j]}</a></span></li>";
                                     }
                                   }
                                   if (array_key_exists("ucscpersonpubalternatemail", $people[$i])) {
                                     for($j=0; $j<count($people[$i]["ucscpersonpubalternatemail"]); $j++) {
-                                        echo "<li><span class=\"u-email\"><a href=\"{$people[$i]['mail'][$j]}\">{$people[$i]['ucscpersonpubalternatemail'][$j]}</a></span></li>";
+                                        echo "<li><span><a class=\"u-email\" href=\"{$people[$i]['mail'][$j]}\">{$people[$i]['ucscpersonpubalternatemail'][$j]}</a></span></li>";
                                     }
                                   }
                                 } else if ($disItem[$key] == "Office Location") {
@@ -112,7 +112,7 @@
                                     $arrWebsite = explode(" ", $people[$i]["ucscpersonpubwebsite"][$j]);
                                     $url = array_shift($arrWebsite);
                                     $label = implode(" ", $arrWebsite);
-                                    echo "<li><a href='{$url}'>{$label}</a></li>";
+                                    echo "<li><span><a class=\"u-website\" href='{$url}'>{$label}</a></span></li>";
                                   }
                                 } else {
                                   echo "<li>{$people[$i][$key][0]}</li>";
