@@ -1,6 +1,9 @@
 <?php
 
-get_header();
+// Call header
+if ( file_exists( get_theme_file_path( 'header-plugin.php' ) ) ) {
+  get_header( 'plugin' );
+}
 $cruzid = get_query_var('directoryprofilecruzid');
 $campusDirectoryAPI = new CampusDirectoryAPI($attributes);
 $profileData = $campusDirectoryAPI->getCampusDirData($cruzid,true)[0];
@@ -146,5 +149,8 @@ if (count($profileData)) {
 } else {
   echo "<div id=\"wrapper\"><h3>CruzID: $cruzid not found.</h3></div>";
 }
-get_footer();
+// Call footer
+if ( file_exists( get_theme_file_path( 'footer-plugin.php' ) ) ) {
+  get_footer( 'plugin' );
+}
 
