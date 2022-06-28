@@ -101,7 +101,7 @@ const CampusDirectory = () => {
                   introParagraph={introParagraph}
                 />
               </PanelBody>
-              <PanelBody title="Page Layout" initialOpen>
+              <PanelBody title="Layout Type" initialOpen>
                 <PanelRow>
                   <PageLayout
                     setAttributes={setAttributes}
