@@ -7,9 +7,6 @@ const Accordion = () => {
     icon: "menu",
     category: "common",
     attributes: {
-      title: {
-        type: 'string',
-      },
       openOnPageLoad: {
         type: 'boolean',
       }
@@ -19,11 +16,6 @@ const Accordion = () => {
 
       return (
         <>
-          {
-            <BlockControls>
-              <input type="checkbox" />
-            </BlockControls>
-          }
           <InspectorControls key="setting">
             <Panel>
               <PanelBody>

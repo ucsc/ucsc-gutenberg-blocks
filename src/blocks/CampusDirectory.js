@@ -12,12 +12,6 @@ const CampusDirectory = () => {
     icon: "welcome-learn-more",
     category: "common",
     attributes: {
-      boolIntroParagraph: {
-        type: 'boolean',
-      },
-      introParagraph: {
-        type: 'string',
-      },
       pageLayout: {
         type: 'string',
       },
@@ -60,8 +54,6 @@ const CampusDirectory = () => {
     },
     edit: ({ setAttributes, attributes }) => {
       const {
-        boolIntroParagraph,
-        introParagraph,
         pageLayout,
         automatedFeeds,
         cruzidList,
@@ -94,13 +86,6 @@ const CampusDirectory = () => {
         <>
           {configuredCorrectly && (
             <Panel className="directory-block" header="Directory Block">
-              <PanelBody title="Intro Paragraph">
-                <IntroParagraph
-                  setAttributes={setAttributes}
-                  boolIntroParagraph={boolIntroParagraph}
-                  introParagraph={introParagraph}
-                />
-              </PanelBody>
               <PanelBody title="Layout Type" initialOpen>
                 <PanelRow>
                   <PageLayout

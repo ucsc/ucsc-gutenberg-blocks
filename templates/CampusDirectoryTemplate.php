@@ -1,8 +1,3 @@
-<?php if (strlen($items["introParagraph"])) { ?>
-  <div class="intro-paragraph">
-    <?php echo $items["introParagraph"] ?>
-  </div>
-<?php } ?>
 <?php
 // echo "<pre>";
 // echo print_r($items['informationToDisplay'], true);

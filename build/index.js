@@ -254,9 +254,6 @@ var Accordion = function Accordion() {
     icon: "menu",
     category: "common",
     attributes: {
-      title: {
-        type: 'string'
-      },
       openOnPageLoad: {
         type: 'boolean'
       }
@@ -265,9 +262,7 @@ var Accordion = function Accordion() {
       var setAttributes = _ref.setAttributes,
           attributes = _ref.attributes;
       var blockProps = Object(_wordpress_block_editor__WEBPACK_IMPORTED_MODULE_1__["useBlockProps"])();
-      return Object(_wordpress_element__WEBPACK_IMPORTED_MODULE_0__["createElement"])(_wordpress_element__WEBPACK_IMPORTED_MODULE_0__["Fragment"], null, Object(_wordpress_element__WEBPACK_IMPORTED_MODULE_0__["createElement"])(_wordpress_block_editor__WEBPACK_IMPORTED_MODULE_1__["BlockControls"], null, Object(_wordpress_element__WEBPACK_IMPORTED_MODULE_0__["createElement"])("input", {
-        type: "checkbox"
-      })), Object(_wordpress_element__WEBPACK_IMPORTED_MODULE_0__["createElement"])(_wordpress_block_editor__WEBPACK_IMPORTED_MODULE_1__["InspectorControls"], {
+      return Object(_wordpress_element__WEBPACK_IMPORTED_MODULE_0__["createElement"])(_wordpress_element__WEBPACK_IMPORTED_MODULE_0__["Fragment"], null, Object(_wordpress_element__WEBPACK_IMPORTED_MODULE_0__["createElement"])(_wordpress_block_editor__WEBPACK_IMPORTED_MODULE_1__["InspectorControls"], {
         key: "setting"
       }, Object(_wordpress_element__WEBPACK_IMPORTED_MODULE_0__["createElement"])(_wordpress_components__WEBPACK_IMPORTED_MODULE_2__["Panel"], null, Object(_wordpress_element__WEBPACK_IMPORTED_MODULE_0__["createElement"])(_wordpress_components__WEBPACK_IMPORTED_MODULE_2__["PanelBody"], null, Object(_wordpress_element__WEBPACK_IMPORTED_MODULE_0__["createElement"])(_wordpress_components__WEBPACK_IMPORTED_MODULE_2__["CheckboxControl"], {
         label: "Open on page load",
@@ -336,12 +331,6 @@ var CampusDirectory = function CampusDirectory() {
     icon: "welcome-learn-more",
     category: "common",
     attributes: {
-      boolIntroParagraph: {
-        type: 'boolean'
-      },
-      introParagraph: {
-        type: 'string'
-      },
       pageLayout: {
         type: 'string'
       },
@@ -385,9 +374,7 @@ var CampusDirectory = function CampusDirectory() {
     edit: function edit(_ref) {
       var setAttributes = _ref.setAttributes,
           attributes = _ref.attributes;
-      var boolIntroParagraph = attributes.boolIntroParagraph,
-          introParagraph = attributes.introParagraph,
-          pageLayout = attributes.pageLayout,
+      var pageLayout = attributes.pageLayout,
           automatedFeeds = attributes.automatedFeeds,
           cruzidList = attributes.cruzidList,
           strFacultyTypes = attributes.strFacultyTypes,
@@ -424,12 +411,6 @@ var CampusDirectory = function CampusDirectory() {
         className: "directory-block",
         header: "Directory Block"
       }, Object(_wordpress_element__WEBPACK_IMPORTED_MODULE_1__["createElement"])(_wordpress_components__WEBPACK_IMPORTED_MODULE_2__["PanelBody"], {
-        title: "Intro Paragraph"
-      }, Object(_wordpress_element__WEBPACK_IMPORTED_MODULE_1__["createElement"])(_components_CampusDirectory_IntroParagraph__WEBPACK_IMPORTED_MODULE_3__["default"], {
-        setAttributes: setAttributes,
-        boolIntroParagraph: boolIntroParagraph,
-        introParagraph: introParagraph
-      })), Object(_wordpress_element__WEBPACK_IMPORTED_MODULE_1__["createElement"])(_wordpress_components__WEBPACK_IMPORTED_MODULE_2__["PanelBody"], {
         title: "Layout Type",
         initialOpen: true
       }, Object(_wordpress_element__WEBPACK_IMPORTED_MODULE_1__["createElement"])(_wordpress_components__WEBPACK_IMPORTED_MODULE_2__["PanelRow"], null, Object(_wordpress_element__WEBPACK_IMPORTED_MODULE_1__["createElement"])(_components_CampusDirectory_PageLayout__WEBPACK_IMPORTED_MODULE_4__["default"], {
