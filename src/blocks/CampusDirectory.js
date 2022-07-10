@@ -1,10 +1,10 @@
 import { useEffect, useState } from '@wordpress/element'
-import { Panel, PanelBody, PanelRow } from '@wordpress/components';
+import { Panel, PanelBody, PanelRow, RadioControl } from '@wordpress/components';
 
-import IntroParagraph from '../components/CampusDirectory/IntroParagraph';
+import DepartmentDropdown from '../components/DepartmentDropdown';
+import DivisionDropdown from '../components/DivisionDropdown';
 import PageLayout from '../components/CampusDirectory/PageLayout';
 import PeopleAndInformation from '../components/CampusDirectory/PeopleAndInformation';
-
 
 const CampusDirectory = () => {
   wp.blocks.registerBlockType("ucscblocks/campusdirectory", {
@@ -51,6 +51,16 @@ const CampusDirectory = () => {
       strInformationTypesTable: {
         type: 'string',
       },
+      department: {
+        type: "string"
+      },
+      division: {
+        type: "string"
+      },
+      deptOrDiv: {
+        type: "string",
+        default: "dept"
+      }
     },
     edit: ({ setAttributes, attributes }) => {
       const {
@@ -66,7 +76,10 @@ const CampusDirectory = () => {
         displayDeptartmentAffiliates,
         linkToProfile,
         strInformationTypes,
-        strInformationTypesTable
+        strInformationTypesTable,
+        department,
+        division,
+        deptOrDiv
       } = attributes;
 
       const [configuredCorrectly, setConfiguredCorrectly] = useState(true);
@@ -86,6 +99,29 @@ const CampusDirectory = () => {
         <>
           {configuredCorrectly && (
             <Panel className="directory-block" header="Directory Block">
+              <PanelBody title="Set Department or Division" initialOpen>
+                <RadioControl
+                    selected={ deptOrDiv }
+                    options={ [
+                        { label: 'Department', value: 'dept' },
+                        { label: 'Division', value: 'div' },
+                    ] }
+                    onChange={ ( value ) => setAttributes( { deptOrDiv: value } ) }
+                />
+                <hr />
+                <DepartmentDropdown
+                  label="Department"
+                  department={department}
+                  setAttributes={setAttributes}
+                  disabled={!(deptOrDiv === 'dept')}
+                />
+                <DivisionDropdown
+                  label="Division"
+                  division={division}
+                  setAttributes={setAttributes}
+                  disabled={!(deptOrDiv === 'div')}
+                />
+              </PanelBody>
               <PanelBody title="Layout Type" initialOpen>
                 <PanelRow>
                   <PageLayout
@@ -119,11 +155,6 @@ const CampusDirectory = () => {
           {!configuredCorrectly && (
             <>
               <h2>This Block is not Configured Correctly</h2>
-              {!resp.deptdiv && (
-                <h4>
-                  The Department or Division needs to be set <a target="_blank" href="/wp-admin/options-general.php?page=ucsc_gutenberg_blocks_settings_page">here.</a>
-                </h4>
-              )}
               {!resp.ldap_pass && resp.multisite && (
                 <>
                   <h4>

@@ -26,7 +26,6 @@ class CampusDirectoryAPI {
     $strCruzids = $this->nodeContent['cruzidList'];
     $variables['dirLayout'] = $this->nodeContent["pageLayout"];
     $variables['linkToProfile'] = $this->nodeContent["linkToProfile"];
-    $variables['introParagraph'] = $this->nodeContent["introParagraph"];
     $variables['informationToDisplay'] = $this->getInformationToDisplay();
 
     $campusDirData = $this->getCampusDirData($strCruzids);
