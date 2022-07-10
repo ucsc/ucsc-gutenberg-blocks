@@ -4,6 +4,8 @@
 import CourseCatalog from './blocks/CourseCatalog';
 import CampusDirectory from './blocks/CampusDirectory';
 import ClassSchedule from './blocks/ClassSchedule';
+import Accordion from './blocks/Accordion';
+
 // import FeedbackForm from './blocks/FeedbackForm';
 
 
@@ -13,4 +15,5 @@ import ClassSchedule from './blocks/ClassSchedule';
 CourseCatalog();
 CampusDirectory();
 ClassSchedule();
+Accordion();
 // FeedbackForm();

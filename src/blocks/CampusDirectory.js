@@ -12,12 +12,6 @@ const CampusDirectory = () => {
     icon: "welcome-learn-more",
     category: "common",
     attributes: {
-      boolIntroParagraph: {
-        type: 'boolean',
-      },
-      introParagraph: {
-        type: 'string',
-      },
       pageLayout: {
         type: 'string',
       },
@@ -70,8 +64,6 @@ const CampusDirectory = () => {
     },
     edit: ({ setAttributes, attributes }) => {
       const {
-        boolIntroParagraph,
-        introParagraph,
         pageLayout,
         automatedFeeds,
         cruzidList,

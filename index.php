@@ -15,6 +15,7 @@ if (!defined('ABSPATH')) exit; // Exit if accessed directly
 include(plugin_dir_path(__FILE__) . 'classes/CourseCatalog.php');
 include(plugin_dir_path(__FILE__) . 'classes/CampusDirectory.php');
 include(plugin_dir_path(__FILE__) . 'classes/ClassSchedule.php');
+include(plugin_dir_path(__FILE__) . 'classes/Accordion.php');
 // include(plugin_dir_path(__FILE__) . 'classes/FeedbackForm.php');
 include(plugin_dir_path(__FILE__) . 'classes/SiteSettings.php');
 
@@ -34,5 +35,6 @@ function registerJSBuild() {
 $CourseCatalog = new CourseCatalog();
 $CampusDirectory = new CampusDirectory();
 $ClassSchedule = new ClassSchedule();
+$Accordion = new Accordion();
 $SiteSettings = new SiteSettings();
 // $FeedbackForm = new FeedbackForm();
