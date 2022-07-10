@@ -43,7 +43,7 @@ class ClassSchedule
   {
     $markup = '
       <link rel="stylesheet" href="https://webapps.ucsc.edu/wcsi/css/app.css">
-      <div id="wcsi"  department="' . get_option('class_schedule_department') . '" >
+      <div id="wcsi"  department="' . $attributes['department'] . '" >
 
       </div>
       <script src="https://cdn.polyfill.io/v2/polyfill.min.js?features=default,Promise,Object.assign,Object.values,Array.prototype.find,Array.prototype.findIndex,Array.prototype.includes,String.prototype.includes,String.prototype.startsWith,String.prototype.endsWith"></script>
