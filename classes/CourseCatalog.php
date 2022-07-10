@@ -4,26 +4,8 @@ class CourseCatalog
 {
     function __construct() {
         add_action('init', array($this, 'renderFrontend'));
-        add_action('rest_api_init', function () {
-            register_rest_route('ucscgutenbergblocks/v1', '/course-catalog/', array(
-                'methods' => 'GET',
-                'callback' => array($this, 'getCourses'),
-                'permission_callback' => array($this, 'restPermissionsCheck')
-            ));
-            register_rest_route('ucscgutenbergblocks/v1', '/coursecatalogdept/', array(
-                'methods' => 'GET',
-                'callback' => array($this, 'coursecatalogdept')
-            ));
-        });
 
         add_action('wp_enqueue_scripts', array($this, 'register_plugin_styles'));
-    }
-
-    function coursecatalogdept() {
-        $resp = [];
-        $resp["dept"] = get_option('course_catalog_subject');
-
-        return new WP_REST_Response($resp);
     }
 
     function restPermissionsCheck() {
@@ -90,20 +72,15 @@ class CourseCatalog
         return $xmlBody;
     }
 
-    function getCourses() {
-        $subject = strtolower(get_option('course_catalog_subject'));
+    function getCourses($subject) {
         $cachedData = $this->getCachedCourses($subject);
         return $cachedData;
     }
 
     function theHTML($attributes) {
         ob_start();
-        $subject = strtolower(get_site_option('course-catalog-subject'));
-        if (!strlen($subject)) {
-            // if no key is found at network level, get key from site level
-            $subject = strtolower(get_option('course-catalog-subject'));
-        }
-        $courses = $this->getCourses();
+        $department = strtolower($attributes['department']);
+        $courses = $this->getCourses($department);
         echo '<div id="courseCatalog">
     <div class="introText">
         <label>

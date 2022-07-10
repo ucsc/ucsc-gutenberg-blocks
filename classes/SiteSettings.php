@@ -9,6 +9,52 @@ class SiteSettings
     add_action("network_admin_menu", array($this, 'networkSettingsLink'));
     add_action('network_admin_edit_ucscplugin', array($this, 'networkSaveSettings'));
     add_action('network_admin_notices', array($this, 'networkSettingsNotifications'));
+    add_action('rest_api_init', function () {
+      register_rest_route('ucscgutenbergblocks/v1', '/departmentcode/', array(
+        'methods' => 'GET',
+        'callback' => array($this, 'departmentcode')
+      ));
+      register_rest_route('ucscgutenbergblocks/v1', '/divisioncode/', array(
+        'methods' => 'GET',
+        'callback' => array($this, 'divisioncode')
+      ));
+    });
+  }
+
+  function divisioncode()
+  {
+    $resp = [];
+    $resp[] = [
+      'label' => 'Division History',
+      'value' => 'his'
+    ];
+    $resp[] = [
+      'label' => 'Division Computer Science',
+      'value' => 'cmps'
+    ];
+    $resp[] = [
+      'label' => 'Division Chemistry',
+      'value' => 'chem'
+    ];
+    return new WP_REST_Response($resp);
+  }
+
+  function departmentcode()
+  {
+    $resp = [];
+    $resp[] = [
+      'label' => 'History',
+      'value' => 'his'
+    ];
+    $resp[] = [
+      'label' => 'Computer Science',
+      'value' => 'cmps'
+    ];
+    $resp[] = [
+      'label' => 'Chemistry',
+      'value' => 'chem'
+    ];
+    return new WP_REST_Response($resp);
   }
 
   function networkSettingsNotifications()
@@ -70,47 +116,15 @@ class SiteSettings
   {
     add_settings_section('ucsc_gutenberg_blocks_section', null, null, 'ucsc_gutenberg_blocks_settings_page');
 
-    add_settings_field('class_schedule_department', 'Class Schedule Department', array($this, 'classScheduleHTML'), 'ucsc_gutenberg_blocks_settings_page', 'ucsc_gutenberg_blocks_section');
-    register_setting('ucsc_gutenberg_blocks', 'class_schedule_department', array('sanitize_callback' => 'sanitize_text_field', 'default' => ''));
-
-    add_settings_field('campus_directory_department', 'Campus Directory Department', array($this, 'campusDirectoryHTML'), 'ucsc_gutenberg_blocks_settings_page', 'ucsc_gutenberg_blocks_section');
-    register_setting('ucsc_gutenberg_blocks', 'campus_directory_department', array('sanitize_callback' => 'sanitize_text_field', 'default' => ''));
-
-    add_settings_field('campus_directory_division', 'Campus Directory Division', array($this, 'campusDirectoryDivisionHTML'), 'ucsc_gutenberg_blocks_settings_page', 'ucsc_gutenberg_blocks_section');
-    register_setting('ucsc_gutenberg_blocks', 'campus_directory_division', array('sanitize_callback' => 'sanitize_text_field', 'default' => ''));
-
     add_settings_field('ldap_api_key', 'LDAP API Key', array($this, 'ldapKeyHTML'), 'ucsc_gutenberg_blocks_settings_page', 'ucsc_gutenberg_blocks_section');
     register_setting('ucsc_gutenberg_blocks', 'ldap_api_key', array('sanitize_callback' => 'sanitize_text_field', 'default' => ''));
-
-    add_settings_field('course_catalog_subject', 'Course Catalog Subject', array($this, 'subjectHTML'), 'ucsc_gutenberg_blocks_settings_page', 'ucsc_gutenberg_blocks_section');
-    register_setting('ucsc_gutenberg_blocks', 'course_catalog_subject', array('sanitize_callback' => 'sanitize_text_field', 'default' => ''));
 
     register_setting('ucsc_network_settings', 'ldap_api_key', array('sanitize_callback' => 'sanitize_text_field', 'default' => ''));
   }
 
-  function subjectHTML()
-  { ?>
-    <input type="text" name="course_catalog_subject" value="<?php echo esc_attr(get_option('course_catalog_subject')) ?>" />
-  <?php }
-
-  function campusDirectoryHTML()
-  { ?>
-    <input type="text" name="campus_directory_department" value="<?php echo esc_attr(get_option('campus_directory_department')) ?>" />
-  <?php }
-
-  function campusDirectoryDivisionHTML()
-  { ?>
-    <input type="text" name="campus_directory_division" value="<?php echo esc_attr(get_option('campus_directory_division')) ?>" />
-  <?php }
-
   function ldapKeyHTML()
   { ?>
     <input type="text" name="ldap_api_key" value="<?php echo esc_attr(get_option('ldap_api_key')) ?>" />
-  <?php }
-
-  function classScheduleHTML()
-  { ?>
-    <input type="text" name="class_schedule_department" value="<?php echo esc_attr(get_option('class_schedule_department')) ?>" />
   <?php }
 
   function settingsLink()
