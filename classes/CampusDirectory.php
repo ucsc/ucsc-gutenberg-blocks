@@ -33,9 +33,6 @@ class CampusDirectory
     $ldap_password = get_site_option('ldap_api_key');
     if (!$ldap_password) $ldap_password = get_option('ldap_api_key');
     $resp["ldap_pass"] = strlen($ldap_password) > 0;
-    $department = get_option('campus_directory_department');
-    $division = get_option('campus_directory_division');
-    $resp["deptdiv"] = strlen($department) > 0 || strlen($division) > 0;
     $resp["multisite"] = is_multisite();
 
     return new WP_REST_Response($resp);

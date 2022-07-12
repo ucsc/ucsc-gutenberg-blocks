@@ -90,7 +90,7 @@ const CampusDirectory = () => {
           .then(res => res.text())
           .then((text) => {
             const resp = JSON.parse(text);
-            if (!resp.ldap_pass || !resp.deptdiv) setConfiguredCorrectly(false);
+            if (!resp.ldap_pass) setConfiguredCorrectly(false);
             setResp(resp);
           });
       }, []);
