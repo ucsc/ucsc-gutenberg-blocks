@@ -24,7 +24,7 @@ const DepartmentDropdown = ({
     fetch('/wp-json/ucscgutenbergblocks/v1/departmentcode')
     .then(res => res.text())
     .then((text) => {
-      const resp = JSON.parse(text);
+      const resp = JSON.parse(text).map(item => {return {label: item.label, value: item.label}});
       setDepartments(resp);
     });
   }, []);

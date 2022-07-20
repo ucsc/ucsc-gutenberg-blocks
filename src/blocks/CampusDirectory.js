@@ -1,7 +1,7 @@
 import { useEffect, useState } from '@wordpress/element'
 import { Panel, PanelBody, PanelRow, RadioControl } from '@wordpress/components';
 
-import DepartmentDropdown from '../components/DepartmentDropdown';
+import CampusDirectoryDepartmentDropdown from '../components//CampusDirectory/CampusDirectoryDepartmentDropdown';
 import DivisionDropdown from '../components/DivisionDropdown';
 import PageLayout from '../components/CampusDirectory/PageLayout';
 import PeopleAndInformation from '../components/CampusDirectory/PeopleAndInformation';
@@ -52,14 +52,13 @@ const CampusDirectory = () => {
         type: 'string',
       },
       department: {
-        type: "string"
+        type: "string",
       },
       division: {
-        type: "string"
+        type: "string",
       },
       deptOrDiv: {
         type: "string",
-        default: "dept"
       }
     },
     edit: ({ setAttributes, attributes }) => {
@@ -85,6 +84,17 @@ const CampusDirectory = () => {
       const [configuredCorrectly, setConfiguredCorrectly] = useState(true);
       const [resp, setResp] = useState({});
 
+      let localDeptOrDiv;
+      let setLocalDeptOrDiv;
+      if (typeof deptOrDiv === 'undefined') {
+        [localDeptOrDiv, setLocalDeptOrDiv] = useState('dept');
+        setAttributes({
+          deptOrDiv: 'dept'
+        });
+      } else {
+        [localDeptOrDiv, setLocalDeptOrDiv] = useState(deptOrDiv);
+      }
+
       useEffect(() => {
         fetch('/wp-json/ucscgutenbergblocks/v1/campusdirectoryrequirements')
           .then(res => res.text())
@@ -106,10 +116,13 @@ const CampusDirectory = () => {
                         { label: 'Department', value: 'dept' },
                         { label: 'Division', value: 'div' },
                     ] }
-                    onChange={ ( value ) => setAttributes( { deptOrDiv: value } ) }
+                    onChange={ ( value ) => {
+                      setAttributes( { deptOrDiv: value } );
+                      setLocalDeptOrDiv(value);
+                    }}
                 />
                 <hr />
-                <DepartmentDropdown
+                <CampusDirectoryDepartmentDropdown
                   label="Department"
                   department={department}
                   setAttributes={setAttributes}

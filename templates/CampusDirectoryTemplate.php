@@ -5,6 +5,9 @@
 // echo "<pre>";
 // echo print_r($items['nodeContent'], true);
 // echo "</pre>";
+// echo "<pre>";
+// echo print_r($items['q'], true);
+// echo "</pre>";
 
   if ($items['dirLayout'] == "table") {
   ?>
