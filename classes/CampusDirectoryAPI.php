@@ -220,8 +220,10 @@ class CampusDirectoryAPI {
 
   public function processDeptDivFilterString(&$filterString)
   {
-    $department = get_option('campus_directory_department');
-    $division = get_option('campus_directory_division');
+    $department = $this->nodeContent['department'];
+    $division = $this->nodeContent['division'];
+    $deptOrDiv = $this->nodeContent['deptOrDiv'];
+
 
     if ($this->count > 0) {
       if ($this->count > 1) $filterString = "(|$filterString)";
@@ -229,9 +231,9 @@ class CampusDirectoryAPI {
       if (!empty($department) || !empty($division)) {
         if ($this->nodeContent['displayDeptartmentAffiliates']) {
           $filterString = "(&(ucscpersonpubaffiliateddepartment=$department)$filterString)";
-        } elseif (!empty($department)) {
+        } elseif ($deptOrDiv == 'dept') {
           $filterString = "(&(ucscpersonpubdepartmentnumber=$department)$filterString)";
-        } elseif (!empty($division)) {
+        } elseif ($deptOrDiv == 'div') {
           $filterString = "(&(ucscpersonpubdivision=$division)$filterString)";
         }
       }

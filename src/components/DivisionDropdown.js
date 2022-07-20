@@ -8,6 +8,18 @@ const DivisionDropdown = ({
   disabled = false
 }) => {
   const [divisions, setDivisions] = useState([]);
+
+  let localDivision;
+  let setLocalDivision;
+  if (typeof division === 'undefined') {
+    [localDivision, setLocalDivision] = useState('---');
+    setAttributes({
+      division: '---'
+    });
+  } else {
+    [localDivision, setLocalDivision] = useState(division);
+  }
+
   useEffect(() => {
     fetch('/wp-json/ucscgutenbergblocks/v1/divisioncode')
     .then(res => res.text())
@@ -25,7 +37,10 @@ const DivisionDropdown = ({
             label={ label }
             value={ division }
             options={ divisions }
-            onChange={ ( newDivisions ) => setAttributes( {division: newDivisions} ) }
+            onChange={ ( newDivision ) => {
+              setAttributes( {division: newDivision} );
+              setLocalDivision(newDivision)
+            }}
             disabled={disabled}
           />
         </div>

@@ -25,6 +25,10 @@ class SiteSettings
   {
     $resp = [];
     $resp[] = [
+      'label' => '---',
+      'value' => '---'
+    ];
+    $resp[] = [
       'label' => 'Division History',
       'value' => 'his'
     ];
@@ -41,20 +45,42 @@ class SiteSettings
 
   function departmentcode()
   {
-    $resp = [];
-    $resp[] = [
-      'label' => 'History',
-      'value' => 'his'
-    ];
-    $resp[] = [
-      'label' => 'Computer Science',
-      'value' => 'cmps'
-    ];
-    $resp[] = [
-      'label' => 'Chemistry',
-      'value' => 'chem'
-    ];
-    return new WP_REST_Response($resp);
+
+    $retDepts = get_transient('ucsc_departments');
+    if (!$retDepts) {
+      $curl = curl_init();
+
+      curl_setopt_array($curl, array(
+        CURLOPT_URL => 'https://my.ucsc.edu/PSIGW/RESTListeningConnector/PSFT_CSPRD/SCX_CLASS_DEPTS.v1/2022/Fall',
+        CURLOPT_RETURNTRANSFER => true,
+        CURLOPT_ENCODING => '',
+        CURLOPT_MAXREDIRS => 10,
+        CURLOPT_TIMEOUT => 0,
+        CURLOPT_FOLLOWLOCATION => true,
+        CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
+        CURLOPT_CUSTOMREQUEST => 'GET',
+      ));
+
+      $response = curl_exec($curl);
+
+      curl_close($curl);
+      $arrResponse = json_decode($response, true);
+      $depts = $arrResponse['depts'];
+      $retDepts = [];
+      $retDepts[] = [
+        'label' => '---',
+        'value' => '---'
+      ];
+      for($i=0; $i<count($depts); $i++) {
+        $retDepts[] = [
+          'label' => $depts[$i]['description'],
+          'value' => $depts[$i]['code']
+        ];
+      }
+      set_transient('ucsc_departments', $retDepts, WEEK_IN_SECONDS);
+    }
+    return new WP_REST_Response($retDepts);
+
   }
 
   function networkSettingsNotifications()
