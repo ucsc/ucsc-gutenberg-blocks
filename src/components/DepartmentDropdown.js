@@ -31,8 +31,8 @@ const DepartmentDropdown = ({
 
   return (
     <>
-      {departments.length > 0 && (
-        <div style={{width: "max-content"}}>
+      <div style={{width: "max-content"}}>
+        {departments.length > 0 && (
           <SelectControl
             label={ label }
             value={ department }
@@ -43,8 +43,11 @@ const DepartmentDropdown = ({
             }}
             disabled={disabled}
           />
-        </div>
-      )}
+        )}
+        {!departments.length && (
+          <span>Subject Dropdown Loading...</span>
+        )}
+      </div>
     </>
   )
 }

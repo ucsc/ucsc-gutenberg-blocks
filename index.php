@@ -9,15 +9,15 @@
 */
 if (!defined('ABSPATH')) exit; // Exit if accessed directly
 
-// include(plugin_dir_path(__FILE__) . 'classes/UCSCGutenbergDemoBlock1.php');
-// include(plugin_dir_path(__FILE__) . 'classes/UCSCGutenbergDemoBlock2.php');
-// include(plugin_dir_path(__FILE__) . 'classes/ContentSharer.php');
-include(plugin_dir_path(__FILE__) . 'classes/CourseCatalog.php');
-include(plugin_dir_path(__FILE__) . 'classes/CampusDirectory.php');
-include(plugin_dir_path(__FILE__) . 'classes/ClassSchedule.php');
-include(plugin_dir_path(__FILE__) . 'classes/Accordion.php');
-// include(plugin_dir_path(__FILE__) . 'classes/FeedbackForm.php');
-include(plugin_dir_path(__FILE__) . 'classes/SiteSettings.php');
+// include_once(plugin_dir_path(__FILE__) . 'classes/UCSCGutenbergDemoBlock1.php');
+// include_once(plugin_dir_path(__FILE__) . 'classes/UCSCGutenbergDemoBlock2.php');
+// include_once(plugin_dir_path(__FILE__) . 'classes/ContentSharer.php');
+include_once(plugin_dir_path(__FILE__) . 'classes/CourseCatalog.php');
+include_once(plugin_dir_path(__FILE__) . 'classes/CampusDirectory.php');
+include_once(plugin_dir_path(__FILE__) . 'classes/ClassSchedule.php');
+include_once(plugin_dir_path(__FILE__) . 'classes/Accordion.php');
+// include_once(plugin_dir_path(__FILE__) . 'classes/FeedbackForm.php');
+include_once(plugin_dir_path(__FILE__) . 'classes/SiteSettings.php');
 
 
 add_action('admin_enqueue_scripts', 'registerJSBuild');

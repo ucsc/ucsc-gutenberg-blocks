@@ -83,21 +83,65 @@ class CampusDirectoryAPI {
     $md5_q = md5($q);
     $people = get_transient($md5_q);
     if (!$people) {
-      $rli = ldap_connect("ldaps://ldap-blue.ucsc.edu/");
-      if ($rli) {
-        ldap_set_option($rli, LDAP_OPT_TIMELIMIT, 90);
-        ldap_set_option($rli, LDAP_OPT_PROTOCOL_VERSION, 3);
-
-        if (ldap_bind($rli, "cn=pantheon-webapps,ou=apps,dc=ucsc,dc=edu", $this->ldap_password)) {
-          $sr = ldap_search($rli, "ou=people,dc=ucsc,dc=edu", "(|{$q})");
-          $people = $this->processSearchResults($rli, $sr);
-          $people = $this->addVacantPositions($people, $this->nodeContent['automatedFeeds'], $arrCruzids);
-          set_transient($md5_q, $people, 600);
-          ldap_close($rli);
-        }
-      }
+      $people = $this->doLDAPQuery($q, $arrCruzids);
+      set_transient($md5_q, $people, 600);
     }
     return [$people, $q];
+  }
+
+  public function doLDAPQuery($q, $arrCruzids) {
+    $rli = ldap_connect("ldaps://ldap-blue.ucsc.edu/");
+    if ($rli) {
+      ldap_set_option($rli, LDAP_OPT_TIMELIMIT, 90);
+      ldap_set_option($rli, LDAP_OPT_PROTOCOL_VERSION, 3);
+
+      if (ldap_bind($rli, "cn=pantheon-webapps,ou=apps,dc=ucsc,dc=edu", $this->ldap_password)) {
+        $sr = ldap_search($rli, "ou=people,dc=ucsc,dc=edu", "(|{$q})");
+        $people = $this->processSearchResults($rli, $sr);
+        $people = $this->addVacantPositions($people, $this->nodeContent['automatedFeeds'], $arrCruzids);
+        ldap_close($rli);
+        return $people;
+      }
+    }
+
+    return [];
+  }
+
+  public function getDirDropdowns($deptOrDiv) {
+    $retDepts = get_transient('ucsc_campus_directory_departments_' . $deptOrDiv);
+    if (!$retDepts) {
+      $people = $this->doLDAPQuery("(|(ucscpersonpubaffiliation=Graduate)(ucscpersonpubaffiliation=Faculty)(ucscpersonpubaffiliation=Staff))", []);
+
+      $uniqueDepts = [];
+      for($i=0; $i<count($people); $i++) {
+        for($j=0; $j<$people[$i][$deptOrDiv]['count']; $j++) {
+          $uniqueDepts[$people[$i][$deptOrDiv][$j]] = '';
+        }
+      }
+
+      $retDepts = [];
+      foreach($uniqueDepts as $dept => $emptyStr) {
+        $retDepts[] = [
+          'label' => $dept,
+          'value' => $dept
+        ];
+      }
+
+      function cmp($a, $b) {
+        return strcmp($a['label'], $b['label']);
+      }
+
+      usort($retDepts, "cmp");
+
+      array_unshift($retDepts, [
+        'label' => '---',
+        'value' => '---'
+      ]);
+
+      set_transient('ucsc_campus_directory_departments_' . $deptOrDiv, $retDepts, 86400);
+    }
+
+    return $retDepts;
   }
 
   public function addVacantPositions($people, $automatedFeed, $arrCruzids)
@@ -105,7 +149,7 @@ class CampusDirectoryAPI {
     $retArr = [];
     if ($automatedFeed) {
       $retArr = $people;
-      if (strlen($this->nodeContent['addCruzids'])) {
+      if (array_key_exists('addCruzids', $this->nodeContent) && strlen($this->nodeContent['addCruzids'])) {
         $arrCruzids = explode(",", $this->nodeContent['addCruzids']);
         for ($i = 0; $i < count($arrCruzids); $i++) {
           $arrCruzids[$i] = trim($arrCruzids[$i]);

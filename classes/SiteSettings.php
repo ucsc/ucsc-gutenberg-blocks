@@ -1,5 +1,7 @@
 <?php
 
+include_once(plugin_dir_path(__FILE__) . 'CampusDirectoryAPI.php');
+
 class SiteSettings
 {
   function __construct()
@@ -14,6 +16,10 @@ class SiteSettings
         'methods' => 'GET',
         'callback' => array($this, 'departmentcode')
       ));
+      register_rest_route('ucscgutenbergblocks/v1', '/cddepartmentcode/', array(
+        'methods' => 'GET',
+        'callback' => array($this, 'cddepartmentcode')
+      ));
       register_rest_route('ucscgutenbergblocks/v1', '/divisioncode/', array(
         'methods' => 'GET',
         'callback' => array($this, 'divisioncode')
@@ -21,26 +27,16 @@ class SiteSettings
     });
   }
 
+  function cddepartmentcode()
+  {
+    $campusDirectoryAPI = new CampusDirectoryAPI(['automatedFeeds' => true]);
+    return new WP_REST_Response($campusDirectoryAPI->getDirDropdowns('departmentnumber'));
+  }
+
   function divisioncode()
   {
-    $resp = [];
-    $resp[] = [
-      'label' => '---',
-      'value' => '---'
-    ];
-    $resp[] = [
-      'label' => 'Division History',
-      'value' => 'his'
-    ];
-    $resp[] = [
-      'label' => 'Division Computer Science',
-      'value' => 'cmps'
-    ];
-    $resp[] = [
-      'label' => 'Division Chemistry',
-      'value' => 'chem'
-    ];
-    return new WP_REST_Response($resp);
+    $campusDirectoryAPI = new CampusDirectoryAPI(['automatedFeeds' => true]);
+    return new WP_REST_Response($campusDirectoryAPI->getDirDropdowns('ucscpersonpubdivision'));
   }
 
   function departmentcode()

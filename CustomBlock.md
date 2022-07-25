@@ -1,28 +1,28 @@
 # How to Add a New Custom Block
-This file includes the basics of what to add and what to change to add a 
+This file includes the basics of what to add and what to change to add a
 new custom block to this plugin.
 
 ## Plugin Files
 These are the core plugin files. You will add pointers to your custom block files.
 ### index.php
-This is the core plugin file. 
+This is the core plugin file.
 Here you will add a call to include your block's PHP file.
 ```phpregexp
-include(plugin_dir_path(__FILE__) . 'classes/CourseCatalog.php');
+include_once(plugin_dir_path(__FILE__) . 'classes/CourseCatalog.php');
 ```
 Then you will instantiate your block's object.
 ```phpregexp
 $CourseCatalog = new CourseCatalog();
 ```
 ### src/index.js
-This is the core javascript file for the plugin. Similar to the PHP file, you will 
+This is the core javascript file for the plugin. Similar to the PHP file, you will
 include your block's javascript and instantiate it.
 ```javascript
 import CourseCatalog from './blocks/CourseCatalog';
 CourseCatalog();
 ```
 ### build/index.js
-The wp-scripts node package you add in the [Development Environment Setup](https://github.com/ucsc/ucsc-gutenberg-blocks#development-environment-setup) 
+The wp-scripts node package you add in the [Development Environment Setup](https://github.com/ucsc/ucsc-gutenberg-blocks#development-environment-setup)
 will combine all the files referenced in src/index.js .
 ## Your Block Files
 At this point you should follow the conventions for the code that is already there in another block and name your files in a similar fashion.
@@ -63,7 +63,7 @@ Here you keep your front-end Javascript and CSS files. They must be included in 
 ## Future Improvements
 ### Templating
 The code in the function you declare as the 'init' for the script must include markup and data to be displayed with ```echo``` statements.
-The method used so far is functional but problematic when the markup gets more complex and the 
+The method used so far is functional but problematic when the markup gets more complex and the
 data more complex or nested. These are problems that were solved long ago with templating tools.
 #### REST API and browser processing
 Most blocks can deliver their data via a REST API. [Front end solutions](https://awhitepixel.com/blog/create-and-fetch-custom-rest-endpoints-in-gutenberg-blocks/) can be used to render this data.

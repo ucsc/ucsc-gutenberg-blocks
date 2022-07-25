@@ -21,18 +21,18 @@ const DepartmentDropdown = ({
     [localDepartment, setLocalDepartment] = useState(department);
   }
   useEffect(() => {
-    fetch('/wp-json/ucscgutenbergblocks/v1/departmentcode')
+    fetch('/wp-json/ucscgutenbergblocks/v1/cddepartmentcode')
     .then(res => res.text())
     .then((text) => {
-      const resp = JSON.parse(text).map(item => {return {label: item.label, value: item.label}});
+      const resp = JSON.parse(text);
       setDepartments(resp);
     });
   }, []);
 
   return (
     <>
-      {departments.length > 0 && (
-        <div style={{width: "max-content"}}>
+      <div style={{width: "max-content"}}>
+        {departments.length > 0 && (
           <SelectControl
             label={ label }
             value={ department }
@@ -43,8 +43,11 @@ const DepartmentDropdown = ({
             }}
             disabled={disabled}
           />
-        </div>
-      )}
+        )}
+        {!departments.length && (
+          <span>Department Dropdown Loading...</span>
+        )}
+      </div>
     </>
   )
 }

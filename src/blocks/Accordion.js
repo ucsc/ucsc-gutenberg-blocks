@@ -9,6 +9,9 @@ const Accordion = () => {
     attributes: {
       openOnPageLoad: {
         type: 'boolean',
+      },
+      title: {
+        type: 'string'
       }
     },
     edit: ({ setAttributes, attributes }) => {
