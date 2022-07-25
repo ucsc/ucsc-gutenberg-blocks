@@ -31,8 +31,8 @@ const DivisionDropdown = ({
 
   return (
     <>
-      {divisions.length > 0 && (
-        <div style={{width: "max-content"}}>
+      <div style={{width: "max-content"}}>
+        {divisions.length > 0 && (
           <SelectControl
             label={ label }
             value={ division }
@@ -43,8 +43,11 @@ const DivisionDropdown = ({
             }}
             disabled={disabled}
           />
-        </div>
-      )}
+        )}
+        {!divisions.length && (
+          <span>Divisions Dropdown Loading...</span>
+        )}
+      </div>
     </>
   )
 }
