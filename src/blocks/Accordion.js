@@ -1,4 +1,4 @@
-import { InnerBlocks, useBlockProps, BlockControls, InspectorControls } from '@wordpress/block-editor';
+import { InnerBlocks, InspectorControls } from '@wordpress/block-editor';
 import { Panel, PanelBody, CheckboxControl } from '@wordpress/components';
 
 const Accordion = () => {
@@ -15,7 +15,6 @@ const Accordion = () => {
       }
     },
     edit: ({ setAttributes, attributes }) => {
-      const blockProps = useBlockProps();
 
       return (
         <>
@@ -44,10 +43,9 @@ const Accordion = () => {
       );
     },
     save:() => {
-      const blockProps = useBlockProps.save();
 
       return (
-          <div { ...blockProps }>
+          <div>
               <InnerBlocks.Content />
           </div>
       );
