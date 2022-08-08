@@ -84,19 +84,14 @@ class CourseCatalog
         echo '<div id="courseCatalog">
     <div class="introText">
         <label>
-        Search Dept Courses:<input type="text" id="search" onkeyup="tableSearch()">
-        </label>
-    </div>
-    <div class="introText">
-        <label>
-        View titles & course descriptions for department course offerings
+        Search Courses:<input type="text" id="search" onkeyup="tableSearch()">
         </label>
     </div>
     <div class="introText clickText">
         <label>
-            Click a course\'s title to read its description.
-            <a id="expandAll" class="collapseExpandLinks pointer">View All</a>
-            <a id="collapseAll" class="collapseExpandLinks pointer">Collapse All</a>
+            Select a course title for details.
+            <a id="expandAll" class="collapseExpandLinks pointer">Expand all</a>
+            <a id="collapseAll" class="collapseExpandLinks pointer">Collapse all</a>
         </label>
     </div>';
         echo '<table class="table-sortable" id="tableSorter">';
