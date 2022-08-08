@@ -1,6 +1,8 @@
 import AutomatedFeeds from './AutomatedFeeds';
 import InformationToDisplay from './InformationToDisplay';
 import InformationToDisplayTable from './InformationToDisplayTable';
+import CampusDirectoryDepartmentDropdown from './CampusDirectoryDepartmentDropdown';
+import DivisionDropdown from '../DivisionDropdown';
 
 import { RadioControl, TextareaControl, CheckboxControl } from '@wordpress/components';
 import { useState } from '@wordpress/element';
@@ -19,7 +21,10 @@ const PeopleAndInformation = ({
   linkToProfile,
   strInformationTypes,
   strInformationTypesTable,
-  pageLayout
+  pageLayout,
+  division,
+  department,
+  deptOrDiv
 }) => {
   let localAutomatedFeeds;
   let setLocalAutomatedFeeds;
@@ -94,6 +99,17 @@ const PeopleAndInformation = ({
     ] = useState(displayDeptartmentAffiliates);
   }
 
+  let localDeptOrDiv;
+  let setLocalDeptOrDiv;
+  if (typeof deptOrDiv === 'undefined') {
+    [localDeptOrDiv, setLocalDeptOrDiv] = useState('dept');
+    setAttributes({
+      deptOrDiv: 'dept'
+    });
+  } else {
+    [localDeptOrDiv, setLocalDeptOrDiv] = useState(deptOrDiv);
+  }
+
   const options = [
     { label: 'Use Automated Feed(s)', value: true },
     { label: 'Create My Own List of People to Display', value: false },
@@ -135,6 +151,33 @@ const PeopleAndInformation = ({
       )}
       {localAutomatedFeeds && (
         <div>
+          <h5>Set Department or Division</h5>
+          <div className="vertical_radio">
+            <RadioControl
+                selected={ deptOrDiv }
+                options={ [
+                    { label: 'Department', value: 'dept' },
+                    { label: 'Division', value: 'div' },
+                ] }
+                onChange={ ( value ) => {
+                  setAttributes( { deptOrDiv: value } );
+                  setLocalDeptOrDiv(value);
+                }}
+            />
+            <hr />
+            <CampusDirectoryDepartmentDropdown
+              label="Department"
+              department={department}
+              setAttributes={setAttributes}
+              disabled={!(deptOrDiv === 'dept')}
+            />
+            <DivisionDropdown
+              label="Division"
+              division={division}
+              setAttributes={setAttributes}
+              disabled={!(deptOrDiv === 'div')}
+            />
+          </div>
           <AutomatedFeeds
             setAttributes={setAttributes}
             strFacultyTypes={strFacultyTypes}

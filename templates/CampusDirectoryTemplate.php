@@ -94,12 +94,12 @@
                                 if ($disItem[$key] == "Email") {
                                   if (array_key_exists("mail", $people[$i])) {
                                     for($j=0; $j<count($people[$i]["mail"]); $j++) {
-                                        echo "<li><span><a class=\"u-email\" href=\"{$people[$i]['mail'][$j]}\">{$people[$i]['mail'][$j]}</a></span></li>";
+                                        echo "<li><span><a class=\"u-email\" href=\"mailto:{$people[$i]['mail'][$j]}\">{$people[$i]['mail'][$j]}</a></span></li>";
                                     }
                                   }
                                   if (array_key_exists("ucscpersonpubalternatemail", $people[$i])) {
                                     for($j=0; $j<count($people[$i]["ucscpersonpubalternatemail"]); $j++) {
-                                        echo "<li><span><a class=\"u-email\" href=\"{$people[$i]['mail'][$j]}\">{$people[$i]['ucscpersonpubalternatemail'][$j]}</a></span></li>";
+                                        echo "<li><span><a class=\"u-email\" href=\"mailto:{$people[$i]['mail'][$j]}\">{$people[$i]['ucscpersonpubalternatemail'][$j]}</a></span></li>";
                                     }
                                   }
                                 } else if ($disItem[$key] == "Office Location") {
@@ -130,8 +130,7 @@
                     $imgSrc = "//static.ucsc.edu/images/icon-slug.jpg";
                   }
                   if ($items['linkToProfile']) echo '<a class="u-url square-img" href="?directoryprofilecruzid=' . $people[$i]['uid'][0] . '">';
-                  echo "<img src='" . $imgSrc . "' class='item-image square-img imgLiquid imgLiquid_bgSize imgLiquid_ready' style='object-fit: cover;' />";
-                  if ($items['linkToProfile']) echo '</a>';
+                  echo "<img src='" . $imgSrc . "' class='item-image square-img imgLiquid imgLiquid_bgSize imgLiquid_ready' style='object-fit: cover;'  alt='Profile picture of ". $people[$i]['cn'][0] ."' />";                  if ($items['linkToProfile']) echo '</a>';
                 ?>
               </div>
               <?php

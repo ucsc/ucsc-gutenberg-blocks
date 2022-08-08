@@ -54,7 +54,7 @@
 .table-sortable thead th {
     text-align: left;
     border-bottom: 1px solid black;
-    color: #5585A2;
+    color: var(--wp--preset--color--ucsc-primary-blue);
 }
 
 th,
@@ -77,7 +77,6 @@ tr.hide {
 #courseCatalog button,
 #courseCatalog label {
     font-family: Roboto, sans-serif;
-    font-size: 11px;
     padding: 0;
 }
 
@@ -91,6 +90,7 @@ span.secret {
 
 .clickText {
     font-style: italic;
+    padding-top: 10px;
 }
 
 .collapseExpandLinks {
@@ -101,7 +101,7 @@ span.secret {
 }
 
 .collapseExpandText {
-    color: #5585A2;
+    color: var(--wp--preset--color--ucsc-primary-blue);
     text-decoration: underline;
     cursor: pointer;
 }

@@ -84,17 +84,6 @@ const CampusDirectory = () => {
       const [configuredCorrectly, setConfiguredCorrectly] = useState(true);
       const [resp, setResp] = useState({});
 
-      let localDeptOrDiv;
-      let setLocalDeptOrDiv;
-      if (typeof deptOrDiv === 'undefined') {
-        [localDeptOrDiv, setLocalDeptOrDiv] = useState('dept');
-        setAttributes({
-          deptOrDiv: 'dept'
-        });
-      } else {
-        [localDeptOrDiv, setLocalDeptOrDiv] = useState(deptOrDiv);
-      }
-
       useEffect(() => {
         fetch('/wp-json/ucscgutenbergblocks/v1/campusdirectoryrequirements')
           .then(res => res.text())
@@ -109,32 +98,6 @@ const CampusDirectory = () => {
         <>
           {configuredCorrectly && (
             <Panel className="directory-block" header="Directory Block">
-              <PanelBody title="Set Department or Division" initialOpen>
-                <RadioControl
-                    selected={ deptOrDiv }
-                    options={ [
-                        { label: 'Department', value: 'dept' },
-                        { label: 'Division', value: 'div' },
-                    ] }
-                    onChange={ ( value ) => {
-                      setAttributes( { deptOrDiv: value } );
-                      setLocalDeptOrDiv(value);
-                    }}
-                />
-                <hr />
-                <CampusDirectoryDepartmentDropdown
-                  label="Department"
-                  department={department}
-                  setAttributes={setAttributes}
-                  disabled={!(deptOrDiv === 'dept')}
-                />
-                <DivisionDropdown
-                  label="Division"
-                  division={division}
-                  setAttributes={setAttributes}
-                  disabled={!(deptOrDiv === 'div')}
-                />
-              </PanelBody>
               <PanelBody title="Layout Type" initialOpen>
                 <PanelRow>
                   <PageLayout
@@ -160,6 +123,9 @@ const CampusDirectory = () => {
                     strInformationTypes={strInformationTypes}
                     strInformationTypesTable={strInformationTypesTable}
                     pageLayout={pageLayout}
+                    division={division}
+                    department={department}
+                    deptOrDiv={deptOrDiv}
                   />
                 </PanelRow>
               </PanelBody>
