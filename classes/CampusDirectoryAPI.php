@@ -273,7 +273,7 @@ class CampusDirectoryAPI {
       if ($this->count > 1) $filterString = "(|$filterString)";
 
       if (!empty($department) || !empty($division)) {
-        if ($this->nodeContent['displayDeptartmentAffiliates']) {
+        if ($this->nodeContent['displayDeptartmentAffiliates'] && $deptOrDiv == 'dept') {
           $filterString = "(&(ucscpersonpubaffiliateddepartment=$department)$filterString)";
         } elseif ($deptOrDiv == 'dept') {
           $filterString = "(&(ucscpersonpubdepartmentnumber=$department)$filterString)";
