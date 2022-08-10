@@ -16,6 +16,10 @@ class SiteSettings
         'methods' => 'GET',
         'callback' => array($this, 'departmentcode')
       ));
+      register_rest_route('ucscgutenbergblocks/v1', '/subjectcode/', array(
+        'methods' => 'GET',
+        'callback' => array($this, 'subjectcode')
+      ));
       register_rest_route('ucscgutenbergblocks/v1', '/cddepartmentcode/', array(
         'methods' => 'GET',
         'callback' => array($this, 'cddepartmentcode')
@@ -1135,7 +1139,55 @@ class SiteSettings
   function departmentcode()
   {
 
-    $retDepts = get_transient('ucsc_deps');
+    $retDepts = get_transient('ucsc_depts');
+    if (!$retDepts) {
+      $curl = curl_init();
+
+      curl_setopt_array($curl, array(
+        CURLOPT_URL => 'https://my.ucsc.edu/PSIGW/RESTListeningConnector/PSFT_CSPRD/SCX_CLASS_DEPTS_V2.v2/'. date("Y", strtotime("-7 months")) .'/Fall',
+        CURLOPT_RETURNTRANSFER => true,
+        CURLOPT_ENCODING => '',
+        CURLOPT_MAXREDIRS => 10,
+        CURLOPT_TIMEOUT => 0,
+        CURLOPT_FOLLOWLOCATION => true,
+        CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
+        CURLOPT_CUSTOMREQUEST => 'GET',
+      ));
+
+      $response = curl_exec($curl);
+
+      curl_close($curl);
+      $arrResponse = json_decode($response, true);
+      $depts = $arrResponse['depts'];
+      $retDepts = [];
+      for($i=0; $i<count($depts); $i++) {
+        $retDepts[] = [
+          'label' => $depts[$i]['description'],
+          'value' => $depts[$i]['code']
+        ];
+      }
+
+      function cmp($a, $b) {
+        return strcmp($a['label'], $b['label']);
+      }
+
+      usort($retDepts, "cmp");
+
+      array_unshift($retDepts, [
+        'label' => '---',
+        'value' => '---'
+      ]);
+
+      set_transient('ucsc_depts', $retDepts, WEEK_IN_SECONDS);
+    }
+    return new WP_REST_Response($retDepts);
+
+  }
+
+  function subjectcode()
+  {
+
+    $retDepts = get_transient('ucsc_subjects');
     if (!$retDepts) {
       $curl = curl_init();
 
@@ -1178,7 +1230,7 @@ class SiteSettings
         'value' => '---'
       ]);
 
-      set_transient('ucsc_deps', $retDepts, WEEK_IN_SECONDS);
+      set_transient('ucsc_subjects', $retDepts, WEEK_IN_SECONDS);
     }
     return new WP_REST_Response($retDepts);
 

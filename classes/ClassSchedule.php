@@ -41,9 +41,15 @@ class ClassSchedule
 
   function theHTML($attributes)
   {
+    $deptOrSubAttribute = '';
+    if ($attributes['subjectOrDept'] == 'dept') {
+      $deptOrSubAttribute = 'department="' . $attributes['department']  . '"';
+    } else {
+      $deptOrSubAttribute = 'subject="' . $attributes['subject']  . '" department=""';
+    }
     $markup = '
       <link rel="stylesheet" href="https://webapps.ucsc.edu/wcsi/css/app.css">
-      <div id="wcsi"  department="' . $attributes['department'] . '" >
+      <div id="wcsi" ' . $deptOrSubAttribute . ' >
 
       </div>
       <script src="https://cdn.polyfill.io/v2/polyfill.min.js?features=default,Promise,Object.assign,Object.values,Array.prototype.find,Array.prototype.findIndex,Array.prototype.includes,String.prototype.includes,String.prototype.startsWith,String.prototype.endsWith"></script>

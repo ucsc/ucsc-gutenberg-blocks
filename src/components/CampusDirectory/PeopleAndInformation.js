@@ -226,30 +226,32 @@ const PeopleAndInformation = ({
               />
             </div>
           )}
-          <div>
-            <h5>
-              Display Department Affiliates? (Rare for administrative units.)
-            </h5>
-            <p>
-              <i>
-                For example, a faculty member is officially associated with the
-                History Department but is also affiliated with College Nine
-                because they teach a College Nine Core Course.
-              </i>
-            </p>
-            <div className="flex-labels">
-              <CheckboxControl
-                label="Display Affiliates"
-                checked={boolDisplayDepartmentAffiliates}
-                onChange={newValue => {
-                  setBoolDisplayDepartmentAffiliates(newValue);
-                  setAttributes({
-                    displayDeptartmentAffiliates: newValue
-                  });
-                }}
-              />
+          {deptOrDiv === "dept" && (
+            <div>
+              <h5>
+                Display Department Affiliates? (Rare for administrative units.)
+              </h5>
+              <p>
+                <i>
+                  For example, a faculty member is officially associated with the
+                  History Department but is also affiliated with College Nine
+                  because they teach a College Nine Core Course.
+                </i>
+              </p>
+              <div className="flex-labels">
+                <CheckboxControl
+                  label="Display Affiliates"
+                  checked={boolDisplayDepartmentAffiliates}
+                  onChange={newValue => {
+                    setBoolDisplayDepartmentAffiliates(newValue);
+                    setAttributes({
+                      displayDeptartmentAffiliates: newValue
+                    });
+                  }}
+                />
+              </div>
             </div>
-          </div>
+          )}
         </div>
       )}
       {pageLayout !== "table" ? (
