@@ -46,8 +46,9 @@ class CourseCatalog
 
     function getCachedCourses($subject, $subjectOrDept) {
         $lowerTitle = strtolower($subject);
-        $body = get_transient('course-catalog-' . $lowerTitle);
-        if ($body) {
+        $body = get_transient('course-catalog-' . $lowerTitle . '-' . $subjectOrDept);
+
+        if (!$body) {
             $queryStr = "";
             if ($subjectOrDept == 'dept') {
                 $queryStr = '<acad_org>' . $subject . '</acad_org>';
@@ -72,7 +73,7 @@ class CourseCatalog
             );
             $response = wp_remote_post("https://my.prd.ais.aws.ucsc.edu:443/PSIGW/HttpListeningConnector", $args);
             $body = wp_remote_retrieve_body($response);
-            set_transient('course-catalog-' . $lowerTitle, $body, WEEK_IN_SECONDS);
+            set_transient('course-catalog-' . $lowerTitle . '-' . $subjectOrDept, $body, WEEK_IN_SECONDS);
         }
         $xmlBody = simplexml_load_string($body);
         return $xmlBody;
