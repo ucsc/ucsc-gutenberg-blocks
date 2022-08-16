@@ -44,17 +44,20 @@ class CourseCatalog
         ));
     }
 
-    function getCachedCourses($subject, $subjectOrDept) {
-        $lowerTitle = strtolower($subject);
-        $body = get_transient('course-catalog-' . $lowerTitle . '-' . $subjectOrDept);
+    // function getCachedCourses($subject, $subjectOrDept) {
+    function getCachedCourses($attributes) {
+        $subjectOrDept = $attributes['subjectOrDept'];
+        $queryStr = "";
+        if ($subjectOrDept == 'dept') {
+            $lowerTitle = strtolower($attributes['department']);
+            $queryStr = '<acad_org>' . $lowerTitle . '</acad_org>';
 
+        } else {
+            $lowerTitle = strtolower($attributes['subject']);
+            $queryStr = '<subject>' . $lowerTitle . '</subject>';
+        }
+        $body = get_transient('course-catalog-' . $lowerTitle . '-' . $subjectOrDept);
         if (!$body) {
-            $queryStr = "";
-            if ($subjectOrDept == 'dept') {
-                $queryStr = '<acad_org>' . $subject . '</acad_org>';
-            } else {
-                $queryStr = '<subject>' . $subject . '</subject>';
-            }
             $request_body = '<!--?xml version="1.0"?-->
       <catalog>
           ' . $queryStr . '
@@ -79,15 +82,9 @@ class CourseCatalog
         return $xmlBody;
     }
 
-    function getCourses($subject, $subjectOrDept) {
-        $cachedData = $this->getCachedCourses($subject, $subjectOrDept);
-        return $cachedData;
-    }
-
     function theHTML($attributes) {
         ob_start();
-        $department = strtolower($attributes['department']);
-        $courses = $this->getCourses($department, $attributes["subjectOrDept"]);
+        $courses = $this->getCachedCourses($attributes);
         echo '<div id="courseCatalog">
     <div class="introText">
         <label>
