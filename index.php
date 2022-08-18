@@ -3,7 +3,7 @@
 /*
   Plugin Name: UCSC Gutenberg Blocks
   Description: Custom UCSC Gutenberg Blocks.
-  Version: 1.0.16
+  Version: 1.0.17
   Author: UCSC
   Author URI: https://www.ucsc.edu/
 */
@@ -23,7 +23,7 @@ include_once(plugin_dir_path(__FILE__) . 'classes/SiteSettings.php');
 add_action('admin_enqueue_scripts', 'registerJSBuild');
 
 function registerJSBuild() {
-  wp_enqueue_script('ucscblocks', plugin_dir_url(__FILE__) . 'build/index.js', array('wp-blocks','wp-element', 'wp-components'));
+  wp_enqueue_script('ucscblocks', plugin_dir_url(__FILE__) . 'build/index.js', array('wp-blocks','wp-element', 'wp-components', 'wp-block-editor'));
 }
 
 
