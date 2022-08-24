@@ -86,7 +86,7 @@ class CampusDirectory
     $campusDirectoryAPI = new CampusDirectoryAPI($attributes);
     $items = $campusDirectoryAPI->setDirectoryData();
     ob_start();
-    include_once(plugin_dir_path(__FILE__) . '../templates/CampusDirectoryTemplate.php');
+    include(plugin_dir_path(__FILE__) . '../templates/CampusDirectoryTemplate.php');
 
     $output = ob_get_contents(); // collect output
     ob_end_clean(); // Turn off output buffer
