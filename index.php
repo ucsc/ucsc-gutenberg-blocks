@@ -12,10 +12,13 @@ if (!defined('ABSPATH')) exit; // Exit if accessed directly
 // include_once(plugin_dir_path(__FILE__) . 'classes/UCSCGutenbergDemoBlock1.php');
 // include_once(plugin_dir_path(__FILE__) . 'classes/UCSCGutenbergDemoBlock2.php');
 // include_once(plugin_dir_path(__FILE__) . 'classes/ContentSharer.php');
+
 include_once(plugin_dir_path(__FILE__) . 'classes/CourseCatalog.php');
 include_once(plugin_dir_path(__FILE__) . 'classes/CampusDirectory.php');
 include_once(plugin_dir_path(__FILE__) . 'classes/ClassSchedule.php');
 include_once(plugin_dir_path(__FILE__) . 'classes/Accordion.php');
+include_once(plugin_dir_path(__FILE__) . 'classes/AccordionWrapper.php');
+
 // include_once(plugin_dir_path(__FILE__) . 'classes/FeedbackForm.php');
 include_once(plugin_dir_path(__FILE__) . 'classes/SiteSettings.php');
 
@@ -32,9 +35,12 @@ function registerJSBuild() {
 // $UCSCGutenbergDemoBlock1 = new UCSCGutenbergDemoBlock1();
 // $UCSCGutenbergDemoBlock2 = new UCSCGutenbergDemoBlock2();
 // $ContentSharer = new ContentSharer();
+
 $CourseCatalog = new CourseCatalog();
 $CampusDirectory = new CampusDirectory();
 $ClassSchedule = new ClassSchedule();
 $Accordion = new Accordion();
+$AccordionWrapper = new AccordionWrapper();
 $SiteSettings = new SiteSettings();
+
 // $FeedbackForm = new FeedbackForm();
