@@ -9,6 +9,15 @@
 // echo print_r($items['q'], true);
 // echo "</pre>";
 
+$displayPhoto = false;
+for($i=0; $i<count($items['informationToDisplay']); $i++) {
+  foreach($items['informationToDisplay'][$i] as $key => $value) {
+    if ($key == "b64image") {
+      $displayPhoto = true;
+    }
+  }
+}
+
   if ($items['dirLayout'] == "table") {
   ?>
     <div class="section-container table-page">
@@ -124,13 +133,15 @@
                   </ul>
                 </div>
                 <?php
-                  if (array_key_exists('jpegphoto', $people[$i])) {
-                    $imgSrc = "data:image/jpeg;base64, " .  base64_encode($people[$i]['jpegphoto'][0]);
-                  } else {
-                    $imgSrc = "//static.ucsc.edu/images/icon-slug.jpg";
+                  if ($displayPhoto) {
+                    if (array_key_exists('jpegphoto', $people[$i])) {
+                      $imgSrc = "data:image/jpeg;base64, " .  base64_encode($people[$i]['jpegphoto'][0]);
+                    } else {
+                      $imgSrc = "//static.ucsc.edu/images/icon-slug.jpg";
+                    }
+                    if ($items['linkToProfile']) echo '<a class="u-url square-img" href="?directoryprofilecruzid=' . $people[$i]['uid'][0] . '">';
+                    echo "<img src='" . $imgSrc . "' class='item-image square-img imgLiquid imgLiquid_bgSize imgLiquid_ready' style='object-fit: cover;'  alt='Profile picture of ". $people[$i]['cn'][0] ."' />";                  if ($items['linkToProfile']) echo '</a>';
                   }
-                  if ($items['linkToProfile']) echo '<a class="u-url square-img" href="?directoryprofilecruzid=' . $people[$i]['uid'][0] . '">';
-                  echo "<img src='" . $imgSrc . "' class='item-image square-img imgLiquid imgLiquid_bgSize imgLiquid_ready' style='object-fit: cover;'  alt='Profile picture of ". $people[$i]['cn'][0] ."' />";                  if ($items['linkToProfile']) echo '</a>';
                 ?>
               </div>
               <?php
