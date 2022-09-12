@@ -36,7 +36,8 @@ const Accordion = () => {
                 onKeyUp={event => {
                   event.preventDefault();
                 }}
-                onChange={e => setAttributes({title: e.target.value})} /></summary>
+                onChange={e => setAttributes({title: e.target.value})}
+                style={{"width": "100%"}} /></summary>
               <InnerBlocks />
           </details>
         </>
