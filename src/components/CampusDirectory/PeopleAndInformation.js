@@ -19,6 +19,7 @@ const PeopleAndInformation = ({
   excludeCruzids,
   displayDeptartmentAffiliates,
   linkToProfile,
+  linkOutToCampusDirectory,
   strInformationTypes,
   strInformationTypesTable,
   pageLayout,
@@ -228,6 +229,7 @@ const PeopleAndInformation = ({
           )}
           {deptOrDiv === "dept" && (
             <div>
+              <hr />
               <h5>
                 Display Department Affiliates? (Rare for administrative units.)
               </h5>
@@ -258,12 +260,15 @@ const PeopleAndInformation = ({
         <InformationToDisplay
           setAttributes={setAttributes}
           linkToProfile={linkToProfile}
+          linkOutToCampusDirectory={linkOutToCampusDirectory}
           strInformationTypes={strInformationTypes}
+          pageLayout={pageLayout}
         />
       ) : (
         <InformationToDisplayTable
           setAttributes={setAttributes}
           linkToProfile={linkToProfile}
+          linkOutToCampusDirectory={linkOutToCampusDirectory}
           strInformationTypesTable={strInformationTypesTable}
         />
       )}
