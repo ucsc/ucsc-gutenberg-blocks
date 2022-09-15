@@ -18,6 +18,10 @@ for($i=0; $i<count($items['informationToDisplay']); $i++) {
   }
 }
 
+$individualPageUrl = $items['nodeContent']['linkOutToCampusDirectory'] ?
+                        'https://campusdirectory.ucsc.edu/cd_detail?uid=' :
+                        '?directoryprofilecruzid=';
+
   if ($items['dirLayout'] == "table") {
   ?>
     <div class="section-container table-page">
@@ -40,7 +44,7 @@ for($i=0; $i<count($items['informationToDisplay']); $i++) {
                 for($i = 0; $i < count($people); $i++) {
                   echo '<tr class="item-body">';
                     echo '<td class="item-name">';
-                      if ($items['linkToProfile']) echo '<a class="u-url" href="/?directoryprofilecruzid=' . $people[$i]['uid'][0] . '">';
+                      if ($items['linkToProfile']) echo '<a class="u-url" href="' . $individualPageUrl . $people[$i]['uid'][0] . '">';
                         echo '<span class="p-name" style="white-space: nowrap;">' . $people[$i]['cn'][0] . '</span>';
                       if ($items['linkToProfile']) echo '</a>';
                     echo '</td>';
@@ -84,7 +88,7 @@ for($i=0; $i<count($items['informationToDisplay']); $i++) {
                   <h3 class="item-name">
                     <?php
                       if ($items['linkToProfile']) {
-                        echo '<a class="u-url" href="?directoryprofilecruzid=' . $people[$i]['uid'][0] . '">';
+                        echo '<a class="u-url" href="' . $individualPageUrl . $people[$i]['uid'][0] . '">';
                       }
                       echo '<span class="p-name">' . $people[$i]['cn'][0] . '</span>';
                       if ($items['linkToProfile']) {
@@ -139,7 +143,7 @@ for($i=0; $i<count($items['informationToDisplay']); $i++) {
                     } else {
                       $imgSrc = "//static.ucsc.edu/images/icon-slug.jpg";
                     }
-                    if ($items['linkToProfile']) echo '<a class="u-url square-img" href="?directoryprofilecruzid=' . $people[$i]['uid'][0] . '">';
+                    if ($items['linkToProfile']) echo '<a class="u-url square-img" href="' . $individualPageUrl . $people[$i]['uid'][0] . '">';
                     echo "<img src='" . $imgSrc . "' class='item-image square-img imgLiquid imgLiquid_bgSize imgLiquid_ready' style='object-fit: cover;'  alt='Profile picture of ". $people[$i]['cn'][0] ."' />";                  if ($items['linkToProfile']) echo '</a>';
                   }
                 ?>

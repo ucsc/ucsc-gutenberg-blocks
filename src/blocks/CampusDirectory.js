@@ -45,6 +45,9 @@ const CampusDirectory = () => {
       linkToProfile: {
         type: 'boolean',
       },
+      linkOutToCampusDirectory: {
+        type: 'boolean',
+      },
       strInformationTypes: {
         type: 'string',
       },
@@ -74,6 +77,7 @@ const CampusDirectory = () => {
         excludeCruzids,
         displayDeptartmentAffiliates,
         linkToProfile,
+        linkOutToCampusDirectory,
         strInformationTypes,
         strInformationTypesTable,
         department,
@@ -120,6 +124,7 @@ const CampusDirectory = () => {
                     excludeCruzids={excludeCruzids}
                     displayDeptartmentAffiliates={displayDeptartmentAffiliates}
                     linkToProfile={linkToProfile}
+                    linkOutToCampusDirectory={linkOutToCampusDirectory}
                     strInformationTypes={strInformationTypes}
                     strInformationTypesTable={strInformationTypesTable}
                     pageLayout={pageLayout}

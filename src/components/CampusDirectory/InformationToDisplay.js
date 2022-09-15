@@ -6,7 +6,9 @@ import { useState } from '@wordpress/element';
 const InformationToDisplay = ({
   setAttributes,
   linkToProfile,
+  linkOutToCampusDirectory,
   strInformationTypes,
+  pageLayout,
 }) => {
   let localLinkToProfile;
   let setLocalLinkToProfile;
@@ -17,6 +19,23 @@ const InformationToDisplay = ({
     });
   } else {
     [localLinkToProfile, setLocalLinkToProfile] = useState(linkToProfile);
+  }
+
+  let boolLinkOutToCampusDirectory;
+  let setBoolLinkOutToCampusDirectory;
+  if (typeof linkOutToCampusDirectory === 'undefined') {
+    [
+      boolLinkOutToCampusDirectory,
+      setBoolLinkOutToCampusDirectory,
+    ] = useState(false);
+    setAttributes({
+      linkOutToCampusDirectory: false,
+    });
+  } else {
+    [
+      boolLinkOutToCampusDirectory,
+      setBoolLinkOutToCampusDirectory,
+    ] = useState(linkOutToCampusDirectory);
   }
 
   const options = [
@@ -55,6 +74,7 @@ const InformationToDisplay = ({
 
   return (
     <div>
+      <hr />
       <h5>Link Name to Individual Profile?</h5>
       <p>
         <i>
@@ -74,8 +94,22 @@ const InformationToDisplay = ({
           options={options}
         />
       </div>
+      <div style={{paddingTop: "10px"}} className="flex-labels">
+        <CheckboxControl
+          label="Link to campusdirectory.ucsc.edu"
+          checked={boolLinkOutToCampusDirectory}
+          onChange={newValue => {
+            setBoolLinkOutToCampusDirectory(newValue);
+            setAttributes({
+              linkOutToCampusDirectory: newValue
+            });
+          }}
+          disabled={!localLinkToProfile}
+        />
+      </div>
+      <hr />
       <div className="flex-labels">
-        <h5>List Layout Information to Display</h5>
+        <h5>{pageLayout === 'list' ? "List" : "Tiled"} Layout Information to Display</h5>
         <CheckboxGroupControl
           setAttributes={setAttributes}
           currentAttributes={strInformationTypes}

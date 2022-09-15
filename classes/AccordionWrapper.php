@@ -28,21 +28,13 @@ class AccordionWrapper
             true
     );
     wp_enqueue_script('accordionwrapperjs');
-    // $file = '../src/components/CourseCatalog/tablesorter.css';
-    // wp_register_style(
-    //         'tablesorter',
-    //         plugins_url($file, __FILE__),
-    //         array(),
-    //         filemtime(plugin_dir_path(__FILE__) .$file)
-    // );
-    // wp_enqueue_style('tablesorter');
 }
 
   function theHTML($attributes, $content)
   {
     return '
             <div class="accordion-wrapper">
-              <a class="expand-collapse" id="expand" href="#">
+              <a class="expand-collapse" id="expand" href="#/">
                 Expand All
               </a>
             '
