@@ -11,6 +11,8 @@ function sortTableByColumn(table, column, asc = true) {
     const tBody = table.tBodies[0];
     let rows = Array.from(tBody.querySelectorAll("tr"));
 
+    column = column % 4;
+
     const rowsLinkedToDesc = [];
     for (var i = 0; i < rows.length; i += 2) {
         rowsLinkedToDesc.push({
@@ -79,12 +81,12 @@ document.querySelectorAll(".table-sortable td").forEach((tableSortable, index) =
     });
 });
 
-function tableSearch() {
+function tableSearch(e) {
     // Declare variables
     var input, filter, table, tr, td;
-    input = document.getElementById("search");
+    input =  e.currentTarget;
     filter = input.value.toUpperCase();
-    table = document.getElementById("tableSorter");
+    table = e.currentTarget.parentElement.parentElement.nextSibling.nextSibling.nextSibling;
     tr = table.getElementsByTagName("tr");
 
     // Loop through all table rows, and hide those who don't match the search query
@@ -110,12 +112,19 @@ function tableSearch() {
         tr[i + 1].style.display = matched;
     }
 }
-const expandAll = document.getElementById('expandAll')
-if (expandAll) expandAll.addEventListener('click', () => {
-    document.querySelectorAll('.hide').forEach((hiddenRow, index) => hiddenRow.classList.add("active"));
+
+const expandAlls = document.querySelectorAll('.expandAll')
+if (expandAlls) expandAlls.forEach(expandAll => {
+    expandAll.addEventListener('click', e => {
+        const currentTable = e.currentTarget.parentElement.parentElement.nextSibling;
+        currentTable.querySelectorAll('.hide').forEach((hiddenRow, index) => hiddenRow.classList.add("active"));
+    });
 });
 
-const collapseAll = document.getElementById('collapseAll');
-if (collapseAll) collapseAll.addEventListener('click', () => {
-    document.querySelectorAll('.hide').forEach((hiddenRow, index) => hiddenRow.classList.remove("active"));
+const collapseAlls = document.querySelectorAll('.collapseAll')
+if (collapseAlls) collapseAlls.forEach(collapseAll => {
+    collapseAll.addEventListener('click', e => {
+        const currentTable = e.currentTarget.parentElement.parentElement.nextSibling;
+        currentTable.querySelectorAll('.hide').forEach((hiddenRow, index) => hiddenRow.classList.remove("active"));
+    });
 });

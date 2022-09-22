@@ -53,7 +53,7 @@ $individualPageUrl = $items['nodeContent']['linkOutToCampusDirectory'] ?
                         echo '<td class="item-info table-renderer">';
                           echo '<strong>' . $people[$i][$key][0] . '</strong>';
                           echo '<ul class="inline-list">';
-                            if ($value == "Email") {
+                            if ($value == "Campus Email" || $value == "Other Email" || $value == "Other Email") {
                               echo '<li><a href="mailto:' . $people[$i][$key][0] . '">' . $people[$i][$key][0] . '</a></li>';
                             } else {
                               echo '<li>' . $people[$i][$key][0] . '</li>';
@@ -104,12 +104,13 @@ $individualPageUrl = $items['nodeContent']['linkOutToCampusDirectory'] ?
                             echo "<li>";
                               echo "<strong>{$disItem[$key]}</strong>";
                               echo '<ul class="inline-list">';
-                                if ($disItem[$key] == "Email") {
+                                if ($disItem[$key] == "Campus Email" ) {
                                   if (array_key_exists("mail", $people[$i])) {
                                     for($j=0; $j<count($people[$i]["mail"]); $j++) {
                                         echo "<li><span><a class=\"u-email\" href=\"mailto:{$people[$i]['mail'][$j]}\">{$people[$i]['mail'][$j]}</a></span></li>";
                                     }
                                   }
+                                } else if ($disItem[$key] == "Other Email") {
                                   if (array_key_exists("ucscpersonpubalternatemail", $people[$i])) {
                                     for($j=0; $j<count($people[$i]["ucscpersonpubalternatemail"]); $j++) {
                                         echo "<li><span><a class=\"u-email\" href=\"mailto:{$people[$i]['mail'][$j]}\">{$people[$i]['ucscpersonpubalternatemail'][$j]}</a></span></li>";

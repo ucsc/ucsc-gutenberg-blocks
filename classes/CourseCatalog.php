@@ -88,14 +88,14 @@ class CourseCatalog
         echo '<div id="courseCatalog">
     <div class="introText">
         <label>
-        Search Courses:<input type="text" id="search" onkeyup="tableSearch()">
+        Search Courses:<input type="text" id="search" onkeyup="tableSearch(event)">
         </label>
     </div>
     <div class="introText clickText">
         <label>
             Select a course title for details.
-            <a id="expandAll" class="collapseExpandLinks pointer">Expand all</a>
-            <a id="collapseAll" class="collapseExpandLinks pointer">Collapse all</a>
+            <a id="expandAll" class="expandAll collapseExpandLinks pointer">Expand all</a>
+            <a id="collapseAll" class="collapseAll collapseExpandLinks pointer">Collapse all</a>
         </label>
     </div>';
         echo '<table class="table-sortable" id="tableSorter">';
