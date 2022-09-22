@@ -48,7 +48,8 @@ const InformationToDisplay = ({
     'Title',
     'Department',
     'Phone',
-    'Email',
+    'Campus Email',
+    'Other Email',
     'Fax',
     'Website',
     'Office Location',
@@ -63,7 +64,7 @@ const InformationToDisplay = ({
     'Title',
     'Department',
     'Phone',
-    'Email',
+    'Campus Email',
   ];
 
   return (
