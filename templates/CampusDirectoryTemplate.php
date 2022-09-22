@@ -1,10 +1,10 @@
 <?php
-echo "<pre>";
-echo print_r($items['informationToDisplay'], true);
-echo "</pre>";
-echo "<pre>";
-echo print_r($items['nodeContent'], true);
-echo "</pre>";
+// echo "<pre>";
+// echo print_r($items['informationToDisplay'], true);
+// echo "</pre>";
+// echo "<pre>";
+// echo print_r($items['nodeContent'], true);
+// echo "</pre>";
 // echo "<pre>";
 // echo print_r($items['q'], true);
 // echo "</pre>";

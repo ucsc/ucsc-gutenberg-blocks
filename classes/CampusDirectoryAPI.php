@@ -45,7 +45,6 @@ class CampusDirectoryAPI {
       'Title' => 'title',
       'Department' => 'ucscpersonpubdepartmentnumber',
       'Phone' => 'telephonenumber',
-      'Email' => 'mail',
       'Campus Email' => 'mail',
       "Other Email" => 'ucscpersonpubalternatemail',
       'Fax' => 'facsimiletelephonenumber',
