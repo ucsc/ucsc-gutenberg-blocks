@@ -34,6 +34,7 @@ $individualPageUrl = $items['nodeContent']['linkOutToCampusDirectory'] ?
                 <?php
                   foreach($items['informationToDisplay'] as $disItem) {
                     foreach($disItem as $headerInfo) {
+                      if ($headerInfo == "Email") continue;
                       echo '<th scope="col" class="titles">' . $headerInfo . '</th>';
                     }
                   }
