@@ -34,6 +34,7 @@ $individualPageUrl = $items['nodeContent']['linkOutToCampusDirectory'] ?
                 <?php
                   foreach($items['informationToDisplay'] as $disItem) {
                     foreach($disItem as $headerInfo) {
+                      if ($headerInfo == "Email") continue;
                       echo '<th scope="col" class="titles">' . $headerInfo . '</th>';
                     }
                   }
@@ -53,9 +54,10 @@ $individualPageUrl = $items['nodeContent']['linkOutToCampusDirectory'] ?
                         echo '<td class="item-info table-renderer">';
                           echo '<strong>' . $people[$i][$key][0] . '</strong>';
                           echo '<ul class="inline-list">';
-                            if ($value == "Campus Email" || $value == "Other Email" || $value == "Other Email") {
+                            if ($value == "Campus Email" || $value == "Other Email") {
                               echo '<li><a href="mailto:' . $people[$i][$key][0] . '">' . $people[$i][$key][0] . '</a></li>';
                             } else {
+                              if ($value == "Email") continue;
                               echo '<li>' . $people[$i][$key][0] . '</li>';
                             }
                           echo '</ul>';
