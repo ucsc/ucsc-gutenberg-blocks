@@ -533,3 +533,8 @@ div.table-wrapper {
 .intro-paragraph {
     padding: 0 2.5em 0 2.5em;
 }
+
+.wp-block-column * {
+    min-width: fit-content;
+    word-break: inherit;
+}
