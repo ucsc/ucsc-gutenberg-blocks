@@ -91,17 +91,27 @@ class CampusDirectoryAPI {
   }
 
   public function doLDAPQuery($q, $arrCruzids) {
-    $rli = ldap_connect("ldaps://ldap-blue.ucsc.edu/");
+    $dev_env = getenv("DOCKER_DEV") == "docker_dev";
+    if ($dev_env) {
+      $rli = ldap_connect("ldap://ldap-blue.ucsc.edu/");
+    } else {
+      $rli = ldap_connect("ldaps://ldap-blue.ucsc.edu/");
+    }
+
     if ($rli) {
       ldap_set_option($rli, LDAP_OPT_TIMELIMIT, 90);
       ldap_set_option($rli, LDAP_OPT_PROTOCOL_VERSION, 3);
 
-      if (ldap_bind($rli, "cn=pantheon-webapps,ou=apps,dc=ucsc,dc=edu", $this->ldap_password)) {
+      if ($dev_env) @$ldapbind = ldap_bind($rli);
+      else @$ldapbind = ldap_bind($rli, "cn=pantheon-webapps,ou=apps,dc=ucsc,dc=edu", $this->ldap_password);
+      if ($ldapbind) {
         $sr = ldap_search($rli, "ou=people,dc=ucsc,dc=edu", "(|{$q})");
         $people = $this->processSearchResults($rli, $sr);
         $people = $this->addVacantPositions($people, $this->nodeContent['automatedFeeds'], $arrCruzids);
         ldap_close($rli);
         return $people;
+      } else {
+        echo ldap_error($rli );
       }
     }
 
