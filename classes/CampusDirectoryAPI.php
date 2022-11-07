@@ -326,10 +326,7 @@ class CampusDirectoryAPI {
 
   public function processSearchResults($rli, $sr)
   {
-    if ($this->nodeContent['automatedFeeds']) {
-      @ldap_sort($rli, $sr, "givenname");
-      @ldap_sort($rli, $sr, "sn");
-    }
+
 
     $people = [];
 
@@ -347,6 +344,16 @@ class CampusDirectoryAPI {
         array_push($people, $person);
       }
     }
+
+    if ($this->nodeContent['automatedFeeds']) {
+      usort($people, function($a, $b) {
+        return strnatcasecmp($a['givenname'][0], $b['givenname'][0]);
+      });
+      usort($people, function($a, $b) {
+        return strnatcasecmp($a['sn'][0], $b['sn'][0]);
+      });
+    }
+
     return $people;
   }
 }

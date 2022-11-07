@@ -8,7 +8,8 @@ class ClassSchedule
     add_action('rest_api_init', function () {
       register_rest_route('ucscgutenbergblocks/v1', '/classscheduledept/', array(
         'methods' => 'GET',
-        'callback' => array($this, 'classscheduledept')
+        'callback' => array($this, 'classscheduledept'),
+        'permission_callback' => function() {return true;}
       ));
     });
   }
@@ -28,9 +29,8 @@ class ClassSchedule
     ));
     wp_register_style(
       'ucscblocks-editor',
-      plugins_url('https://webapps.ucsc.edu/wcsi/css/app.css', __FILE__),
-      array('wp-edit-blocks'),
-      filemtime('https://webapps.ucsc.edu/wcsi/css/app.css')
+      plugins_url('//webapps.ucsc.edu/wcsi/css/app.css', __FILE__),
+      array('wp-edit-blocks')
     );
     wp_register_style( 'classschedule',
       plugins_url('../src/components/ClassSchedule/classschedule.css', __FILE__),

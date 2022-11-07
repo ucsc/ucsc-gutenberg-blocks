@@ -14,19 +14,23 @@ class SiteSettings
     add_action('rest_api_init', function () {
       register_rest_route('ucscgutenbergblocks/v1', '/departmentcode/', array(
         'methods' => 'GET',
-        'callback' => array($this, 'departmentcode')
+        'callback' => array($this, 'departmentcode'),
+        'permission_callback' => function() {return true;}
       ));
       register_rest_route('ucscgutenbergblocks/v1', '/subjectcode/', array(
         'methods' => 'GET',
-        'callback' => array($this, 'subjectcode')
+        'callback' => array($this, 'subjectcode'),
+        'permission_callback' => function() {return true;}
       ));
       register_rest_route('ucscgutenbergblocks/v1', '/cddepartmentcode/', array(
         'methods' => 'GET',
-        'callback' => array($this, 'cddepartmentcode')
+        'callback' => array($this, 'cddepartmentcode'),
+        'permission_callback' => function() {return true;}
       ));
       register_rest_route('ucscgutenbergblocks/v1', '/divisioncode/', array(
         'methods' => 'GET',
-        'callback' => array($this, 'divisioncode')
+        'callback' => array($this, 'divisioncode'),
+        'permission_callback' => function() {return true;}
       ));
     });
   }

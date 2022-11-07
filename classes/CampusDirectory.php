@@ -24,7 +24,8 @@ class CampusDirectory
     add_action('rest_api_init', function () {
       register_rest_route('ucscgutenbergblocks/v1', '/campusdirectoryrequirements/', array(
         'methods' => 'GET',
-        'callback' => array($this, 'requirements')
+        'callback' => array($this, 'requirements'),
+        'permission_callback' => function() {return true;}
       ));
     });
   }
@@ -82,7 +83,7 @@ class CampusDirectory
     $attributes['objStaffTypes'] = json_decode($attributes['strStaffTypes'], true);
     $attributes['objGradTypes'] = json_decode($attributes['strGradTypes'], true);
     $attributes['objInformationTypes'] = json_decode($attributes['strInformationTypes'], true);
-    $attributes['objInformationTypesTable'] = json_decode($attributes['strInformationTypesTable'], true);
+    if ($attributes['strInformationTypesTable'] != null) $attributes['objInformationTypesTable'] = json_decode($attributes['strInformationTypesTable'], true);
     $campusDirectoryAPI = new CampusDirectoryAPI($attributes);
     $items = $campusDirectoryAPI->setDirectoryData();
     ob_start();

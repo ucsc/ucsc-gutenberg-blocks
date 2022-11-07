@@ -14,7 +14,8 @@ class FeedbackForm
       // create a new rest route for posting the feedback form
       register_rest_route('ucscgutenbergblocks/v1', '/feedbackform', array(
         'methods' => 'POST',
-        'callback' => array($this, 'submit_feedback')
+        'callback' => array($this, 'submit_feedback'),
+        'permission_callback' => function() {return true;}
       ));
     });
   }
