@@ -3,7 +3,7 @@
 /*
   Plugin Name: UCSC Gutenberg Blocks
   Description: Custom UCSC Gutenberg Blocks.
-  Version: 1.1.3
+  Version: 1.1.5
   Author: UCSC
   Author URI: https://www.ucsc.edu/
 */
