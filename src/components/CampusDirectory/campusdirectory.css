@@ -400,7 +400,7 @@ div.item-expertise>ul li {
     -webkit-flex-direction: row wrap;
     display: flex;
     flex-flow: row wrap;
-    justify-content: center;
+    justify-content: start;
 }
 
 table .section-body tr td strong,

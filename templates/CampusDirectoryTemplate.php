@@ -6,7 +6,7 @@
 // echo print_r($items['nodeContent'], true);
 // echo "</pre>";
 // echo "<pre>";
-// echo print_r($items['q'], true);
+// echo print_r($items['items'][0]['mail']['count'], true);
 // echo "</pre>";
 
 $displayPhoto = false;
@@ -102,20 +102,20 @@ $individualPageUrl = $items['nodeContent']['linkOutToCampusDirectory'] ?
                     <?php
                       foreach($items['informationToDisplay'] as $disItem) {
                         foreach($disItem as $key => $value){
-                          if ($people[$i][$key][0]) {
+                          if (array_key_exists($key, $people[$i]) && $people[$i][$key][0]) {
                             echo "<li>";
                               echo "<strong>{$disItem[$key]}</strong>";
                               echo '<ul class="inline-list">';
                                 if ($disItem[$key] == "Campus Email" ) {
                                   if (array_key_exists("mail", $people[$i])) {
-                                    for($j=0; $j<count($people[$i]["mail"]); $j++) {
-                                        echo "<li><span><a class=\"u-email\" href=\"mailto:{$people[$i]['mail'][$j]}\">{$people[$i]['mail'][$j]}</a></span></li>";
+                                    for($j=0; $j<$people[$i]["mail"]['count']; $j++) {
+                                        echo "<li><span><a class=\"u-email kwa\" href=\"mailto:{$people[$i]['mail'][$j]}\">{$people[$i]['mail'][$j]}</a></span></li>";
                                     }
                                   }
                                 } else if ($disItem[$key] == "Other Email") {
                                   if (array_key_exists("ucscpersonpubalternatemail", $people[$i])) {
-                                    for($j=0; $j<count($people[$i]["ucscpersonpubalternatemail"]); $j++) {
-                                        echo "<li><span><a class=\"u-email\" href=\"mailto:{$people[$i]['mail'][$j]}\">{$people[$i]['ucscpersonpubalternatemail'][$j]}</a></span></li>";
+                                    for($j=0; $j<$people[$i]["ucscpersonpubalternatemail"]["count"]; $j++) {
+                                        echo "<li><span><a class=\"u-email\" href=\"mailto:{$people[$i]['ucscpersonpubalternatemail'][$j]}\">{$people[$i]['ucscpersonpubalternatemail'][$j]}</a></span></li>";
                                     }
                                   }
                                 } else if ($disItem[$key] == "Office Location") {
