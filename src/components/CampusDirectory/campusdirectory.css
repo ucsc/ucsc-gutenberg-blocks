@@ -130,8 +130,8 @@
     margin-bottom: 0.25em;
 }
 
-.section-container.sub .section-header a,
-.section-container.sub .section-header {
+.ucsc-block-directory .section-container.sub .section-header a,
+.ucsc-block-directory .section-container.sub .section-header {
     background-color: #e8e5cf !important;
     font-size: 1.4em;
     font-weight: 400;
@@ -145,7 +145,7 @@
 }
 
 .section-header>a,
-.section-container.sub .section-header>a {
+.ucsc-block-directory .section-container.sub .section-header > a {
     font-size: inherit;
     color: inherit;
     padding: 0;
@@ -165,8 +165,8 @@
 }
 
 .allapsible.allapsed,
-.section-container .collapsible.collapsed,
-.section-container.sub .collapsible.collapsed {
+.ucsc-block-directory .section-container .collapsible.collapsed,
+.ucsc-block-directory .section-container.sub .collapsible.collapsed {
     background: url(//static.ucsc.edu/images/5e5e5e-right-arrow-120x120.png) no-repeat .1em 50%;
     cursor: pointer;
     padding-left: .75em;
@@ -174,15 +174,15 @@
 }
 
 .allapsible,
-.section-container .collapsible,
-.section-container.sub .collapsible {
+.ucsc-block-directory .section-container .collapsible,
+.ucsc-block-directory .section-container.sub .collapsible {
     background: url(//static.ucsc.edu/images/5e5e5e-down-arrow-120x120.png) no-repeat .1em 50%;
     cursor: pointer;
     padding-left: .75em;
     background-size: .55em;
 }
 
-.section-container.sub .section-header:focus,
+.ucsc-block-directory .section-container.sub .section-header:focus,
 .section-header:focus {
     background-color: #fff !important;
     border-radius: 5px;
