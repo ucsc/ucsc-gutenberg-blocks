@@ -24,7 +24,7 @@ $individualPageUrl = $items['nodeContent']['linkOutToCampusDirectory'] ?
 
   if ($items['dirLayout'] == "table") {
   ?>
-    <div class="section-container ucsc-block-directory table-page">
+    <div class="section-container table-page">
       <div class="section-body">
         <div class="content-box">
           <table class="table-wrapper">
@@ -75,9 +75,9 @@ $individualPageUrl = $items['nodeContent']['linkOutToCampusDirectory'] ?
   <?php
 } else {
   if ($items['dirLayout'] == "tiled") {
-    ?> <div class="section-container ucsc-block-directory tiled-page"> <?php
+    ?> <div class="section-container tiled-page"> <?php
   } else {
-    ?> <div class="section-container ucsc-block-directory list-page"> <?php
+    ?> <div class="section-container list-page"> <?php
   }
     ?>
         <div class="section-body">
