@@ -161,11 +161,9 @@ class CampusDirectoryAPI {
     if ($automatedFeed) {
       $retArr = $people;
       if (array_key_exists('addCruzids', $this->nodeContent) && strlen($this->nodeContent['addCruzids'])) {
-        $arrCruzids = explode(",", $this->nodeContent['addCruzids']);
-        for ($i = 0; $i < count($arrCruzids); $i++) {
-          $arrCruzids[$i] = trim($arrCruzids[$i]);
-          if (substr($arrCruzids[$i], 0, 1) == "%") {
-            array_push($retArr, $this->addVacantPosition($arrCruzids[$i]));
+        if(preg_match_all("/%(?:[^%]*%){2}/", $this->nodeContent['addCruzids'], $vacancies)){
+          foreach ($vacancies[0] as $vacant){
+            array_push($retArr, $this->addVacantPosition($vacant));
           }
         }
       }
