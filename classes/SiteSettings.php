@@ -1278,9 +1278,14 @@ class SiteSettings
 
   function networkSettingsPage()
   {
+    if( ! function_exists('get_plugin_data') ){
+      require_once( ABSPATH . 'wp-admin/includes/plugin.php' );
+    }
+    $plugin_data = get_plugin_data( WP_PLUGIN_DIR . '/ucsc-gutenberg-blocks/index.php');
     echo '<div class="wrap">
-		<h1>UCSC Gutenberg Blocks Network Settings</h1>
-		<form method="post" action="edit.php?action=ucscplugin">';
+    <h1>UCSC Gutenberg Blocks Network Settings</h1>
+    <h3>Version: ' . $plugin_data['Version'] . '</h3>
+    <form method="post" action="edit.php?action=ucscplugin">';
     wp_nonce_field('ucscplugin-validate');
     echo '
 			<table class="form-table">
@@ -1316,9 +1321,15 @@ class SiteSettings
   }
 
   function settingsPageHTML()
-  { ?>
+  {
+    if( ! function_exists('get_plugin_data') ){
+      require_once( ABSPATH . 'wp-admin/includes/plugin.php' );
+    }
+    $plugin_data = get_plugin_data( WP_PLUGIN_DIR . '/ucsc-gutenberg-blocks/index.php');
+    ?>
     <div class="wrap">
       <h1>UCSC Gutenberg Blocks Settings</h1>
+      <h3>Version: <?php echo $plugin_data['Version']; ?></h3>
       <form action="options.php" method="POST">
         <?php
         settings_fields('ucsc_gutenberg_blocks');
