@@ -273,9 +273,9 @@ class CampusDirectoryAPI {
 
   public function processDeptDivFilterString(&$filterString)
   {
-    $department = $this->nodeContent['department'];
-    $division = $this->nodeContent['division'];
-    $deptOrDiv = $this->nodeContent['deptOrDiv'];
+    $department = ldap_escape($this->nodeContent['department'], "", LDAP_ESCAPE_FILTER);
+    $division = ldap_escape($this->nodeContent['division'], "", LDAP_ESCAPE_FILTER);
+    $deptOrDiv = ldap_escape($this->nodeContent['deptOrDiv'], "", LDAP_ESCAPE_FILTER);
 
 
     if ($this->count > 0) {
