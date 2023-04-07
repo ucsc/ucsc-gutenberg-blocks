@@ -818,6 +818,10 @@ class SiteSettings
       "value" => "Program in Community & Agroecology (PICA)"
     ];
     $ret[] = [
+      "label" => "Proposal Administration",
+      "value" => "Proposal Administration"
+    ];
+    $ret[] = [
       "label" => "Psychology Department",
       "value" => "Psychology Department"
     ];
