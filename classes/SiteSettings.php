@@ -333,7 +333,7 @@ class SiteSettings
 					</td>
         </tr>
         <tr>
-          <th scope="row"><label for="ldap_api_key">LDAP CN</label></th>
+          <th scope="row"><label for="ldap_cn">LDAP CN</label></th>
           <td>
 						<input name="ldap_cn" class="regular-text" type="text" id="ldap_cn" value="' . esc_attr(get_site_option('ldap_cn')) . '" />
 					</td>
