@@ -18,6 +18,9 @@ class CampusDirectoryAPI {
     ];
     $this->ldap_password = get_site_option('ldap_api_key');
     if (!$this->ldap_password) $this->ldap_password = get_option('ldap_api_key');
+    $this->ldap_cn = get_site_option('ldap_cn');
+    if (!$this->ldap_cn) $this->ldap_cn = get_option('ldap_cn');
+    if (!$this->ldap_cn) $this->ldap_cn = "pantheon-webapps";
   }
 
   public function setDirectoryData()
@@ -103,7 +106,7 @@ class CampusDirectoryAPI {
       ldap_set_option($rli, LDAP_OPT_PROTOCOL_VERSION, 3);
 
       if ($dev_env) @$ldapbind = ldap_bind($rli);
-      else @$ldapbind = ldap_bind($rli, "cn=pantheon-webapps,ou=apps,dc=ucsc,dc=edu", $this->ldap_password);
+      else @$ldapbind = ldap_bind($rli, "cn=" . $this->ldap_cn . ",ou=apps,dc=ucsc,dc=edu", $this->ldap_password);
       if ($ldapbind) {
         $sr = ldap_search($rli, "ou=people,dc=ucsc,dc=edu", "(|{$q})");
         $people = $this->processSearchResults($rli, $sr);
