@@ -288,6 +288,7 @@ class SiteSettings
     check_admin_referer('ucscplugin-validate'); // Nonce security check
 
     update_site_option('ldap_api_key', $_POST['ldap_api_key']);
+    update_site_option('ldap_api_key', $_POST['ldap_cn']);
 
     wp_redirect(add_query_arg(
       array(
@@ -330,6 +331,9 @@ class SiteSettings
 					<td>
 						<input name="ldap_api_key" class="regular-text" type="text" id="ldap_api_key" value="' . esc_attr(get_site_option('ldap_api_key')) . '" />
 					</td>
+          <td>
+						<input name="ldap_cn" class="regular-text" type="text" id="ldap_cn" value="' . esc_attr(get_site_option('ldap_cn')) . '" />
+					</td>
 				</tr>
 			</table>';
     submit_button();
@@ -341,15 +345,24 @@ class SiteSettings
     add_settings_section('ucsc_gutenberg_blocks_section', null, null, 'ucsc_gutenberg_blocks_settings_page');
 
     add_settings_field('ldap_api_key', 'LDAP API Key', array($this, 'ldapKeyHTML'), 'ucsc_gutenberg_blocks_settings_page', 'ucsc_gutenberg_blocks_section');
+    add_settings_field('ldap_cn', 'LDAP CN', array($this, 'ldapCN'), 'ucsc_gutenberg_blocks_settings_page', 'ucsc_gutenberg_blocks_section');
+
     register_setting('ucsc_gutenberg_blocks', 'ldap_api_key', array('sanitize_callback' => 'sanitize_text_field', 'default' => ''));
+    register_setting('ucsc_gutenberg_blocks', 'ldap_cn', array('sanitize_callback' => 'sanitize_text_field', 'default' => ''));
 
     register_setting('ucsc_network_settings', 'ldap_api_key', array('sanitize_callback' => 'sanitize_text_field', 'default' => ''));
+    register_setting('ucsc_network_settings', 'ldap_cn', array('sanitize_callback' => 'sanitize_text_field', 'default' => ''));
   }
 
   function ldapKeyHTML()
   { ?>
     <input type="text" name="ldap_api_key" value="<?php echo esc_attr(get_option('ldap_api_key')) ?>" />
   <?php }
+
+function ldapCN()
+{ ?>
+  <input type="text" name="ldap_cn" value="<?php echo esc_attr(get_option('ldap_cn')) ?>" />
+<?php }
 
   function settingsLink()
   {
