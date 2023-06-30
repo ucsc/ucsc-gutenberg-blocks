@@ -288,7 +288,7 @@ class SiteSettings
     check_admin_referer('ucscplugin-validate'); // Nonce security check
 
     update_site_option('ldap_api_key', $_POST['ldap_api_key']);
-    update_site_option('ldap_api_key', $_POST['ldap_cn']);
+    update_site_option('ldap_cn', $_POST['ldap_cn']);
 
     wp_redirect(add_query_arg(
       array(
