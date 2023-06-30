@@ -9,11 +9,8 @@ class CampusDirectoryShortcode
   {
   //  register shortcode
       add_shortcode('ucsc_profiles', array($this, 'ucsc_cdp_profile_render_shortcode'));
-
-// styles can be added later  
+// 	  styles can be added later  
 //    add_action('wp_enqueue_scripts', array($this, 'register_plugin_styles'));
-//  add message if ldap is not connecting 
-
 	}
  
 public function ucsc_cdp_profile_render_shortcode($attributes) {
@@ -70,24 +67,12 @@ public function ucsc_cdp_profile_render_shortcode($attributes) {
 		'displayStyle' => $sa['displaystyle'],
 	);
 
-	 $strCruzids = $attrs['uids']; // string with comma separated uids 
+	$strCruzids = $attrs['uids']; // string with comma separated uids 
 
-// add ldap password in settings 
-// get data for each profile  
-$campusDirectoryAPI = new CampusDirectoryAPI();
-$itemsShortcode = $campusDirectoryAPI->getCampusDirData($strCruzids, true);
-
-// default plugin options
-function ucsc_cdp_options_default() {
-	return array(
-		'proxy_uri' => 'https://proxy.appserver.edu',
-		'proxy_api_key' => '',
-		'profile_server_url' => '',
-		'cache_ttl_minutes' => 30,
-	);
-}
-
-$uids = preg_split('/[\s,]+/', $attrs['uids']);
+	// get data for each profile  
+	$campusDirectoryAPI = new CampusDirectoryAPI();
+	$itemsShortcode = $campusDirectoryAPI->getCampusDirData($strCruzids, true);
+	$uids = preg_split('/[\s,]+/', $attrs['uids']);
 
 //  print " <hr>    ";
 //  print_r ($itemsShortcode[0]  ) ;
@@ -308,7 +293,7 @@ public function render_attr_cn($values, $val_key, $options, $attributes, $uid) {
 // 	print_r ($values)  ;
 	if(!empty($values[$val_key])) {
 		if($attributes['profLinks']) {
-			$result .= '<a style="text-decoration: none" href="' . $options['profile_server_url'] . $uid . '">';
+			$result .= '<a style="text-decoration: none" href="https://campusdirectory.ucsc.edu/cd_detail?uid=' . $uid . '">';
 			$result .= $values[$val_key][0] . '</a>';
 		} else {
 			$values[$val_key][0];
@@ -324,7 +309,7 @@ public function ucsc_cdp_read_more($data, $options, $uid) {
 		return wp_kses_post($data);
 	}
 	$result = '<p>' . substr(strip_tags($data), 0, 128);
-	$result .= ' <a href="' . $options['profile_server_url'] . $uid . '">...more</a></p>';
+	$result .= ' <a href="https://campusdirectory.ucsc.edu/cd_detail?uid=' . $uid . '">...more</a></p>';
 	return $result;
 }
 public function render_attr_single_line($values, $val_key) {
@@ -360,10 +345,11 @@ public function render_attr_photo($values, $val_key) {
 	$result = '';
 //	print_r($values);
 	if(!empty($values[$val_key])) {
-		$result .= '<div class="square-img" style="background-image: url(\'data:image/jpeg;base64, ' . $values[$val_key][0] . '\')"></div>';
+		$result .= '<div class="square-img" style="background-image: url(\'data:image/jpeg;base64, ' . base64_encode($values[$val_key][0]) . '\')"></div>';
 	} else {
-		$result .= '<div class="square-img" style="background-image: url(\'' . plugins_url('ucsc_cdp/public/icon-slug.jpg') . '\')"></div>';
+		$result .= '<div class="square-img" style="background-image: url(\'//static.ucsc.edu/images/icon-slug.jpg\')"></div>';
 	}
+
 	return $result;
 }
 public function marshal_or_filter_from_uids($uids) { // unknown use 
