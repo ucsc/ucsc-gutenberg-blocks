@@ -19,6 +19,9 @@ include_once(plugin_dir_path(__FILE__) . 'classes/ClassSchedule.php');
 include_once(plugin_dir_path(__FILE__) . 'classes/Accordion.php');
 include_once(plugin_dir_path(__FILE__) . 'classes/AccordionWrapper.php');
 
+// New option for using shortcode without Gutenberg blocks
+include_once(plugin_dir_path(__FILE__) . 'classes/CampusDirectoryShortcode.php');
+
 // include_once(plugin_dir_path(__FILE__) . 'classes/FeedbackForm.php');
 include_once(plugin_dir_path(__FILE__) . 'classes/SiteSettings.php');
 
@@ -42,5 +45,7 @@ $ClassSchedule = new ClassSchedule();
 $Accordion = new Accordion();
 $AccordionWrapper = new AccordionWrapper();
 $SiteSettings = new SiteSettings();
+
+$CampusDirectoryShortcode = new CampusDirectoryShortcode();
 
 // $FeedbackForm = new FeedbackForm();
