@@ -278,7 +278,7 @@ public function render_profiles_list($uids, $attrs, $options, $itemsShortcode) {
 		} */
 		$result .= '</ul></div>';
 		if($attributes['jpegPhoto']) {
-			$result .= render_attr_photo($entry, 'jpegPhoto', $options, $attributes);
+			$result .= $this->render_attr_photo($entry, 'jpegPhoto', $options, $attributes);
 		}
 		$i++;
 		$result .= '</div></div>';
