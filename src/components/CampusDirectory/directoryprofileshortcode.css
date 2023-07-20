@@ -1,0 +1,87 @@
+ul.cdp-list-render {
+	margin-left: 0px;
+	margin-bottom: 0px;
+}
+.cdp-profile {
+	display: flex;
+	margin-right: 1em;
+	font-size: .9em;
+}
+.cdp-profile.grid {
+	display: flex;
+	margin-right: 1em;
+	font-size: .9em;
+	max-width: 160px;
+}
+.cdp-profile.grid ul {
+	max-width: 160px;
+}
+.cdp-list-profile {
+	padding: .5em 1em;
+        margin-bottom: 1em;
+}
+.cdp-list-box {
+        display: flex;
+	font-size: 0.9em;
+}
+.cdp-list-profile .cdp-list-body .cdp-list-render li {
+	display: flex;
+}
+.cdp-inline-list {
+	margin: 0px;
+}
+.cdp-inline-list li{
+	margin-top: 0px;
+}
+span.cdp-li-header {
+	flex-grow: 0;
+	flex-shrink: 0;
+	flex-basis: 140px;
+	text-align: right;
+	margin-right: 1em;
+	font-weight: bold;
+}
+div.cdp-list-profile h4 {
+	margin-top: 0px;
+	margin-bottom: 10px;
+	width: 480px;
+}
+.cdp-list-body {
+	padding: 0;
+	width: calc(100% - 160px);
+	flex-grow: 1;
+	margin-right: 1em;
+}
+.cdp-profiles {
+	display: flex;
+	flex-wrap: wrap;
+}
+.cdp-profile-ul {
+	list-style-type: none;
+	margin: 0;
+	width: 400px;
+	font-size: 1em; 
+}
+.cdp-profile-ul > li {
+	margin: 0;
+	border-bottom: 1px;
+	border-style: none none solid none;
+}
+.cdp-profile-ul > li:last-child {
+	margin: 0;
+	border-style: none;
+}
+.cdp-profile-ul > li:first-child {
+	margin: 0;
+	border-style: none;
+}
+.cdp-profiles.alignfull {
+	margin-left: 1.5em;
+	margin-right: 1.5em;
+}
+.square-img {
+	height: 160px;
+	width: 160px;
+	border-radius: 5px;
+	background-size: cover;
+}

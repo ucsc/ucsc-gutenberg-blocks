@@ -10,9 +10,17 @@ class CampusDirectoryShortcode
   //  register shortcode
       add_shortcode('ucsc_profiles', array($this, 'ucsc_cdp_profile_render_shortcode'));
 // 	  styles can be added later  
-//    add_action('wp_enqueue_scripts', array($this, 'register_plugin_styles'));
+      add_action('wp_enqueue_scripts', array($this, 'register_plugin_styles'));
 	}
- 
+
+public function register_plugin_styles() {
+	wp_register_style( 'directoryprofileshortcode',
+		plugins_url('../src/components/CampusDirectory/directoryprofile.css', __FILE__),
+		array(),
+		filemtime(plugin_dir_path(__FILE__) . '../src/components/CampusDirectory/directoryprofileshortcode.css'));
+	wp_enqueue_style( 'directoryprofileshortcode');
+	}
+
 public function ucsc_cdp_profile_render_shortcode($attributes) {
 
 	$sa = shortcode_atts(array(
@@ -101,8 +109,15 @@ public function render_profiles_grid($uids, $attrs, $options, $itemsShortcode) {
 
 		$entry = $itemsShortcode[0][$i]   ; 
 
-	  //	print '<hr><pre>'; print_r ($entry);
-	  // 	print_r ($entry['telephonenumber'][0] );
+  	 //  print '<hr><pre>'; print_r ($entry);
+	//  print_r ($entry['labeleduri']);
+
+	  /*
+	  print_r ($entry['telephonenumber']  );
+	  print_r ($entry['mail'] );
+	  print_r ($entry['ucscPersonPubOfficeLocationDetail'] );
+	  print_r ($entry['ucscPersonPubOfficeHours']  );
+	  */
 	 //	print_r ($attributes);
  
 		$profile_uid = $entry['uid'][0];
@@ -124,18 +139,21 @@ public function render_profiles_grid($uids, $attrs, $options, $itemsShortcode) {
 		if($attributes['mail'] && !empty($entry['mail'][0])) {
 			$result .= $this->render_grid_attr($this->render_attr_mail($entry, 'mail', $options));
 		}
-		if($attributes['labeledURI'] && !empty($entry['labeledURI'][0])) {
-			$result .= $this->render_grid_attr($this->render_attr_labeled_uri($entry, 'labeledURI', $options));
+		if($attributes['mail'] && !empty($entry['ucscpersonpubalternatemail'][0])) {
+			$result .= $this->render_grid_attr($this->render_attr_mail($entry, 'ucscpersonpubalternatemail', $options));
 		}
-		if($attributes['ucscPersonPubOfficeLocationDetail'] && !empty($entry['ucscPersonPubOfficeLocationDetail'][0])) {
-			$office_info = $this->render_attr_multi_line($entry, 'ucscPrimaryLocationPubOfficialName', $options);
-			$office_info .= $this->render_attr_multi_line($entry, 'ucscPersonPubOfficeLocationDetail', $options);
+		if($attributes['labeledURI'] && !empty($entry['labeleduri'])) {
+			$result .= $this->render_grid_attr($this->render_attr_labeled_uri($entry, 'labeleduri', $options));
+		}
+		if($attributes['ucscPersonPubOfficeLocationDetail'] && !empty($entry['ucscpersonpubofficelocationdetail'][0])) {
+			$office_info = $this->render_attr_multi_line($entry, 'ucscprimarylocationpubofficialname', $options);
+			$office_info .= $this->render_attr_multi_line($entry, 'ucscpersonpubofficelocationdetail', $options);
 			$result .= $this->render_grid_attr($office_info);
 		}
-		/*
 		if($attributes['ucscPersonPubOfficeHours'] && !empty($entry['ucscPersonPubOfficeHours'])) {
 			$result .= render_grid_attr(render_attr_multi_line($entry, 'ucscPersonPubOfficeHours', $options));
 		}
+		/*
 		if($attributes['ucscPersonPubAreaOfExpertise'] && !empty($entry['ucscPersonPubAreaOfExpertise'])) {
 			if($attributes['ucscPersonPubAreaOfExpertise'] === 'short') {
 				$result .= render_grid_attr(ucsc_cdp_read_more(render_attr_single_line($entry, 'ucscPersonPubAreaOfExpertise', $options, $attributes), $options, $profile_uid));
@@ -199,9 +217,9 @@ public function render_profiles_list($uids, $attrs, $options, $itemsShortcode) {
 	foreach($uids as $uid_value) {
 	// print '<p>this is uid for the faculty  '. $uid_value .$i.'</p>';
 
-		$entry = $itemsShortcode[0][$i]   ; 
+		$entry = $itemsShortcode[0][$i]   ; 	    
 
-	//	print '<hr><pre>'; print_r ($entry);
+	 //	print '<hr><pre>'; print_r ($entry);
 	//	print_r ($entry['mail'][0]);
 	//	print_r ($attributes);
 	 
@@ -221,16 +239,18 @@ public function render_profiles_list($uids, $attrs, $options, $itemsShortcode) {
 		if($attributes['mail'] && !empty($entry['mail'])) {
 			$result .= $this->render_list_attr('Email', '<li>' . $this->render_attr_mail($entry, 'mail', $options, $attributes) . '</li>');
 		}
-		if($attributes['labeledURI'] && !empty($entry['labeledURI'])) {
-			$result .= $this->render_list_attr('Website', '<li>' . $this->render_attr_labeled_uri($entry, 'labeledURI', $options, $attributes). '</li>');
+		if($attributes['labeledURI'] && !empty($entry['labeleduri'])) {
+			$result .= $this->render_list_attr('Website', '<li>' . $this->render_attr_labeled_uri($entry, 'labeleduri', $options, $attributes). '</li>');
 		}
-		if($attributes['ucscPersonPubOfficeLocationDetail'] && !empty($entry['ucscPersonPubOfficeLocationDetail'])) {
-			$result .= $this->render_list_attr('Office Location', '<li>' . $this->render_attr_multi_line($entry, 'ucscPrimaryLocationPubOfficialName', $options) . '</li><li>' . render_attr_multi_line($entry, 'ucscPersonPubOfficeLocationDetail', $options, $attributes) . '</li>');
+		if($attributes['ucscPersonPubOfficeLocationDetail'] && !empty($entry['ucscpersonpubofficelocationdetail'])) {
+			$result .= $this->render_list_attr('Office Location', '<li>' . $this->render_attr_multi_line($entry, 'ucscprimarylocationpubofficialname', $options) . '</li>
+			<li>' . $this->render_attr_multi_line($entry, 'ucscpersonpubofficelocationdetail', $options, $attributes) . '</li>');
 		}
-		/*
+		
 		if($attributes['ucscPersonPubOfficeHours'] && !empty($entry['ucscPersonPubOfficeHours'])) {
 			$result .= render_list_attr('Office Hours', '<li>' . render_attr_multi_line($entry, 'ucscPersonPubOfficeHours', $options, $attributes) . '</li>');
 		}
+		/*
 		if($attributes['ucscPersonPubAreaOfExpertise'] && !empty($entry['ucscPersonPubAreaOfExpertise'])) {
 			if($attributes['ucscPersonPubAreaOfExpertise'] === 'short') {
 				$result .= render_list_attr('Summary of Expertise', '<li>' . ucsc_cdp_read_more(render_attr_single_line($entry, 'ucscPersonPubAreaOfExpertise', $options, $attributes), $options, $profile_uid) . '</li>');
@@ -277,9 +297,9 @@ public function render_profiles_list($uids, $attrs, $options, $itemsShortcode) {
 			}
 		} */
 		$result .= '</ul></div>';
-		if($attributes['jpegPhoto']) {
-			$result .= render_attr_photo($entry, 'jpegPhoto', $options, $attributes);
-		}
+		if($attributes['jpegphoto']) {
+			$result .= $this->render_attr_photo($entry, 'jpegphoto');
+	   }
 		$i++;
 		$result .= '</div></div>';
 	}
@@ -321,23 +341,27 @@ public function render_attr_single_line($values, $val_key) {
 }
 public function render_attr_multi_line($values, $val_key) {
 	$result = '';
-	if(!empty($values[$val_key])) {
+	if(!empty($values[$val_key])) { 
+		unset ($values[$val_key]['count']); 
 		$result .= '<div>' . join('<br />', $values[$val_key]) . '</div>';
 	}
 	return $result;
 }
 public function render_attr_labeled_uri($values, $val_key) {
 	$result = '';
-	if(!empty($values[$val_key])) {
-		$result .= '<div>' . join('<br />', array_map('render_attr_labeled_uri_map', $values[$val_key])) . '</div>';
+ 
+	if(!empty($values[$val_key]   )) {
+		unset ($values[$val_key]['count']); 
+		$result .= '<div>' . join('<br />', array_map([$this,'render_attr_labeled_uri_map'], $values[$val_key])) . '</div>';
 	}
 	return $result;
 }
 public function render_attr_mail($values, $val_key) {
+
 	$result = '';
 	if(!empty($values[$val_key])) {
-	//	$result .= '<div>' . join('<br />', array_map('render_attr_mail_map', $values[$val_key])) . '</div>';
-	 	$result .= '<div> <a style="text-decoration:none" href="mailto:' . $values[$val_key][0] . '">' . $values[$val_key][0] . '</a> </div>';
+		// print 'keys '.($val_key);
+	   	$result .= '<div> <a style="text-decoration:none" href="mailto:' . $values[$val_key][0] . '">' . $values[$val_key][0] . '</a> </div>';
 	}
 	return $result;
 }
