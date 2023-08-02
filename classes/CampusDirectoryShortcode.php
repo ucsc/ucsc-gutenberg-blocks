@@ -15,7 +15,7 @@ class CampusDirectoryShortcode
 
 public function register_plugin_styles() {
 	wp_register_style( 'directoryprofileshortcode',
-		plugins_url('../src/components/CampusDirectory/directoryprofile.css', __FILE__),
+		plugins_url('../src/components/CampusDirectory/directoryprofileshortcode.css', __FILE__),
 		array(),
 		filemtime(plugin_dir_path(__FILE__) . '../src/components/CampusDirectory/directoryprofileshortcode.css'));
 	wp_enqueue_style( 'directoryprofileshortcode');
