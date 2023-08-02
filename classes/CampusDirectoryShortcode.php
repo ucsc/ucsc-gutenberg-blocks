@@ -233,8 +233,8 @@ public function render_profiles_list($uids, $attrs, $options, $itemsShortcode) {
 		if($attributes['title'] && !empty($entry['title'])) {
 			$result .= $this->render_list_attr('Title', '<li>' . $this->render_attr_single_line($entry, 'title', $options, $attributes) . '</li>');
 		}
-		if($attributes['telephoneNumber'] && !empty($entry['telephoneNumber'])) {
-			$result .= $this->render_list_attr('Phone', '<li>' . $this->render_attr_multi_line($entry, 'telephoneNumber', $options, $attributes) . '</li>');
+		if($attributes['telephoneNumber'] && !empty($entry['telephonenumber'])) {
+			$result .= $this->render_list_attr('Phone', '<li>' . $this->render_attr_multi_line($entry, 'telephonenumber', $options, $attributes) . '</li>');
 		}
 		if($attributes['mail'] && !empty($entry['mail'])) {
 			$result .= $this->render_list_attr('Email', '<li>' . $this->render_attr_mail($entry, 'mail', $options, $attributes) . '</li>');
@@ -297,7 +297,7 @@ public function render_profiles_list($uids, $attrs, $options, $itemsShortcode) {
 			}
 		} */
 		$result .= '</ul></div>';
-		if($attributes['jpegphoto']) {
+		if($attributes['jpegPhoto']) {
 			$result .= $this->render_attr_photo($entry, 'jpegphoto');
 	   }
 		$i++;
