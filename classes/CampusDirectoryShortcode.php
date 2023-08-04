@@ -85,7 +85,6 @@ public function ucsc_cdp_profile_render_shortcode($attributes) {
 //  print " <hr>    ";
 //  print_r ($itemsShortcode[0]  ) ;
 //  print_r ($attrs);
-//	print_r ($attributes['cruzids']);
 
 	$result = '';
  	if($attrs['displayStyle'] === 'list') {
@@ -104,20 +103,11 @@ public function render_profiles_grid($uids, $attrs, $options, $itemsShortcode) {
 	$i = 0; // we are using simple counter to iterate through $itemsShortcode
 	foreach($uids as $uid_value) {
 
-	// 	print ' <p>this is uid for the faculty '. $uid_value .$i.'</p>';
 	//	print( $itemsShortcode[0][$i]['cn'][0] ) ; 
 
 		$entry = $itemsShortcode[0][$i]   ; 
 
-  	 //  print '<hr><pre>'; print_r ($entry);
-	//  print_r ($entry['labeleduri']);
-
-	  /*
-	  print_r ($entry['telephonenumber']  );
-	  print_r ($entry['mail'] );
-	  print_r ($entry['ucscPersonPubOfficeLocationDetail'] );
-	  print_r ($entry['ucscPersonPubOfficeHours']  );
-	  */
+  	 //     print '<hr><pre>'; print_r ($entry);
 	 //	print_r ($attributes);
  
 		$profile_uid = $entry['uid'][0];
@@ -211,17 +201,14 @@ public function render_profiles_list($uids, $attrs, $options, $itemsShortcode) {
 	// $index_map = $this->gen_response_index_map($profiles);
 
 	$attributes = $attrs;
-
-	$result = '<div class="cdp-profiles cdp-display-' . $attributes['displayStyle'] . ' ' . $this->ucsc_cdp_block_classes($attributes) . '">';
+        //  div for list display does not have class "cdp-profiles"
+	$result = '<div class="cdp-display-' . $attributes['displayStyle'] . ' ' . $this->ucsc_cdp_block_classes($attributes) . '">';
 	$i=0;
 	foreach($uids as $uid_value) {
-	// print '<p>this is uid for the faculty  '. $uid_value .$i.'</p>';
 
 		$entry = $itemsShortcode[0][$i]   ; 	    
 
 	 //	print '<hr><pre>'; print_r ($entry);
-	//	print_r ($entry['mail'][0]);
-	//	print_r ($attributes);
 	 
 		$profile_uid = $entry['uid'][0];
 		$result .= '<div class="cdp-list-profile" id="cdp-profile-';
@@ -309,7 +296,7 @@ public function render_profiles_list($uids, $attrs, $options, $itemsShortcode) {
 
 public function render_attr_cn($values, $val_key, $options, $attributes, $uid) {
 	$result = '';
-//	print ' render_attr_cn function   ';
+
 // 	print_r ($values)  ;
 	if(!empty($values[$val_key])) {
 		if($attributes['profLinks']) {
