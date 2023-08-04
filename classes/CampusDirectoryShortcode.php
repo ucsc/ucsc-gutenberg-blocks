@@ -99,7 +99,7 @@ public function render_profiles_grid($uids, $attrs, $options, $itemsShortcode) {
 	// $index_map = gen_response_index_map($profiles);
 	$attributes = $attrs;
 //	$result = '<div class="cdp-profiles cdp-display-' . $attributes['displayStyle'] . ' ' . ucsc_cdp_block_classes($attributes) . '">';
-	$result = '<div class="cdp-profiles cdp-display-' . $attributes['displayStyle'] . '">';
+	$result = '<div class="cdp-profiles cdp-display-grid">';
 	$i = 0; // we are using simple counter to iterate through $itemsShortcode
 	foreach($uids as $uid_value) {
 
@@ -201,8 +201,9 @@ public function render_profiles_list($uids, $attrs, $options, $itemsShortcode) {
 	// $index_map = $this->gen_response_index_map($profiles);
 
 	$attributes = $attrs;
-        //  div for list display does not have class "cdp-profiles"
-	$result = '<div class="cdp-display-' . $attributes['displayStyle'] . ' ' . $this->ucsc_cdp_block_classes($attributes) . '">';
+//	$result = '<div class="cdp-profiles cdp-display-' . $attributes['displayStyle'] . ' ' . ucsc_cdp_block_classes($attributes) . '">';	
+//      div for list display does not have class "cdp-profiles"
+	$result = '<div class="cdp-display-list">';
 	$i=0;
 	foreach($uids as $uid_value) {
 
