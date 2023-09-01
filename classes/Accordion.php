@@ -24,7 +24,7 @@ class Accordion
   function theHTML($attributes, $content)
   {
     $open = ($attributes['openOnPageLoad'] === true) ? 'open' : '';
-    return '<details class="' . $attributes['className']  . '"' . $open . '>
+    return '<details class="ucsc-content-blocks"' . $open . '>
               <summary>' . $attributes['title'] . '</summary>'
               . $content .
            '</details>';
