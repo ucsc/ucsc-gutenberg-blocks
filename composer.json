@@ -1,0 +1,19 @@
+{
+    "name": "ucsc/ucsc-service-blocks",
+    "description": "UCSC Service Blocks",
+    "type": "project",
+    "require": {},
+    "require-dev": {
+        "wp-coding-standards/wpcs": "^3.0",
+        "dealerdirect/phpcodesniffer-composer-installer": "^1.0"
+    },
+    "scripts": {
+        "lint": "./vendor/bin/phpcs",
+        "lint-fix": "./vendor/bin/phpcbf --extensions=php ."
+    },
+    "config": {
+        "allow-plugins": {
+            "dealerdirect/phpcodesniffer-composer-installer": true
+        }
+    }
+}
