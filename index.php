@@ -1,18 +1,23 @@
 <?php
+/**
+ * Plugin Name:       UCSC Service Blocks
+ * Plugin URI:        https://github.com/ucsc/ucsc-service-blocks
+ * Description:       Service blocks for UCSC WordPress Websites.
+ * Requires at least: 6.1
+ * Requires PHP:      7.0
+ * Version:           1.1.21
+ * Author:            UC Santa Cruz
+ * Author URI:        https://github.com/ucsc
+ * License:           GPL-2.0-or-later
+ * License URI:       https://www.gnu.org/licenses/gpl-2.0.html
+ * Text Domain:       ucsc
+ * Domain Path:       service-blocks
+ *
+ * @package           ucsc-blocks
+ */
 
-/*
-	Plugin Name: UCSC Gutenberg Blocks
-	Description: Custom UCSC Gutenberg Blocks.
-	Version: 1.1.21
-	Author: UCSC
-	Author URI: https://www.ucsc.edu/
-*/
 if (!defined('ABSPATH')) { exit; // Exit if accessed directly
 }
-
-// include_once(plugin_dir_path(__FILE__) . 'classes/UCSCGutenbergDemoBlock1.php');
-// include_once(plugin_dir_path(__FILE__) . 'classes/UCSCGutenbergDemoBlock2.php');
-// include_once(plugin_dir_path(__FILE__) . 'classes/ContentSharer.php');
 
 require_once plugin_dir_path(__FILE__) . 'classes/CourseCatalog.php';
 require_once plugin_dir_path(__FILE__) . 'classes/CampusDirectory.php';
@@ -20,7 +25,7 @@ require_once plugin_dir_path(__FILE__) . 'classes/ClassSchedule.php';
 require_once plugin_dir_path(__FILE__) . 'classes/Accordion.php';
 require_once plugin_dir_path(__FILE__) . 'classes/AccordionWrapper.php';
 
-// New option for using shortcode without Gutenberg blocks
+// New option for using shortcode without Service blocks
 require_once plugin_dir_path(__FILE__) . 'classes/CampusDirectoryShortcode.php';
 
 // include_once(plugin_dir_path(__FILE__) . 'classes/FeedbackForm.php');
@@ -37,8 +42,8 @@ function registerJSBuild()
 
 
 
-// $UCSCGutenbergDemoBlock1 = new UCSCGutenbergDemoBlock1();
-// $UCSCGutenbergDemoBlock2 = new UCSCGutenbergDemoBlock2();
+// $UCSCServiceDemoBlock1 = new UCSCServiceDemoBlock1();
+// $UCSCServiceDemoBlock2 = new UCSCServiceDemoBlock2();
 // $ContentSharer = new ContentSharer();
 
 $CourseCatalog = new CourseCatalog();

@@ -56,7 +56,7 @@ Then you must build that function to register and enqueue each script file and s
         wp_enqueue_script('tablesorterjs');
 ```
 ### src/blocks/Whatever.js
-This is basic declaration for the Gutenberg block. We don't fully use Gutenberg blocks because we render the display dynamically, so much of this is placeholder. You do define the name of the block and its icon here.
+This is basic declaration for the Service block. We don't fully use Service blocks because we render the display dynamically, so much of this is placeholder. You do define the name of the block and its icon here.
 ### src/components/Whatever
 Here you keep your front-end Javascript and CSS files. They must be included in your class constructor. See CourseCatalog as an example.
 

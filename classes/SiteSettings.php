@@ -306,7 +306,7 @@ class SiteSettings
 
 	function networkSettingsNotifications()
 	{
-		if (isset($_GET['page']) && $_GET['page'] == 'ucsc-gutenberg-blocks-network-settings' && isset($_GET['updated'])) {
+		if (isset($_GET['page']) && $_GET['page'] == 'ucsc-service-blocks-network-settings' && isset($_GET['updated'])) {
 			echo '<div id="message" class="updated notice is-dismissible"><p>Settings updated.</p><button type="button" class="notice-dismiss"><span class="screen-reader-text">Dismiss this notice.</span></button></div>';
 		}
 	}
@@ -321,7 +321,7 @@ class SiteSettings
 		wp_redirect(
 			add_query_arg(
 				array(
-				'page' => 'ucsc-gutenberg-blocks-network-settings',
+				'page' => 'ucsc-service-blocks-network-settings',
 				'updated' => true
 				),
 				network_admin_url('settings.php')
@@ -335,10 +335,10 @@ class SiteSettings
 	{
 		add_submenu_page(
 			'settings.php', // Parent element
-			'UCSC Gutenberg Blocks Network Settings', // Text in browser title bar
-			'UCSC Gutenberg Blocks Network Settings', // Text to be displayed in the menu.
+			'UCSC Service Blocks Network Settings', // Text in browser title bar
+			'UCSC Service Blocks Network Settings', // Text to be displayed in the menu.
 			'manage_options', // Capability
-			'ucsc-gutenberg-blocks-network-settings', // Page slug, will be displayed in URL
+			'ucsc-service-blocks-network-settings', // Page slug, will be displayed in URL
 			array($this, 'networkSettingsPage') // Callback function which displays the page
 		);
 	}
@@ -348,9 +348,9 @@ class SiteSettings
 		if(! function_exists('get_plugin_data') ) {
 			include_once ABSPATH . 'wp-admin/includes/plugin.php';
 		}
-		$plugin_data = get_plugin_data(WP_PLUGIN_DIR . '/ucsc-gutenberg-blocks/index.php');
+		$plugin_data = get_plugin_data(WP_PLUGIN_DIR . '/ucsc-service-blocks/index.php');
 		echo '<div class="wrap">
-	<h1>UCSC Gutenberg Blocks Network Settings</h1>
+	<h1>UCSC Service Blocks Network Settings</h1>
 	<h3>Version: ' . $plugin_data['Version'] . '</h3>
 	<form method="post" action="edit.php?action=ucscplugin">';
 		wp_nonce_field('ucscplugin-validate');
@@ -375,13 +375,13 @@ class SiteSettings
 
 	function settings()
 	{
-		add_settings_section('ucsc_gutenberg_blocks_section', null, null, 'ucsc_gutenberg_blocks_settings_page');
+		add_settings_section('ucsc_service_blocks_section', null, null, 'ucsc_service_blocks_settings_page');
 
-		add_settings_field('ldap_api_key', 'LDAP API Key', array($this, 'ldapKeyHTML'), 'ucsc_gutenberg_blocks_settings_page', 'ucsc_gutenberg_blocks_section');
-		add_settings_field('ldap_cn', 'LDAP CN', array($this, 'ldapCN'), 'ucsc_gutenberg_blocks_settings_page', 'ucsc_gutenberg_blocks_section');
+		add_settings_field('ldap_api_key', 'LDAP API Key', array($this, 'ldapKeyHTML'), 'ucsc_service_blocks_settings_page', 'ucsc_service_blocks_section');
+		add_settings_field('ldap_cn', 'LDAP CN', array($this, 'ldapCN'), 'ucsc_service_blocks_settings_page', 'ucsc_service_blocks_section');
 
-		register_setting('ucsc_gutenberg_blocks', 'ldap_api_key', array('sanitize_callback' => 'sanitize_text_field', 'default' => ''));
-		register_setting('ucsc_gutenberg_blocks', 'ldap_cn', array('sanitize_callback' => 'sanitize_text_field', 'default' => ''));
+		register_setting('ucsc_service_blocks', 'ldap_api_key', array('sanitize_callback' => 'sanitize_text_field', 'default' => ''));
+		register_setting('ucsc_service_blocks', 'ldap_cn', array('sanitize_callback' => 'sanitize_text_field', 'default' => ''));
 
 		register_setting('ucsc_network_settings', 'ldap_api_key', array('sanitize_callback' => 'sanitize_text_field', 'default' => ''));
 		register_setting('ucsc_network_settings', 'ldap_cn', array('sanitize_callback' => 'sanitize_text_field', 'default' => ''));
@@ -401,7 +401,7 @@ class SiteSettings
 
 	function settingsLink()
 	{
-		add_options_page('UCSC Gutenberg Block Settings', 'UCSC Gutenberg Block Settings', 'manage_options', 'ucsc_gutenberg_blocks_settings_page', array($this, 'settingsPageHTML'));
+		add_options_page('UCSC Service Block Settings', 'UCSC Service Block Settings', 'manage_options', 'ucsc_service_blocks_settings_page', array($this, 'settingsPageHTML'));
 	}
 
 	function settingsPageHTML()
@@ -409,15 +409,15 @@ class SiteSettings
 		if(! function_exists('get_plugin_data') ) {
 			include_once ABSPATH . 'wp-admin/includes/plugin.php';
 		}
-		$plugin_data = get_plugin_data(WP_PLUGIN_DIR . '/ucsc-gutenberg-blocks/index.php');
+		$plugin_data = get_plugin_data(WP_PLUGIN_DIR . '/ucsc-service-blocks/index.php');
 		?>
 	<div class="wrap">
-	  <h1>UCSC Gutenberg Blocks Settings</h1>
+	  <h1>UCSC Service Blocks Settings</h1>
 	  <h3>Version: <?php echo $plugin_data['Version']; ?></h3>
 	  <form action="options.php" method="POST">
 		<?php
-		settings_fields('ucsc_gutenberg_blocks');
-		do_settings_sections('ucsc_gutenberg_blocks_settings_page');
+		settings_fields('ucsc_service_blocks');
+		do_settings_sections('ucsc_service_blocks_settings_page');
 		submit_button();
 		?>
 	  </form>

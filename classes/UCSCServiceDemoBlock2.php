@@ -3,7 +3,7 @@
 /**
  * Doc: a doc
  */
-class UCSCGutenbergDemoBlock2
+class UCSCServiceDemoBlock2
 {
 	function __construct()
 	{
