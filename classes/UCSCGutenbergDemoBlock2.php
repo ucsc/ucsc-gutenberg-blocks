@@ -1,25 +1,27 @@
 <?php
 
 /**
-  Doc: a doc
+ * Doc: a doc
  */
 class UCSCGutenbergDemoBlock2
 {
-  function __construct()
-  {
-    add_action('init', array($this, 'adminAssets'));
-  }
+	function __construct()
+	{
+		add_action('init', array($this, 'adminAssets'));
+	}
 
-  function adminAssets()
-  {
-    register_block_type('ucscblocks/block2', array(
-      'editor_script' => 'ucscblocks',
-      'render_callback' => array($this, 'theHTML')
-    ));
-  }
+	function adminAssets()
+	{
+		register_block_type(
+			'ucscblocks/block2', array(
+			'editor_script' => 'ucscblocks',
+			'render_callback' => array($this, 'theHTML')
+			)
+		);
+	}
 
-  function theHTML($attributes)
-  {
-    return '<p>Today, in block 2, the sky is ' . $attributes['skyColor'] . '  and the grass is ' . $attributes['grassColor'] . '!!!</p>';
-  }
+	function theHTML($attributes)
+	{
+		return '<p>Today, in block 2, the sky is ' . $attributes['skyColor'] . '  and the grass is ' . $attributes['grassColor'] . '!!!</p>';
+	}
 }
