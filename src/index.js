@@ -10,7 +10,6 @@ import AccordionWrapper from './blocks/AccordionWrapper';
 
 // import FeedbackForm from './blocks/FeedbackForm';
 
-
 // TestDemoUCSC();
 // TestDemoUCSC2();
 // ContentSharer();
@@ -20,6 +19,5 @@ CampusDirectory();
 ClassSchedule();
 Accordion();
 AccordionWrapper();
-
 
 // FeedbackForm();
