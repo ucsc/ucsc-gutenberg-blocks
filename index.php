@@ -56,3 +56,24 @@ $SiteSettings     = new SiteSettings();
 $CampusDirectoryShortcode = new CampusDirectoryShortcode();
 
 // $FeedbackForm = new FeedbackForm();
+
+// Add link to Settings page
+
+add_filter( 'plugin_action_links_' . plugin_basename(__FILE__), 'ucsc_service_blocks_plugin_action_links' );
+
+function ucsc_service_blocks_plugin_action_links( $links ) {
+	// Build and escape the URL.
+	$url = esc_url( add_query_arg(
+		'page',
+		'ucsc_service_blocks_settings_page',
+		get_admin_url() . 'options-general.php'
+	) );
+	// Create the link.
+	$settings_link = "<a href='$url'>" . __( 'Settings' ) . '</a>';
+	// Adds the link to the end of the array.
+	array_push(
+		$links,
+		$settings_link
+	);
+	return $links;
+}
