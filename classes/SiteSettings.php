@@ -14,7 +14,7 @@ class SiteSettings {
 			'rest_api_init',
 			function () {
 				register_rest_route(
-					'ucscgutenbergblocks/v1',
+					'ucscserviceblocks/v1',
 					'/departmentcode/',
 					array(
 						'methods'             => 'GET',
@@ -25,7 +25,7 @@ class SiteSettings {
 					)
 				);
 				register_rest_route(
-					'ucscgutenbergblocks/v1',
+					'ucscserviceblocks/v1',
 					'/subjectcode/',
 					array(
 						'methods'             => 'GET',
@@ -36,7 +36,7 @@ class SiteSettings {
 					)
 				);
 				register_rest_route(
-					'ucscgutenbergblocks/v1',
+					'ucscserviceblocks/v1',
 					'/cddepartmentcode/',
 					array(
 						'methods'             => 'GET',
@@ -47,7 +47,7 @@ class SiteSettings {
 					)
 				);
 				register_rest_route(
-					'ucscgutenbergblocks/v1',
+					'ucscserviceblocks/v1',
 					'/divisioncode/',
 					array(
 						'methods'             => 'GET',
