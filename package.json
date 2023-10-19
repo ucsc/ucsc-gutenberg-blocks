@@ -1,16 +1,23 @@
 {
-  "name": "ucsc-gutenberg-blocks",
-  "version": "1.0.0",
-  "description": "",
-  "main": "test.js",
+	"name": "ucsc-service-blocks",
+	"version": "1.1.21",
+	"description": "",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
     "build": "wp-scripts build",
-    "start": "wp-scripts start"
+    "start": "wp-scripts start",
+    "format": "wp-scripts format",
+    "format:src": "wp-scripts format ./src",
+    "lint:js": "wp-scripts lint-js",
+    "lint:js:src": "wp-scripts lint-js ./src",
+    "lint:pkg-json": "wp-scripts lint-pkg-json",
+    "lint:style": "wp-scripts lint-style",
+    "plugin-zip": "wp-scripts plugin-zip",
+    "release": "standard-version"
   },
   "author": "",
   "license": "ISC",
   "devDependencies": {
-    "@wordpress/scripts": "^22.3.0"
+    "@wordpress/scripts": "^22.3.0",
+    "standard-version": "^9.5.0"
   }
 }

@@ -1,51 +1,80 @@
 <?php
+/**
+ * Plugin Name:       UCSC Service Blocks
+ * Plugin URI:        https://github.com/ucsc/ucsc-service-blocks
+ * Description:       Service blocks for UCSC WordPress Websites.
+ * Requires at least: 6.1
+ * Requires PHP:      7.0
+ * Version:           1.1.21
+ * Author:            UC Santa Cruz
+ * Author URI:        https://github.com/ucsc
+ * License:           GPL-2.0-or-later
+ * License URI:       https://www.gnu.org/licenses/gpl-2.0.html
+ * Text Domain:       ucsc
+ * Domain Path:       service-blocks
+ *
+ * @package           ucsc-blocks
+ */
 
-/*
-  Plugin Name: UCSC Gutenberg Blocks
-  Description: Custom UCSC Gutenberg Blocks.
-  Version: 1.1.22
-  Author: UCSC
-  Author URI: https://www.ucsc.edu/
-*/
-if (!defined('ABSPATH')) exit; // Exit if accessed directly
 
-// include_once(plugin_dir_path(__FILE__) . 'classes/UCSCGutenbergDemoBlock1.php');
-// include_once(plugin_dir_path(__FILE__) . 'classes/UCSCGutenbergDemoBlock2.php');
-// include_once(plugin_dir_path(__FILE__) . 'classes/ContentSharer.php');
+if ( ! defined( 'ABSPATH' ) ) {
+	exit; // Exit if accessed directly
+}
 
-include_once(plugin_dir_path(__FILE__) . 'classes/CourseCatalog.php');
-include_once(plugin_dir_path(__FILE__) . 'classes/CampusDirectory.php');
-include_once(plugin_dir_path(__FILE__) . 'classes/ClassSchedule.php');
-include_once(plugin_dir_path(__FILE__) . 'classes/Accordion.php');
-include_once(plugin_dir_path(__FILE__) . 'classes/AccordionWrapper.php');
+require_once plugin_dir_path( __FILE__ ) . 'classes/CourseCatalog.php';
+require_once plugin_dir_path( __FILE__ ) . 'classes/CampusDirectory.php';
+require_once plugin_dir_path( __FILE__ ) . 'classes/ClassSchedule.php';
+require_once plugin_dir_path( __FILE__ ) . 'classes/Accordion.php';
+require_once plugin_dir_path( __FILE__ ) . 'classes/AccordionWrapper.php';
 
-// New option for using shortcode without Gutenberg blocks
-include_once(plugin_dir_path(__FILE__) . 'classes/CampusDirectoryShortcode.php');
+// New option for using shortcode without Service blocks
+require_once plugin_dir_path( __FILE__ ) . 'classes/CampusDirectoryShortcode.php';
 
 // include_once(plugin_dir_path(__FILE__) . 'classes/FeedbackForm.php');
-include_once(plugin_dir_path(__FILE__) . 'classes/SiteSettings.php');
+require_once plugin_dir_path( __FILE__ ) . 'classes/SiteSettings.php';
 
 
-add_action('admin_enqueue_scripts', 'registerJSBuild');
+add_action( 'admin_enqueue_scripts', 'registerJSBuild' );
 
 function registerJSBuild() {
-  wp_enqueue_script('ucscblocks', plugin_dir_url(__FILE__) . 'build/index.js', array('wp-blocks','wp-element', 'wp-components', 'wp-block-editor'));
+		wp_enqueue_script( 'ucscblocks', plugin_dir_url( __FILE__ ) . 'build/index.js', array( 'wp-blocks', 'wp-element', 'wp-components', 'wp-block-editor' ) );
 }
 
 
 
 
-// $UCSCGutenbergDemoBlock1 = new UCSCGutenbergDemoBlock1();
-// $UCSCGutenbergDemoBlock2 = new UCSCGutenbergDemoBlock2();
+// $UCSCServiceDemoBlock1 = new UCSCServiceDemoBlock1();
+// $UCSCServiceDemoBlock2 = new UCSCServiceDemoBlock2();
 // $ContentSharer = new ContentSharer();
 
-$CourseCatalog = new CourseCatalog();
-$CampusDirectory = new CampusDirectory();
-$ClassSchedule = new ClassSchedule();
-$Accordion = new Accordion();
+$CourseCatalog    = new CourseCatalog();
+$CampusDirectory  = new CampusDirectory();
+$ClassSchedule    = new ClassSchedule();
+$Accordion        = new Accordion();
 $AccordionWrapper = new AccordionWrapper();
-$SiteSettings = new SiteSettings();
+$SiteSettings     = new SiteSettings();
 
 $CampusDirectoryShortcode = new CampusDirectoryShortcode();
 
 // $FeedbackForm = new FeedbackForm();
+
+// Add link to Settings page
+
+add_filter( 'plugin_action_links_' . plugin_basename(__FILE__), 'ucsc_service_blocks_plugin_action_links' );
+
+function ucsc_service_blocks_plugin_action_links( $links ) {
+	// Build and escape the URL.
+	$url = esc_url( add_query_arg(
+		'page',
+		'ucsc_service_blocks_settings_page',
+		get_admin_url() . 'options-general.php'
+	) );
+	// Create the link.
+	$settings_link = "<a href='$url'>" . __( 'Settings' ) . '</a>';
+	// Adds the link to the end of the array.
+	array_push(
+		$links,
+		$settings_link
+	);
+	return $links;
+}
