@@ -5,7 +5,7 @@
  * Description:       Service blocks for UCSC WordPress Websites.
  * Requires at least: 6.1
  * Requires PHP:      7.0
- * Version:           1.1.21
+ * Version:           1.0.0
  * Author:            UC Santa Cruz
  * Author URI:        https://github.com/ucsc
  * License:           GPL-2.0-or-later
@@ -34,9 +34,9 @@ require_once plugin_dir_path( __FILE__ ) . 'classes/CampusDirectoryShortcode.php
 require_once plugin_dir_path( __FILE__ ) . 'classes/SiteSettings.php';
 
 
-add_action( 'admin_enqueue_scripts', 'registerJSBuild' );
+add_action( 'admin_enqueue_scripts', 'ucsc_service_blocks_register_js_build' );
 
-function registerJSBuild() {
+function ucsc_service_blocks_register_js_build() {
 		wp_enqueue_script( 'ucscblocks', plugin_dir_url( __FILE__ ) . 'build/index.js', array( 'wp-blocks', 'wp-element', 'wp-components', 'wp-block-editor' ) );
 }
 
