@@ -14,7 +14,7 @@ class FeedbackForm {
 			function () {
 				// create a new rest route for posting the feedback form
 				register_rest_route(
-					'ucscgutenbergblocks/v1',
+					'ucscserviceblocks/v1',
 					'/feedbackform',
 					array(
 						'methods'             => 'POST',

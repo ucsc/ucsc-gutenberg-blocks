@@ -184,7 +184,7 @@ const CampusDirectory = () => {
 									The LDAP password needs to be set here{' '}
 									<a
 										target="_blank"
-										href="/wp-admin/options-general.php?page=ucsc_gutenberg_blocks_settings_page"
+										href="/wp-admin/options-general.php?page=ucsc-service-blocks-plugin-settings"
 									>
 										here.
 									</a>

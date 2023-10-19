@@ -30,7 +30,7 @@ class CampusDirectory {
 			'rest_api_init',
 			function () {
 				register_rest_route(
-					'ucscgutenbergblocks/v1',
+					'ucscserviceblocks/v1',
 					'/campusdirectoryrequirements/',
 					array(
 						'methods'             => 'GET',

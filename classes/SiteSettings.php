@@ -425,7 +425,7 @@ class SiteSettings {
 	}
 
 	function settingsLink() {
-		add_options_page( 'UCSC Service Block Settings', 'UCSC Service Block Settings', 'manage_options', 'ucsc_service_blocks_settings_page', array( $this, 'settingsPageHTML' ) );
+		add_options_page( 'UCSC Service Blocks', 'UCSC Service Blocks', 'manage_options', 'ucsc-service-blocks-plugin-settings', array( $this, 'settingsPageHTML' ) );
 	}
 
 	function settingsPageHTML() {

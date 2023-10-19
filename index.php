@@ -61,7 +61,7 @@ function ucsc_service_blocks_plugin_action_links( $links ) {
 	// Build and escape the URL.
 	$url = esc_url( add_query_arg(
 		'page',
-		'ucsc_service_blocks_settings_page',
+		'ucsc-service-blocks-plugin-settings',
 		get_admin_url() . 'options-general.php'
 	) );
 	// Create the link.

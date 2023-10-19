@@ -6,7 +6,7 @@ class ContentSharer {
 			'rest_api_init',
 			function () {
 				register_rest_route(
-					'ucscgutenbergblocks/v1',
+					'ucscserviceblocks/v1',
 					'/sites/',
 					array(
 						'methods'             => 'GET',
@@ -15,7 +15,7 @@ class ContentSharer {
 					)
 				);
 				register_rest_route(
-					'ucscgutenbergblocks/v1',
+					'ucscserviceblocks/v1',
 					'/posttypes',
 					array(
 						'methods'             => 'GET',
@@ -24,7 +24,7 @@ class ContentSharer {
 					)
 				);
 				register_rest_route(
-					'ucscgutenbergblocks/v1',
+					'ucscserviceblocks/v1',
 					'/post',
 					array(
 						'methods'             => 'GET',
