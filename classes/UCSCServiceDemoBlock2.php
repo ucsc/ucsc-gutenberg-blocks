@@ -11,7 +11,7 @@ class UCSCServiceDemoBlock2 {
 
 	function adminAssets() {
 		register_block_type(
-			'ucscblocks/block2',
+			'ucsc/block2',
 			array(
 				'editor_script'   => 'ucscblocks',
 				'render_callback' => array( $this, 'theHTML' ),

@@ -48,7 +48,7 @@ class ContentSharer {
 
 	function renderFrontend() {
 		register_block_type(
-			'ucscblocks/contentsharer',
+			'ucsc/contentsharer',
 			array(
 				'editor_script'   => 'ucscblocks',
 				'render_callback' => array( $this, 'theHTML' ),

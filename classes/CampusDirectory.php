@@ -81,7 +81,7 @@ class ucsc_services_block_campus_directory {
 			filemtime( plugin_dir_path( __FILE__ ) . '../src/components/CampusDirectory/editor.css' )
 		);
 		register_block_type(
-			'ucscblocks/campusdirectory',
+			'ucsc/campusdirectory',
 			array(
 				'editor_script'   => 'ucscblocks',
 				'editor_style'    => 'ucscblocks-editor',

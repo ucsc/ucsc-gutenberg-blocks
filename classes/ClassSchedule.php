@@ -31,7 +31,7 @@ class ucsc_services_block_class_schedule {
 
 	function adminAssets() {
 		register_block_type(
-			'ucscblocks/classschedule',
+			'ucsc/classschedule',
 			array(
 				'editor_script'   => 'ucscblocks',
 				'render_callback' => array( $this, 'theHTML' ),

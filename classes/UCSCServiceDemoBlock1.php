@@ -10,7 +10,7 @@ class UCSCServiceDemoBlock1 {
 
 	function adminAssets() {
 		register_block_type(
-			'ucscblocks/gutenberg',
+			'ucsc/gutenberg',
 			array(
 				'editor_script'   => 'ucscblocks',
 				'render_callback' => array( $this, 'theHTML' ),
