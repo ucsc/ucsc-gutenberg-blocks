@@ -16,7 +16,6 @@
  * @package           ucsc-blocks
  */
 
-
 if ( ! defined( 'ABSPATH' ) ) {
 	exit; // Exit if accessed directly
 }
@@ -24,8 +23,6 @@ if ( ! defined( 'ABSPATH' ) ) {
 require_once plugin_dir_path( __FILE__ ) . 'classes/CourseCatalog.php';
 require_once plugin_dir_path( __FILE__ ) . 'classes/CampusDirectory.php';
 require_once plugin_dir_path( __FILE__ ) . 'classes/ClassSchedule.php';
-require_once plugin_dir_path( __FILE__ ) . 'classes/Accordion.php';
-require_once plugin_dir_path( __FILE__ ) . 'classes/AccordionWrapper.php';
 
 // New option for using shortcode without Service blocks
 require_once plugin_dir_path( __FILE__ ) . 'classes/CampusDirectoryShortcode.php';
@@ -50,8 +47,6 @@ function ucsc_service_blocks_register_js_build() {
 $CourseCatalog    = new CourseCatalog();
 $CampusDirectory  = new CampusDirectory();
 $ClassSchedule    = new ClassSchedule();
-$Accordion        = new Accordion();
-$AccordionWrapper = new AccordionWrapper();
 $SiteSettings     = new SiteSettings();
 
 $CampusDirectoryShortcode = new CampusDirectoryShortcode();
