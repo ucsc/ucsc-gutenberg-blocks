@@ -2,7 +2,7 @@
 require_once ABSPATH . 'wp-admin/includes/class-wp-filesystem-base.php';
 require_once ABSPATH . 'wp-admin/includes/class-wp-filesystem-direct.php';
 
-class CampusDirectoryAPI {
+class ucsc_services_block_campus_directory_api {
 
 	public $nodeContent;
 	public $allStaffTypes;

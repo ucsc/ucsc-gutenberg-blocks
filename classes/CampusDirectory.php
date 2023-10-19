@@ -3,7 +3,7 @@
 
 require_once plugin_dir_path( __FILE__ ) . 'CampusDirectoryAPI.php';
 
-class CampusDirectory {
+class ucsc_services_block_campus_directory {
 
 	function __construct() {
 		add_action( 'init', array( $this, 'renderFrontend' ) );
@@ -105,7 +105,7 @@ class CampusDirectory {
 		if ( $attributes['strInformationTypesTable'] != null ) {
 			$attributes['objInformationTypesTable'] = json_decode( $attributes['strInformationTypesTable'], true );
 		}
-		$campusDirectoryAPI = new CampusDirectoryAPI( $attributes );
+		$campusDirectoryAPI = new ucsc_services_block_campus_directory_api( $attributes );
 		$items              = $campusDirectoryAPI->setDirectoryData();
 		ob_start();
 		include plugin_dir_path( __FILE__ ) . '../templates/CampusDirectoryTemplate.php';

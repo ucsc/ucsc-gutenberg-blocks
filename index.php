@@ -44,12 +44,11 @@ function ucsc_service_blocks_register_js_build() {
 // $UCSCServiceDemoBlock2 = new UCSCServiceDemoBlock2();
 // $ContentSharer = new ContentSharer();
 
-$CourseCatalog    = new CourseCatalog();
-$CampusDirectory  = new CampusDirectory();
-$ClassSchedule    = new ClassSchedule();
-$SiteSettings     = new SiteSettings();
-
-$CampusDirectoryShortcode = new CampusDirectoryShortcode();
+$CourseCatalog    = new ucsc_services_block_course_catalog();
+$CampusDirectory  = new ucsc_services_block_campus_directory();
+$ClassSchedule    = new ucsc_services_block_class_schedule();
+$SiteSettings     = new ucsc_services_block_class_site_settings();
+$CampusDirectoryShortcode = new ucsc_services_block_campus_directory_shortcode();
 
 // $FeedbackForm = new FeedbackForm();
 

@@ -1,6 +1,6 @@
 <?php
 
-class ClassSchedule {
+class ucsc_services_block_class_schedule {
 
 	function __construct() {
 		add_action( 'init', array( $this, 'adminAssets' ) );

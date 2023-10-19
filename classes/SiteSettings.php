@@ -2,7 +2,7 @@
 
 require_once plugin_dir_path( __FILE__ ) . 'CampusDirectoryAPI.php';
 
-class SiteSettings {
+class ucsc_services_block_class_site_settings {
 
 	function __construct() {
 		add_action( 'admin_menu', array( $this, 'settingsLink' ) );
