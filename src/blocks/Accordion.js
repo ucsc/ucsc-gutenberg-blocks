@@ -29,7 +29,7 @@ const Accordion = () => {
               </PanelBody>
             </Panel>
           </InspectorControls>
-          <details className='ucsc-accordion' open="true" >
+          <details className='ucsc-block-accordion' open="true" >
               <summary><input
                 placeholder='Accordion Item Title'
                 value={attributes.title}
