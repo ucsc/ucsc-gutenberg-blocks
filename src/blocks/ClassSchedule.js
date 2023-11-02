@@ -10,30 +10,26 @@ import { useState } from '@wordpress/element';
 
 const ClassSchedule = () => {
   wp.blocks.registerBlockType("ucscblocks/classschedule", {
-    title: "Class Schedule",
+    title: "Class Schedule (deprecated)",
     icon: "schedule",
     category: "common",
     attributes: {
       subjectOrDept: {
-        type: "string"
+        type: "string",
       },
       department: {
-        type: "string"
+        type: "string",
       },
       subject: {
-        type: "string"
+        type: "string",
       },
     },
     edit: ({ setAttributes, attributes }) => {
-      const {
-        department,
-        subject,
-        subjectOrDept
-      } = attributes;
+      const { department, subject, subjectOrDept } = attributes;
 
       let localSubjectOrDept;
       let setLocalSubjectOrDept;
-      if (typeof subjectOrDept === 'undefined') {
+      if (typeof subjectOrDept === "undefined") {
         [localSubjectOrDept, setLocalSubjectOrDept] = useState("dept");
         setAttributes({
           subjectOrDept: "dept",
@@ -43,8 +39,8 @@ const ClassSchedule = () => {
       }
 
       const options = [
-        { label: 'Department', value: 'dept' },
-        { label: 'Subject', value: 'subject' },
+        { label: "Department", value: "dept" },
+        { label: "Subject", value: "subject" },
       ];
 
       return (
@@ -54,7 +50,7 @@ const ClassSchedule = () => {
               <div className="vertical_radio">
                 <RadioControl
                   selected={localSubjectOrDept}
-                  onChange={newLocalSubjectOrDept => {
+                  onChange={(newLocalSubjectOrDept) => {
                     setLocalSubjectOrDept(newLocalSubjectOrDept);
                     setAttributes({
                       subjectOrDept: newLocalSubjectOrDept,
@@ -83,8 +79,8 @@ const ClassSchedule = () => {
     },
     save: (props) => {
       return null;
-    }
-  })
+    },
+  });
 }
 
 export default ClassSchedule;

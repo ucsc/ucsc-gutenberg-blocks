@@ -1,6 +1,6 @@
 const FeedbackForm = () => {
   wp.blocks.registerBlockType("ucscblocks/feedback", {
-    title: "Feedback Form",
+    title: "Feedback Form (deprecated)",
     icon: "smiley",
     category: "common",
     attributes: {
@@ -45,19 +45,23 @@ const FeedbackForm = () => {
           <div>
             <label>Name: </label>
             <div id="name-input">
-              <input style={{ margin: 3 }}
+              <input
+                style={{ margin: 3 }}
                 type="text"
                 id="name"
                 placeholder="Name"
                 value={attributes.name}
-                onChange={e => setAttributes({ name: e.target.value })}
+                onChange={(e) => setAttributes({ name: e.target.value })}
               />
-              <input style={{ margin: 3 }}
+              <input
+                style={{ margin: 3 }}
                 type="text"
                 id="namePlaceholder"
                 placeholder="Name Placeholder"
                 value={attributes.namePlaceholder}
-                onChange={e => setAttributes({ namePlaceholder: e.target.value })}
+                onChange={(e) =>
+                  setAttributes({ namePlaceholder: e.target.value })
+                }
               />
             </div>
           </div>
@@ -65,17 +69,21 @@ const FeedbackForm = () => {
           <div>
             <label>Email: </label>
             <div id="email-input">
-              <input style={{ margin: 3 }}
+              <input
+                style={{ margin: 3 }}
                 type="text"
                 placeholder="Email"
                 value={attributes.email}
-                onChange={e => setAttributes({ email: e.target.value })}
+                onChange={(e) => setAttributes({ email: e.target.value })}
               />
-              <input style={{ margin: 3 }}
+              <input
+                style={{ margin: 3 }}
                 type="text"
                 placeholder="Email Placeholder"
                 value={attributes.emailPlaceholder}
-                onChange={e => setAttributes({ emailPlaceholder: e.target.value })}
+                onChange={(e) =>
+                  setAttributes({ emailPlaceholder: e.target.value })
+                }
               />
             </div>
           </div>
@@ -83,11 +91,12 @@ const FeedbackForm = () => {
           <div>
             <label>Affiliation: </label>
             <div id="affiliation-input">
-              <input style={{ margin: 3 }}
+              <input
+                style={{ margin: 3 }}
                 type="text"
                 placeholder="Affiliation"
                 value={attributes.affiliation}
-                onChange={e => setAttributes({ affiliation: e.target.value })}
+                onChange={(e) => setAttributes({ affiliation: e.target.value })}
               />
             </div>
           </div>
@@ -95,11 +104,12 @@ const FeedbackForm = () => {
           <div>
             <label>Topic: </label>
             <div id="topic-input">
-              <input style={{ margin: 3 }}
+              <input
+                style={{ margin: 3 }}
                 type="text"
                 placeholder="Topic"
                 value={attributes.topic}
-                onChange={e => setAttributes({ topic: e.target.value })}
+                onChange={(e) => setAttributes({ topic: e.target.value })}
               />
             </div>
           </div>
@@ -107,17 +117,21 @@ const FeedbackForm = () => {
           <div>
             <label>Message: </label>
             <div id="message-input">
-              <input style={{ margin: 3 }}
+              <input
+                style={{ margin: 3 }}
                 type="text"
                 placeholder="Message"
                 value={attributes.message}
-                onChange={e => setAttributes({ message: e.target.value })}
+                onChange={(e) => setAttributes({ message: e.target.value })}
               />
-              <input style={{ margin: 3 }}
+              <input
+                style={{ margin: 3 }}
                 type="text"
                 placeholder="Message Placeholder"
                 value={attributes.messagePlaceholder}
-                onChange={e => setAttributes({ messagePlaceholder: e.target.value })}
+                onChange={(e) =>
+                  setAttributes({ messagePlaceholder: e.target.value })
+                }
               />
             </div>
           </div>
@@ -125,11 +139,12 @@ const FeedbackForm = () => {
           <div>
             <label>Who is receiving the email</label>
             <div id="to-input">
-              <input style={{ margin: 3 }}
+              <input
+                style={{ margin: 3 }}
                 type="text"
                 placeholder="email1, email2, email3..."
                 value={attributes.to}
-                onChange={e => setAttributes({ to: e.target.value })}
+                onChange={(e) => setAttributes({ to: e.target.value })}
               />
             </div>
           </div>
@@ -138,8 +153,8 @@ const FeedbackForm = () => {
     },
     save: (props) => {
       return null;
-    }
-  })
+    },
+  });
 }
 
 export default FeedbackForm;
