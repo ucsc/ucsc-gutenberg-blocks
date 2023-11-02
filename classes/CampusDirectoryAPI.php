@@ -18,9 +18,14 @@ class CampusDirectoryAPI {
     ];
     $this->ldap_password = get_site_option('ldap_api_key');
     if (!$this->ldap_password) $this->ldap_password = get_option('ldap_api_key');
+
     $this->ldap_cn = get_site_option('ldap_cn');
     if (!$this->ldap_cn) $this->ldap_cn = get_option('ldap_cn');
     if (!$this->ldap_cn) $this->ldap_cn = "pantheon-webapps";
+
+    $this->ldap_url = get_site_option('ldap_url');
+    if (!$this->ldap_url) $this->ldap_url = get_option('ldap_url');
+    if (!$this->ldap_url) $this->ldap_url = "ldap-blue.ucsc.edu";
   }
 
   public function setDirectoryData()
@@ -96,13 +101,14 @@ class CampusDirectoryAPI {
   public function doLDAPQuery($q, $arrCruzids) {
     $dev_env = getenv("DOCKER_DEV") == "docker_dev";
     if ($dev_env) {
-      $rli = ldap_connect("ldap://ldap-blue.ucsc.edu/");
+      $rli = ldap_connect("ldap://" . $this->ldap_url);
     } else {
-      $rli = ldap_connect("ldaps://ldap-blue.ucsc.edu/");
+      $rli = ldap_connect("ldaps://" . $this->ldap_url);
     }
 
     if ($rli) {
       ldap_set_option($rli, LDAP_OPT_TIMELIMIT, 90);
+      ldap_set_option($rli, LDAP_OPT_NETWORK_TIMEOUT, 5);
       ldap_set_option($rli, LDAP_OPT_PROTOCOL_VERSION, 3);
 
       if ($dev_env) @$ldapbind = ldap_bind($rli);

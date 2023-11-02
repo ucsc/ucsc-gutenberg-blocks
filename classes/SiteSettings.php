@@ -289,6 +289,7 @@ class SiteSettings
 
     update_site_option('ldap_api_key', $_POST['ldap_api_key']);
     update_site_option('ldap_cn', $_POST['ldap_cn']);
+    update_site_option('ldap_url', $_POST['ldap_url']);
 
     wp_redirect(add_query_arg(
       array(
@@ -325,20 +326,26 @@ class SiteSettings
     <form method="post" action="edit.php?action=ucscplugin">';
     wp_nonce_field('ucscplugin-validate');
     echo '
-			<table class="form-table">
-				<tr>
-					<th scope="row"><label for="ldap_api_key">LDAP API Key</label></th>
-					<td>
-						<input name="ldap_api_key" class="regular-text" type="text" id="ldap_api_key" value="' . esc_attr(get_site_option('ldap_api_key')) . '" />
-					</td>
+      <table class="form-table">
+        <tr>
+          <th scope="row"><label for="ldap_api_key">LDAP API Key</label></th>
+          <td>
+            <input name="ldap_api_key" class="regular-text" type="text" id="ldap_api_key" value="' . esc_attr(get_site_option('ldap_api_key')) . '" />
+          </td>
         </tr>
         <tr>
           <th scope="row"><label for="ldap_cn">LDAP CN</label></th>
           <td>
-						<input name="ldap_cn" class="regular-text" type="text" id="ldap_cn" value="' . esc_attr(get_site_option('ldap_cn')) . '" />
-					</td>
-				</tr>
-			</table>';
+            <input name="ldap_cn" class="regular-text" type="text" id="ldap_cn" value="' . esc_attr(get_site_option('ldap_cn')) . '" />
+          </td>
+        </tr>
+        <tr>
+          <th scope="row"><label for="ldap_url">LDAP URL</label>(ldap-blue.ucsc.edu or ldap-gold.ucsc.edu:636)</th>
+          <td>
+            <input name="ldap_url" class="regular-text" type="text" id="ldap_url" value="' . esc_attr(get_site_option('ldap_url')) . '" />
+          </td>
+        </tr>
+      </table>';
     submit_button();
     echo '</form></div>';
   }
@@ -349,12 +356,15 @@ class SiteSettings
 
     add_settings_field('ldap_api_key', 'LDAP API Key', array($this, 'ldapKeyHTML'), 'ucsc_gutenberg_blocks_settings_page', 'ucsc_gutenberg_blocks_section');
     add_settings_field('ldap_cn', 'LDAP CN', array($this, 'ldapCN'), 'ucsc_gutenberg_blocks_settings_page', 'ucsc_gutenberg_blocks_section');
+    add_settings_field('ldap_url', 'LDAP URL', array($this, 'ldapURL'), 'ucsc_gutenberg_blocks_settings_page', 'ucsc_gutenberg_blocks_section');
 
     register_setting('ucsc_gutenberg_blocks', 'ldap_api_key', array('sanitize_callback' => 'sanitize_text_field', 'default' => ''));
     register_setting('ucsc_gutenberg_blocks', 'ldap_cn', array('sanitize_callback' => 'sanitize_text_field', 'default' => ''));
+    register_setting('ucsc_gutenberg_blocks', 'ldap_url', array('sanitize_callback' => 'sanitize_text_field', 'default' => ''));
 
     register_setting('ucsc_network_settings', 'ldap_api_key', array('sanitize_callback' => 'sanitize_text_field', 'default' => ''));
     register_setting('ucsc_network_settings', 'ldap_cn', array('sanitize_callback' => 'sanitize_text_field', 'default' => ''));
+    register_setting('ucsc_network_settings', 'ldap_url', array('sanitize_callback' => 'sanitize_text_field', 'default' => ''));
   }
 
   function ldapKeyHTML()
@@ -362,10 +372,16 @@ class SiteSettings
     <input type="text" name="ldap_api_key" value="<?php echo esc_attr(get_option('ldap_api_key')) ?>" />
   <?php }
 
-function ldapCN()
-{ ?>
-  <input type="text" name="ldap_cn" value="<?php echo esc_attr(get_option('ldap_cn')) ?>" />
-<?php }
+  function ldapCN()
+  { ?>
+    <input type="text" name="ldap_cn" value="<?php echo esc_attr(get_option('ldap_cn')) ?>" />
+  <?php }
+
+  function ldapURL()
+  { ?>
+    <input type="text" name="ldap_url" value="<?php echo esc_attr(get_option('ldap_url')) ?>" />
+    <p>(ldap-blue.ucsc.edu or ldap-gold.ucsc.edu:636)</p>
+  <?php }
 
   function settingsLink()
   {
