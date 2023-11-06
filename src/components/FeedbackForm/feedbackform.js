@@ -14,7 +14,7 @@ feedbackform.addEventListener('submit', function (e) {
 	e.preventDefault();
 	var formData = new FormData(feedbackform);
 	var xhr = new XMLHttpRequest();
-	xhr.open('POST', '/wp-json/ucscgutenbergblocks/v1/feedbackform/', true);
+	xhr.open('POST', '/wp-json/ucscserviceblocks/v1/feedbackform/', true);
 	xhr.onload = function () {
 		if (this.status == 200) {
 			var response = JSON.parse(this.responseText);

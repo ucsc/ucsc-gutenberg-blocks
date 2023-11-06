@@ -21,7 +21,7 @@ const SubjectDropdown = ({
 	}
 
 	useEffect(() => {
-		fetch('/wp-json/ucscgutenbergblocks/v1/subjectcode')
+		fetch('/wp-json/ucscserviceblocks/v1/subjectcode')
 			.then((res) => res.text())
 			.then((text) => {
 				const resp = JSON.parse(text);

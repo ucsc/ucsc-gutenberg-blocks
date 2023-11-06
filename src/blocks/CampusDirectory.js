@@ -96,7 +96,7 @@ const CampusDirectory = () => {
 
 			useEffect(() => {
 				fetch(
-					'/wp-json/ucscgutenbergblocks/v1/campusdirectoryrequirements'
+					'/wp-json/ucscserviceblocks/v1/campusdirectoryrequirements'
 				)
 					.then((res) => res.text())
 					.then((text) => {

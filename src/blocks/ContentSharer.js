@@ -42,7 +42,7 @@ const TestDemoUCSC = () => {
 
 			const fetchPostTypes = (siteid) => {
 				fetch(
-					'/wp-json/ucscgutenbergblocks/v1/posttypes?siteid=' + siteid
+					'/wp-json/ucscserviceblocks/v1/posttypes?siteid=' + siteid
 				)
 					.then((res) => res.text())
 					.then((text) => {
@@ -59,7 +59,7 @@ const TestDemoUCSC = () => {
 			};
 
 			useEffect(() => {
-				fetch('/wp-json/ucscgutenbergblocks/v1/sites')
+				fetch('/wp-json/ucscserviceblocks/v1/sites')
 					.then((res) => res.text())
 					.then((text) => {
 						setSites(JSON.parse(text));

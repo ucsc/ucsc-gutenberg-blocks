@@ -1,9 +1,9 @@
 <?php
 
-class ucsc_services_block_class_schedule {
+class Ucsc_Services_Blocks_Class_Schedule {
 
 	function __construct() {
-		add_action( 'init', array( $this, 'adminAssets' ) );
+		add_action( 'init', array( $this, 'admin_Assets' ) );
 		add_action(
 			'rest_api_init',
 			function () {
@@ -12,7 +12,7 @@ class ucsc_services_block_class_schedule {
 					'/classscheduledept/',
 					array(
 						'methods'             => 'GET',
-						'callback'            => array( $this, 'classscheduledept' ),
+						'callback'            => array( $this, 'class_schedule_dept' ),
 						'permission_callback' => function () {
 							return true;
 						},
@@ -22,19 +22,19 @@ class ucsc_services_block_class_schedule {
 		);
 	}
 
-	function classscheduledept() {
+	function class_schedule_dept() {
 		$resp         = array();
 		$resp['dept'] = get_option( 'class_schedule_department' );
 
 		return new WP_REST_Response( $resp );
 	}
 
-	function adminAssets() {
+	function admin_Assets() {
 		register_block_type(
 			'ucscservice/classschedule',
 			array(
 				'editor_script'   => 'ucscblocks',
-				'render_callback' => array( $this, 'theHTML' ),
+				'render_callback' => array( $this, 'the_HTML' ),
 			)
 		);
 		wp_register_style(
@@ -51,7 +51,7 @@ class ucsc_services_block_class_schedule {
 		wp_enqueue_style( 'classschedule' );
 	}
 
-	function theHTML( $attributes ) {
+	function the_HTML( $attributes ) {
 		$deptOrSubAttribute = '';
 		if ( $attributes['subjectOrDept'] == 'dept' ) {
 			$deptOrSubAttribute = 'department="' . $attributes['department'] . '"';

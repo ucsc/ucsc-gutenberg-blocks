@@ -21,7 +21,7 @@ const DivisionDropdown = ({
 	}
 
 	useEffect(() => {
-		fetch('/wp-json/ucscgutenbergblocks/v1/divisioncode')
+		fetch('/wp-json/ucscserviceblocks/v1/divisioncode')
 			.then((res) => res.text())
 			.then((text) => {
 				const resp = JSON.parse(text);

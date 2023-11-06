@@ -20,7 +20,7 @@ const DepartmentDropdown = ({
 		[localDepartment, setLocalDepartment] = useState(department);
 	}
 	useEffect(() => {
-		fetch('/wp-json/ucscgutenbergblocks/v1/cddepartmentcode')
+		fetch('/wp-json/ucscserviceblocks/v1/cddepartmentcode')
 			.then((res) => res.text())
 			.then((text) => {
 				const resp = JSON.parse(text);
