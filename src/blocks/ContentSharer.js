@@ -2,7 +2,7 @@ import { useEffect, useState } from '@wordpress/element';
 import { SelectControl } from '@wordpress/components';
 
 const TestDemoUCSC = () => {
-	wp.blocks.registerBlockType('ucsc/contentsharer', {
+	wp.blocks.registerBlockType('ucscservice/contentsharer', {
 		title: 'Content Sharer',
 		icon: 'admin-site-alt3',
 		category: 'common',

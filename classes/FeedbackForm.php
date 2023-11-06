@@ -51,7 +51,7 @@ class FeedbackForm {
 
 	function adminAssets() {
 		register_block_type(
-			'ucsc/feedback',
+			'ucscservice/feedback',
 			array(
 				'editor_script'   => 'ucscblocks',
 				'render_callback' => array( $this, 'theHTML' ),

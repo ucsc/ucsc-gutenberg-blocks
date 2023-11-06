@@ -1,5 +1,5 @@
 const FeedbackForm = () => {
-	wp.blocks.registerBlockType('ucsc/feedback', {
+	wp.blocks.registerBlockType('ucscservice/feedback', {
 		title: 'Feedback Form',
 		icon: 'smiley',
 		category: 'common',

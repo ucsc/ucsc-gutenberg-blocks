@@ -10,7 +10,7 @@
  * Author URI:        https://github.com/ucsc
  * License:           GPL-2.0-or-later
  * License URI:       https://www.gnu.org/licenses/gpl-2.0.html
- * Text Domain:       ucsc
+ * Text Domain:       ucscservice
  * Domain Path:       service-blocks
  *
  * @package           ucsc-blocks
@@ -34,7 +34,7 @@ require_once plugin_dir_path( __FILE__ ) . 'classes/SiteSettings.php';
 add_action( 'admin_enqueue_scripts', 'ucsc_service_blocks_register_js_build' );
 
 function ucsc_service_blocks_register_js_build() {
-		wp_enqueue_script( 'ucscblocks', plugin_dir_url( __FILE__ ) . 'build/index.js', array( 'wp-blocks', 'wp-element', 'wp-components', 'wp-block-editor' ) );
+		wp_enqueue_script( 'ucscserviceblocks', plugin_dir_url( __FILE__ ) . 'build/index.js', array( 'wp-blocks', 'wp-element', 'wp-components', 'wp-block-editor' ) );
 }
 
 

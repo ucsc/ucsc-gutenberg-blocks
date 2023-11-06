@@ -39,7 +39,7 @@ class ucsc_services_block_course_catalog {
 
 	function renderFrontend() {
 		register_block_type(
-			'ucsc/coursecatalog',
+			'ucscservice/coursecatalog',
 			array(
 				'editor_script'   => 'ucscblocks',
 				'render_callback' => array( $this, 'theHTML' ),

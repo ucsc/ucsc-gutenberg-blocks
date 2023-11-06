@@ -12,7 +12,7 @@ import PageLayout from '../components/CampusDirectory/PageLayout';
 import PeopleAndInformation from '../components/CampusDirectory/PeopleAndInformation';
 
 const CampusDirectory = () => {
-	wp.blocks.registerBlockType('ucsc/campusdirectory', {
+	wp.blocks.registerBlockType('ucscservice/campusdirectory', {
 		title: 'Campus Directory',
 		icon: 'welcome-learn-more',
 		category: 'common',

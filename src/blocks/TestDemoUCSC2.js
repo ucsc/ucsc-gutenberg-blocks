@@ -1,7 +1,7 @@
 import Hello from '../components/Hello';
 
 const TestDemoUCSC = () => {
-	wp.blocks.registerBlockType('ucsc/block2', {
+	wp.blocks.registerBlockType('ucscservice/block2', {
 		title: 'Test Demo 2 UCSC',
 		icon: 'smiley',
 		category: 'common',

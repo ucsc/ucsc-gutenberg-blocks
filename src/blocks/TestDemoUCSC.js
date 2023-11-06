@@ -1,5 +1,5 @@
 const TestDemoUCSC = () => {
-	wp.blocks.registerBlockType('ucsc/gutenberg', {
+	wp.blocks.registerBlockType('ucscservice/gutenberg', {
 		title: 'Test Demo UCSC',
 		icon: 'smiley',
 		category: 'common',
