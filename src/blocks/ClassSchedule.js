@@ -5,7 +5,7 @@ import SubjectDropdown from '../components/SubjectDropdown';
 
 import { useState } from '@wordpress/element';
 
-const ClassSchedule = () => {
+const UcscClassSchedule = () => {
 	wp.blocks.registerBlockType('ucscservice/classschedule', {
 		title: 'Class Schedule',
 		icon: 'schedule',
@@ -87,4 +87,4 @@ const ClassSchedule = () => {
 	});
 };
 
-export default ClassSchedule;
+export default UcscClassSchedule;
