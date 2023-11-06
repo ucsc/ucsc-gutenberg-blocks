@@ -1,9 +1,9 @@
 <?php
 
 
-require_once plugin_dir_path( __FILE__ ) . 'CampusDirectoryAPI.php';
+include_once plugin_dir_path( __FILE__ ) . 'CampusDirectoryAPI.php';
 
-class ucsc_services_block_campus_directory {
+class Ucsc_Services_Blocks_Campus_Directory {
 
 	function __construct() {
 		add_action( 'init', array( $this, 'renderFrontend' ) );
@@ -105,7 +105,7 @@ class ucsc_services_block_campus_directory {
 		if ( $attributes['strInformationTypesTable'] != null ) {
 			$attributes['objInformationTypesTable'] = json_decode( $attributes['strInformationTypesTable'], true );
 		}
-		$campusDirectoryAPI = new ucsc_services_block_campus_directory_api( $attributes );
+		$campusDirectoryAPI = new Ucsc_Services_Blocks_Campus_Directory_api( $attributes );
 		$items              = $campusDirectoryAPI->setDirectoryData();
 		ob_start();
 		include plugin_dir_path( __FILE__ ) . '../templates/CampusDirectoryTemplate.php';
