@@ -1,6 +1,6 @@
 <?php
 
-class ClassSchedule {
+class ucsc_services_block_class_schedule {
 
 	function __construct() {
 		add_action( 'init', array( $this, 'adminAssets' ) );
@@ -31,7 +31,7 @@ class ClassSchedule {
 
 	function adminAssets() {
 		register_block_type(
-			'ucscblocks/classschedule',
+			'ucsc/classschedule',
 			array(
 				'editor_script'   => 'ucscblocks',
 				'render_callback' => array( $this, 'theHTML' ),

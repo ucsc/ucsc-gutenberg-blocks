@@ -6,7 +6,7 @@ import SubjectDropdown from '../components/SubjectDropdown';
 import { useState } from '@wordpress/element';
 
 const ClassSchedule = () => {
-	wp.blocks.registerBlockType('ucscblocks/classschedule', {
+	wp.blocks.registerBlockType('ucsc/classschedule', {
 		title: 'Class Schedule',
 		icon: 'schedule',
 		category: 'common',

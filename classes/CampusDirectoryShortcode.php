@@ -3,7 +3,7 @@
 
 require_once plugin_dir_path( __FILE__ ) . 'CampusDirectoryAPI.php';
 
-class CampusDirectoryShortcode {
+class ucsc_services_block_campus_directory_shortcode {
 
 	function __construct() {
 		// register shortcode
@@ -82,7 +82,7 @@ class CampusDirectoryShortcode {
 		$strCruzids = $attrs['uids']; // string with comma separated uids
 
 		// get data for each profile
-		$campusDirectoryAPI = new CampusDirectoryAPI();
+		$campusDirectoryAPI = new ucsc_services_block_campus_directory();
 		$itemsShortcode     = $campusDirectoryAPI->getCampusDirData( $strCruzids, true );
 		$uids               = preg_split( '/[\s,]+/', $attrs['uids'] );
 

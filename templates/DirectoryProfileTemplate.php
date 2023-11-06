@@ -4,7 +4,7 @@ if ( file_exists( get_theme_file_path( 'header-plugin.php' ) ) ) {
 	get_header( 'plugin' );
 }
 $cruzid             = get_query_var( 'directoryprofilecruzid' );
-$campusDirectoryAPI = new CampusDirectoryAPI( $attributes );
+$campusDirectoryAPI = new ucsc_services_block_campus_directory_api( $attributes );
 $profileData        = $campusDirectoryAPI->getCampusDirData( $cruzid, true )[0];
 $cruzidEmail        = $profileData['0']['mail'][0];
 

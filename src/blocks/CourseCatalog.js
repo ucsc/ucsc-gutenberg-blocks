@@ -6,7 +6,7 @@ import SubjectDropdown from '../components/SubjectDropdown';
 import { useState } from '@wordpress/element';
 
 const CourseCatalog = () => {
-	wp.blocks.registerBlockType('ucscblocks/coursecatalog', {
+	wp.blocks.registerBlockType('ucsc/coursecatalog', {
 		title: 'Course Catalog',
 		icon: 'book-alt',
 		category: 'common',
