@@ -1,4 +1,4 @@
-const FeedbackForm = () => {
+const UcscFeedbackForm = () => {
 	wp.blocks.registerBlockType('ucscservice/feedback', {
 		title: 'Feedback Form',
 		icon: 'smiley',
@@ -177,4 +177,4 @@ const FeedbackForm = () => {
 	});
 };
 
-export default FeedbackForm;
+export default UcscFeedbackForm;
