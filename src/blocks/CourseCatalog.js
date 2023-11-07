@@ -5,7 +5,7 @@ import SubjectDropdown from '../components/SubjectDropdown';
 
 import { useState } from '@wordpress/element';
 
-const CourseCatalog = () => {
+const UcscCourseCatalog = () => {
 	wp.blocks.registerBlockType('ucscservice/coursecatalog', {
 		title: 'Course Catalog',
 		icon: 'book-alt',
@@ -87,4 +87,4 @@ const CourseCatalog = () => {
 	});
 };
 
-export default CourseCatalog;
+export default UcscCourseCatalog;
