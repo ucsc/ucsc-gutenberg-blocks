@@ -1,6 +1,6 @@
 {
   "name": "ucsc-service-blocks",
-  "version": null,
+  "version": "2.1.0",
   "description": "",
   "scripts": {
     "build": "wp-scripts build",
@@ -14,15 +14,15 @@
     "plugin-zip": "wp-scripts plugin-zip",
     "release": "standard-version"
   },
-	"files": [
-		"*",
-		"classes",
-		"build/index.js",
-		"build/index.asset.php",
-		"templates"
-	],
-	"main": "build/index.js",
-	"author": "UC Santa Cruz",
+  "files": [
+    "*",
+    "classes",
+    "build/index.js",
+    "build/index.asset.php",
+    "templates"
+  ],
+  "main": "build/index.js",
+  "author": "UC Santa Cruz",
   "license": "ISC",
   "devDependencies": {
     "@wordpress/scripts": "^22.3.0",
