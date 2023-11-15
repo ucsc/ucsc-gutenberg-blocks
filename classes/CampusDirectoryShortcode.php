@@ -3,7 +3,7 @@
 
 require_once plugin_dir_path( __FILE__ ) . 'CampusDirectoryAPI.php';
 
-class Ucsc_Services_Blocks_Campus_Directory_shortcode {
+class Ucsc_Services_Blocks_Campus_Directory_Shortcode {
 
 	function __construct() {
 		// register shortcode

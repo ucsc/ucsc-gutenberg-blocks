@@ -1,5 +1,5 @@
 <?php
-class ContentSharer {
+class Ucsc_Services_Blocks_Content_Sharer {
 
 	function __construct() {
 		add_action(

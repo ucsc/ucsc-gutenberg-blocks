@@ -27,7 +27,7 @@ require_once plugin_dir_path( __FILE__ ) . 'classes/ClassSchedule.php';
 // New option for using shortcode without Service blocks
 require_once plugin_dir_path( __FILE__ ) . 'classes/CampusDirectoryShortcode.php';
 
-// include_once(plugin_dir_path(__FILE__) . 'classes/FeedbackForm.php');
+// include_once(plugin_dir_path(__FILE__) . 'classes/Ucsc_Services_Blocks_Content_Sharer.php');
 require_once plugin_dir_path( __FILE__ ) . 'classes/SiteSettings.php';
 
 
@@ -42,15 +42,15 @@ function ucsc_service_blocks_register_js_build() {
 
 // $UCSCServiceDemoBlock1 = new UCSCServiceDemoBlock1();
 // $UCSCServiceDemoBlock2 = new UCSCServiceDemoBlock2();
-// $ContentSharer = new ContentSharer();
+// $Ucsc_Services_Blocks_Content_Sharer = new Ucsc_Services_Blocks_Content_Sharer();
 
 $CourseCatalog    = new Ucsc_Services_Blocks_Course_Catalog();
 $CampusDirectory  = new Ucsc_Services_Blocks_Campus_Directory();
 $ClassSchedule    = new Ucsc_Services_Blocks_Class_Schedule();
 $SiteSettings     = new Ucsc_Services_Blocks_Site_Settings();
-$CampusDirectoryShortcode = new Ucsc_Services_Blocks_Campus_Directory_shortcode();
+$CampusDirectoryShortcode = new Ucsc_Services_Blocks_Campus_Directory_Shortcode();
 
-// $FeedbackForm = new FeedbackForm();
+// $Ucsc_Services_Blocks_Content_Sharer = new Ucsc_Services_Blocks_Content_Sharer();
 
 // Add link to Settings page
 
