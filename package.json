@@ -1,7 +1,7 @@
 {
-	"name": "ucsc-service-blocks",
-	"version": "1.1.21",
-	"description": "",
+  "name": "ucsc-service-blocks",
+  "version": null,
+  "description": "",
   "scripts": {
     "build": "wp-scripts build",
     "start": "wp-scripts start",
