@@ -172,7 +172,7 @@ class Ucsc_Services_Blocks_Campus_Directory_api {
 	  if (array_key_exists('addCruzids', $this->nodeContent) && strlen($this->nodeContent['addCruzids'])) {
 		if(preg_match_all("/%(?:[^%]*%){2}/", $this->nodeContent['addCruzids'], $vacancies)){
 		  foreach ($vacancies[0] as $vacant){
-			array_push($retArr, $this->Ucsc_Service_Blocks_Add_Vacant_Positions($vacant));
+			array_push($retArr, $this->Ucsc_Service_Blocks_Add_Vacant_Position($vacant));
 		  }
 		}
 	  }
@@ -184,7 +184,7 @@ class Ucsc_Services_Blocks_Campus_Directory_api {
 	  for ($i = 0; $i < count($arrCruzids); $i++) {
 		if (strlen($arrCruzids[$i])) {
 		  if (substr($arrCruzids[$i], 0, 1) == "%") {
-			array_push($retArr, $this->Ucsc_Service_Blocks_Add_Vacant_Positions($arrCruzids[$i]));
+			array_push($retArr, $this->Ucsc_Service_Blocks_Add_Vacant_Position($arrCruzids[$i]));
 		  } elseif (array_key_exists($arrCruzids[$i], $cruzidToPersion)) {
 			array_push($retArr, $cruzidToPersion[$arrCruzids[$i]]);
 		  }
@@ -195,7 +195,7 @@ class Ucsc_Services_Blocks_Campus_Directory_api {
 	return $retArr;
   }
 
-  public function Ucsc_Service_Blocks_Add_Vacant_Positions($position) {
+  public function Ucsc_Service_Blocks_Add_Vacant_Position($position) {
 	$trimmedPosition = trim($position, "%");
 	$arrPosition = explode("%", $trimmedPosition);
 	return [
