@@ -1,6 +1,6 @@
 <?php
 
-class ucsc_services_block_course_catalog {
+class Ucsc_Services_Blocks_Course_Catalog {
 
 	function __construct() {
 		add_action( 'init', array( $this, 'renderFrontend' ) );

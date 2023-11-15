@@ -44,7 +44,7 @@ function ucsc_service_blocks_register_js_build() {
 // $UCSCServiceDemoBlock2 = new UCSCServiceDemoBlock2();
 // $ContentSharer = new ContentSharer();
 
-$CourseCatalog    = new ucsc_services_block_course_catalog();
+$CourseCatalog    = new Ucsc_Services_Blocks_Course_Catalog();
 $CampusDirectory  = new Ucsc_Services_Blocks_Campus_Directory();
 $ClassSchedule    = new Ucsc_Services_Blocks_Class_Schedule();
 $SiteSettings     = new Ucsc_Services_Blocks_Site_Settings();
