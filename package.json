@@ -14,7 +14,15 @@
     "plugin-zip": "wp-scripts plugin-zip",
     "release": "standard-version"
   },
-  "author": "",
+	"files": [
+		"*",
+		"classes",
+		"build/index.js",
+		"build/index.asset.php",
+		"templates"
+	],
+	"main": "build/index.js",
+	"author": "UC Santa Cruz",
   "license": "ISC",
   "devDependencies": {
     "@wordpress/scripts": "^22.3.0",
