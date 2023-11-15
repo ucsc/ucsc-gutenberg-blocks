@@ -2,7 +2,7 @@
 
 include_once plugin_dir_path( __FILE__ ) . 'CampusDirectoryAPI.php';
 
-class ucsc_services_block_class_site_settings
+class Ucsc_Services_Blocks_Site_Settings
 {
 	function __construct()
 	{
