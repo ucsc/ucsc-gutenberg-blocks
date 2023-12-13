@@ -3,7 +3,7 @@ import { Panel, PanelBody, CheckboxControl } from '@wordpress/components';
 
 const Accordion = () => {
   wp.blocks.registerBlockType("ucscblocks/accordion-wrapper", {
-    title: "Accordion Wrapper",
+    title: "Accordion Wrapper (deprecated)",
     icon: "button",
     category: "common",
     attributes: {

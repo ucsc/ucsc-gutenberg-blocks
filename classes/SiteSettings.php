@@ -306,8 +306,8 @@ class SiteSettings
   {
     add_submenu_page(
       'settings.php', // Parent element
-      'UCSC Gutenberg Blocks Network Settings', // Text in browser title bar
-      'UCSC Gutenberg Blocks Network Settings', // Text to be displayed in the menu.
+      'UCSC Gutenberg Blocks Network Settings (deprecated)', // Text in browser title bar
+      'UCSC Gutenberg Blocks Network Settings (deprecated)', // Text to be displayed in the menu.
       'manage_options', // Capability
       'ucsc-gutenberg-blocks-network-settings', // Page slug, will be displayed in URL
       array($this, 'networkSettingsPage') // Callback function which displays the page
@@ -321,7 +321,7 @@ class SiteSettings
     }
     $plugin_data = get_plugin_data( WP_PLUGIN_DIR . '/ucsc-gutenberg-blocks/index.php');
     echo '<div class="wrap">
-    <h1>UCSC Gutenberg Blocks Network Settings</h1>
+    <h1>UCSC Gutenberg Blocks Network Settings (deprecated)</h1>
     <h3>Version: ' . $plugin_data['Version'] . '</h3>
     <form method="post" action="edit.php?action=ucscplugin">';
     wp_nonce_field('ucscplugin-validate');
@@ -385,7 +385,7 @@ class SiteSettings
 
   function settingsLink()
   {
-    add_options_page('UCSC Gutenberg Block Settings', 'UCSC Gutenberg Block Settings', 'manage_options', 'ucsc_gutenberg_blocks_settings_page', array($this, 'settingsPageHTML'));
+    add_options_page('UCSC Gutenberg Block Settings (deprecated)', 'UCSC Gutenberg Block Settings (deprecated)', 'manage_options', 'ucsc_gutenberg_blocks_settings_page', array($this, 'settingsPageHTML'));
   }
 
   function settingsPageHTML()
@@ -396,7 +396,7 @@ class SiteSettings
     $plugin_data = get_plugin_data( WP_PLUGIN_DIR . '/ucsc-gutenberg-blocks/index.php');
     ?>
     <div class="wrap">
-      <h1>UCSC Gutenberg Blocks Settings</h1>
+      <h1>UCSC Gutenberg Blocks Settings (deprecated)</h1>
       <h3>Version: <?php echo $plugin_data['Version']; ?></h3>
       <form action="options.php" method="POST">
         <?php

@@ -1,8 +1,8 @@
 <?php
 
 /*
-  Plugin Name: UCSC Gutenberg Blocks
-  Description: Custom UCSC Gutenberg Blocks.
+  Plugin Name: UCSC Gutenberg Blocks (deprecated)
+  Description: Custom UCSC Gutenberg Blocks. The blocks in this plugin are deprecated. They will be replaced by the UCSC Service Blocks plugin.
   Version: 1.1.23
   Author: UCSC
   Author URI: https://www.ucsc.edu/
