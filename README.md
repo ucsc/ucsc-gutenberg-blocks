@@ -7,7 +7,7 @@ A collection of WordPress blocks Service Block for UC Santa Cruz. Additional blo
 
 ## TL;DR
 
-Assumes you alredy have a local environment.
+Assumes you already have a local environment.
 
 ```bash
 cd wp-content/plugins/
