@@ -18,6 +18,8 @@ composer install
 npm run start
 ```
 
+See `package.json` file for additional `npm` scripts. See `composer.json` file for `composer` scripts.
+
 ## Current Blocks
 
 - **UCSC Course Catalog** -- a block for embedding a course catalog onto a post or page
