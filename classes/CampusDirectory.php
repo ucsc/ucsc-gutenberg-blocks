@@ -106,7 +106,7 @@ class Ucsc_Services_Blocks_Campus_Directory {
 			$attributes['objInformationTypesTable'] = json_decode( $attributes['strInformationTypesTable'], true );
 		}
 		$campusDirectoryAPI = new Ucsc_Services_Blocks_Campus_Directory_api( $attributes );
-		$items              = $campusDirectoryAPI->setDirectoryData();
+		$items              = $campusDirectoryAPI->Ucsc_Service_Blocks_Set_Directory_Data();
 		ob_start();
 		include plugin_dir_path( __FILE__ ) . '../templates/CampusDirectoryTemplate.php';
 

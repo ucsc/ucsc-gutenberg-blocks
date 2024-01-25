@@ -1,11 +1,10 @@
 <?php
-
 if ( file_exists( get_theme_file_path( 'header-plugin.php' ) ) ) {
 	get_header( 'plugin' );
 }
 $cruzid             = get_query_var( 'directoryprofilecruzid' );
 $campusDirectoryAPI = new Ucsc_Services_Blocks_Campus_Directory_api( $attributes );
-$profileData        = $campusDirectoryAPI->getCampusDirData( $cruzid, true )[0];
+$profileData        = $campusDirectoryAPI->Ucsc_Service_Blocks_Get_Campus_Dir_Data( $cruzid, true )[0];
 $cruzidEmail        = $profileData['0']['mail'][0];
 
 
