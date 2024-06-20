@@ -1,4 +1,4 @@
-import { Panel, PanelBody, RadioControl } from '@wordpress/components';
+import { Panel, PanelBody, RadioControl, CheckboxControl } from '@wordpress/components';
 
 import DepartmentDropdown from '../components/DepartmentDropdown';
 import SubjectDropdown from '../components/SubjectDropdown';
@@ -10,26 +10,35 @@ import { useState } from '@wordpress/element';
 
 const ClassSchedule = () => {
   wp.blocks.registerBlockType("ucscblocks/classschedule", {
-    title: "Class Schedule (deprecated)",
+    title: "Class Schedule",
     icon: "schedule",
     category: "common",
     attributes: {
       subjectOrDept: {
-        type: "string",
+        type: "string"
       },
       department: {
-        type: "string",
+        type: "string"
       },
       subject: {
-        type: "string",
+        type: "string"
+      },
+      useNewServer: {
+        type: "boolean",
+        default: false
       },
     },
     edit: ({ setAttributes, attributes }) => {
-      const { department, subject, subjectOrDept } = attributes;
+      const {
+        department,
+        subject,
+        subjectOrDept,
+        useNewServer
+      } = attributes;
 
       let localSubjectOrDept;
       let setLocalSubjectOrDept;
-      if (typeof subjectOrDept === "undefined") {
+      if (typeof subjectOrDept === 'undefined') {
         [localSubjectOrDept, setLocalSubjectOrDept] = useState("dept");
         setAttributes({
           subjectOrDept: "dept",
@@ -38,9 +47,15 @@ const ClassSchedule = () => {
         [localSubjectOrDept, setLocalSubjectOrDept] = useState(subjectOrDept);
       }
 
+      const isDevEnvironment = () => {
+        const isDevEnv = window.location.href.includes('https://wordpress-dev.ucsc.edu/')
+                    || window.location.href.includes('wp-dev.ucsc');
+        return isDevEnv;
+      }
+
       const options = [
-        { label: "Department", value: "dept" },
-        { label: "Subject", value: "subject" },
+        { label: 'Department', value: 'dept' },
+        { label: 'Subject', value: 'subject' },
       ];
 
       return (
@@ -50,7 +65,7 @@ const ClassSchedule = () => {
               <div className="vertical_radio">
                 <RadioControl
                   selected={localSubjectOrDept}
-                  onChange={(newLocalSubjectOrDept) => {
+                  onChange={newLocalSubjectOrDept => {
                     setLocalSubjectOrDept(newLocalSubjectOrDept);
                     setAttributes({
                       subjectOrDept: newLocalSubjectOrDept,
@@ -72,6 +87,16 @@ const ClassSchedule = () => {
                 setAttributes={setAttributes}
                 disabled={subjectOrDept !== "subject"}
               />
+              {isDevEnvironment() && (
+                <>
+                  <hr />
+                  <CheckboxControl
+                    label="Use New Server for Testing"
+                    checked={useNewServer}
+                    onChange={(newUseNewServer) => setAttributes({ useNewServer: newUseNewServer })}
+                  />
+                </>
+              )}
             </PanelBody>
           </Panel>
         </>
@@ -79,8 +104,8 @@ const ClassSchedule = () => {
     },
     save: (props) => {
       return null;
-    },
-  });
+    }
+  })
 }
 
 export default ClassSchedule;
