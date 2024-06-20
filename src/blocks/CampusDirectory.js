@@ -8,7 +8,7 @@ import PeopleAndInformation from '../components/CampusDirectory/PeopleAndInforma
 
 const CampusDirectory = () => {
   wp.blocks.registerBlockType("ucscblocks/campusdirectory", {
-    title: "Campus Directory (deprecated)",
+    title: "Campus Directory",
     icon: "welcome-learn-more",
     category: "common",
     attributes: {

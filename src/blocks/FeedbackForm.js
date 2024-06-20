@@ -1,6 +1,6 @@
 const FeedbackForm = () => {
   wp.blocks.registerBlockType("ucscblocks/feedback", {
-    title: "Feedback Form (deprecated)",
+    title: "Feedback Form",
     icon: "smiley",
     category: "common",
     attributes: {

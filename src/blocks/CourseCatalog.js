@@ -7,7 +7,7 @@ import { useState } from '@wordpress/element';
 
 const CourseCatalog = () => {
   wp.blocks.registerBlockType("ucscblocks/coursecatalog", {
-    title: "Course Catalog (deprecated)",
+    title: "Course Catalog",
     icon: "book-alt",
     category: "common",
     attributes: {
