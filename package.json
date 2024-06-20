@@ -6,8 +6,16 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "build": "wp-scripts build",
-    "start": "wp-scripts start"
+    "start": "wp-scripts start",
+    "plugin-zip": "wp-scripts plugin-zip"
   },
+  "files": [
+    "*",
+    "classes",
+    "build/index.js",
+    "build/index.asset.php",
+    "templates"
+  ],
   "author": "",
   "license": "ISC",
   "devDependencies": {
