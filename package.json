@@ -1,7 +1,7 @@
 {
   "name": "ucsc-gutenberg-blocks",
 	"version": "1.1.25",
-  "description": "",
+	"description": "Adds custom blocks to UCSC WordPress websites",
   "main": "test.js",
 	"scripts": {
     "build": "wp-scripts build",
@@ -9,6 +9,14 @@
 		"plugin-zip": "wp-scripts plugin-zip",
 		"release": "standard-version"
   },
+	"repository": {
+		"type": "git",
+		"url": "git+https://github.com/ucsc/ucsc-gutenberg-blocks.git"
+	},
+	"keywords": [
+		"WordPress",
+		"plugin"
+	],
   "files": [
     "*",
     "classes",
