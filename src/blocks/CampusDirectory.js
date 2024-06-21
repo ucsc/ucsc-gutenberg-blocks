@@ -13,46 +13,46 @@ const CampusDirectory = () => {
     category: "common",
     attributes: {
       pageLayout: {
-        type: 'string',
+        type: "string",
       },
       automatedFeeds: {
-        type: 'boolean',
+        type: "boolean",
       },
       cruzidList: {
-        type: 'string',
+        type: "string",
       },
       strFacultyTypes: {
-        type: 'string',
+        type: "string",
       },
       strStaffTypes: {
-        type: 'string',
+        type: "string",
       },
       strGradTypes: {
-        type: 'string',
+        type: "string",
       },
       manualAdd: {
-        type: 'boolean',
+        type: "boolean",
       },
       addCruzids: {
-        type: 'string',
+        type: "string",
       },
       excludeCruzids: {
-        type: 'string',
+        type: "string",
       },
       displayDeptartmentAffiliates: {
-        type: 'boolean',
+        type: "boolean",
       },
       linkToProfile: {
-        type: 'boolean',
+        type: "boolean",
       },
       linkOutToCampusDirectory: {
-        type: 'boolean',
+        type: "boolean",
       },
       strInformationTypes: {
-        type: 'string',
+        type: "string",
       },
       strInformationTypesTable: {
-        type: 'string',
+        type: "string",
       },
       department: {
         type: "string",
@@ -62,7 +62,7 @@ const CampusDirectory = () => {
       },
       deptOrDiv: {
         type: "string",
-      }
+      },
     },
     edit: ({ setAttributes, attributes }) => {
       const {
@@ -82,15 +82,15 @@ const CampusDirectory = () => {
         strInformationTypesTable,
         department,
         division,
-        deptOrDiv
+        deptOrDiv,
       } = attributes;
 
       const [configuredCorrectly, setConfiguredCorrectly] = useState(true);
       const [resp, setResp] = useState({});
 
       useEffect(() => {
-        fetch('/wp-json/ucscgutenbergblocks/v1/campusdirectoryrequirements')
-          .then(res => res.text())
+        fetch("/wp-json/ucscgutenbergblocks/v1/campusdirectoryrequirements")
+          .then((res) => res.text())
           .then((text) => {
             const resp = JSON.parse(text);
             if (!resp.ldap_pass) setConfiguredCorrectly(false);
@@ -142,25 +142,39 @@ const CampusDirectory = () => {
               {!resp.ldap_pass && resp.multisite && (
                 <>
                   <h4>
-                    The LDAP password can be set at the network level <a target="_blank" href="/wp-admin/network/settings.php?page=ucsc-gutenberg-blocks-network-settings">here.</a>
+                    The LDAP password can be set at the network level{" "}
+                    <a
+                      target="_blank"
+                      href="/wp-admin/network/settings.php?page=ucsc-gutenberg-blocks-network-settings"
+                    >
+                      here.
+                    </a>
                   </h4>
-                  <h6>Or the LDAP password can be set at the site level below.</h6>
+                  <h6>
+                    Or the LDAP password can be set at the site level below.
+                  </h6>
                 </>
               )}
               {!resp.ldap_pass && (
                 <h4>
-                  The LDAP password needs to be set here <a target="_blank" href="/wp-admin/options-general.php?page=ucsc_gutenberg_blocks_settings_page">here.</a>
+                  The LDAP password needs to be set here{" "}
+                  <a
+                    target="_blank"
+                    href="/wp-admin/options-general.php?page=ucsc_gutenberg_blocks_settings_page"
+                  >
+                    here.
+                  </a>
                 </h4>
               )}
             </>
           )}
         </>
-      )
+      );
     },
     save: (props) => {
       return null;
-    }
-  })
+    },
+  });
 }
 
 export default CampusDirectory;

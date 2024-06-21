@@ -1,18 +1,14 @@
 <?php
 
 /*
-  Plugin Name: UCSC Gutenberg Blocks
-  Description: Custom UCSC Gutenberg Blocks.
-  Version: 1.1.25
-  Author: UCSC
-  Author URI: https://www.ucsc.edu/
-*/
+ * Plugin Name: UCSC Gutenberg Blocks
+ * Plugin URI: https://github.com/ucsc/ucsc-gutenberg-blocks
+ * Description: Custom UCSC Gutenberg Blocks.
+ * Version: 1.1.25
+ * Author: UC Santa Cruz
+ * Author URI: https://github.com/ucsc
+ */
 if (!defined('ABSPATH')) exit; // Exit if accessed directly
-
-// include_once(plugin_dir_path(__FILE__) . 'classes/UCSCGutenbergDemoBlock1.php');
-// include_once(plugin_dir_path(__FILE__) . 'classes/UCSCGutenbergDemoBlock2.php');
-// include_once(plugin_dir_path(__FILE__) . 'classes/ContentSharer.php');
-
 include_once(plugin_dir_path(__FILE__) . 'classes/CourseCatalog.php');
 include_once(plugin_dir_path(__FILE__) . 'classes/CampusDirectory.php');
 include_once(plugin_dir_path(__FILE__) . 'classes/ClassSchedule.php');
@@ -22,7 +18,6 @@ include_once(plugin_dir_path(__FILE__) . 'classes/AccordionWrapper.php');
 // New option for using shortcode without Gutenberg blocks
 include_once(plugin_dir_path(__FILE__) . 'classes/CampusDirectoryShortcode.php');
 
-// include_once(plugin_dir_path(__FILE__) . 'classes/FeedbackForm.php');
 include_once(plugin_dir_path(__FILE__) . 'classes/SiteSettings.php');
 
 

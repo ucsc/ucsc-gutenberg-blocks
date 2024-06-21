@@ -12,25 +12,21 @@ const CourseCatalog = () => {
     category: "common",
     attributes: {
       subjectOrDept: {
-        type: "string"
+        type: "string",
       },
       department: {
-        type: "string"
+        type: "string",
       },
       subject: {
-        type: "string"
+        type: "string",
       },
     },
     edit: ({ setAttributes, attributes }) => {
-      const {
-        department,
-        subject,
-        subjectOrDept
-      } = attributes;
+      const { department, subject, subjectOrDept } = attributes;
 
       let localSubjectOrDept;
       let setLocalSubjectOrDept;
-      if (typeof subjectOrDept === 'undefined') {
+      if (typeof subjectOrDept === "undefined") {
         [localSubjectOrDept, setLocalSubjectOrDept] = useState("dept");
         setAttributes({
           subjectOrDept: "dept",
@@ -40,18 +36,18 @@ const CourseCatalog = () => {
       }
 
       const options = [
-        { label: 'Department', value: 'dept' },
-        { label: 'Subject', value: 'subject' },
+        { label: "Department", value: "dept" },
+        { label: "Subject", value: "subject" },
       ];
 
       return (
         <>
           <Panel header="Course Catalog Block">
             <PanelBody title="Set Department or Subject" initialOpen>
-            <div className="vertical_radio">
+              <div className="vertical_radio">
                 <RadioControl
                   selected={localSubjectOrDept}
-                  onChange={newLocalSubjectOrDept => {
+                  onChange={(newLocalSubjectOrDept) => {
                     setLocalSubjectOrDept(newLocalSubjectOrDept);
                     setAttributes({
                       subjectOrDept: newLocalSubjectOrDept,
@@ -80,8 +76,8 @@ const CourseCatalog = () => {
     },
     save: (props) => {
       return null;
-    }
-  })
+    },
+  });
 }
 
 export default CourseCatalog;
