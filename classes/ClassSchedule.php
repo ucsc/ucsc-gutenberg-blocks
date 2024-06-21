@@ -41,6 +41,12 @@ class ClassSchedule
 
   function theHTML($attributes)
   {
+    // Retrieve the 'useNewServer' attribute
+    $useNewServer = isset($attributes['useNewServer']) && $attributes['useNewServer'];
+
+    // Determine the base URL based on the 'useNewServer' attribute
+    $baseURL = $useNewServer ? 'https://webapps.stg.web.aws.ucsc.edu/wcsi' : 'https://webapps.ucsc.edu/wcsi';
+
     $deptOrSubAttribute = '';
     if ($attributes['subjectOrDept'] == 'dept') {
       $deptOrSubAttribute = 'department="' . $attributes['department']  . '"';
@@ -48,14 +54,13 @@ class ClassSchedule
       $deptOrSubAttribute = 'subject="' . $attributes['subject']  . '" department=""';
     }
     $markup = '
-      <link rel="stylesheet" href="https://webapps.ucsc.edu/wcsi/css/app.css">
-      <div id="wcsi" ' . $deptOrSubAttribute . ' >
-
-      </div>
+      <link rel="stylesheet" href="' . $baseURL . '/css/app.css">
+      <div id="wcsi" ' . $deptOrSubAttribute . '></div>
       <script src="https://cdn.polyfill.io/v2/polyfill.min.js?features=default,Promise,Object.assign,Object.values,Array.prototype.find,Array.prototype.findIndex,Array.prototype.includes,String.prototype.includes,String.prototype.startsWith,String.prototype.endsWith"></script>
-      <script src="https://webapps.ucsc.edu/wcsi/js/manifest.js"></script>
-      <script src="https://webapps.ucsc.edu/wcsi/js/vendor.js"></script>
-      <script src="https://webapps.ucsc.edu/wcsi/js/app.js"></script>';
+      <script src="' . $baseURL . '/js/manifest.js"></script>
+      <script src="' . $baseURL . '/js/vendor.js"></script>
+      <script src="' . $baseURL . '/js/app.js"></script>';
+
     return $markup;
   }
 }
