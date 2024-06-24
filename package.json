@@ -1,22 +1,22 @@
 {
   "name": "ucsc-gutenberg-blocks",
-	"version": "1.1.25",
-	"description": "Adds custom blocks to UCSC WordPress websites",
+  "version": "1.1.26",
+  "description": "Adds custom blocks to UCSC WordPress websites",
   "main": "test.js",
-	"scripts": {
+  "scripts": {
     "build": "wp-scripts build",
     "start": "wp-scripts start",
-		"plugin-zip": "wp-scripts plugin-zip",
-		"release": "standard-version"
+    "plugin-zip": "wp-scripts plugin-zip",
+    "release": "standard-version"
   },
-	"repository": {
-		"type": "git",
-		"url": "git+https://github.com/ucsc/ucsc-gutenberg-blocks.git"
-	},
-	"keywords": [
-		"WordPress",
-		"plugin"
-	],
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/ucsc/ucsc-gutenberg-blocks.git"
+  },
+  "keywords": [
+    "WordPress",
+    "plugin"
+  ],
   "files": [
     "*",
     "classes",
@@ -24,10 +24,10 @@
     "build/index.asset.php",
     "templates"
   ],
-	"author": "UC Santa Cruz",
+  "author": "UC Santa Cruz",
   "license": "ISC",
   "devDependencies": {
-		"@wordpress/scripts": "^22.3.0",
-		"standard-version": "^9.5.0"
+    "@wordpress/scripts": "^22.3.0",
+    "standard-version": "^9.5.0"
   }
 }
