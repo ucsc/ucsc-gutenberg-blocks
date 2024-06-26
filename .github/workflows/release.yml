@@ -23,10 +23,10 @@ jobs:
             - name: Install Node dependencies
               run: npm install
 
-            - name: Build the project
+            - name: Build the plugin
               run: npm run build
 
-            - name: Package theme
+            - name: Package the plugin
               run: ./node_modules/.bin/wp-scripts plugin-zip
 
             - name: Release
