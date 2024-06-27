@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [1.1.28](https://github.com/ucsc/ucsc-gutenberg-blocks/compare/v1.1.27...v1.1.28) (2024-06-27)
+
+
+### Bug Fixes
+
+* 🚑️ Remove polyfill.io script ([#135](https://github.com/ucsc/ucsc-gutenberg-blocks/issues/135)) ([9ccd29e](https://github.com/ucsc/ucsc-gutenberg-blocks/commit/9ccd29e8d7f1b2541607067beafe455a953952d5))
+
 ### [1.1.27](https://github.com/ucsc/ucsc-gutenberg-blocks/compare/v1.1.26...v1.1.27) (2024-06-26)
 
 
