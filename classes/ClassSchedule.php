@@ -56,7 +56,6 @@ class ClassSchedule
     $markup = '
       <link rel="stylesheet" href="' . $baseURL . '/css/app.css">
       <div id="wcsi" ' . $deptOrSubAttribute . '></div>
-      <script src="https://cdn.polyfill.io/v2/polyfill.min.js?features=default,Promise,Object.assign,Object.values,Array.prototype.find,Array.prototype.findIndex,Array.prototype.includes,String.prototype.includes,String.prototype.startsWith,String.prototype.endsWith"></script>
       <script src="' . $baseURL . '/js/manifest.js"></script>
       <script src="' . $baseURL . '/js/vendor.js"></script>
       <script src="' . $baseURL . '/js/app.js"></script>';
