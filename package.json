@@ -18,11 +18,16 @@
     "plugin"
   ],
   "files": [
-    "*",
+    "!.gitignore",
+    "!.github",
+    "!package.json",
+    "!package-lock.json",
+    "src",
     "classes",
+    "templates",
+    "index.php",
     "build/index.js",
-    "build/index.asset.php",
-    "templates"
+    "build/index.asset.php"
   ],
   "author": "UC Santa Cruz",
   "license": "ISC",
