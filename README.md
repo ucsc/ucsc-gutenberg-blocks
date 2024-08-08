@@ -6,35 +6,12 @@ This is a plugin that contains multiple custom gutenberg blocks.
 
 The following will cover preqrequisites, development environment setup, basic block development and how to contribute.
 
-### Prerequisites
+### Instructions
 
-- A local wordpress development environment.
-
-  - https://localwp.com/ is a tool to spin up and manage local wp sites
-
-- Node/npm
-  - With MacOS I use the following:
-- https://brew.sh/
-
-```
-/bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
-```
-
-- nvm: https://github.com/nvm-sh/nvm
-
-```
-nvm install node
-```
-
-- Make sure it all works
-
-```
-node --version
-```
-
-```
-npm --version
-```
+- First download, install and start Docker: https://www.docker.com/products/docker-desktop/
+- Make sure you have git install on your system.
+- Then head to this repo and follow the readme: https://github.com/ucsc/wp-dev.ucsc
+  - After following the instructions you will have a local dev environment with ldap installed. It will also clone and build both the UCSC theme and plugin. Finally it will start the dev watchers that build the code every time you save a file while developing. Since all the build steps are mainly in docker, the only requirement is that you have docker and git.
 
 ### Development Environment Setup
 
