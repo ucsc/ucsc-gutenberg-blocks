@@ -7,6 +7,7 @@ class CampusDirectoryAPI {
   public $allStaffTypes;
   public $ldap_password;
   public $count;
+  public $deptOrDivSet = true;
 
   function __construct($content = [])
   {
@@ -110,6 +111,10 @@ class CampusDirectoryAPI {
       ldap_set_option($rli, LDAP_OPT_TIMELIMIT, 90);
       ldap_set_option($rli, LDAP_OPT_NETWORK_TIMEOUT, 5);
       ldap_set_option($rli, LDAP_OPT_PROTOCOL_VERSION, 3);
+
+      if (!$this->deptOrDivSet) {
+        ldap_set_option($rli, LDAP_OPT_SIZELIMIT, 50);
+      }
 
       if ($dev_env) @$ldapbind = ldap_bind($rli);
       else @$ldapbind = ldap_bind($rli, "cn=" . $this->ldap_cn . ",ou=apps,dc=ucsc,dc=edu", $this->ldap_password);
@@ -286,19 +291,22 @@ class CampusDirectoryAPI {
     $division = ldap_escape($this->nodeContent['division'], "", LDAP_ESCAPE_FILTER);
     $deptOrDiv = ldap_escape($this->nodeContent['deptOrDiv'], "", LDAP_ESCAPE_FILTER);
 
+    if ($this->nodeContent['automatedFeeds'] && ($deptOrDiv === "dept" && $department !== "---") || ($deptOrDiv === "div" && $division !== "---")) {
+      if ($this->count > 0) {
+        if ($this->count > 1) $filterString = "(|$filterString)";
 
-    if ($this->count > 0) {
-      if ($this->count > 1) $filterString = "(|$filterString)";
-
-      if (!empty($department) || !empty($division)) {
-        if ($this->nodeContent['displayDeptartmentAffiliates'] && $deptOrDiv == 'dept') {
-          $filterString = "(&(ucscpersonpubaffiliateddepartment=$department)$filterString)";
-        } elseif ($deptOrDiv == 'dept') {
-          $filterString = "(&(ucscpersonpubdepartmentnumber=$department)$filterString)";
-        } elseif ($deptOrDiv == 'div') {
-          $filterString = "(&(ucscpersonpubdivision=$division)$filterString)";
+        if (!empty($department) || !empty($division)) {
+          if ($this->nodeContent['displayDeptartmentAffiliates'] && $deptOrDiv == 'dept') {
+            $filterString = "(&(ucscpersonpubaffiliateddepartment=$department)$filterString)";
+          } elseif ($deptOrDiv == 'dept') {
+            $filterString = "(&(ucscpersonpubdepartmentnumber=$department)$filterString)";
+          } elseif ($deptOrDiv == 'div') {
+            $filterString = "(&(ucscpersonpubdivision=$division)$filterString)";
+          }
         }
       }
+    } else {
+      $this->deptOrDivSet = false;
     }
   }
 
