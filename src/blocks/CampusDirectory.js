@@ -1,5 +1,6 @@
-import { useEffect, useState } from '@wordpress/element'
-import { Panel, PanelBody, PanelRow, RadioControl } from '@wordpress/components';
+import { useEffect, useState } from '@wordpress/element';
+import { dispatch } from '@wordpress/data';
+import { Panel, PanelBody, PanelRow, Notice } from '@wordpress/components';
 
 import CampusDirectoryDepartmentDropdown from '../components//CampusDirectory/CampusDirectoryDepartmentDropdown';
 import DivisionDropdown from '../components/DivisionDropdown';
@@ -12,57 +13,23 @@ const CampusDirectory = () => {
     icon: "welcome-learn-more",
     category: "common",
     attributes: {
-      pageLayout: {
-        type: "string",
-      },
-      automatedFeeds: {
-        type: "boolean",
-      },
-      cruzidList: {
-        type: "string",
-      },
-      strFacultyTypes: {
-        type: "string",
-      },
-      strStaffTypes: {
-        type: "string",
-      },
-      strGradTypes: {
-        type: "string",
-      },
-      manualAdd: {
-        type: "boolean",
-      },
-      addCruzids: {
-        type: "string",
-      },
-      excludeCruzids: {
-        type: "string",
-      },
-      displayDeptartmentAffiliates: {
-        type: "boolean",
-      },
-      linkToProfile: {
-        type: "boolean",
-      },
-      linkOutToCampusDirectory: {
-        type: "boolean",
-      },
-      strInformationTypes: {
-        type: "string",
-      },
-      strInformationTypesTable: {
-        type: "string",
-      },
-      department: {
-        type: "string",
-      },
-      division: {
-        type: "string",
-      },
-      deptOrDiv: {
-        type: "string",
-      },
+      pageLayout: { type: "string" },
+      automatedFeeds: { type: "boolean" },
+      cruzidList: { type: "string" },
+      strFacultyTypes: { type: "string" },
+      strStaffTypes: { type: "string" },
+      strGradTypes: { type: "string" },
+      manualAdd: { type: "boolean" },
+      addCruzids: { type: "string" },
+      excludeCruzids: { type: "string" },
+      displayDeptartmentAffiliates: { type: "boolean" },
+      linkToProfile: { type: "boolean" },
+      linkOutToCampusDirectory: { type: "boolean" },
+      strInformationTypes: { type: "string" },
+      strInformationTypesTable: { type: "string" },
+      department: { type: "string" },
+      division: { type: "string" },
+      deptOrDiv: { type: "string" },
     },
     edit: ({ setAttributes, attributes }) => {
       const {
@@ -87,6 +54,19 @@ const CampusDirectory = () => {
 
       const [configuredCorrectly, setConfiguredCorrectly] = useState(true);
       const [resp, setResp] = useState({});
+      const [isInvalidState, setIsInvalidState] = useState(false);
+
+      // Lock or unlock post saving based on attribute state
+      useEffect(() => {
+        const invalidState = automatedFeeds && department === '---' && division === '---';
+        setIsInvalidState(invalidState);
+
+        if (invalidState) {
+          dispatch('core/editor').lockPostSaving('campusDirectoryInvalidState');
+        } else {
+          dispatch('core/editor').unlockPostSaving('campusDirectoryInvalidState');
+        }
+      }, [automatedFeeds, department, division]);
 
       useEffect(() => {
         fetch("/wp-json/ucscgutenbergblocks/v1/campusdirectoryrequirements")
@@ -100,6 +80,14 @@ const CampusDirectory = () => {
 
       return (
         <>
+          {isInvalidState && (
+            <Notice
+              status="error"
+              isDismissible={false}
+            >
+              <strong>Unable to publish:</strong> Please select a valid department or division when using automated feeds to enable publishing.
+            </Notice>
+          )}
           {configuredCorrectly && (
             <Panel className="directory-block" header="Directory Block">
               <PanelBody title="Layout Type" initialOpen>
@@ -171,10 +159,10 @@ const CampusDirectory = () => {
         </>
       );
     },
-    save: (props) => {
+    save: () => {
       return null;
     },
   });
-}
+};
 
 export default CampusDirectory;
