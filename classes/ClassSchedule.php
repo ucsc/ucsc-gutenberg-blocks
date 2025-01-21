@@ -54,7 +54,6 @@ class ClassSchedule
       $deptOrSubAttribute = 'subject="' . $attributes['subject']  . '" department=""';
     }
     $markup = '
-      <link rel="stylesheet" href="' . $baseURL . '/css/app.css">
       <div id="wcsi" ' . $deptOrSubAttribute . '></div>
       <script src="' . $baseURL . '/js/manifest.js"></script>
       <script src="' . $baseURL . '/js/vendor.js"></script>
