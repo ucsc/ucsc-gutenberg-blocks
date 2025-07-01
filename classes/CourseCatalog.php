@@ -85,7 +85,8 @@ class CourseCatalog
     function theHTML($attributes) {
         ob_start();
         $courses = $this->getCachedCourses($attributes);
-        echo '<div id="courseCatalog">
+        $extraAttributes = get_block_wrapper_attributes(['id' => 'courseCatalog']);
+        echo '<div ' . $extraAttributes . '>
     <div class="introText">
         <label>
         Search Courses:<input type="text" id="search" onkeyup="tableSearch(event)">
