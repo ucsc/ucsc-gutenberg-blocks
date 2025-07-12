@@ -279,8 +279,15 @@ class CampusDirectoryAPI {
         }
         if ($typeCount > 1) $typeList = "(|$typeList)";
       }
-      if ($typeCount > 0) $affiliation = "(ucscpersonpubaffiliation=Staff)";
-      $filterString .= "(&$affiliation$typeList)";
+      if ($typeCount > 0) {
+        $affiliation = "(ucscpersonpubaffiliation=Staff)";
+      } 
+      if (!empty($affiliation) || !empty($typeList)) {
+        $filterString .= "(&$affiliation$typeList)";
+      }
+      if ($typeCount === 0 && !empty($this->nodeContent['ucscPersonIsPostDoc']) && $this->nodeContent['ucscPersonIsPostDoc'] === true) {
+        $filterString .= "(ucscPersonIsPostDoc=true)";
+      }
       $this->count++;
     }
   }
