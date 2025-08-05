@@ -370,13 +370,13 @@ class SiteSettings
   function ldapKeyHTML()
   { ?>
     <input type="text" name="ldap_api_key" value="<?php echo esc_attr(get_option('ldap_api_key')) ?>" />
-    <p>ex: LdApPaSsWoRd1!</p>
+    <p>ex: "your-ldap-password-here"</p>
   <?php }
 
   function ldapCN()
   { ?>
     <input type="text" name="ldap_cn" value="<?php echo esc_attr(get_option('ldap_cn')) ?>" />
-    <p>ex: pbsci-wordpress</p>
+    <p>ex: "pbsci-wordpress" (do not include cn=)</p>
   <?php }
 
   function ldapURL()
