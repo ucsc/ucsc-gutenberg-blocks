@@ -62,7 +62,7 @@ This commit show's how to create a Dynamic Block vs a Static block. There are ma
 
 #### Instructions:
 
-- Create a file in the `classes/` to hold the PHP/Wordpress code.
+- Create a file in `src/classes` to hold the PHP/Wordpress code.
   - Actions can be added
   - Blocks can be registered
   - Site and Network settings
@@ -72,6 +72,7 @@ This commit show's how to create a Dynamic Block vs a Static block. There are ma
   - Create and export a function where you can register the block.
   - Make sure the name you are registering here matches the name you registered in PHP
 - In `src/index.js` import your function and call it so that the block gets registered.
+- If needed, add JS and CSS component code under `src/components`
 
 ### How To Contribute
 
