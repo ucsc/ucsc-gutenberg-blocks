@@ -18,6 +18,7 @@ jobs:
             - uses: actions/setup-node@v3.3.0
               with:
                   node-version: 17
+                  cache: 'npm'
 
             - name: Install Node dependencies
               run: npm install
