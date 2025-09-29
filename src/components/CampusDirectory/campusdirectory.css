@@ -147,7 +147,7 @@
 .section-header>a,
 .section-container.sub .section-header>a {
     font-size: inherit;
-    color: inherit;
+    /* color: inherit; */
     padding: 0;
     border: 0;
 }
@@ -331,6 +331,8 @@ div.item-expertise>ul li {
     height: 160px;
     overflow: hidden;
     border-radius: 5px;
+    object-fit: cover;
+    object-position: top;
 }
 
 .tiled-page {
