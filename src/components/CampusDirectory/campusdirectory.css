@@ -147,7 +147,7 @@
 .section-header>a,
 .section-container.sub .section-header>a {
     font-size: inherit;
-    /* color: inherit; */
+    color: inherit;
     padding: 0;
     border: 0;
 }
