@@ -264,7 +264,8 @@ class CampusDirectoryAPI {
       if ($staffTypes['Regular Staff']) {
         foreach ($this->allStaffTypes as $type) {
           if (!$this->nodeContent['objStaffTypes'][$type]) {
-            $typeList .= "(ucscpersonpubstafftype=$type)";
+            if($type == 'Postdoctoral Scholar') $typeList .= "(ucscPersonIsPostDoc=TRUE)";
+            else $typeList .= "(ucscpersonpubstafftype=$type)";
             $typeCount++;
           }
         }
@@ -273,7 +274,8 @@ class CampusDirectoryAPI {
       } else {
         foreach ($this->allStaffTypes as $type) {
           if ($this->nodeContent['objStaffTypes'][$type]) { // we already know "Regular Staff" is false
-            $typeList .= "(ucscpersonpubstafftype=$type)";
+            if($type == 'Postdoctoral Scholar') $typeList .= "(ucscPersonIsPostDoc=TRUE)";
+            else $typeList .= "(ucscpersonpubstafftype=$type)";
             $typeCount++;
           }
         }
