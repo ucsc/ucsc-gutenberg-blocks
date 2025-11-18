@@ -7,5 +7,5 @@
 }
 
 .el-popover.el-popper {
-  top: 380px !important;
+  transform: translateY(27px);
 }
