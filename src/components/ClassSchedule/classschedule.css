@@ -1,3 +1,11 @@
 #wcsi .el-select .el-input input {
   font-size: 13px;
 }
+
+#wcsi .display-key.no-print.el-row > div:nth-child(2) {
+  margin-left: -155px;
+}
+
+.el-popover.el-popper {
+  transform: translateY(27px);
+}
