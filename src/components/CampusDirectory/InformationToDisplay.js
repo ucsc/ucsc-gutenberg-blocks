@@ -27,9 +27,9 @@ const InformationToDisplay = ({
     [
       boolLinkOutToCampusDirectory,
       setBoolLinkOutToCampusDirectory,
-    ] = useState(false);
+    ] = useState(true);
     setAttributes({
-      linkOutToCampusDirectory: false,
+      linkOutToCampusDirectory: true,
     });
   } else {
     [
