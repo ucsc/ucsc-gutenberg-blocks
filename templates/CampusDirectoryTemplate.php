@@ -147,7 +147,7 @@ $individualPageUrl = $items['nodeContent']['linkOutToCampusDirectory'] ?
                       $imgSrc = "//static.ucsc.edu/images/icon-slug.jpg";
                     }
                     if ($items['linkToProfile']) echo '<a class="u-url square-img" href="' . $individualPageUrl . $people[$i]['uid'][0] . '">';
-                    echo "<img src='" . $imgSrc . "' class='item-image square-img imgLiquid imgLiquid_bgSize imgLiquid_ready' style='object-fit: cover;'  alt='Profile picture of ". $people[$i]['cn'][0] ."' />";                  if ($items['linkToProfile']) echo '</a>';
+                    echo "<img src='" . $imgSrc . "' class='item-image square-img imgLiquid imgLiquid_bgSize imgLiquid_ready' alt='Profile picture of ". $people[$i]['cn'][0] ."' />";                  if ($items['linkToProfile']) echo '</a>';
                   }
                 ?>
               </div>
