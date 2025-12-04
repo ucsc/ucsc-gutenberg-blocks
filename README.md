@@ -8,8 +8,8 @@ The following will cover preqrequisites, development environment setup, basic bl
 
 ### Instructions
 
-- First download, install and start Docker: https://www.docker.com/products/docker-desktop/
-- Make sure you have git install on your system.
+- First create a Docker account here: https://app.docker.com/signup. Then download, install and start Docker: https://www.docker.com/products/docker-desktop/
+- Make sure you have git install on your system. In order to check if you have git installed use git --version in your terminal. If you do not have git installed follow this link: https://git-scm.com/install/
 - Then head to this repo and follow the readme: https://github.com/ucsc/wp-dev.ucsc
   - After following the instructions you will have a local dev environment with ldap installed. It will also clone and build both the UCSC theme and plugin. Finally it will start the dev watchers that build the code every time you save a file while developing. Since all the build steps are mainly in docker, the only requirement is that you have docker and git.
 
