@@ -93,11 +93,11 @@ class CourseCatalog
         </label>
     </div>
     <div class="introText clickText">
-        <label>
+        <div>
             Select a course title for details.
             <a id="expandAll" class="expandAll collapseExpandLinks pointer">Expand all</a>
             <a id="collapseAll" class="collapseAll collapseExpandLinks pointer">Collapse all</a>
-        </label>
+        </div>
     </div>';
         echo '<table class="table-sortable" id="tableSorter">';
         echo '<thead><tr><th>Course #</th><th>Course Title</th><th>Course Level</th><th>Units</th></tr></thead>';
