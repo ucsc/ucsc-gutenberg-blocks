@@ -139,7 +139,7 @@ if (count($profileData)) {
                     if (count($arrKey) == 1) {
                         if ($profileData[$key]['count']) {
                             echo "<div><p>";
-                                echo "<label>{$title}</label>";
+                                echo "<span>{$title}</span>";
                                 for ($i = 0; $i < $profileData[$key]['count']; $i++) {
                                     echo linkify($key, $profileData[$key][$i]);
                                     if (($i + 1) < $profileData[$key]['count']) echo "<br />";
@@ -149,7 +149,7 @@ if (count($profileData)) {
                     } else {
                         if ($profileData[$arrKey[0]]['count'] || $profileData[$arrKey[1]]['count']) {
                             echo "<div><p>";
-                                echo "<label>{$title}</label>";
+                                echo "<span>{$title}</span>";
                                 for ($i = 0; $i < $profileData[$arrKey[0]]['count']; $i++) {
                                     echo $profileData[$arrKey[0]][$i];
                                 }

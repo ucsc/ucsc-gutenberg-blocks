@@ -65,7 +65,7 @@
   page-break-inside: avoid;
   -webkit-column-break-inside: avoid;
 }
-#profilebody p label {
+#profilebody p span {
   display: block;
   font-weight: bold;
 }
