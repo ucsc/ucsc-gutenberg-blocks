@@ -13,9 +13,9 @@ if ( file_exists( get_theme_file_path( 'header-plugin.php' ) ) ) {
 $term = get_query_var('course_term');
 $course_id = get_query_var('course_id');
 
-// Fetch course details from API
-$course_url = home_url('/wp-json/ucsc/v1/course/' . $term . '/' . $course_id);
-$response = wp_remote_get($course_url);
+// Fetch course details from API using internal REST API call
+$request = new WP_REST_Request('GET', '/ucsc/v1/course/' . $term . '/' . $course_id);
+$response = rest_do_request($request);
 
 if (is_wp_error($response)) {
 	echo '<p>Error loading course details. Please try again later.</p>';
@@ -23,7 +23,7 @@ if (is_wp_error($response)) {
 	exit;
 }
 
-$course_data = json_decode(wp_remote_retrieve_body($response), true);
+$course_data = $response->get_data();
 
 if (empty($course_data)) {
 	echo '<p>Course not found.</p>';

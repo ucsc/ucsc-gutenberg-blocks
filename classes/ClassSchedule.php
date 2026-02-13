@@ -76,15 +76,23 @@ class ClassSchedule
   }
 
   function getCachedCourses($term, $attributes) {
-    $subjectOrDept = $attributes['subjectOrDept'];
+    $subjectOrDept = $attributes['subjectOrDept'] ?? 'dept';
     $cache_key = 'class-schedule-' . $term . '-';
 
     if ($subjectOrDept == 'dept') {
-      $dept = strtoupper($attributes['department']);
+      $dept = strtoupper($attributes['department'] ?? '');
+      // Skip if department is empty or default value
+      if (empty($dept) || $dept === '---') {
+        return array();
+      }
       $cache_key .= 'dept-' . $dept;
       $query_param = 'dept=' . $dept;
     } else {
-      $subject = strtoupper($attributes['subject']);
+      $subject = strtoupper($attributes['subject'] ?? '');
+      // Skip if subject is empty or default value
+      if (empty($subject) || $subject === '---') {
+        return array();
+      }
       $cache_key .= 'subject-' . $subject;
       $query_param = 'subject=' . $subject;
     }
@@ -93,15 +101,16 @@ class ClassSchedule
     $courses_data = get_transient($cache_key);
 
     if (!$courses_data) {
-      // Fetch from API
-      $courses_url = home_url('/wp-json/ucsc/v1/courses/' . $term . '?' . $query_param);
-      $response = wp_remote_get($courses_url);
+      // Fetch from API using internal REST API call
+      $request = new WP_REST_Request('GET', '/ucsc/v1/courses/' . $term);
+      $request->set_query_params(array($subjectOrDept == 'dept' ? 'dept' : 'subject' => $subjectOrDept == 'dept' ? strtoupper($attributes['department'] ?? '') : strtoupper($attributes['subject'] ?? '')));
+      $response = rest_do_request($request);
 
       if (is_wp_error($response)) {
         return array();
       }
 
-      $courses_data = json_decode(wp_remote_retrieve_body($response), true);
+      $courses_data = $response->get_data();
 
       // Cache for 15 minutes
       set_transient($cache_key, $courses_data, 15 * MINUTE_IN_SECONDS);
@@ -114,15 +123,16 @@ class ClassSchedule
   {
     ob_start();
 
-    // Get the current term
-    $terms_response = wp_remote_get(home_url('/wp-json/ucsc/v1/terms'));
+    // Get the current term using internal REST API call
+    $request = new WP_REST_Request('GET', '/ucsc/v1/terms');
+    $response = rest_do_request($request);
 
-    if (is_wp_error($terms_response)) {
+    if (is_wp_error($response)) {
       echo '<p>Error loading terms. Please try again later.</p>';
       return ob_get_clean();
     }
 
-    $terms_data = json_decode(wp_remote_retrieve_body($terms_response), true);
+    $terms_data = $response->get_data();
 
     if (empty($terms_data['terms'])) {
       echo '<p>No terms available.</p>';
@@ -146,7 +156,14 @@ class ClassSchedule
     $courses_data = $this->getCachedCourses($current_term, $attributes);
 
     if (empty($courses_data['classes'])) {
-      echo '<p>No courses found for the selected criteria.</p>';
+      $subjectOrDept = $attributes['subjectOrDept'] ?? 'dept';
+      $selected_value = $subjectOrDept == 'dept' ? ($attributes['department'] ?? '') : ($attributes['subject'] ?? '');
+
+      if (empty($selected_value) || $selected_value === '---') {
+        echo '<p>Please select a department or subject from the block settings to view courses.</p>';
+      } else {
+        echo '<p>No courses found for the selected criteria.</p>';
+      }
       return ob_get_clean();
     }
 
