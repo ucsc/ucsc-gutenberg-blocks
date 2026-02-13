@@ -5,7 +5,10 @@ class ClassSchedule
   function __construct()
   {
     add_action('init', array($this, 'adminAssets'));
+    add_action('init', array($this, 'add_course_detail_rewrite'));
     add_action('wp_enqueue_scripts', array($this, 'register_plugin_styles'));
+    add_filter('query_vars', array($this, 'add_query_vars'));
+    add_action('template_include', array($this, 'course_detail_template'));
     add_action('rest_api_init', function () {
       register_rest_route('ucscgutenbergblocks/v1', '/classscheduledept/', array(
         'methods' => 'GET',
@@ -13,6 +16,27 @@ class ClassSchedule
         'permission_callback' => function() {return true;}
       ));
     });
+  }
+
+  function add_course_detail_rewrite() {
+    add_rewrite_rule(
+      '^course/([0-9]+)/([0-9]+)/?$',
+      'index.php?course_term=$matches[1]&course_id=$matches[2]',
+      'top'
+    );
+  }
+
+  function add_query_vars($query_vars) {
+    $query_vars[] = 'course_term';
+    $query_vars[] = 'course_id';
+    return $query_vars;
+  }
+
+  function course_detail_template($template) {
+    if (get_query_var('course_term') && get_query_var('course_id')) {
+      return plugin_dir_path(__FILE__) . '../templates/CourseDetailTemplate.php';
+    }
+    return $template;
   }
 
   function classscheduledept() {
@@ -160,10 +184,12 @@ class ClassSchedule
       $available = $course['enrl_capacity'] - $course['enrl_total'];
       $status_class = 'status-' . strtolower($course['enrl_status']);
 
+      $course_url = home_url('/course/' . $current_term . '/' . $course['class_nbr']);
+
       echo '<tr>';
       echo '<td>' . esc_html($course['subject']) . '</td>';
       echo '<td>' . esc_html($course['catalog_nbr']) . '</td>';
-      echo '<td>' . esc_html($course['title']) . '</td>';
+      echo '<td><a href="' . esc_url($course_url) . '">' . esc_html($course['title']) . '</a></td>';
       echo '<td>' . esc_html($course['component']) . '</td>';
       echo '<td>' . esc_html($course['meeting_days']) . '</td>';
       echo '<td>' . esc_html($course['start_time'] . ' - ' . $course['end_time']) . '</td>';
