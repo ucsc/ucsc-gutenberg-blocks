@@ -24,7 +24,18 @@ include_once(plugin_dir_path(__FILE__) . 'classes/SiteSettings.php');
 add_action('admin_enqueue_scripts', 'registerJSBuild');
 
 function registerJSBuild() {
-  wp_enqueue_script('ucscblocks', plugin_dir_url(__FILE__) . 'build/index.js', array('wp-blocks','wp-element', 'wp-components', 'wp-block-editor'));
+  $script_path = plugin_dir_path(__FILE__) . 'build/index.js';
+  $plugin_data = get_file_data(__FILE__, array('Version' => 'Version'), 'plugin');
+  $plugin_version = !empty($plugin_data['Version']) ? $plugin_data['Version'] : false;
+
+  $is_dev_environment =
+    (defined('DOCKER_DEV') && constant('DOCKER_DEV')) ||
+    (function_exists('wp_get_environment_type') && in_array(wp_get_environment_type(), array('local', 'development'), true)) ||
+    (defined('WP_DEBUG') && WP_DEBUG) ||
+    (defined('SCRIPT_DEBUG') && SCRIPT_DEBUG);
+
+  $script_version = ($is_dev_environment && file_exists($script_path)) ? filemtime($script_path) : $plugin_version;
+  wp_enqueue_script('ucscblocks', plugin_dir_url(__FILE__) . 'build/index.js', array('wp-blocks','wp-element', 'wp-components', 'wp-block-editor'), $script_version);
 }
 
 
