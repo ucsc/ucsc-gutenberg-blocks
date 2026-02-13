@@ -8,6 +8,7 @@ class CampusDirectory
   function __construct()
   {
     add_action('init', array($this, 'renderFrontend'));
+    add_action('init', array($this, 'add_directory_profile_rewrite'));
     add_filter('query_vars', function($query_vars) {
       $query_vars[] = 'directoryprofilecruzid';
       return $query_vars;
@@ -20,6 +21,7 @@ class CampusDirectory
 
       return plugin_dir_path(__FILE__) . '../templates/DirectoryProfileTemplate.php';
     });
+    add_filter('document_title_parts', array($this, 'directory_profile_title'));
     add_action('wp_enqueue_scripts', array($this, 'register_plugin_styles'));
     add_action('rest_api_init', function () {
       register_rest_route('ucscgutenbergblocks/v1', '/campusdirectoryrequirements/', array(
@@ -29,6 +31,28 @@ class CampusDirectory
       ));
     });
   }
+
+  function add_directory_profile_rewrite() {
+    // instead of something like ?directoryprofilecruzid=jsmith, users see /directory/jsmith/
+    add_rewrite_rule(
+      '^directory/([^/]+)/?$',
+      'index.php?directoryprofilecruzid=$matches[1]',
+      'top'
+    );
+  }
+  // a11y: set a descriptive <title> for directory profile pages
+  function directory_profile_title($title_parts) {
+    $cruzid = get_query_var('directoryprofilecruzid');
+    if ($cruzid) {
+      $campusDirectoryAPI = new CampusDirectoryAPI([]);
+      $data = $campusDirectoryAPI->getCampusDirData($cruzid, true);
+      if (!empty($data[0][0]['cn'][0])) {
+        $title_parts['title'] = $data[0][0]['cn'][0];
+      }
+    }
+    return $title_parts;
+  }
+
   function requirements(){
     $resp = [];
     $ldap_password = get_site_option('ldap_api_key');
@@ -53,6 +77,19 @@ class CampusDirectory
             filemtime(plugin_dir_path(__FILE__) .$file)
     );
     wp_enqueue_style('campusdirectory');
+
+    wp_enqueue_style( 'ucsc-shared-templates',
+        plugins_url('../src/components/shared/templates.css', __FILE__),
+        array(),
+        filemtime(plugin_dir_path(__FILE__) . '../src/components/shared/templates.css')
+    );
+
+    wp_enqueue_style( 'static-directory-page',
+        plugins_url('../src/components/shared/static-directory-page.css', __FILE__),
+        array(),
+        filemtime(plugin_dir_path(__FILE__) . '../src/components/shared/static-directory-page.css')
+    );
+
   }
 
   function renderFrontend()

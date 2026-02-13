@@ -51,16 +51,19 @@ $individualPageUrl = $items['nodeContent']['linkOutToCampusDirectory'] ?
                     echo '</td>';
                     foreach($items['informationToDisplay'] as $disItem) {
                       foreach($disItem as $key => $value) {
+                        if ($value == "Email") continue;
+                        $cellValue = (array_key_exists($key, $people[$i]) && !empty($people[$i][$key][0])) ? $people[$i][$key][0] : '';
                         echo '<td class="item-info table-renderer">';
-                          echo '<strong>' . $people[$i][$key][0] . '</strong>';
-                          echo '<ul class="inline-list">';
-                            if ($value == "Campus Email" || $value == "Other Email") {
-                              echo '<li><a href="mailto:' . $people[$i][$key][0] . '">' . $people[$i][$key][0] . '</a></li>';
-                            } else {
-                              if ($value == "Email") continue;
-                              echo '<li>' . $people[$i][$key][0] . '</li>';
-                            }
-                          echo '</ul>';
+                          if ($cellValue) {
+                            echo '<strong>' . esc_html($cellValue) . '</strong>';
+                            echo '<ul class="inline-list">';
+                              if ($value == "Campus Email" || $value == "Other Email") {
+                                echo '<li><a href="mailto:' . esc_attr($cellValue) . '">' . esc_html($cellValue) . '</a></li>';
+                              } else {
+                                echo '<li>' . esc_html($cellValue) . '</li>';
+                              }
+                            echo '</ul>';
+                          }
                         echo '</td>';
                       }
                     }
@@ -87,7 +90,7 @@ $individualPageUrl = $items['nodeContent']['linkOutToCampusDirectory'] ?
               ?>
               <div class="section-item h-card wrap">
                 <div class="item-body">
-                  <h3 class="item-name">
+                  <h2 class="h3-style item-name">
                     <?php
                       if ($items['linkToProfile']) {
                         echo '<a class="u-url" href="' . $individualPageUrl . $people[$i]['uid'][0] . '">';
@@ -97,7 +100,7 @@ $individualPageUrl = $items['nodeContent']['linkOutToCampusDirectory'] ?
                         echo '</a>';
                       }
                     ?>
-                  </h3>
+                  </h2>
                   <ul class="item-info list-renderer">
                     <?php
                       foreach($items['informationToDisplay'] as $disItem) {
@@ -147,7 +150,8 @@ $individualPageUrl = $items['nodeContent']['linkOutToCampusDirectory'] ?
                       $imgSrc = "//static.ucsc.edu/images/icon-slug.jpg";
                     }
                     if ($items['linkToProfile']) echo '<a class="u-url square-img" href="' . $individualPageUrl . $people[$i]['uid'][0] . '">';
-                    echo "<img src='" . $imgSrc . "' class='item-image square-img imgLiquid imgLiquid_bgSize imgLiquid_ready' alt='Profile picture of ". $people[$i]['cn'][0] ."' />";                  if ($items['linkToProfile']) echo '</a>';
+                    echo "<img src='" . esc_url($imgSrc) . "' class='item-image square-img imgLiquid imgLiquid_bgSize imgLiquid_ready' style='object-fit: cover;' alt='Profile picture of " . esc_attr($people[$i]['cn'][0]) . "' />";
+                    if ($items['linkToProfile']) echo '</a>';
                   }
                 ?>
               </div>

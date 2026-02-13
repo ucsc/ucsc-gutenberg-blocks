@@ -1,4 +1,4 @@
-import { Panel, PanelBody, RadioControl, CheckboxControl } from '@wordpress/components';
+import { Panel, PanelBody, RadioControl } from '@wordpress/components';
 
 import DepartmentDropdown from '../components/DepartmentDropdown';
 import SubjectDropdown from '../components/SubjectDropdown';
@@ -23,17 +23,12 @@ const ClassSchedule = () => {
       subject: {
         type: "string"
       },
-      useNewServer: {
-        type: "boolean",
-        default: false
-      },
     },
     edit: ({ setAttributes, attributes }) => {
       const {
         department,
         subject,
         subjectOrDept,
-        useNewServer
       } = attributes;
 
       let localSubjectOrDept;
@@ -87,16 +82,7 @@ const ClassSchedule = () => {
                 setAttributes={setAttributes}
                 disabled={subjectOrDept !== "subject"}
               />
-              {isDevEnvironment() && (
-                <>
-                  <hr />
-                  <CheckboxControl
-                    label="Use New Server for Testing"
-                    checked={useNewServer}
-                    onChange={(newUseNewServer) => setAttributes({ useNewServer: newUseNewServer })}
-                  />
-                </>
-              )}
+              <small style={{ display: 'block', marginTop: '3em', fontSize: '0.7em', color: '#666' }}>version 1.1.32</small>
             </PanelBody>
           </Panel>
         </>
@@ -104,7 +90,25 @@ const ClassSchedule = () => {
     },
     save: (props) => {
       return null;
-    }
+    },
+    deprecated: [
+      // The useNewServer attribute was removed from the block in the class_schedule_2.0 branch. Without a 
+      // deprecated entry, existing posts that saved this attribute will trigger a block validation error in 
+      // the editor. A deprecation migration silently strips it.
+      {
+        attributes: {
+          subjectOrDept: { type: "string" },
+          department:    { type: "string" },
+          subject:       { type: "string" },
+          useNewServer:  { type: "boolean" },
+        },
+        migrate( attributes ) {
+          const { useNewServer, ...rest } = attributes;
+          return rest;
+        },
+        save: () => null,
+      },
+    ],
   })
 }
 

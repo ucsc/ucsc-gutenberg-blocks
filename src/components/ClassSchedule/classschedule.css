@@ -1,3 +1,605 @@
-#wcsi .el-select .el-input input {
+/* ============================================================
+   Class Schedule — styles ported from old WCSI Vue/Element UI app
+   Adapted selectors: #wcsi → #classSchedule,
+                      .el-table_1_column_* → .col-*
+   ============================================================ */
+
+/* ============================================================
+   Status indicator shapes
+   ============================================================ */
+.open,
+.closed,
+.waitlist {
+  display: inline-block;
+  margin: 0 5px;
+}
+
+.open {
+  width: 10px;
+  height: 10px;
+  background: green;
+  border-radius: 50%;
+}
+
+.closed {
+  width: 10px;
+  height: 10px;
+  background: red;
+}
+
+.waitlist {
+  width: 0;
+  height: 0;
+  border-left: 6px solid transparent;
+  border-right: 6px solid transparent;
+  border-bottom: 12px solid #FAC509;
+}
+
+/* Cancelled course link */
+a.cancelled {
+  text-decoration: line-through;
+}
+
+/* ============================================================
+   Main container
+   ============================================================ */
+#classSchedule {
+  margin: 20px 0;
+}
+
+/* ============================================================
+   Toolbar: search + filter buttons
+   ============================================================ */
+.introText {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 10px;
+}
+
+/* Term dropdown + search input grouped together
+   (replaces old el-input with el-select prepend) */
+.input-with-select {
+  display: flex;
+  flex: 1;
+  max-width: 550px;
+  border: 1px solid #dcdfe6;
+  border-radius: 4px;
+  overflow: hidden;
+  background-color: #fff;
+}
+
+.term-select-wrap {
+  background-color: #fff;
+  border-right: 1px solid #dcdfe6;
+  flex-shrink: 0;
+  margin-left: 0;
+  text-align: left;
+  padding-left: 0;
+}
+
+.term-select-wrap select {
+  appearance: none;
+  -webkit-appearance: none;
+  background: transparent url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath fill='%23999' d='M0 0l5 6 5-6z'/%3E%3C/svg%3E") no-repeat right 10px center;
+  padding: 10px 28px 10px 10px;
+  font-size: 14px;
+  color: #606266;
+  border: none;
+  outline: none;
+  cursor: pointer;
+  min-width: 200px;
+  height: 40px;
+}
+
+#courseSearch {
+  flex: 1;
+  padding: 10px 10px;
+  font-size: 14px;
+  border: none;
+  outline: none;
+  color: #666;
+  min-width: 0;
+}
+
+#courseSearch::placeholder {
+  color: #bbb;
+}
+
+.input-with-select:focus-within {
+  border-color: #2272D6;
+}
+
+/* Button group (replaces old el-button-group) */
+.button-group {
+  display: flex;
+  gap: 0;
+}
+
+.filter-button {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 12px 20px;
+  font-size: 14px;
+  font-weight: 500;
+  background-color: #fff;
+  color: #606266;
+  border: 1px solid #dcdfe6;
+  border-radius: 0;
+  cursor: pointer;
+  white-space: nowrap;
+  margin: 0;
+  height: 40px;
+  box-sizing: border-box;
+}
+
+#filterButton {
+  color: #2272D6;
+}
+
+.button-group .filter-button + .filter-button {
+  margin-left: -1px;
+}
+
+.button-group .filter-button:first-child {
+  border-radius: 4px 0 0 4px;
+}
+
+.button-group .filter-button:last-child {
+  border-radius: 0 4px 4px 0;
+}
+
+.filter-button:hover {
+  border-color: #c6e2ff;
+  background-color: #ecf5ff;
+}
+
+.filter-button .icon-filter {
+  width: 14px;
+  height: 14px;
+}
+
+.filter-active {
+  color: #2272D6 !important;
+}
+
+.right-btn {
+  padding-left: 0;
+  margin-left: 0;
+}
+
+/* ============================================================
+   Filter Modal (replaces old el-popover)
+   Styled to match old popover appearance
+   ============================================================ */
+.filter-modal {
+  display: none;
+  position: fixed;
+  z-index: 1000;
+  left: 0;
+  top: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.4);
+}
+
+.filter-modal.active {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.filter-modal-content {
+  background-color: #fff;
+  padding: 0;
+  border-radius: 4px;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.15);
+  max-width: 400px;
+  width: 90%;
+}
+
+.filter-modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px 15px;
+  border-bottom: 1px solid #eee;
+}
+
+.filter-modal-header h2 {
+  font-size: 16px;
+  font-weight: 700;
+  color: #303133;
+  margin: 0;
+}
+
+.filter-modal-close {
+  background: none;
+  border: none;
+  font-size: 22px;
+  line-height: 1;
+  color: #909399;
+  cursor: pointer;
+  padding: 0 4px;
+}
+
+.filter-modal-close:hover {
+  color: #303133;
+}
+
+.filter-modal-content .divider {
+  padding: 14px 15px;
+  border-bottom: 1px solid #eee;
+}
+
+.filter-modal-content .divider strong {
+  display: block;
+  font-size: 14px;
+  color: #303133;
+  margin-bottom: 10px;
+}
+
+.column-toggles,
+.status-filters {
+  display: flex;
+  flex-wrap: wrap;
+}
+
+.column-toggles label,
+.status-filters label {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 14px;
+  color: #606266;
+  cursor: pointer;
+  width: 90px;
+  padding-bottom: 10px;
+  margin-left: 0;
+}
+
+.column-toggles label:nth-last-child(-n+3),
+.status-filters label:nth-last-child(-n+3) {
+  padding-bottom: 0;
+}
+
+.advButtons {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 6px 15px;
+}
+
+.advButtons button:hover {
+  opacity: 0.8;
+}
+
+.reset-filters {
+  background: none;
+  border: none;
+  color: #F56C6C;
+  font-size: 12px;
+  cursor: pointer;
+  padding: 4px 0;
+}
+
+.apply-button,
+.cancel-button {
+  background: none;
+  border: none;
+  font-size: 12px;
+  cursor: pointer;
+  padding: 5px 12px;
+  margin-right: 10px;
+}
+
+.apply-button {
+  color: #606266;
+}
+
+.cancel-button {
+  color: #909399;
+}
+
+/* ============================================================
+   Display key (count + legend)
+   ============================================================ */
+.display-key {
+  background-color: #f8f8f8;
+  margin: 0;
   font-size: 13px;
+  padding: 10px 155px 0 5px;
+  color: #666;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.display-key .right {
+  text-align: right;
+}
+
+/* ============================================================
+   Table — div-based layout with CSS Grid (replaces HTML tables)
+   ============================================================ */
+.el-table {
+  width: 100%;
+  overflow-x: auto;
+  font-size: 14px;
+  color: #606266;
+}
+
+/* CSS Grid row layout — shared by header and body rows.
+   grid-template-columns is set dynamically by updateGridTemplate() in JS
+   to handle column visibility toggling. This is the default. */
+.el-table__header-row,
+.el-table__row {
+  display: grid;
+  grid-template-columns: 40px 120px 1fr 150px 80px 170px 180px 160px 90px 100px;
+  align-items: center;
+}
+
+/* Header row — Element UI default light style */
+.el-table__header-row {
+  background-color: #fff;
+}
+
+.el-table__header-row > [role="columnheader"] {
+  padding: 12px 0;
+  text-align: left;
+  font-weight: 700;
+  white-space: nowrap;
+  border-bottom: 1px solid #ebeef5;
+  color: #73777D;
+  background-color: #fff;
+  min-height: 67px;
+  box-sizing: border-box;
+  display: flex;
+  align-items: center;
+}
+
+.el-table__header-row > .is-sortable {
+  cursor: pointer;
+  user-select: none;
+}
+
+.el-table__header-row > .is-sortable button.cell {
+  background: none;
+  border: none;
+  font: inherit;
+  color: inherit;
+  cursor: pointer;
+  text-align: left;
+  width: 100%;
+}
+
+.el-table__header-row > .is-sortable:hover {
+  background-color: #f5f7fa;
+}
+
+/* Sort carets — matching old Element UI style */
+.caret-wrapper {
+  display: inline-flex;
+  flex-direction: column;
+  align-items: center;
+  vertical-align: middle;
+  margin-left: 5px;
+  line-height: 0;
+}
+
+.sort-caret {
+  width: 0;
+  height: 0;
+  border: 5px solid transparent;
+}
+
+.sort-caret.ascending {
+  border-bottom-color: #c0c4cc;
+  margin-bottom: 2px;
+}
+
+.sort-caret.descending {
+  border-top-color: #c0c4cc;
+}
+
+.ascending .sort-caret.ascending  { border-bottom-color: #2272D6; }
+.descending .sort-caret.descending { border-top-color: #2272D6; }
+
+/* Explicit grid-column placement so cells stay in the correct column
+   even if a global .hidden rule removes them from flow */
+.el-table .col-status      { grid-column: 1; }
+.el-table .col-course-id   { grid-column: 2; }
+.el-table .col-title       { grid-column: 3; }
+.el-table .col-seats       { grid-column: 4; }
+.el-table .col-days        { grid-column: 5; }
+.el-table .col-time        { grid-column: 6; }
+.el-table .col-location    { grid-column: 7; }
+.el-table .col-instructor  { grid-column: 8; }
+.el-table .col-class-num   { grid-column: 9; }
+.el-table .col-enrollment  { grid-column: 10; }
+
+/* Hide columns marked hidden — collapse in grid via overflow */
+.el-table .hidden {
+  overflow: hidden;
+  padding: 0 !important;
+  visibility: hidden;
+  min-width: 0;
+  border: none;
+}
+
+/* Body rows — matching Element UI hover behavior */
+.el-table__row {
+  background-color: #fff;
+  transition: background-color 0.15s;
+}
+
+.el-table__row:hover {
+  background-color: #f5f7fa;
+}
+
+.el-table__row > [role="cell"] {
+  padding: 12px 0;
+  border-bottom: 1px solid #ebeef5;
+}
+
+/* Cell padding — matching old #wcsi div.cell */
+.el-table .cell {
+  padding: 4px 5px;
+  word-break: keep-all;
+}
+
+/* Status column — center the dot */
+.el-table .col-status .cell {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+/* Seats column — matching old style */
+.seats {
+  font-size: 80%;
+  color: #515256;
+}
+
+.seats .available {
+  color: #515256;
+  font-size: 125%;
+  padding-right: 3px;
+}
+
+/* Title link */
+.el-table .col-title a {
+  color: #003C6C;
+  text-decoration: underline;
+  line-height: 23px;
+}
+
+.el-table .col-title a:hover {
+  color: #003C6C;
+  opacity: 0.8;
+}
+
+/* Responsive — horizontal scroll on small screens */
+@media (max-width: 768px) {
+  .el-table__header-row,
+  .el-table__row {
+    min-width: 700px;
+  }
+}
+
+/* ============================================================
+   Toast notification (copy URL feedback)
+   ============================================================ */
+.cs-toast {
+  position: fixed;
+  top: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+  background-color: #fff;
+  color: #303133;
+  padding: 10px 20px;
+  border-radius: 4px;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.15);
+  font-size: 14px;
+  z-index: 9999;
+  opacity: 0;
+  transition: opacity 0.3s;
+  white-space: nowrap;
+}
+
+.cs-toast.cs-toast-visible {
+  opacity: 1;
+}
+
+.cs-toast strong {
+  color: #000;
+}
+
+.cs-toast i {
+  color: #606266;
+  font-style: italic;
+}
+
+/* ============================================================
+   Misc
+   ============================================================ */
+
+/* A11Y: Suppress outline only for mouse/touch clicks; keyboard focus keeps the ring */
+*:focus:not(:focus-visible) {
+  outline: none;
+}
+
+div.print-only {
+  display: none;
+}
+
+/* ============================================================
+   Print styles — matching old WCSI print styles
+   ============================================================ */
+@media print {
+  html, body {
+    width: auto;
+    height: auto;
+  }
+
+  body {
+    overflow: auto;
+    height: auto;
+    margin: 0 !important;
+    -webkit-print-color-adjust: exact !important;
+  }
+
+  .scroll-y {
+    height: auto;
+    overflow: visible;
+  }
+
+  @page {
+    size: landscape;
+    margin-top: 0.35in;
+    margin-left: 0.30in;
+    margin-right: 0.30in;
+    margin-bottom: 0.35in;
+  }
+
+  div.no-print {
+    display: none !important;
+  }
+
+  div.print-only {
+    display: block;
+  }
+
+  #classSchedule .el-table [role="cell"],
+  #classSchedule .el-table [role="columnheader"],
+  div.cell {
+    padding: 0;
+  }
+
+  .el-table span.caret-wrapper {
+    display: none;
+  }
+
+  #classSchedule .el-table [role="cell"] .closed {
+    width: 10px !important;
+    height: 10px !important;
+    background: red !important;
+    display: inline-block !important;
+  }
+
+  #classSchedule .el-table [role="cell"] div.cell span.open {
+    height: 10px !important;
+    background: green !important;
+    border-radius: 50% !important;
+    display: inline-block !important;
+  }
+
+  #classSchedule div.el-table {
+    zoom: 92%;
+  }
+
+  #classSchedule div.el-table__body {
+    overflow: hidden;
+  }
 }

@@ -38,7 +38,7 @@
 
 .table-sortable .th-sort-asc,
 .table-sortable .th-sort-desc {
-    background: rgba(0, 0, 0, 0.1);
+    background: transparent;
 }
 
 .table-sortable tr,

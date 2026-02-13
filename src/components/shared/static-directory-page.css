@@ -1,0 +1,253 @@
+/*
+ * Local replacement for static.ucsc.edu/css/directory-page.css
+ * Only includes rules for classes used by our templates.
+ */
+
+/* ── General section layout ─────────────────────────────────────────────────── */
+
+.section-container {
+  margin: 1em 0;
+}
+
+.section-body tr,
+.section-body td,
+.section-body p,
+.section-body ul,
+.section-body li,
+.section-body dl,
+.section-body dt,
+.section-body dd,
+.section-item .item-body .item-info {
+  padding: 0;
+  margin: 0;
+}
+
+.section-item {
+  border-bottom: 1px solid #ddd;
+  background-color: #fff;
+  padding: .5em 1em;
+  display: flex;
+  margin-bottom: 1em;
+  border-radius: 5px;
+}
+
+.section-item .item-body {
+  padding: 0;
+  width: calc(100% - 160px);
+  flex-grow: 1;
+}
+
+.section-item .item-body .item-name {
+  margin: 0 0 .25em;
+}
+
+.section-item .item-body .item-info li {
+  display: flex;
+  flex-direction: column;
+}
+
+.section-item .item-body .item-info li strong,
+.section-item .item-body .item-info li span {
+  display: inline-block;
+  line-height: 1.5;
+}
+
+.section-item .item-body .item-info li strong {
+  flex: 0 1 auto;
+  font-weight: 600;
+  text-align: left;
+}
+
+.section-item .item-body .item-info li span {
+  flex: 1 0 auto;
+}
+
+.section-item .item-body .item-info ul {
+  list-style: none;
+}
+
+.section-item .item-body .item-info .inline-list {
+  margin-bottom: 0;
+}
+
+.section-item .item-body .item-info .inline-list li {
+  border-bottom: 0;
+  line-height: 1.5;
+}
+
+/* ── dl/dt/dd variants (semantic key-value pairs) ─────────────────────────── */
+
+.section-item .item-body dl.item-info > div {
+  display: flex;
+  flex-direction: column;
+}
+
+.section-item .item-body dl.item-info dt,
+.section-item .item-body dl.item-info dd span {
+  display: inline-block;
+  line-height: 1.5;
+}
+
+.section-item .item-body dl.item-info dt {
+  flex: 0 1 auto;
+  font-weight: 600;
+  text-align: left;
+}
+
+.section-item .item-body dl.item-info dd {
+  flex: 1 0 auto;
+  margin: 0;
+}
+
+.section-item .item-body dl.item-info .inline-list {
+  list-style: none;
+  margin-bottom: 0;
+  padding: 0;
+}
+
+.section-item .item-body dl.item-info .inline-list li {
+  border-bottom: 0;
+  line-height: 1.5;
+}
+
+/* ── Person / profile styles ────────────────────────────────────────────────── */
+
+.person .section-item {
+  padding-top: 1em;
+  padding-bottom: 1em;
+}
+
+.person .section-item .item-body .item-info li,
+.person .section-item .item-body dl.item-info > div {
+  padding: .1em 0;
+}
+
+.person .section-item .item-image {
+  margin-left: 0;
+  margin-right: 1em;
+  padding: 0;
+}
+
+.section-item .item-image {
+  max-width: 160px;
+  margin-left: 1em;
+}
+
+.section-item .item-image img {
+  width: 160px;
+  height: 160px;
+  padding: 0;
+  object-fit: cover;
+}
+
+.square-img {
+  width: 160px;
+  height: 160px;
+  overflow: hidden;
+  border-radius: 5px;
+}
+
+/* ── Expertise ──────────────────────────────────────────────────────────────── */
+
+.item-expertise {
+  -webkit-column-break-inside: avoid;
+  page-break-inside: avoid;
+  break-inside: avoid;
+}
+
+.expertise {
+  columns: 2;
+  column-gap: .75em;
+}
+
+.person div.item-expertise > h3 {
+  padding-top: .5em;
+  padding-bottom: .25em;
+  margin-top: 0;
+  margin-bottom: 0;
+}
+
+div.item-expertise > ul li {
+  background: url(https://wcms.ucsc.edu/static/images/bullet.gif) no-repeat left 10px;
+  list-style: none;
+  padding: 0px 0px 0px 15px !important;
+}
+
+@media all and (max-width: 767px) {
+  .expertise {
+    columns: 1;
+  }
+}
+
+/* ── List-page responsive layout ────────────────────────────────────────────── */
+
+@media all and (max-width: 767px) {
+  .list-page .section-item .item-body {
+    padding: .5em .25em;
+    width: 100%;
+  }
+  .list-page .section-item .item-body .item-info {
+    padding: 0;
+    margin: 0;
+    font-size: .9em;
+  }
+  .list-page .section-item .item-body .item-info > li,
+  .list-page .section-item .item-body dl.item-info > div {
+    padding: 0;
+    margin: 0;
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.12);
+  }
+  .list-page .section-item .item-body .item-info > li:last-of-type,
+  .list-page .section-item .item-body dl.item-info > div:last-of-type {
+    border-bottom: 0;
+  }
+  .list-page .section-item .item-body .item-info li span,
+  .list-page .section-item .item-body dl.item-info dd span {
+    flex-basis: auto;
+    text-align: left;
+    display: inline;
+  }
+  .list-page .section-item .item-image {
+    margin: 0;
+  }
+  .list-page .section-item {
+    padding: .5em;
+    width: 100%;
+    min-width: 184px;
+    display: flex;
+    flex-direction: column-reverse;
+  }
+  .list-page .section-body {
+    display: flex;
+    flex-flow: row wrap;
+  }
+  .person .section-item {
+    flex-direction: column;
+  }
+}
+
+@media all and (min-width: 768px) {
+  .list-page .section-item .item-body .item-info > li,
+  .list-page .section-item .item-body dl.item-info > div {
+    align-items: flex-start;
+    flex-direction: row;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.12);
+  }
+  .list-page .section-item .item-body .item-info > li:last-of-type,
+  .list-page .section-item .item-body dl.item-info > div:last-of-type {
+    border-bottom: 0;
+  }
+  .list-page .section-item .item-body .item-info li strong,
+  .list-page .section-item .item-body dl.item-info dt {
+    flex: 0 0 150px;
+    text-align: right;
+    padding-right: 1.5em;
+  }
+  .list-page .section-item .item-body .item-info li span,
+  .list-page .section-item .item-body dl.item-info dd {
+    flex: 0 1 auto;
+  }
+}
