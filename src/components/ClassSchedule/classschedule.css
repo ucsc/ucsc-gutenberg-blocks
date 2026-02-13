@@ -1,3 +1,91 @@
-#wcsi .el-select .el-input input {
-  font-size: 13px;
+/* Class Schedule Styles */
+#classSchedule {
+  margin: 20px 0;
+}
+
+#classSchedule .introText {
+  margin-bottom: 15px;
+}
+
+#classSchedule .introText label {
+  font-weight: bold;
+}
+
+#classSchedule #courseSearch {
+  padding: 8px;
+  font-size: 14px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  width: 300px;
+  max-width: 100%;
+}
+
+#classScheduleTable {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 15px;
+}
+
+#classScheduleTable th,
+#classScheduleTable td {
+  padding: 10px;
+  text-align: left;
+  border: 1px solid #ddd;
+}
+
+#classScheduleTable th {
+  background-color: #003c6c;
+  color: white;
+  font-weight: bold;
+  cursor: pointer;
+  user-select: none;
+}
+
+#classScheduleTable th:hover {
+  background-color: #00549e;
+}
+
+#classScheduleTable th.sorted-asc::after {
+  content: ' ▲';
+  font-size: 0.8em;
+}
+
+#classScheduleTable th.sorted-desc::after {
+  content: ' ▼';
+  font-size: 0.8em;
+}
+
+#classScheduleTable tbody tr:nth-child(even) {
+  background-color: #f9f9f9;
+}
+
+#classScheduleTable tbody tr:hover {
+  background-color: #f0f0f0;
+}
+
+#classScheduleTable .status-open {
+  color: green;
+  font-weight: bold;
+}
+
+#classScheduleTable .status-closed {
+  color: red;
+  font-weight: bold;
+}
+
+#classScheduleTable .status-waitlist {
+  color: orange;
+  font-weight: bold;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  #classScheduleTable {
+    font-size: 12px;
+  }
+
+  #classScheduleTable th,
+  #classScheduleTable td {
+    padding: 6px;
+  }
 }
