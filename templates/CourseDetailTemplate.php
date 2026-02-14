@@ -97,55 +97,53 @@ wp_enqueue_style('classschedule', plugins_url('../src/components/ClassSchedule/c
 
 			<section class="course-enrollment">
 				<h2>Enrollment Information</h2>
-				<table class="course-info-table">
-					<tr>
-						<th>Class Number</th>
-						<td><?php echo esc_html($primary['class_nbr']); ?></td>
-					</tr>
-					<tr>
-						<th>Section</th>
-						<td><?php echo esc_html($primary['class_section']); ?></td>
-					</tr>
-					<tr>
-						<th>Status</th>
-						<td class="status-<?php echo esc_attr(strtolower($primary['enrl_status'])); ?>">
+				<ul class="course-info-list">
+					<li>
+						<strong>Class Number</strong>
+						<span><?php echo esc_html($primary['class_nbr']); ?></span>
+					</li>
+					<li>
+						<strong>Section</strong>
+						<span><?php echo esc_html($primary['class_section']); ?></span>
+					</li>
+					<li>
+						<strong>Status</strong>
+						<span class="status-<?php echo esc_attr(strtolower($primary['enrl_status'])); ?>">
 							<?php echo esc_html($primary['enrl_status']); ?>
-						</td>
-					</tr>
-					<tr>
-						<th>Enrollment</th>
-						<td><?php echo esc_html($primary['enrl_total'] . ' / ' . $primary['capacity']); ?></td>
-					</tr>
-					<tr>
-						<th>Waitlist</th>
-						<td><?php echo esc_html($primary['waitlist_total'] . ' / ' . $primary['waitlist_capacity']); ?></td>
-					</tr>
-					<tr>
-						<th>Term Dates</th>
-						<td><?php echo esc_html(date('M j, Y', strtotime($primary['start_date'])) . ' - ' . date('M j, Y', strtotime($primary['end_date']))); ?></td>
-					</tr>
-				</table>
+						</span>
+					</li>
+					<li>
+						<strong>Enrollment</strong>
+						<span><?php echo esc_html($primary['enrl_total'] . ' / ' . $primary['capacity']); ?></span>
+					</li>
+					<li>
+						<strong>Waitlist</strong>
+						<span><?php echo esc_html($primary['waitlist_total'] . ' / ' . $primary['waitlist_capacity']); ?></span>
+					</li>
+					<li>
+						<strong>Term Dates</strong>
+						<span><?php echo esc_html(date('M j, Y', strtotime($primary['start_date'])) . ' - ' . date('M j, Y', strtotime($primary['end_date']))); ?></span>
+					</li>
+				</ul>
 			</section>
 
 			<?php if (!empty($meetings)): ?>
 			<section class="course-meetings">
 				<h2>Meeting Times</h2>
-				<table class="course-info-table">
-					<thead>
-						<tr>
-							<th>Days</th>
-							<th>Time</th>
-							<th>Location</th>
-							<th>Instructor(s)</th>
-						</tr>
-					</thead>
-					<tbody>
-						<?php foreach ($meetings as $meeting): ?>
-						<tr>
-							<td><?php echo esc_html($meeting['days']); ?></td>
-							<td><?php echo esc_html($meeting['start_time'] . ' - ' . $meeting['end_time']); ?></td>
-							<td><?php echo esc_html($meeting['location']); ?></td>
-							<td>
+				<div class="meeting-list">
+					<?php foreach ($meetings as $meeting): ?>
+					<div class="meeting-item">
+						<div class="meeting-detail">
+							<strong>Days & Times</strong>
+							<span><?php echo esc_html($meeting['days'] . ' ' . $meeting['start_time'] . ' - ' . $meeting['end_time']); ?></span>
+						</div>
+						<div class="meeting-detail">
+							<strong>Location</strong>
+							<span><?php echo esc_html($meeting['location']); ?></span>
+						</div>
+						<div class="meeting-detail">
+							<strong>Instructor(s)</strong>
+							<span>
 								<?php
 								if (!empty($meeting['instructors'])) {
 									$instructor_links = array_map(function($instructor) {
@@ -157,47 +155,47 @@ wp_enqueue_style('classschedule', plugins_url('../src/components/ClassSchedule/c
 									echo implode(', ', $instructor_links);
 								}
 								?>
-							</td>
-						</tr>
-						<?php endforeach; ?>
-					</tbody>
-				</table>
+							</span>
+						</div>
+					</div>
+					<?php endforeach; ?>
+				</div>
 			</section>
 			<?php endif; ?>
 
 			<?php if (!empty($secondary_sections['secondary_section'])): ?>
 			<section class="course-sections">
 				<h2>Sections</h2>
-				<table class="course-info-table">
-					<thead>
-						<tr>
-							<th>Section</th>
-							<th>Type</th>
-							<th>Days</th>
-							<th>Time</th>
-							<th>Location</th>
-							<th>Instructor</th>
-							<th>Status</th>
-							<th>Enrollment</th>
-						</tr>
-					</thead>
-					<tbody>
-						<?php
-						$sections = $secondary_sections['secondary_section'];
-						// Ensure it's an array of sections
-						if (isset($sections['class_section'])) {
-							$sections = [$sections];
-						}
-						foreach ($sections as $section):
-							$section_meeting = $section['meetings']['meeting'] ?? [];
-						?>
-						<tr>
-							<td><?php echo esc_html($section['class_section']); ?></td>
-							<td><?php echo esc_html($section['component']); ?></td>
-							<td><?php echo esc_html($section_meeting['days'] ?? ''); ?></td>
-							<td><?php echo esc_html(($section_meeting['start_time'] ?? '') . ' - ' . ($section_meeting['end_time'] ?? '')); ?></td>
-							<td><?php echo esc_html($section_meeting['location'] ?? ''); ?></td>
-							<td>
+				<div class="section-list">
+					<?php
+					$sections = $secondary_sections['secondary_section'];
+					// Ensure it's an array of sections
+					if (isset($sections['class_section'])) {
+						$sections = [$sections];
+					}
+					foreach ($sections as $section):
+						$section_meeting = $section['meetings']['meeting'] ?? [];
+					?>
+					<div class="section-item">
+						<div class="section-detail">
+							<strong>Section</strong>
+							<span><?php echo esc_html($section['class_section']); ?></span>
+						</div>
+						<div class="section-detail">
+							<strong>Type</strong>
+							<span><?php echo esc_html($section['component']); ?></span>
+						</div>
+						<div class="section-detail">
+							<strong>Days & Times</strong>
+							<span><?php echo esc_html(($section_meeting['days'] ?? '') . ' ' . ($section_meeting['start_time'] ?? '') . ' - ' . ($section_meeting['end_time'] ?? '')); ?></span>
+						</div>
+						<div class="section-detail">
+							<strong>Location</strong>
+							<span><?php echo esc_html($section_meeting['location'] ?? ''); ?></span>
+						</div>
+						<div class="section-detail">
+							<strong>Instructor</strong>
+							<span>
 								<?php
 								if (!empty($section_meeting['instructors']['instructor'])) {
 									$instructor = $section_meeting['instructors']['instructor'];
@@ -209,15 +207,21 @@ wp_enqueue_style('classschedule', plugins_url('../src/components/ClassSchedule/c
 									}
 								}
 								?>
-							</td>
-							<td class="status-<?php echo esc_attr(strtolower($section['enrl_status'])); ?>">
+							</span>
+						</div>
+						<div class="section-detail">
+							<strong>Status</strong>
+							<span class="status-<?php echo esc_attr(strtolower($section['enrl_status'])); ?>">
 								<?php echo esc_html($section['enrl_status']); ?>
-							</td>
-							<td><?php echo esc_html($section['enrl_total'] . ' / ' . $section['capacity']); ?></td>
-						</tr>
-						<?php endforeach; ?>
-					</tbody>
-				</table>
+							</span>
+						</div>
+						<div class="section-detail">
+							<strong>Enrollment</strong>
+							<span><?php echo esc_html($section['enrl_total'] . ' / ' . $section['capacity']); ?></span>
+						</div>
+					</div>
+					<?php endforeach; ?>
+				</div>
 			</section>
 			<?php endif; ?>
 
@@ -259,36 +263,100 @@ wp_enqueue_style('classschedule', plugins_url('../src/components/ClassSchedule/c
 }
 
 .course-detail h2 {
-	color: #003c6c;
-	margin-bottom: 15px;
-	font-size: 1.5em;
-}
-
-.course-info-table {
-	width: 100%;
-	border-collapse: collapse;
-	margin-top: 10px;
-}
-
-.course-info-table th,
-.course-info-table td {
-	padding: 12px;
-	text-align: left;
-	border: 1px solid #ddd;
-}
-
-.course-info-table th {
-	background-color: #003c6c;
-	color: white;
+	color: #000;
+	margin: 40px 0 20px 0;
+	font-size: 2.2em;
 	font-weight: bold;
+	text-align: left;
 }
 
-.course-info-table tbody tr:nth-child(even) {
-	background-color: #f9f9f9;
+.course-info-list {
+	list-style: none;
+	padding: 0;
+	margin: 30px auto;
+	max-width: 600px;
 }
 
-.course-info-table tbody tr:hover {
-	background-color: #f0f0f0;
+.course-info-list li {
+	display: grid;
+	grid-template-columns: 200px 1fr;
+	padding: 5px 0;
+	border-bottom: 1px solid #e0e0e0;
+	gap: 20px;
+}
+
+.course-info-list li:last-child {
+	border-bottom: none;
+}
+
+.course-info-list li strong {
+	font-weight: bold;
+	color: #000;
+	text-align: right;
+	font-size: 1.1em;
+	white-space: nowrap;
+}
+
+.course-info-list li span {
+	color: #000;
+	text-align: left;
+	font-size: 1.1em;
+}
+
+.meeting-list,
+.section-list {
+	margin: 30px auto;
+	max-width: 600px;
+}
+
+.meeting-item,
+.section-item {
+	margin-bottom: 30px;
+}
+
+.meeting-detail,
+.section-detail {
+	display: grid;
+	grid-template-columns: 200px 1fr;
+	padding: 5px 0;
+	border-bottom: 1px solid #e0e0e0;
+	gap: 20px;
+}
+
+.meeting-item .meeting-detail:last-child,
+.section-item .section-detail:last-child {
+	border-bottom: none;
+}
+
+.meeting-detail strong,
+.section-detail strong {
+	font-weight: bold;
+	color: #000;
+	text-align: right;
+	font-size: 1.1em;
+	white-space: nowrap;
+}
+
+.meeting-detail span,
+.section-detail span {
+	color: #000;
+	text-align: left;
+	font-size: 1.1em;
+}
+
+@media (max-width: 768px) {
+	.course-info-list li,
+	.meeting-detail,
+	.section-detail {
+		grid-template-columns: 1fr;
+		gap: 5px;
+	}
+
+	.course-info-list li strong,
+	.meeting-detail strong,
+	.section-detail strong {
+		text-align: left;
+	}
 }
 </style>
 
