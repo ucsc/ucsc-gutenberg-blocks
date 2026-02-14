@@ -6,117 +6,88 @@ if ( file_exists( get_theme_file_path( 'header-plugin.php' ) ) ) {
 ?>
 <link href="//static.ucsc.edu/css/directory-page.css" media="all" rel="stylesheet" type="text/css">
 <style>
-/* Override WordPress spacing for profile pages */
+/* Simple clean profile page styling to match class-schedule */
 .content-region {
     margin-block-start: 0 !important;
 }
 
 #wrapper {
-    max-width: 1200px;
+    max-width: 900px;
     margin: 20px auto;
     padding: 0 20px;
 }
 
-#profilehead {
-    display: grid;
-    grid-template-columns: 200px 1fr 1fr;
-    gap: 30px;
-    margin-bottom: 30px;
-    padding-bottom: 20px;
-    border-bottom: 2px solid #003c6c;
+/* Hide the SVG icons */
+#profilehead svg,
+.svg-inline--fa {
+    display: none !important;
 }
 
-.profileheaditem {
-    display: flex;
-    flex-direction: column;
+/* Main heading - name */
+#profilehead h2 {
+    font-family: Georgia, 'Times New Roman', serif;
+    font-size: 2.5em;
+    font-weight: normal;
+    margin: 20px 0 10px 0;
+    color: #000;
+    clear: both;
 }
 
+/* Profile layout with image on left */
 .profileheadimage {
-    grid-row: 1 / 3;
+    float: left;
+    margin-right: 30px;
+    margin-bottom: 20px;
 }
 
 .profileheadimage img {
-    width: 100%;
-    max-width: 200px;
-    border-radius: 4px;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-}
-
-#profilehead h2 {
-    margin: 0 0 5px 0;
-    color: #003c6c;
-    font-size: 1.8em;
-    line-height: 1.2;
-}
-
-#profilehead p {
-    margin: 4px 0;
-    line-height: 1.4;
-    font-size: 0.95em;
-}
-
-#profilehead svg {
-    width: 14px;
-    height: 14px;
-    margin-right: 6px;
-    vertical-align: middle;
-    fill: #003c6c;
-}
-
-#profilehead a {
-    color: #0071a5;
-    text-decoration: none;
-}
-
-#profilehead a:hover {
-    text-decoration: underline;
-}
-
-.altemail {
-    margin: 4px 0;
-}
-
-#profilebody {
-    margin-top: 20px;
-}
-
-#profilebody > div {
-    margin-bottom: 20px;
-    padding: 15px 20px;
-    background: #f9f9f9;
-    border-left: 4px solid #003c6c;
-}
-
-#profilebody > div p {
-    margin: 0 0 5px 0 !important;
-}
-
-#profilebody label {
+    width: 180px;
+    height: auto;
     display: block;
+}
+
+/* Basic info table */
+.profile-info-table {
+    margin: 20px 0;
+    border-collapse: collapse;
+    width: 100%;
+    max-width: 600px;
+}
+
+.profile-info-table tr {
+    border-bottom: 1px solid #e0e0e0;
+}
+
+.profile-info-table td {
+    padding: 12px 15px;
+    vertical-align: top;
+}
+
+.profile-info-table td:first-child {
     font-weight: bold;
-    color: #003c6c;
-    margin-bottom: 8px;
-    font-size: 1.1em;
+    width: 180px;
+    color: #333;
 }
 
-#profilebody p {
-    line-height: 1.5;
+.profile-info-table td:last-child {
+    color: #000;
 }
 
-/* Responsive adjustments */
-@media (max-width: 768px) {
-    #profilehead {
-        grid-template-columns: 1fr;
-        gap: 15px;
-    }
+/* Hide all the extra profile sections */
+#profilebody {
+    display: none;
+}
 
-    .profileheadimage {
-        grid-row: 1;
-    }
+/* Hide extra paragraphs in header */
+#profilehead p {
+    display: none;
+}
 
-    .profileheadimage img {
-        max-width: 150px;
-    }
+/* Clear floats */
+#wrapper::after {
+    content: "";
+    display: table;
+    clear: both;
 }
 </style>
 <?php
@@ -170,6 +141,41 @@ if (count($profileData)) {
                     <svg class="svg-inline--fa fa-user-circle fa-w-16" title="User" aria-labelledby="svg-inline--fa-title-1" data-prefix="fa" data-icon="user-circle" role="img" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" data-fa-i2svg=""><title id="svg-inline--fa-title-1">User</title><path fill="currentColor" d="M8 256C8 119.033 119.033 8 256 8s248 111.033 248 248-111.033 248-248 248S8 392.967 8 256zm72.455 125.868C119.657 436.446 183.673 472 256 472s136.343-35.554 175.545-90.132c-3.141-26.99-22.667-49.648-49.538-56.366l-32.374-8.093C323.565 339.79 290.722 352 256 352s-67.565-12.21-93.634-34.591l-32.374 8.093c-26.87 6.718-46.396 29.376-49.537 56.366zM144 208c0 61.856 50.144 112 112 112s112-50.144 112-112S317.856 96 256 96s-112 50.144-112 112z"></path></svg>
                     <?php echo $profileData["cn"][0]; ?>
                 </h2>
+
+                <table class="profile-info-table">
+                    <?php if (!empty($profileData['title'])): ?>
+                    <tr>
+                        <td>Title</td>
+                        <td><?php echo esc_html($profileData['title'][0]); ?></td>
+                    </tr>
+                    <?php endif; ?>
+
+                    <?php if (!empty($profileData['ucscpersonpubdivision'])): ?>
+                    <tr>
+                        <td>Division</td>
+                        <td><?php echo esc_html($profileData['ucscpersonpubdivision'][0]); ?></td>
+                    </tr>
+                    <?php endif; ?>
+
+                    <?php if (!empty($profileData['ucscpersonpubdepartmentnumber'])): ?>
+                    <tr>
+                        <td>Department</td>
+                        <td><?php echo esc_html($profileData['ucscpersonpubdepartmentnumber'][0]); ?></td>
+                    </tr>
+                    <?php endif; ?>
+
+                    <?php if (!empty($profileData['ucscpersonpubaffiliateddepartment'])): ?>
+                    <tr>
+                        <td>Affiliations</td>
+                        <td><?php
+                            $affiliations = is_array($profileData['ucscpersonpubaffiliateddepartment'])
+                                ? $profileData['ucscpersonpubaffiliateddepartment']
+                                : [$profileData['ucscpersonpubaffiliateddepartment']];
+                            echo esc_html(implode(', ', array_filter($affiliations, function($v) { return !is_numeric($v); })));
+                        ?></td>
+                    </tr>
+                    <?php endif; ?>
+                </table>
                 <?php
                     for($i=1; $profileData["cn"] && $i<count($profileData["cn"])-1; $i++) {
                         echo "<p>{$profileData['cn'][$i]}</p>";
