@@ -17,6 +17,14 @@ if ( file_exists( get_theme_file_path( 'header-plugin.php' ) ) ) {
     padding: 0 20px;
 }
 
+#profilehead {
+    margin-bottom: 30px;
+}
+
+.profileheaditem {
+    margin-bottom: 20px;
+}
+
 /* Hide the SVG icons */
 #profilehead svg,
 .svg-inline--fa {
@@ -46,41 +54,99 @@ if ( file_exists( get_theme_file_path( 'header-plugin.php' ) ) ) {
     display: block;
 }
 
-/* Basic info table */
-.profile-info-table {
+/* Basic info list */
+.item-info {
+    list-style: none;
+    padding: 0;
     margin: 20px 0;
-    border-collapse: collapse;
-    width: 100%;
-    max-width: 600px;
 }
 
-.profile-info-table tr {
-    border-bottom: 1px solid #e0e0e0;
+.item-info > li {
+    display: flex;
+    padding: 8px 0;
+    border-bottom: 1px solid #ccc;
+    align-items: baseline;
 }
 
-.profile-info-table td {
-    padding: 12px 15px;
-    vertical-align: top;
+.item-info > li:last-child {
+    border-bottom: none;
 }
 
-.profile-info-table td:first-child {
+.item-info > li > strong {
+    flex: 0 0 180px;
     font-weight: bold;
-    width: 180px;
-    color: #333;
-}
-
-.profile-info-table td:last-child {
     color: #000;
 }
 
-/* Hide all the extra profile sections */
-#profilebody {
-    display: none;
+.item-info > li > div,
+.item-info > li > span,
+.item-info > li > ul {
+    flex: 1;
+    color: #000;
 }
 
-/* Hide extra paragraphs in header */
-#profilehead p {
-    display: none;
+.item-info .inline-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: inline;
+}
+
+.item-info .inline-list li {
+    display: inline;
+}
+
+.item-info .inline-list li:not(:last-child):after {
+    content: ", ";
+}
+
+/* Profile body sections - two column layout */
+#profilebody {
+    clear: both;
+    margin-top: 40px;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 40px;
+}
+
+#profilebody > div {
+    margin-bottom: 30px;
+    break-inside: avoid;
+}
+
+#profilebody > div > p {
+    margin: 0 0 15px 0;
+}
+
+#profilebody label {
+    display: block;
+    font-size: 1.4em;
+    color: #000;
+    font-weight: bold;
+    margin: 0 0 15px 0;
+    font-family: inherit;
+}
+
+#profilebody p {
+    line-height: 1.6;
+    margin: 0 0 10px 0;
+}
+
+@media (max-width: 768px) {
+    #profilebody {
+        grid-template-columns: 1fr;
+        gap: 20px;
+    }
+
+    .item-info > li {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    .item-info > li > strong {
+        flex: 1;
+        margin-bottom: 5px;
+    }
 }
 
 /* Clear floats */
@@ -142,93 +208,202 @@ if (count($profileData)) {
                     <?php echo $profileData["cn"][0]; ?>
                 </h2>
 
-                <table class="profile-info-table">
+                <ul class="item-info">
                     <?php if (!empty($profileData['title'])): ?>
-                    <tr>
-                        <td>Title</td>
-                        <td><?php echo esc_html($profileData['title'][0]); ?></td>
-                    </tr>
+                    <li>
+                        <strong>Title</strong>
+                        <ul class="inline-list">
+                            <?php foreach ((array)$profileData['title'] as $item): ?>
+                                <li><?php echo esc_html($item); ?></li>
+                            <?php endforeach; ?>
+                        </ul>
+                    </li>
                     <?php endif; ?>
 
                     <?php if (!empty($profileData['ucscpersonpubdivision'])): ?>
-                    <tr>
-                        <td>Division</td>
-                        <td><?php echo esc_html($profileData['ucscpersonpubdivision'][0]); ?></td>
-                    </tr>
+                    <li>
+                        <strong>Division</strong>
+                        <?php
+                        $divisions = (array)$profileData['ucscpersonpubdivision'];
+                        foreach ($divisions as $idx => $item) {
+                            if ($idx > 0) echo '; ';
+                            echo esc_html($item);
+                        }
+                        ?>
+                    </li>
                     <?php endif; ?>
 
                     <?php if (!empty($profileData['ucscpersonpubdepartmentnumber'])): ?>
-                    <tr>
-                        <td>Department</td>
-                        <td><?php echo esc_html($profileData['ucscpersonpubdepartmentnumber'][0]); ?></td>
-                    </tr>
+                    <li>
+                        <strong>Department</strong>
+                        <ul class="inline-list">
+                            <?php foreach ((array)$profileData['ucscpersonpubdepartmentnumber'] as $item): ?>
+                                <li><?php echo esc_html($item); ?></li>
+                            <?php endforeach; ?>
+                        </ul>
+                    </li>
                     <?php endif; ?>
 
                     <?php if (!empty($profileData['ucscpersonpubaffiliateddepartment'])): ?>
-                    <tr>
-                        <td>Affiliations</td>
-                        <td><?php
-                            $affiliations = is_array($profileData['ucscpersonpubaffiliateddepartment'])
-                                ? $profileData['ucscpersonpubaffiliateddepartment']
-                                : [$profileData['ucscpersonpubaffiliateddepartment']];
-                            echo esc_html(implode(', ', array_filter($affiliations, function($v) { return !is_numeric($v); })));
-                        ?></td>
-                    </tr>
+                    <li>
+                        <strong>Affiliations</strong>
+                        <?php
+                        $affiliations = (array)$profileData['ucscpersonpubaffiliateddepartment'];
+                        foreach ($affiliations as $idx => $item) {
+                            if ($idx > 0) echo ', ';
+                            echo esc_html($item);
+                        }
+                        ?>
+                    </li>
                     <?php endif; ?>
-                </table>
-                <?php
-                    for($i=1; $profileData["cn"] && $i<count($profileData["cn"])-1; $i++) {
-                        echo "<p>{$profileData['cn'][$i]}</p>";
-                    }
-                ?>
-                <p>
-                    <svg class="svg-inline--fa fa-address-book fa-w-14" title="User" aria-labelledby="svg-inline--fa-title-2" data-prefix="fa" data-icon="address-book" role="img" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512" data-fa-i2svg=""><title id="svg-inline--fa-title-2">User</title><path fill="currentColor" d="M436 160c6.627 0 12-5.373 12-12v-40c0-6.627-5.373-12-12-12h-20V48c0-26.51-21.49-48-48-48H48C21.49 0 0 21.49 0 48v416c0 26.51 21.49 48 48 48h320c26.51 0 48-21.49 48-48v-48h20c6.627 0 12-5.373 12-12v-40c0-6.627-5.373-12-12-12h-20v-64h20c6.627 0 12-5.373 12-12v-40c0-6.627-5.373-12-12-12h-20v-64h20zm-228-32c44.183 0 80 35.817 80 80s-35.817 80-80 80-80-35.817-80-80 35.817-80 80-80zm128 232c0 13.255-10.745 24-24 24H104c-13.255 0-24-10.745-24-24v-18.523c0-22.026 14.99-41.225 36.358-46.567l35.657-8.914c29.101 20.932 74.509 26.945 111.97 0l35.657 8.914C321.01 300.252 336 319.452 336 341.477V360z"></path></svg>
-                    <?php
-                        for($i=0; $profileData["title"] && $i<count($profileData["title"]); $i++) {
-                            echo "{$profileData['title'][$i]}";
-                            break;
-                        }
-                    ?>
-                </p>
-            </div>
-            <div class="profileheaditem">
 
-                <?php
-                    for($i=0; $profileData["telephonenumber"] && $i<count($profileData["telephonenumber"])-1; $i++) {
-                        echo "<p>";
-                            echo '<svg class="svg-inline--fa fa-phone fa-w-16" title="User" aria-labelledby="svg-inline--fa-title-3" data-prefix="fa" data-icon="phone" role="img" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" data-fa-i2svg=""><title id="svg-inline--fa-title-3">User</title><path fill="currentColor" d="M493.397 24.615l-104-23.997c-11.314-2.611-22.879 3.252-27.456 13.931l-48 111.997a24 24 0 0 0 6.862 28.029l60.617 49.596c-35.973 76.675-98.938 140.508-177.249 177.248l-49.596-60.616a24 24 0 0 0-28.029-6.862l-111.997 48C3.873 366.516-1.994 378.08.618 389.397l23.997 104C27.109 504.204 36.748 512 48 512c256.087 0 464-207.532 464-464 0-11.176-7.714-20.873-18.603-23.385z"></path></svg>';
-                            echo "{$profileData['telephonenumber'][$i]}";
-                        echo "</p>";
-                    }
-                    for($i=0; $profileData["facsimiletelephonenumber"] && $i<count($profileData["facsimiletelephonenumber"])-1; $i++) {
-                        echo "<p>";
-                            echo '<svg class="svg-inline--fa fa-phone fa-w-16" title="User" aria-labelledby="svg-inline--fa-title-3" data-prefix="fa" data-icon="phone" role="img" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" data-fa-i2svg=""><title id="svg-inline--fa-title-3">User</title><path fill="currentColor" d="M493.397 24.615l-104-23.997c-11.314-2.611-22.879 3.252-27.456 13.931l-48 111.997a24 24 0 0 0 6.862 28.029l60.617 49.596c-35.973 76.675-98.938 140.508-177.249 177.248l-49.596-60.616a24 24 0 0 0-28.029-6.862l-111.997 48C3.873 366.516-1.994 378.08.618 389.397l23.997 104C27.109 504.204 36.748 512 48 512c256.087 0 464-207.532 464-464 0-11.176-7.714-20.873-18.603-23.385z"></path></svg>';
-                            echo "{$profileData['facsimiletelephonenumber'][$i]} (Fax)";
-                        echo "</p>";
-                    }
-                ?>
-                <p>
-                    <svg class="svg-inline--fa fa-envelope fa-w-16" title="User" aria-labelledby="svg-inline--fa-title-4" data-prefix="fas" data-icon="envelope" role="img" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" data-fa-i2svg=""><title id="svg-inline--fa-title-4">User</title><path fill="currentColor" d="M502.3 190.8c3.9-3.1 9.7-.2 9.7 4.7V400c0 26.5-21.5 48-48 48H48c-26.5 0-48-21.5-48-48V195.6c0-5 5.7-7.8 9.7-4.7 22.4 17.4 52.1 39.5 154.1 113.6 21.1 15.4 56.7 47.8 92.2 47.6 35.7.3 72-32.8 92.3-47.6 102-74.1 131.6-96.3 154-113.7zM256 320c23.2.4 56.6-29.2 73.4-41.4 132.7-96.3 142.8-104.7 173.4-128.7 5.8-4.5 9.2-11.5 9.2-18.9v-19c0-26.5-21.5-48-48-48H48C21.5 64 0 85.5 0 112v19c0 7.4 3.4 14.3 9.2 18.9 30.6 23.9 40.7 32.4 173.4 128.7 16.8 12.2 50.2 41.8 73.4 41.4z"></path></svg>
-                    <?php
-                        for($i=0; $profileData["mail"] && $i<count($profileData["mail"]); $i++) {
-                            echo "<a href=\"mailto:{$profileData['mail'][$i]}\">{$profileData['mail'][$i]}</a>";
-                        }
-                    ?>
-                </p>
+                    <?php if (!empty($profileData['telephonenumber'])): ?>
+                    <li>
+                        <strong>Phone</strong>
+                        <div>
+                            <span style="white-space: nowrap" class="p-tel">
+                                <?php
+                                $phones = (array)$profileData['telephonenumber'];
+                                foreach ($phones as $idx => $item) {
+                                    if ($idx > 0) echo ', ';
+                                    echo esc_html($item);
+                                }
+                                ?>
+                            </span>
+                        </div>
+                    </li>
+                    <?php endif; ?>
 
-
-                    <?php
-                        $seenEmails = [$cruzidEmail];
-                        for($i=0; $profileData["ucscpersonpubalternatemail"] && $i<count($profileData["ucscpersonpubalternatemail"]) - 1; $i++) {
-                            if (!in_array($profileData['ucscpersonpubalternatemail'][$i], $seenEmails)) {
-                                array_push($seenEmails, $profileData['ucscpersonpubalternatemail'][$i]);
-                                echo "<p class='altemail'>";
-                                echo '<svg class="svg-inline--fa fa-envelope fa-w-16" title="User" aria-labelledby="svg-inline--fa-title-5" data-prefix="far" data-icon="envelope" role="img" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" data-fa-i2svg=""><title id="svg-inline--fa-title-5">User</title><path fill="currentColor" d="M464 64H48C21.49 64 0 85.49 0 112v288c0 26.51 21.49 48 48 48h416c26.51 0 48-21.49 48-48V112c0-26.51-21.49-48-48-48zm0 48v40.805c-22.422 18.259-58.168 46.651-134.587 106.49-16.841 13.247-50.201 45.072-73.413 44.701-23.208.375-56.579-31.459-73.413-44.701C106.18 199.465 70.425 171.067 48 152.805V112h416zM48 400V214.398c22.914 18.251 55.409 43.862 104.938 82.646 21.857 17.205 60.134 55.186 103.062 54.955 42.717.231 80.509-37.199 103.053-54.947 49.528-38.783 82.032-64.401 104.947-82.653V400H48z"></path></svg>';
-                                    echo "<a href=\"mailto:{$profileData['ucscpersonpubalternatemail'][$i]}\">{$profileData['ucscpersonpubalternatemail'][$i]}</a>";
-                                echo "</p>";
+                    <?php if (!empty($profileData['mail']) || !empty($profileData['ucscpersonpubalternatemail'])): ?>
+                    <li>
+                        <strong>Email</strong>
+                        <ul class="inline-list">
+                            <?php
+                            $seenEmails = [];
+                            if (!empty($profileData['mail'])) {
+                                foreach ((array)$profileData['mail'] as $item) {
+                                    $seenEmails[] = $item;
+                                    echo '<li><span class="u-email"><a href="mailto:' . esc_attr($item) . '">' . esc_html($item) . '</a></span></li>';
+                                }
                             }
+                            if (!empty($profileData['ucscpersonpubalternatemail'])) {
+                                foreach ((array)$profileData['ucscpersonpubalternatemail'] as $item) {
+                                    if (!in_array($item, $seenEmails)) {
+                                        echo '<li><span class="u-email"><a href="mailto:' . esc_attr($item) . '">' . esc_html($item) . '</a></span></li>';
+                                    }
+                                }
+                            }
+                            ?>
+                        </ul>
+                    </li>
+                    <?php endif; ?>
+
+                    <?php if (!empty($profileData['facsimiletelephonenumber'])): ?>
+                    <li>
+                        <strong>Fax</strong>
+                        <ul class="inline-list">
+                            <?php foreach ((array)$profileData['facsimiletelephonenumber'] as $item): ?>
+                                <li><span style="white-space: nowrap" class="p-tel"><?php echo esc_html($item); ?></span></li>
+                            <?php endforeach; ?>
+                        </ul>
+                    </li>
+                    <?php endif; ?>
+
+                    <?php if (!empty($profileData['ucscpersonpubwebsite'])): ?>
+                    <li>
+                        <strong>Website</strong>
+                        <ul class="inline-list">
+                            <?php foreach ((array)$profileData['ucscpersonpubwebsite'] as $item): ?>
+                                <?php
+                                $parts = explode(' ', $item, 2);
+                                $url = $parts[0];
+                                $label = isset($parts[1]) ? $parts[1] : $url;
+                                ?>
+                                <li><span class="u-url"><a href="<?php echo esc_url($url); ?>" target="_website"><?php echo esc_html($label); ?></a></span></li>
+                            <?php endforeach; ?>
+                        </ul>
+                    </li>
+                    <?php endif; ?>
+
+                    <?php if (!empty($profileData['ucscprimarylocationpubofficialname'])): ?>
+                    <li>
+                        <strong>Office Location</strong>
+                        <ul class="inline-list">
+                            <li>
+                                <span class="p-extended-address">
+                                    <?php
+                                    $locations = (array)$profileData['ucscprimarylocationpubofficialname'];
+                                    $details = !empty($profileData['ucscpersonpubofficelocationdetail']) ? (array)$profileData['ucscpersonpubofficelocationdetail'] : [];
+                                    echo esc_html($locations[0]);
+                                    if (!empty($details[0])) {
+                                        echo ', ' . esc_html($details[0]);
+                                    }
+                                    ?>
+                                </span>
+                            </li>
+                            <?php if (!empty($profileData['roomnumber'])): ?>
+                            <li><span class="p-extended-address"><?php echo esc_html(((array)$profileData['roomnumber'])[0]); ?></span></li>
+                            <?php endif; ?>
+                        </ul>
+                    </li>
+                    <?php endif; ?>
+
+                    <?php if (!empty($profileData['ucscpersonpubofficehours'])): ?>
+                    <li>
+                        <strong>Office Hours</strong>
+                        <ul class="inline-list">
+                            <?php foreach ((array)$profileData['ucscpersonpubofficehours'] as $item): ?>
+                                <li><?php echo esc_html($item); ?></li>
+                            <?php endforeach; ?>
+                        </ul>
+                    </li>
+                    <?php endif; ?>
+
+                    <?php if (!empty($profileData['ucscpersonpubmailstop'])): ?>
+                    <li>
+                        <strong>Mail Stop</strong>
+                        <?php echo esc_html(((array)$profileData['ucscpersonpubmailstop'])[0]); ?>
+                    </li>
+                    <?php endif; ?>
+
+                    <?php if (!empty($profileData['street'])): ?>
+                    <li>
+                        <strong>Mailing Address</strong>
+                        <ul class="inline-list">
+                            <li><?php echo esc_html(((array)$profileData['street'])[0]); ?></li>
+                            <li>Santa Cruz CA 95064</li>
+                        </ul>
+                    </li>
+                    <?php endif; ?>
+
+                    <?php if (!empty($profileData['ucscpersonpubexpertisereference'])): ?>
+                    <li>
+                        <strong>Faculty Areas of Expertise</strong>
+                        <span class="p-label">
+                            <?php
+                            $expertise = (array)$profileData['ucscpersonpubexpertisereference'];
+                            foreach ($expertise as $idx => $item) {
+                                if ($idx > 0) echo ', ';
+                                echo esc_html($item);
+                            }
+                            ?>
+                        </span>
+                    </li>
+                    <?php endif; ?>
+
+                    <?php if (!empty($profileData['ucscpersonpubfacultycourses'])): ?>
+                    <li>
+                        <strong>Courses Taught</strong>
+                        <?php
+                        $courses = (array)$profileData['ucscpersonpubfacultycourses'];
+                        foreach ($courses as $idx => $item) {
+                            if ($idx > 0) echo '; ';
+                            echo esc_html($item);
                         }
-                    ?>
+                        ?>
+                    </li>
+                    <?php endif; ?>
+                </ul>
 
             </div>
         </div>
