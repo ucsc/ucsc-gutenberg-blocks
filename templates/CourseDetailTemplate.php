@@ -148,10 +148,13 @@ wp_enqueue_style('classschedule', plugins_url('../src/components/ClassSchedule/c
 							<td>
 								<?php
 								if (!empty($meeting['instructors'])) {
-									$instructor_names = array_map(function($instructor) {
-										return $instructor['name'];
+									$instructor_links = array_map(function($instructor) {
+										if (!empty($instructor['cruzid'])) {
+											return '<a href="' . esc_url(home_url('/directory/' . $instructor['cruzid'])) . '">' . esc_html($instructor['name']) . '</a>';
+										}
+										return esc_html($instructor['name']);
 									}, $meeting['instructors']);
-									echo esc_html(implode(', ', $instructor_names));
+									echo implode(', ', $instructor_links);
 								}
 								?>
 							</td>
@@ -198,7 +201,12 @@ wp_enqueue_style('classschedule', plugins_url('../src/components/ClassSchedule/c
 								<?php
 								if (!empty($section_meeting['instructors']['instructor'])) {
 									$instructor = $section_meeting['instructors']['instructor'];
-									echo esc_html($instructor['name'] ?? '');
+									$instructor_name = $instructor['name'] ?? '';
+									if (!empty($instructor['cruzid']) && !empty($instructor_name)) {
+										echo '<a href="' . esc_url(home_url('/directory/' . $instructor['cruzid'])) . '">' . esc_html($instructor_name) . '</a>';
+									} else {
+										echo esc_html($instructor_name);
+									}
 								}
 								?>
 							</td>

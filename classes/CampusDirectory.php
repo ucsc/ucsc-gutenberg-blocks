@@ -8,6 +8,7 @@ class CampusDirectory
   function __construct()
   {
     add_action('init', array($this, 'renderFrontend'));
+    add_action('init', array($this, 'add_directory_profile_rewrite'));
     add_filter('query_vars', function($query_vars) {
       $query_vars[] = 'directoryprofilecruzid';
       return $query_vars;
@@ -28,6 +29,14 @@ class CampusDirectory
         'permission_callback' => function() {return true;}
       ));
     });
+  }
+
+  function add_directory_profile_rewrite() {
+    add_rewrite_rule(
+      '^directory/([^/]+)/?$',
+      'index.php?directoryprofilecruzid=$matches[1]',
+      'top'
+    );
   }
   function requirements(){
     $resp = [];
@@ -53,6 +62,11 @@ class CampusDirectory
             filemtime(plugin_dir_path(__FILE__) .$file)
     );
     wp_enqueue_style('campusdirectory');
+
+    // Load UCSC directory page CSS for profile pages (matches class-schedule styling)
+    if (get_query_var('directoryprofilecruzid')) {
+      wp_enqueue_style('ucsc-directory-page', '//static.ucsc.edu/css/directory-page.css', array(), null);
+    }
   }
 
   function renderFrontend()

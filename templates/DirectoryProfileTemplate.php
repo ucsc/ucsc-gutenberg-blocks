@@ -3,6 +3,124 @@
 if ( file_exists( get_theme_file_path( 'header-plugin.php' ) ) ) {
 	get_header( 'plugin' );
 }
+?>
+<link href="//static.ucsc.edu/css/directory-page.css" media="all" rel="stylesheet" type="text/css">
+<style>
+/* Override WordPress spacing for profile pages */
+.content-region {
+    margin-block-start: 0 !important;
+}
+
+#wrapper {
+    max-width: 1200px;
+    margin: 20px auto;
+    padding: 0 20px;
+}
+
+#profilehead {
+    display: grid;
+    grid-template-columns: 200px 1fr 1fr;
+    gap: 30px;
+    margin-bottom: 30px;
+    padding-bottom: 20px;
+    border-bottom: 2px solid #003c6c;
+}
+
+.profileheaditem {
+    display: flex;
+    flex-direction: column;
+}
+
+.profileheadimage {
+    grid-row: 1 / 3;
+}
+
+.profileheadimage img {
+    width: 100%;
+    max-width: 200px;
+    border-radius: 4px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+#profilehead h2 {
+    margin: 0 0 5px 0;
+    color: #003c6c;
+    font-size: 1.8em;
+    line-height: 1.2;
+}
+
+#profilehead p {
+    margin: 4px 0;
+    line-height: 1.4;
+    font-size: 0.95em;
+}
+
+#profilehead svg {
+    width: 14px;
+    height: 14px;
+    margin-right: 6px;
+    vertical-align: middle;
+    fill: #003c6c;
+}
+
+#profilehead a {
+    color: #0071a5;
+    text-decoration: none;
+}
+
+#profilehead a:hover {
+    text-decoration: underline;
+}
+
+.altemail {
+    margin: 4px 0;
+}
+
+#profilebody {
+    margin-top: 20px;
+}
+
+#profilebody > div {
+    margin-bottom: 20px;
+    padding: 15px 20px;
+    background: #f9f9f9;
+    border-left: 4px solid #003c6c;
+}
+
+#profilebody > div p {
+    margin: 0 0 5px 0 !important;
+}
+
+#profilebody label {
+    display: block;
+    font-weight: bold;
+    color: #003c6c;
+    margin-bottom: 8px;
+    font-size: 1.1em;
+}
+
+#profilebody p {
+    line-height: 1.5;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    #profilehead {
+        grid-template-columns: 1fr;
+        gap: 15px;
+    }
+
+    .profileheadimage {
+        grid-row: 1;
+    }
+
+    .profileheadimage img {
+        max-width: 150px;
+    }
+}
+</style>
+<?php
+
 $cruzid = get_query_var('directoryprofilecruzid');
 $campusDirectoryAPI = new CampusDirectoryAPI($attributes);
 $profileData = $campusDirectoryAPI->getCampusDirData($cruzid,true)[0];
