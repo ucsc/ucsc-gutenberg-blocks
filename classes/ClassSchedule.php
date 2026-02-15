@@ -169,25 +169,25 @@ class ClassSchedule
 
     $courses = $courses_data['classes'];
 
-    // Render the table
+    // Render the course list
     echo '<div id="classSchedule">';
     echo '<div class="introText">';
     echo '<label>Search Courses: <input type="text" id="courseSearch" onkeyup="classScheduleSearch(event)"></label>';
     echo '</div>';
-    echo '<table class="table-sortable" id="classScheduleTable">';
-    echo '<thead><tr>';
-    echo '<th onclick="sortClassSchedule(0)">Subject</th>';
-    echo '<th onclick="sortClassSchedule(1)">Course #</th>';
-    echo '<th onclick="sortClassSchedule(2)">Title</th>';
-    echo '<th onclick="sortClassSchedule(3)">Type</th>';
-    echo '<th onclick="sortClassSchedule(4)">Days</th>';
-    echo '<th onclick="sortClassSchedule(5)">Time</th>';
-    echo '<th onclick="sortClassSchedule(6)">Location</th>';
-    echo '<th onclick="sortClassSchedule(7)">Instructor</th>';
-    echo '<th onclick="sortClassSchedule(8)">Status</th>';
-    echo '<th onclick="sortClassSchedule(9)">Seats</th>';
-    echo '</tr></thead>';
-    echo '<tbody>';
+    echo '<div class="course-list-container" id="classScheduleTable">';
+    echo '<div class="course-list-header">';
+    echo '<div class="course-col subject" onclick="sortClassSchedule(0)">Subject</div>';
+    echo '<div class="course-col course-num" onclick="sortClassSchedule(1)">Course #</div>';
+    echo '<div class="course-col title" onclick="sortClassSchedule(2)">Title</div>';
+    echo '<div class="course-col type" onclick="sortClassSchedule(3)">Type</div>';
+    echo '<div class="course-col days" onclick="sortClassSchedule(4)">Days</div>';
+    echo '<div class="course-col time" onclick="sortClassSchedule(5)">Time</div>';
+    echo '<div class="course-col location" onclick="sortClassSchedule(6)">Location</div>';
+    echo '<div class="course-col instructor" onclick="sortClassSchedule(7)">Instructor</div>';
+    echo '<div class="course-col status" onclick="sortClassSchedule(8)">Status</div>';
+    echo '<div class="course-col seats" onclick="sortClassSchedule(9)">Seats</div>';
+    echo '</div>';
+    echo '<div class="course-list-body">';
 
     foreach ($courses as $course) {
       $instructor_names = '';
@@ -203,21 +203,21 @@ class ClassSchedule
 
       $course_url = home_url('/course/' . $current_term . '/' . $course['class_nbr']);
 
-      echo '<tr>';
-      echo '<td>' . esc_html($course['subject']) . '</td>';
-      echo '<td>' . esc_html($course['catalog_nbr']) . '</td>';
-      echo '<td><a href="' . esc_url($course_url) . '">' . esc_html($course['title']) . '</a></td>';
-      echo '<td>' . esc_html($course['component']) . '</td>';
-      echo '<td>' . esc_html($course['meeting_days']) . '</td>';
-      echo '<td>' . esc_html($course['start_time'] . ' - ' . $course['end_time']) . '</td>';
-      echo '<td>' . esc_html($course['location']) . '</td>';
-      echo '<td>' . esc_html($instructor_names) . '</td>';
-      echo '<td class="' . $status_class . '">' . esc_html($course['enrl_status']) . '</td>';
-      echo '<td>' . esc_html($available . ' / ' . $course['enrl_capacity']) . '</td>';
-      echo '</tr>';
+      echo '<div class="course-row">';
+      echo '<div class="course-col subject">' . esc_html($course['subject']) . '</div>';
+      echo '<div class="course-col course-num">' . esc_html($course['catalog_nbr']) . '</div>';
+      echo '<div class="course-col title"><a href="' . esc_url($course_url) . '">' . esc_html($course['title']) . '</a></div>';
+      echo '<div class="course-col type">' . esc_html($course['component']) . '</div>';
+      echo '<div class="course-col days">' . esc_html($course['meeting_days']) . '</div>';
+      echo '<div class="course-col time">' . esc_html($course['start_time'] . ' - ' . $course['end_time']) . '</div>';
+      echo '<div class="course-col location">' . esc_html($course['location']) . '</div>';
+      echo '<div class="course-col instructor">' . esc_html($instructor_names) . '</div>';
+      echo '<div class="course-col status ' . $status_class . '">' . esc_html($course['enrl_status']) . '</div>';
+      echo '<div class="course-col seats">' . esc_html($available . ' / ' . $course['enrl_capacity']) . '</div>';
+      echo '</div>';
     }
 
-    echo '</tbody></table></div>';
+    echo '</div></div></div>';
 
     $output = ob_get_contents();
     ob_end_clean();

@@ -20,72 +20,133 @@
   max-width: 100%;
 }
 
-#classScheduleTable {
-  width: 100%;
-  border-collapse: collapse;
+.course-list-container {
   margin-top: 15px;
-}
-
-#classScheduleTable th,
-#classScheduleTable td {
-  padding: 10px;
-  text-align: left;
   border: 1px solid #ddd;
+  overflow-x: auto;
 }
 
-#classScheduleTable th {
+.course-list-header,
+.course-row {
+  display: grid;
+  grid-template-columns: 70px 80px minmax(200px, 2fr) 70px 70px 130px 140px minmax(150px, 1fr) 80px 90px;
+  gap: 8px;
+  border-bottom: 1px solid #ddd;
+  min-width: max-content;
+}
+
+.course-list-header {
   background-color: #003c6c;
   color: white;
   font-weight: bold;
-  cursor: pointer;
-  user-select: none;
+  position: sticky;
+  top: 0;
+  left: 0;
+  z-index: 10;
 }
 
-#classScheduleTable th:hover {
+.course-list-header .course-col {
+  padding: 12px 8px;
+  cursor: pointer;
+  user-select: none;
+  font-weight: bold;
+  overflow: visible;
+  white-space: nowrap;
+}
+
+.course-list-header .course-col:hover {
   background-color: #00549e;
 }
 
-#classScheduleTable th.sorted-asc::after {
+.course-list-header .course-col.sorted-asc::after {
   content: ' ▲';
   font-size: 0.8em;
 }
 
-#classScheduleTable th.sorted-desc::after {
+.course-list-header .course-col.sorted-desc::after {
   content: ' ▼';
   font-size: 0.8em;
 }
 
-#classScheduleTable tbody tr:nth-child(even) {
+.course-row {
+  background-color: white;
+}
+
+.course-row:nth-child(even) {
   background-color: #f9f9f9;
 }
 
-#classScheduleTable tbody tr:hover {
+.course-row:hover {
   background-color: #f0f0f0;
 }
 
-#classScheduleTable .status-open {
+.course-row:last-child {
+  border-bottom: none;
+}
+
+.course-col {
+  padding: 10px 8px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.course-col.title,
+.course-col.location,
+.course-col.instructor {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.course-col a {
+  color: #003c6c;
+  text-decoration: none;
+}
+
+.course-col a:hover {
+  text-decoration: underline;
+}
+
+.status-open {
   color: green;
   font-weight: bold;
 }
 
-#classScheduleTable .status-closed {
+.status-closed {
   color: red;
   font-weight: bold;
 }
 
-#classScheduleTable .status-waitlist {
+.status-waitlist {
   color: orange;
   font-weight: bold;
 }
 
 /* Responsive */
+@media (max-width: 1200px) {
+  .course-list-header,
+  .course-row {
+    grid-template-columns: 70px 80px 1.5fr 70px 70px 120px 100px 1fr 80px 80px;
+    gap: 8px;
+    font-size: 14px;
+  }
+
+  .course-col {
+    padding: 8px 6px;
+  }
+}
+
 @media (max-width: 768px) {
-  #classScheduleTable {
+  .course-list-header,
+  .course-row {
+    grid-template-columns: 60px 70px 1fr 60px 60px 100px 90px 1fr 70px 70px;
+    gap: 5px;
     font-size: 12px;
   }
 
-  #classScheduleTable th,
-  #classScheduleTable td {
-    padding: 6px;
+  .course-list-header .course-col,
+  .course-col {
+    padding: 6px 4px;
   }
 }

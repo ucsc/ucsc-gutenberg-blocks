@@ -5,16 +5,15 @@
 // Search function
 function classScheduleSearch(event) {
     const searchTerm = event.target.value.toLowerCase();
-    const table = document.getElementById('classScheduleTable');
-    const rows = table.getElementsByTagName('tr');
+    const container = document.getElementById('classScheduleTable');
+    const rows = container.querySelectorAll('.course-row');
 
-    for (let i = 1; i < rows.length; i++) {
-        const row = rows[i];
-        const cells = row.getElementsByTagName('td');
+    rows.forEach(row => {
+        const cols = row.querySelectorAll('.course-col');
         let found = false;
 
-        for (let j = 0; j < cells.length; j++) {
-            const cellText = cells[j].textContent || cells[j].innerText;
+        for (let j = 0; j < cols.length; j++) {
+            const cellText = cols[j].textContent || cols[j].innerText;
             if (cellText.toLowerCase().indexOf(searchTerm) > -1) {
                 found = true;
                 break;
@@ -22,7 +21,7 @@ function classScheduleSearch(event) {
         }
 
         row.style.display = found ? '' : 'none';
-    }
+    });
 }
 
 // Sort function
@@ -30,9 +29,9 @@ let currentSortColumn = -1;
 let sortAscending = true;
 
 function sortClassSchedule(columnIndex) {
-    const table = document.getElementById('classScheduleTable');
-    const tbody = table.tBodies[0];
-    const rows = Array.from(tbody.querySelectorAll('tr'));
+    const container = document.getElementById('classScheduleTable');
+    const body = container.querySelector('.course-list-body');
+    const rows = Array.from(body.querySelectorAll('.course-row'));
 
     // Toggle sort direction if clicking the same column
     if (currentSortColumn === columnIndex) {
@@ -46,8 +45,10 @@ function sortClassSchedule(columnIndex) {
 
     // Sort rows
     const sortedRows = rows.sort((a, b) => {
-        const aColText = a.querySelector(`td:nth-child(${columnIndex + 1})`).textContent.trim();
-        const bColText = b.querySelector(`td:nth-child(${columnIndex + 1})`).textContent.trim();
+        const aCols = a.querySelectorAll('.course-col');
+        const bCols = b.querySelectorAll('.course-col');
+        const aColText = aCols[columnIndex].textContent.trim();
+        const bColText = bCols[columnIndex].textContent.trim();
 
         // Try to parse as numbers for numeric columns
         const aNum = parseFloat(aColText);
@@ -62,20 +63,20 @@ function sortClassSchedule(columnIndex) {
     });
 
     // Remove all existing rows
-    while (tbody.firstChild) {
-        tbody.removeChild(tbody.firstChild);
+    while (body.firstChild) {
+        body.removeChild(body.firstChild);
     }
 
     // Re-add sorted rows
-    tbody.append(...sortedRows);
+    body.append(...sortedRows);
 
     // Update sort indicators
-    updateSortIndicators(table, columnIndex, sortAscending);
+    updateSortIndicators(container, columnIndex, sortAscending);
 }
 
-function updateSortIndicators(table, columnIndex, ascending) {
+function updateSortIndicators(container, columnIndex, ascending) {
     // Remove all existing sort indicators
-    const headers = table.querySelectorAll('th');
+    const headers = container.querySelectorAll('.course-list-header .course-col');
     headers.forEach(header => {
         header.classList.remove('sorted-asc', 'sorted-desc');
     });
