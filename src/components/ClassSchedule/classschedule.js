@@ -134,24 +134,43 @@ function applyColumnVisibility() {
         'seats': 9
     };
 
+    // Define column widths for each column
+    const columnWidths = {
+        0: '30px',           // status (always visible)
+        1: '70px',           // subject
+        2: '80px',           // course-num
+        3: 'minmax(200px, 2fr)', // title
+        4: '70px',           // type
+        5: '70px',           // days
+        6: '130px',          // time
+        7: '140px',          // location
+        8: 'minmax(150px, 1fr)', // instructor
+        9: '80px'            // seats
+    };
+
+    const container = document.getElementById('classScheduleTable');
+    const headers = container.querySelectorAll('.course-list-header .course-col');
+    const rows = container.querySelectorAll('.course-row');
+
+    // Build array of visible column indices
+    const visibleColumns = [0]; // Status column is always visible
+
     toggles.forEach(toggle => {
         const columnName = toggle.dataset.column;
         const columnIndex = columnMap[columnName];
         const isVisible = toggle.checked;
 
-        // Toggle header column
-        const container = document.getElementById('classScheduleTable');
-        const headers = container.querySelectorAll('.course-list-header .course-col');
+        // Toggle header column visibility
         if (headers[columnIndex]) {
             if (isVisible) {
                 headers[columnIndex].classList.remove('hidden');
+                visibleColumns.push(columnIndex);
             } else {
                 headers[columnIndex].classList.add('hidden');
             }
         }
 
         // Toggle data columns in all rows
-        const rows = container.querySelectorAll('.course-row');
         rows.forEach(row => {
             const cols = row.querySelectorAll('.course-col');
             if (cols[columnIndex]) {
@@ -162,6 +181,22 @@ function applyColumnVisibility() {
                 }
             }
         });
+    });
+
+    // Sort visible columns in order
+    visibleColumns.sort((a, b) => a - b);
+
+    // Build new grid-template-columns string
+    const gridColumns = visibleColumns.map(index => columnWidths[index]).join(' ');
+
+    // Apply new grid template to header and all rows
+    const headerRow = container.querySelector('.course-list-header');
+    if (headerRow) {
+        headerRow.style.gridTemplateColumns = gridColumns;
+    }
+
+    rows.forEach(row => {
+        row.style.gridTemplateColumns = gridColumns;
     });
 }
 
@@ -227,6 +262,16 @@ function resetFilters() {
     const rows = container.querySelectorAll('.course-row');
     rows.forEach(row => {
         row.style.display = '';
+    });
+
+    // Reset grid template columns to default
+    const defaultGridColumns = '30px 70px 80px minmax(200px, 2fr) 70px 70px 130px 140px minmax(150px, 1fr) 80px';
+    const headerRow = container.querySelector('.course-list-header');
+    if (headerRow) {
+        headerRow.style.gridTemplateColumns = defaultGridColumns;
+    }
+    rows.forEach(row => {
+        row.style.gridTemplateColumns = defaultGridColumns;
     });
 }
 
