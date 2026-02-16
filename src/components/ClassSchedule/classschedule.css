@@ -5,6 +5,10 @@
 
 #classSchedule .introText {
   margin-bottom: 15px;
+  display: flex;
+  gap: 15px;
+  align-items: center;
+  flex-wrap: wrap;
 }
 
 #classSchedule .introText label {
@@ -20,8 +24,202 @@
   max-width: 100%;
 }
 
+.filter-button {
+  padding: 8px 16px;
+  font-size: 14px;
+  background-color: #4a90e2;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.filter-button:hover {
+  background-color: #357abd;
+}
+
+/* Filter Modal */
+.filter-modal {
+  display: none;
+  position: fixed;
+  z-index: 1000;
+  left: 0;
+  top: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.4);
+}
+
+.filter-modal.active {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.filter-modal-content {
+  background-color: #fff;
+  padding: 30px;
+  border-radius: 8px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+  max-width: 600px;
+  width: 90%;
+  max-height: 80vh;
+  overflow-y: auto;
+}
+
+.filter-modal-content h3 {
+  margin: 20px 0 15px 0;
+  font-size: 1.2em;
+  font-weight: bold;
+  color: #333;
+}
+
+.filter-modal-content h3:first-child {
+  margin-top: 0;
+}
+
+.column-toggles,
+.status-filters {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+  gap: 12px;
+  margin-bottom: 20px;
+}
+
+.column-toggles label,
+.status-filters label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+  font-size: 14px;
+}
+
+.column-toggles input[type="checkbox"],
+.status-filters input[type="checkbox"] {
+  width: 18px;
+  height: 18px;
+  cursor: pointer;
+}
+
+.filter-actions {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 25px;
+  padding-top: 20px;
+  border-top: 1px solid #e0e0e0;
+}
+
+.reset-filters {
+  background: none;
+  border: none;
+  color: #e74c3c;
+  font-size: 14px;
+  cursor: pointer;
+  padding: 8px 12px;
+  text-decoration: underline;
+}
+
+.reset-filters:hover {
+  color: #c0392b;
+}
+
+.cancel-button,
+.apply-button {
+  padding: 10px 20px;
+  font-size: 14px;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.cancel-button {
+  background-color: #e0e0e0;
+  color: #333;
+}
+
+.cancel-button:hover {
+  background-color: #d0d0d0;
+}
+
+.apply-button {
+  background-color: #4a90e2;
+  color: white;
+  margin-left: 10px;
+}
+
+.apply-button:hover {
+  background-color: #357abd;
+}
+
+/* Column visibility */
+.course-col.hidden,
+.course-list-header .course-col.hidden {
+  display: none;
+}
+
+/* Status indicators and legend */
+.status-legend {
+  background-color: #f8f8f8;
+  margin: 15px 0;
+  padding: 10px 15px;
+  font-size: 13px;
+  color: #666;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.status-legend .count {
+  font-weight: normal;
+}
+
+.status-legend .count strong {
+  font-weight: bold;
+  color: #333;
+}
+
+.status-legend .legend-items {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+}
+
+.status-legend .legend-item {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.status-indicator {
+  display: inline-block;
+  width: 10px;
+  height: 10px;
+}
+
+.status-indicator.open {
+  background: green;
+  border-radius: 50%;
+}
+
+.status-indicator.closed {
+  background: red;
+}
+
+.status-indicator.waitlist {
+  width: 0;
+  height: 0;
+  border-left: 6px solid transparent;
+  border-right: 6px solid transparent;
+  border-bottom: 12px solid #FAC509;
+}
+
 .course-list-container {
-  margin-top: 15px;
+  margin-top: 0;
   border: 1px solid #ddd;
   overflow-x: auto;
 }
@@ -29,10 +227,17 @@
 .course-list-header,
 .course-row {
   display: grid;
-  grid-template-columns: 70px 80px minmax(200px, 2fr) 70px 70px 130px 140px minmax(150px, 1fr) 80px 90px;
+  grid-template-columns: 30px 70px 80px minmax(200px, 2fr) 70px 70px 130px 140px minmax(150px, 1fr) 80px;
   gap: 8px;
   border-bottom: 1px solid #ddd;
   min-width: max-content;
+}
+
+.course-col.status-col {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 10px 4px;
 }
 
 .course-list-header {
@@ -127,7 +332,7 @@
 @media (max-width: 1200px) {
   .course-list-header,
   .course-row {
-    grid-template-columns: 70px 80px 1.5fr 70px 70px 120px 100px 1fr 80px 80px;
+    grid-template-columns: 30px 70px 80px 1.5fr 70px 70px 120px 100px 1fr 80px;
     gap: 8px;
     font-size: 14px;
   }
@@ -135,12 +340,16 @@
   .course-col {
     padding: 8px 6px;
   }
+
+  .course-col.status-col {
+    padding: 8px 4px;
+  }
 }
 
 @media (max-width: 768px) {
   .course-list-header,
   .course-row {
-    grid-template-columns: 60px 70px 1fr 60px 60px 100px 90px 1fr 70px 70px;
+    grid-template-columns: 25px 60px 70px 1fr 60px 60px 100px 90px 1fr 70px;
     gap: 5px;
     font-size: 12px;
   }
@@ -148,5 +357,15 @@
   .course-list-header .course-col,
   .course-col {
     padding: 6px 4px;
+  }
+
+  .course-col.status-col {
+    padding: 6px 2px;
+  }
+
+  .status-legend {
+    flex-direction: column;
+    gap: 10px;
+    align-items: flex-start;
   }
 }

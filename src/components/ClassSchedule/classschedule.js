@@ -8,19 +8,34 @@ function classScheduleSearch(event) {
     const container = document.getElementById('classScheduleTable');
     const rows = container.querySelectorAll('.course-row');
 
+    // Get active status filters
+    const statusFilters = document.querySelectorAll('.status-filter');
+    const activeStatuses = [];
+    statusFilters.forEach(filter => {
+        if (filter.checked) {
+            activeStatuses.push(filter.dataset.status);
+        }
+    });
+
     rows.forEach(row => {
         const cols = row.querySelectorAll('.course-col');
-        let found = false;
+        let foundInSearch = false;
 
+        // Check if row matches search term
         for (let j = 0; j < cols.length; j++) {
             const cellText = cols[j].textContent || cols[j].innerText;
             if (cellText.toLowerCase().indexOf(searchTerm) > -1) {
-                found = true;
+                foundInSearch = true;
                 break;
             }
         }
 
-        row.style.display = found ? '' : 'none';
+        // Check if row matches status filter
+        const rowStatus = row.dataset.status;
+        let matchesStatusFilter = activeStatuses.length === 0 || activeStatuses.includes(rowStatus);
+
+        // Show row only if it matches both search and status filter
+        row.style.display = (foundInSearch && matchesStatusFilter) ? '' : 'none';
     });
 }
 
@@ -85,5 +100,140 @@ function updateSortIndicators(container, columnIndex, ascending) {
     const currentHeader = headers[columnIndex];
     if (currentHeader) {
         currentHeader.classList.add(ascending ? 'sorted-asc' : 'sorted-desc');
+    }
+}
+
+// Filter Modal Functions
+function openFilterModal() {
+    const modal = document.getElementById('filterModal');
+    modal.classList.add('active');
+}
+
+function closeFilterModal() {
+    const modal = document.getElementById('filterModal');
+    modal.classList.remove('active');
+}
+
+function applyFilters() {
+    applyColumnVisibility();
+    applyStatusFilters();
+    closeFilterModal();
+}
+
+function applyColumnVisibility() {
+    const toggles = document.querySelectorAll('.column-toggle');
+    const columnMap = {
+        'subject': 1,
+        'course-num': 2,
+        'title': 3,
+        'type': 4,
+        'days': 5,
+        'time': 6,
+        'location': 7,
+        'instructor': 8,
+        'seats': 9
+    };
+
+    toggles.forEach(toggle => {
+        const columnName = toggle.dataset.column;
+        const columnIndex = columnMap[columnName];
+        const isVisible = toggle.checked;
+
+        // Toggle header column
+        const container = document.getElementById('classScheduleTable');
+        const headers = container.querySelectorAll('.course-list-header .course-col');
+        if (headers[columnIndex]) {
+            if (isVisible) {
+                headers[columnIndex].classList.remove('hidden');
+            } else {
+                headers[columnIndex].classList.add('hidden');
+            }
+        }
+
+        // Toggle data columns in all rows
+        const rows = container.querySelectorAll('.course-row');
+        rows.forEach(row => {
+            const cols = row.querySelectorAll('.course-col');
+            if (cols[columnIndex]) {
+                if (isVisible) {
+                    cols[columnIndex].classList.remove('hidden');
+                } else {
+                    cols[columnIndex].classList.add('hidden');
+                }
+            }
+        });
+    });
+}
+
+function applyStatusFilters() {
+    const statusFilters = document.querySelectorAll('.status-filter');
+    const activeStatuses = [];
+
+    statusFilters.forEach(filter => {
+        if (filter.checked) {
+            activeStatuses.push(filter.dataset.status);
+        }
+    });
+
+    const container = document.getElementById('classScheduleTable');
+    const rows = container.querySelectorAll('.course-row');
+
+    rows.forEach(row => {
+        const rowStatus = row.dataset.status;
+        let shouldShow = false;
+
+        // Check if the row's status matches any active filter
+        if (activeStatuses.includes(rowStatus)) {
+            shouldShow = true;
+        }
+
+        // Also respect the search filter
+        if (shouldShow) {
+            // Check if row is hidden by search
+            const currentDisplay = row.style.display;
+            if (currentDisplay !== 'none') {
+                row.style.display = '';
+            }
+        } else {
+            row.style.display = 'none';
+        }
+    });
+}
+
+function resetFilters() {
+    // Reset all column toggles to checked
+    const columnToggles = document.querySelectorAll('.column-toggle');
+    columnToggles.forEach(toggle => {
+        toggle.checked = true;
+    });
+
+    // Reset all status filters to checked
+    const statusFilters = document.querySelectorAll('.status-filter');
+    statusFilters.forEach(filter => {
+        filter.checked = true;
+    });
+
+    // Apply the reset filters
+    applyFilters();
+
+    // Clear search
+    const searchInput = document.getElementById('courseSearch');
+    if (searchInput) {
+        searchInput.value = '';
+    }
+
+    // Show all rows
+    const container = document.getElementById('classScheduleTable');
+    const rows = container.querySelectorAll('.course-row');
+    rows.forEach(row => {
+        row.style.display = '';
+    });
+}
+
+// Close modal when clicking outside of it
+window.onclick = function(event) {
+    const modal = document.getElementById('filterModal');
+    if (event.target === modal) {
+        closeFilterModal();
     }
 }
