@@ -1,54 +1,56 @@
 /**
- * Class Schedule - Search and Sort functionality
+ * Class Schedule — Search, Sort, and Filter functionality
+ *
+ * Table structure (column indices used by sort):
+ *   0  col-status     (always visible)
+ *   1  col-course-id  (always visible)
+ *   2  col-title      (always visible)
+ *   3  col-seats      (toggleable, default on)
+ *   4  col-days       (toggleable, default on)
+ *   5  col-time       (toggleable, default off)
+ *   6  col-location   (toggleable, default off)
+ *   7  col-instructor (toggleable, default off)
  */
 
-// Search function
+// ── Search ────────────────────────────────────────────────────────────────────
+
 function classScheduleSearch(event) {
     const searchTerm = event.target.value.toLowerCase();
-    const container = document.getElementById('classScheduleTable');
-    const rows = container.querySelectorAll('.course-row');
+    const rows = document.querySelectorAll('#classScheduleTable .course-row');
 
-    // Get active status filters
-    const statusFilters = document.querySelectorAll('.status-filter');
-    const activeStatuses = [];
-    statusFilters.forEach(filter => {
-        if (filter.checked) {
-            activeStatuses.push(filter.dataset.status);
-        }
-    });
+    const activeStatuses = getActiveStatuses();
 
     rows.forEach(row => {
-        const cols = row.querySelectorAll('.course-col');
-        let foundInSearch = false;
+        const cells = row.querySelectorAll('td');
+        let matchesSearch = false;
 
-        // Check if row matches search term
-        for (let j = 0; j < cols.length; j++) {
-            const cellText = cols[j].textContent || cols[j].innerText;
-            if (cellText.toLowerCase().indexOf(searchTerm) > -1) {
-                foundInSearch = true;
-                break;
+        cells.forEach(cell => {
+            if (cell.textContent.toLowerCase().includes(searchTerm)) {
+                matchesSearch = true;
             }
-        }
+        });
 
-        // Check if row matches status filter
         const rowStatus = row.dataset.status;
-        let matchesStatusFilter = activeStatuses.length === 0 || activeStatuses.includes(rowStatus);
+        const matchesStatus = activeStatuses.length === 0 || activeStatuses.includes(rowStatus);
 
-        // Show row only if it matches both search and status filter
-        row.style.display = (foundInSearch && matchesStatusFilter) ? '' : 'none';
+        row.style.display = (matchesSearch && matchesStatus) ? '' : 'none';
     });
 }
 
-// Sort function
+function getActiveStatuses() {
+    const activeStatuses = [];
+    document.querySelectorAll('.status-filter').forEach(filter => {
+        if (filter.checked) activeStatuses.push(filter.dataset.status);
+    });
+    return activeStatuses;
+}
+
+// ── Sort ──────────────────────────────────────────────────────────────────────
+
 let currentSortColumn = -1;
 let sortAscending = true;
 
 function sortClassSchedule(columnIndex) {
-    const container = document.getElementById('classScheduleTable');
-    const body = container.querySelector('.course-list-body');
-    const rows = Array.from(body.querySelectorAll('.course-row'));
-
-    // Toggle sort direction if clicking the same column
     if (currentSortColumn === columnIndex) {
         sortAscending = !sortAscending;
     } else {
@@ -56,62 +58,48 @@ function sortClassSchedule(columnIndex) {
         currentSortColumn = columnIndex;
     }
 
-    const dirModifier = sortAscending ? 1 : -1;
+    const tbody = document.querySelector('#classScheduleTable .el-table__body tbody');
+    const rows  = Array.from(tbody.querySelectorAll('.course-row'));
+    const dir   = sortAscending ? 1 : -1;
 
-    // Sort rows
-    const sortedRows = rows.sort((a, b) => {
-        const aCols = a.querySelectorAll('.course-col');
-        const bCols = b.querySelectorAll('.course-col');
-        const aColText = aCols[columnIndex].textContent.trim();
-        const bColText = bCols[columnIndex].textContent.trim();
+    rows.sort((a, b) => {
+        const aCells = a.querySelectorAll('td');
+        const bCells = b.querySelectorAll('td');
+        const aText  = (aCells[columnIndex] ? aCells[columnIndex].textContent.trim() : '');
+        const bText  = (bCells[columnIndex] ? bCells[columnIndex].textContent.trim() : '');
 
-        // Try to parse as numbers for numeric columns
-        const aNum = parseFloat(aColText);
-        const bNum = parseFloat(bColText);
-
+        // Numeric sort for seats column (parse "N open / M total" → N)
+        const aNum = parseFloat(aText);
+        const bNum = parseFloat(bText);
         if (!isNaN(aNum) && !isNaN(bNum)) {
-            return (aNum - bNum) * dirModifier;
+            return (aNum - bNum) * dir;
         }
 
-        // Otherwise, sort as strings
-        return aColText.localeCompare(bColText) * dirModifier;
+        return aText.localeCompare(bText) * dir;
     });
 
-    // Remove all existing rows
-    while (body.firstChild) {
-        body.removeChild(body.firstChild);
-    }
+    rows.forEach(row => tbody.appendChild(row));
 
-    // Re-add sorted rows
-    body.append(...sortedRows);
-
-    // Update sort indicators
-    updateSortIndicators(container, columnIndex, sortAscending);
+    updateSortIndicators(columnIndex, sortAscending);
 }
 
-function updateSortIndicators(container, columnIndex, ascending) {
-    // Remove all existing sort indicators
-    const headers = container.querySelectorAll('.course-list-header .course-col');
-    headers.forEach(header => {
-        header.classList.remove('sorted-asc', 'sorted-desc');
+function updateSortIndicators(columnIndex, ascending) {
+    document.querySelectorAll('#classScheduleTable .el-table__header th').forEach((th, i) => {
+        th.classList.remove('ascending', 'descending');
+        if (i === columnIndex) {
+            th.classList.add(ascending ? 'ascending' : 'descending');
+        }
     });
-
-    // Add indicator to current sorted column
-    const currentHeader = headers[columnIndex];
-    if (currentHeader) {
-        currentHeader.classList.add(ascending ? 'sorted-asc' : 'sorted-desc');
-    }
 }
 
-// Filter Modal Functions
+// ── Filter Modal ──────────────────────────────────────────────────────────────
+
 function openFilterModal() {
-    const modal = document.getElementById('filterModal');
-    modal.classList.add('active');
+    document.getElementById('filterModal').classList.add('active');
 }
 
 function closeFilterModal() {
-    const modal = document.getElementById('filterModal');
-    modal.classList.remove('active');
+    document.getElementById('filterModal').classList.remove('active');
 }
 
 function applyFilters() {
@@ -120,165 +108,80 @@ function applyFilters() {
     closeFilterModal();
 }
 
+// Map data-column values to their 0-based td/th index in each row
+const columnMap = {
+    'seats':      3,
+    'days':       4,
+    'time':       5,
+    'location':   6,
+    'instructor': 7
+};
+
 function applyColumnVisibility() {
-    const toggles = document.querySelectorAll('.column-toggle');
-    const columnMap = {
-        'subject': 1,
-        'course-num': 2,
-        'title': 3,
-        'type': 4,
-        'days': 5,
-        'time': 6,
-        'location': 7,
-        'instructor': 8,
-        'seats': 9
-    };
+    const table = document.getElementById('classScheduleTable');
 
-    // Define column widths for each column
-    const columnWidths = {
-        0: '30px',           // status (always visible)
-        1: '70px',           // subject
-        2: '80px',           // course-num
-        3: 'minmax(200px, 2fr)', // title
-        4: '70px',           // type
-        5: '70px',           // days
-        6: '130px',          // time
-        7: '140px',          // location
-        8: 'minmax(150px, 1fr)', // instructor
-        9: '80px'            // seats
-    };
+    document.querySelectorAll('.column-toggle').forEach(toggle => {
+        const colIndex = columnMap[toggle.dataset.column];
+        if (colIndex === undefined) return;
 
-    const container = document.getElementById('classScheduleTable');
-    const headers = container.querySelectorAll('.course-list-header .course-col');
-    const rows = container.querySelectorAll('.course-row');
-
-    // Build array of visible column indices
-    const visibleColumns = [0]; // Status column is always visible
-
-    toggles.forEach(toggle => {
-        const columnName = toggle.dataset.column;
-        const columnIndex = columnMap[columnName];
         const isVisible = toggle.checked;
 
-        // Toggle header column visibility
-        if (headers[columnIndex]) {
-            if (isVisible) {
-                headers[columnIndex].classList.remove('hidden');
-                visibleColumns.push(columnIndex);
-            } else {
-                headers[columnIndex].classList.add('hidden');
-            }
+        // Toggle header th
+        const headerCells = table.querySelectorAll('.el-table__header th');
+        if (headerCells[colIndex]) {
+            headerCells[colIndex].classList.toggle('hidden', !isVisible);
         }
 
-        // Toggle data columns in all rows
-        rows.forEach(row => {
-            const cols = row.querySelectorAll('.course-col');
-            if (cols[columnIndex]) {
-                if (isVisible) {
-                    cols[columnIndex].classList.remove('hidden');
-                } else {
-                    cols[columnIndex].classList.add('hidden');
-                }
+        // Toggle body td in every row
+        table.querySelectorAll('.course-row').forEach(row => {
+            const cells = row.querySelectorAll('td');
+            if (cells[colIndex]) {
+                cells[colIndex].classList.toggle('hidden', !isVisible);
             }
         });
-    });
-
-    // Sort visible columns in order
-    visibleColumns.sort((a, b) => a - b);
-
-    // Build new grid-template-columns string
-    const gridColumns = visibleColumns.map(index => columnWidths[index]).join(' ');
-
-    // Apply new grid template to header and all rows
-    const headerRow = container.querySelector('.course-list-header');
-    if (headerRow) {
-        headerRow.style.gridTemplateColumns = gridColumns;
-    }
-
-    rows.forEach(row => {
-        row.style.gridTemplateColumns = gridColumns;
     });
 }
 
 function applyStatusFilters() {
-    const statusFilters = document.querySelectorAll('.status-filter');
-    const activeStatuses = [];
+    const activeStatuses = getActiveStatuses();
+    const searchTerm = (document.getElementById('courseSearch')?.value || '').toLowerCase();
 
-    statusFilters.forEach(filter => {
-        if (filter.checked) {
-            activeStatuses.push(filter.dataset.status);
-        }
-    });
+    document.querySelectorAll('#classScheduleTable .course-row').forEach(row => {
+        const matchesStatus = activeStatuses.length === 0 || activeStatuses.includes(row.dataset.status);
 
-    const container = document.getElementById('classScheduleTable');
-    const rows = container.querySelectorAll('.course-row');
-
-    rows.forEach(row => {
-        const rowStatus = row.dataset.status;
-        let shouldShow = false;
-
-        // Check if the row's status matches any active filter
-        if (activeStatuses.includes(rowStatus)) {
-            shouldShow = true;
+        // Re-check search too so both filters stay in sync
+        const cells = row.querySelectorAll('td');
+        let matchesSearch = !searchTerm;
+        if (searchTerm) {
+            cells.forEach(cell => {
+                if (cell.textContent.toLowerCase().includes(searchTerm)) matchesSearch = true;
+            });
         }
 
-        // Also respect the search filter
-        if (shouldShow) {
-            // Check if row is hidden by search
-            const currentDisplay = row.style.display;
-            if (currentDisplay !== 'none') {
-                row.style.display = '';
-            }
-        } else {
-            row.style.display = 'none';
-        }
+        row.style.display = (matchesStatus && matchesSearch) ? '' : 'none';
     });
 }
 
 function resetFilters() {
-    // Reset all column toggles to checked
-    const columnToggles = document.querySelectorAll('.column-toggle');
-    columnToggles.forEach(toggle => {
-        toggle.checked = true;
-    });
+    document.querySelectorAll('.column-toggle').forEach(t => t.checked = true);
+    document.querySelectorAll('.status-filter').forEach(f => f.checked = true);
 
-    // Reset all status filters to checked
-    const statusFilters = document.querySelectorAll('.status-filter');
-    statusFilters.forEach(filter => {
-        filter.checked = true;
-    });
-
-    // Apply the reset filters
-    applyFilters();
-
-    // Clear search
     const searchInput = document.getElementById('courseSearch');
-    if (searchInput) {
-        searchInput.value = '';
-    }
+    if (searchInput) searchInput.value = '';
 
-    // Show all rows
-    const container = document.getElementById('classScheduleTable');
-    const rows = container.querySelectorAll('.course-row');
-    rows.forEach(row => {
-        row.style.display = '';
-    });
-
-    // Reset grid template columns to default
-    const defaultGridColumns = '30px 70px 80px minmax(200px, 2fr) 70px 70px 130px 140px minmax(150px, 1fr) 80px';
-    const headerRow = container.querySelector('.course-list-header');
-    if (headerRow) {
-        headerRow.style.gridTemplateColumns = defaultGridColumns;
-    }
-    rows.forEach(row => {
-        row.style.gridTemplateColumns = defaultGridColumns;
-    });
+    applyColumnVisibility();
+    applyStatusFilters();
 }
 
-// Close modal when clicking outside of it
-window.onclick = function(event) {
+// Close modal when clicking the backdrop
+window.addEventListener('click', function(event) {
     const modal = document.getElementById('filterModal');
-    if (event.target === modal) {
-        closeFilterModal();
-    }
-}
+    if (event.target === modal) closeFilterModal();
+});
+
+// ── Init ──────────────────────────────────────────────────────────────────────
+
+// Apply default column visibility (time/location/instructor are unchecked by default)
+document.addEventListener('DOMContentLoaded', function() {
+    applyColumnVisibility();
+});

@@ -1,47 +1,104 @@
-/* Class Schedule Styles */
+/* ============================================================
+   Class Schedule — styles matching the old WCSI app
+   ============================================================ */
+
+/* Status indicator shapes — used as <span> in rows and <div> in legend */
+.open,
+.closed,
+.waitlist {
+  display: inline-block;
+  margin: 0 4px;
+  vertical-align: middle;
+}
+
+.open {
+  width: 10px;
+  height: 10px;
+  background: green;
+  border-radius: 50%;
+}
+
+.closed {
+  width: 10px;
+  height: 10px;
+  background: red;
+}
+
+.waitlist {
+  width: 0;
+  height: 0;
+  border-left: 6px solid transparent;
+  border-right: 6px solid transparent;
+  border-bottom: 12px solid #FAC509;
+  background: none;
+}
+
+/* Cancelled course link */
+a.cancelled {
+  text-decoration: line-through;
+  color: #999;
+}
+
+/* ============================================================
+   Toolbar: search + filter button
+   ============================================================ */
 #classSchedule {
   margin: 20px 0;
 }
 
-#classSchedule .introText {
-  margin-bottom: 15px;
+.introText {
   display: flex;
-  gap: 15px;
   align-items: center;
-  flex-wrap: wrap;
+  gap: 10px;
+  margin-bottom: 10px;
 }
 
-#classSchedule .introText label {
-  font-weight: bold;
-}
-
-#classSchedule #courseSearch {
-  padding: 8px;
+#courseSearch {
+  flex: 1;
+  max-width: 400px;
+  padding: 7px 10px;
   font-size: 14px;
-  border: 1px solid #ccc;
+  border: 1px solid #dcdfe6;
   border-radius: 4px;
-  width: 300px;
-  max-width: 100%;
+  outline: none;
+}
+
+#courseSearch:focus {
+  border-color: #003c6c;
+}
+
+.button-group {
+  display: flex;
+  gap: 8px;
 }
 
 .filter-button {
-  padding: 8px 16px;
-  font-size: 14px;
-  background-color: #4a90e2;
-  color: white;
-  border: none;
-  border-radius: 4px;
-  cursor: pointer;
-  display: flex;
+  display: inline-flex;
   align-items: center;
   gap: 6px;
+  padding: 7px 15px;
+  font-size: 14px;
+  background-color: #fff;
+  color: #333;
+  border: 1px solid #dcdfe6;
+  border-radius: 4px;
+  cursor: pointer;
+  white-space: nowrap;
 }
 
 .filter-button:hover {
-  background-color: #357abd;
+  border-color: #003c6c;
+  color: #003c6c;
 }
 
-/* Filter Modal */
+.filter-button .icon-filter {
+  width: 14px;
+  height: 14px;
+}
+
+/* ============================================================
+   Filter Modal
+   ============================================================ */
 .filter-modal {
   display: none;
   position: fixed;
@@ -61,311 +118,261 @@
 
 .filter-modal-content {
   background-color: #fff;
-  padding: 30px;
-  border-radius: 8px;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
-  max-width: 600px;
+  padding: 20px 30px;
+  border-radius: 4px;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.15);
+  max-width: 500px;
   width: 90%;
-  max-height: 80vh;
-  overflow-y: auto;
 }
 
-.filter-modal-content h3 {
-  margin: 20px 0 15px 0;
-  font-size: 1.2em;
-  font-weight: bold;
-  color: #333;
+.filter-modal-content .divider {
+  display: flex;
+  align-items: flex-start;
+  gap: 20px;
+  padding: 12px 0;
+  border-bottom: 1px solid #ebeef5;
 }
 
-.filter-modal-content h3:first-child {
-  margin-top: 0;
+.filter-modal-content .divider strong {
+  min-width: 120px;
+  font-size: 14px;
+  color: #303133;
+  padding-top: 2px;
 }
 
 .column-toggles,
 .status-filters {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
-  gap: 12px;
-  margin-bottom: 20px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px 20px;
 }
 
 .column-toggles label,
 .status-filters label {
   display: flex;
   align-items: center;
-  gap: 8px;
-  cursor: pointer;
+  gap: 6px;
   font-size: 14px;
-}
-
-.column-toggles input[type="checkbox"],
-.status-filters input[type="checkbox"] {
-  width: 18px;
-  height: 18px;
+  color: #606266;
   cursor: pointer;
 }
 
-.filter-actions {
+.advButtons {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-top: 25px;
-  padding-top: 20px;
-  border-top: 1px solid #e0e0e0;
+  padding-top: 15px;
 }
 
 .reset-filters {
   background: none;
   border: none;
-  color: #e74c3c;
-  font-size: 14px;
+  color: #f56c6c;
+  font-size: 12px;
   cursor: pointer;
-  padding: 8px 12px;
-  text-decoration: underline;
+  padding: 4px 0;
 }
 
 .reset-filters:hover {
   color: #c0392b;
 }
 
-.cancel-button,
-.apply-button {
-  padding: 10px 20px;
-  font-size: 14px;
-  border: none;
-  border-radius: 4px;
-  cursor: pointer;
-}
-
+.apply-button,
 .cancel-button {
-  background-color: #e0e0e0;
-  color: #333;
-}
-
-.cancel-button:hover {
-  background-color: #d0d0d0;
+  padding: 5px 12px;
+  font-size: 12px;
+  border-radius: 3px;
+  cursor: pointer;
+  border: 1px solid #dcdfe6;
 }
 
 .apply-button {
-  background-color: #4a90e2;
-  color: white;
-  margin-left: 10px;
+  background: none;
+  color: #333;
+  margin-left: 8px;
 }
 
 .apply-button:hover {
-  background-color: #357abd;
+  border-color: #003c6c;
+  color: #003c6c;
 }
 
-/* Column visibility */
-.course-col.hidden,
-.course-list-header .course-col.hidden {
-  display: none;
+.cancel-button {
+  background: none;
+  color: #999;
 }
 
-/* Status indicators and legend */
-.status-legend {
-  background-color: #f8f8f8;
-  margin: 15px 0;
-  padding: 10px 15px;
-  font-size: 13px;
-  color: #666;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-}
-
-.status-legend .count {
-  font-weight: normal;
-}
-
-.status-legend .count strong {
-  font-weight: bold;
+.cancel-button:hover {
   color: #333;
 }
 
-.status-legend .legend-items {
+/* ============================================================
+   Display key (count + legend)
+   ============================================================ */
+.display-key {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin: 10px 0;
+  font-size: 13px;
+  color: #606266;
+}
+
+.display-key .right {
   display: flex;
   align-items: center;
-  gap: 15px;
+  gap: 4px;
 }
 
-.status-legend .legend-item {
-  display: flex;
-  align-items: center;
-  gap: 5px;
-}
-
-.status-indicator {
-  display: inline-block;
-  width: 10px;
-  height: 10px;
-}
-
-.status-indicator.open {
-  background: green;
-  border-radius: 50%;
-}
-
-.status-indicator.closed {
-  background: red;
-}
-
-.status-indicator.waitlist {
-  width: 0;
-  height: 0;
-  border-left: 6px solid transparent;
-  border-right: 6px solid transparent;
-  border-bottom: 12px solid #FAC509;
-}
-
-.course-list-container {
-  margin-top: 0;
-  border: 1px solid #ddd;
+/* ============================================================
+   Table
+   ============================================================ */
+.el-table {
+  width: 100%;
   overflow-x: auto;
+  border: 1px solid #ebeef5;
+  font-size: 14px;
+  color: #606266;
 }
 
-.course-list-header,
-.course-row {
-  display: grid;
-  grid-template-columns: 30px 70px 80px minmax(200px, 2fr) 70px 70px 130px 140px minmax(150px, 1fr) 80px;
-  gap: 8px;
-  border-bottom: 1px solid #ddd;
-  min-width: max-content;
+.el-table__header,
+.el-table__body {
+  width: 100%;
+  border-collapse: collapse;
+  table-layout: fixed;
 }
 
-.course-col.status-col {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 10px 4px;
+/* Column widths */
+.el-table th.col-status,
+.el-table td.col-status   { width: 40px;  min-width: 40px; }
+.el-table th.col-course-id,
+.el-table td.col-course-id { width: 120px; min-width: 80px; }
+.el-table th.col-title,
+.el-table td.col-title    { width: auto;  min-width: 180px; }
+.el-table th.col-seats,
+.el-table td.col-seats    { width: 150px; min-width: 100px; }
+.el-table th.col-days,
+.el-table td.col-days     { width: 80px;  min-width: 60px; }
+.el-table th.col-time,
+.el-table td.col-time     { width: 130px; min-width: 100px; }
+.el-table th.col-location,
+.el-table td.col-location { width: 140px; min-width: 100px; }
+.el-table th.col-instructor,
+.el-table td.col-instructor { width: 160px; min-width: 120px; }
+
+/* Hide columns marked hidden */
+.el-table th.hidden,
+.el-table td.hidden {
+  display: none;
 }
 
-.course-list-header {
+/* Header row */
+.el-table__header thead tr {
   background-color: #003c6c;
-  color: white;
-  font-weight: bold;
-  position: sticky;
-  top: 0;
-  left: 0;
-  z-index: 10;
+  color: #fff;
 }
 
-.course-list-header .course-col {
-  padding: 12px 8px;
+.el-table__header th {
+  padding: 10px 8px;
+  text-align: left;
+  font-weight: bold;
+  white-space: nowrap;
+  border-bottom: 2px solid #00305a;
+}
+
+.el-table__header th.is-sortable {
   cursor: pointer;
   user-select: none;
-  font-weight: bold;
-  overflow: visible;
-  white-space: nowrap;
 }
 
-.course-list-header .course-col:hover {
+.el-table__header th.is-sortable:hover {
   background-color: #00549e;
 }
 
-.course-list-header .course-col.sorted-asc::after {
-  content: ' ▲';
-  font-size: 0.8em;
+/* Sort carets — matching old Element UI style */
+.caret-wrapper {
+  display: inline-flex;
+  flex-direction: column;
+  align-items: center;
+  vertical-align: middle;
+  margin-left: 5px;
+  line-height: 0;
 }
 
-.course-list-header .course-col.sorted-desc::after {
-  content: ' ▼';
-  font-size: 0.8em;
+.sort-caret {
+  width: 0;
+  height: 0;
+  border: 5px solid transparent;
 }
 
-.course-row {
-  background-color: white;
+.sort-caret.ascending {
+  border-bottom-color: rgba(255,255,255,0.4);
+  margin-bottom: 2px;
 }
 
-.course-row:nth-child(even) {
-  background-color: #f9f9f9;
+.sort-caret.descending {
+  border-top-color: rgba(255,255,255,0.4);
 }
 
-.course-row:hover {
-  background-color: #f0f0f0;
+th.ascending .sort-caret.ascending  { border-bottom-color: #fff; }
+th.descending .sort-caret.descending { border-top-color: #fff; }
+
+/* Body rows */
+.el-table__body tr.el-table__row {
+  background-color: #fff;
+  transition: background-color 0.15s;
 }
 
-.course-row:last-child {
-  border-bottom: none;
+.el-table__body tr.el-table__row:hover {
+  background-color: #f5f7fa;
 }
 
-.course-col {
-  padding: 10px 8px;
+.el-table__body tr.el-table__row:nth-child(even) {
+  background-color: #fafafa;
+}
+
+.el-table__body tr.el-table__row:nth-child(even):hover {
+  background-color: #f5f7fa;
+}
+
+.el-table__body td {
+  padding: 8px;
+  border-bottom: 1px solid #ebeef5;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
 
-.course-col.title,
-.course-col.location,
-.course-col.instructor {
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
+.el-table td .cell {
+  padding: 0 4px;
 }
 
-.course-col a {
+/* Status column — center the dot */
+.el-table td.col-status .cell {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+/* Seats column */
+.seats .available {
+  color: green;
+  font-weight: 500;
+}
+
+/* Title link */
+.el-table__body td.col-title a {
   color: #003c6c;
   text-decoration: none;
 }
 
-.course-col a:hover {
+.el-table__body td.col-title a:hover {
   text-decoration: underline;
 }
 
-.status-open {
-  color: green;
-  font-weight: bold;
-}
-
-.status-closed {
-  color: red;
-  font-weight: bold;
-}
-
-.status-waitlist {
-  color: orange;
-  font-weight: bold;
-}
-
-/* Responsive */
-@media (max-width: 1200px) {
-  .course-list-header,
-  .course-row {
-    grid-template-columns: 30px 70px 80px 1.5fr 70px 70px 120px 100px 1fr 80px;
-    gap: 8px;
-    font-size: 14px;
-  }
-
-  .course-col {
-    padding: 8px 6px;
-  }
-
-  .course-col.status-col {
-    padding: 8px 4px;
-  }
-}
-
-@media (max-width: 768px) {
-  .course-list-header,
-  .course-row {
-    grid-template-columns: 25px 60px 70px 1fr 60px 60px 100px 90px 1fr 70px;
-    gap: 5px;
-    font-size: 12px;
-  }
-
-  .course-list-header .course-col,
-  .course-col {
-    padding: 6px 4px;
-  }
-
-  .course-col.status-col {
-    padding: 6px 2px;
-  }
-
-  .status-legend {
-    flex-direction: column;
-    gap: 10px;
-    align-items: flex-start;
-  }
+/* ============================================================
+   Print styles
+   ============================================================ */
+@media print {
+  .no-print { display: none !important; }
 }
