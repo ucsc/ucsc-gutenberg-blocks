@@ -121,22 +121,18 @@ class ClassSchedule
 
   function theHTML($attributes)
   {
-    ob_start();
-
     // Get the current term using internal REST API call
     $request = new WP_REST_Request('GET', '/ucsc/v1/terms');
     $response = rest_do_request($request);
 
     if (is_wp_error($response)) {
-      echo '<p>Error loading terms. Please try again later.</p>';
-      return ob_get_clean();
+      return '<p>Error loading terms. Please try again later.</p>';
     }
 
     $terms_data = $response->get_data();
 
     if (empty($terms_data['terms'])) {
-      echo '<p>No terms available.</p>';
-      return ob_get_clean();
+      return '<p>No terms available.</p>';
     }
 
     // Find the default term
@@ -160,119 +156,16 @@ class ClassSchedule
       $selected_value = $subjectOrDept == 'dept' ? ($attributes['department'] ?? '') : ($attributes['subject'] ?? '');
 
       if (empty($selected_value) || $selected_value === '---') {
-        echo '<p>Please select a department or subject from the block settings to view courses.</p>';
-      } else {
-        echo '<p>No courses found for the selected criteria.</p>';
+        return '<p>Please select a department or subject from the block settings to view courses.</p>';
       }
-      return ob_get_clean();
+
+      return '<p>No courses found for the selected criteria.</p>';
     }
 
     $courses = $courses_data['classes'];
 
-    // Render the course list
-    echo '<div id="classSchedule">';
-    echo '<div class="introText">';
-    echo '<label>Search Courses: <input type="text" id="courseSearch" onkeyup="classScheduleSearch(event)"></label>';
-    echo '<button id="filterButton" class="filter-button" onclick="openFilterModal()">⚙ Filter</button>';
-    echo '</div>';
-
-    // Filter Modal
-    echo '<div id="filterModal" class="filter-modal">';
-    echo '<div class="filter-modal-content">';
-    echo '<h3>Display Columns</h3>';
-    echo '<div class="column-toggles">';
-    echo '<label><input type="checkbox" class="column-toggle" data-column="subject" checked> Subject</label>';
-    echo '<label><input type="checkbox" class="column-toggle" data-column="course-num" checked> Course #</label>';
-    echo '<label><input type="checkbox" class="column-toggle" data-column="title" checked> Title</label>';
-    echo '<label><input type="checkbox" class="column-toggle" data-column="type" checked> Type</label>';
-    echo '<label><input type="checkbox" class="column-toggle" data-column="days" checked> Days</label>';
-    echo '<label><input type="checkbox" class="column-toggle" data-column="time" checked> Time</label>';
-    echo '<label><input type="checkbox" class="column-toggle" data-column="location" checked> Location</label>';
-    echo '<label><input type="checkbox" class="column-toggle" data-column="instructor" checked> Instructor</label>';
-    echo '<label><input type="checkbox" class="column-toggle" data-column="seats" checked> Seats</label>';
-    echo '</div>';
-
-    echo '<h3>Status</h3>';
-    echo '<div class="status-filters">';
-    echo '<label><input type="checkbox" class="status-filter" data-status="open" checked> Open</label>';
-    echo '<label><input type="checkbox" class="status-filter" data-status="closed" checked> Closed</label>';
-    echo '<label><input type="checkbox" class="status-filter" data-status="waitlist" checked> Wait List</label>';
-    echo '</div>';
-
-    echo '<div class="filter-actions">';
-    echo '<button class="reset-filters" onclick="resetFilters()">Reset all filters</button>';
-    echo '<button class="cancel-button" onclick="closeFilterModal()">Cancel</button>';
-    echo '<button class="apply-button" onclick="applyFilters()">Apply</button>';
-    echo '</div>';
-    echo '</div>';
-    echo '</div>';
-
-    // Legend
-    echo '<div class="status-legend">';
-    echo '<div class="count">Displaying <strong>' . count($courses) . '</strong> classes</div>';
-    echo '<div class="legend-items">';
-    echo '<div class="legend-item"><div class="status-indicator open"></div> Open</div>';
-    echo '<div class="legend-item"><div class="status-indicator closed"></div> Closed</div>';
-    echo '<div class="legend-item"><div class="status-indicator waitlist"></div> Closed w/ Wait List</div>';
-    echo '</div>';
-    echo '</div>';
-
-    echo '<div class="course-list-container" id="classScheduleTable">';
-    echo '<div class="course-list-header">';
-    echo '<div class="course-col status-col"></div>';
-    echo '<div class="course-col subject" onclick="sortClassSchedule(1)">Subject</div>';
-    echo '<div class="course-col course-num" onclick="sortClassSchedule(2)">Course #</div>';
-    echo '<div class="course-col title" onclick="sortClassSchedule(3)">Title</div>';
-    echo '<div class="course-col type" onclick="sortClassSchedule(4)">Type</div>';
-    echo '<div class="course-col days" onclick="sortClassSchedule(5)">Days</div>';
-    echo '<div class="course-col time" onclick="sortClassSchedule(6)">Time</div>';
-    echo '<div class="course-col location" onclick="sortClassSchedule(7)">Location</div>';
-    echo '<div class="course-col instructor" onclick="sortClassSchedule(8)">Instructor</div>';
-    echo '<div class="course-col seats" onclick="sortClassSchedule(9)">Seats</div>';
-    echo '</div>';
-    echo '<div class="course-list-body">';
-
-    foreach ($courses as $course) {
-      $instructor_names = '';
-      if (!empty($course['instructors']) && is_array($course['instructors'])) {
-        $names = array_map(function($instructor) {
-          return $instructor['name'];
-        }, $course['instructors']);
-        $instructor_names = implode(', ', $names);
-      }
-
-      $available = $course['enrl_capacity'] - $course['enrl_total'];
-
-      // Determine status indicator class
-      $status_text = strtolower($course['enrl_status']);
-      $status_indicator_class = 'open';
-      if (strpos($status_text, 'wait') !== false) {
-        $status_indicator_class = 'waitlist';
-      } elseif (strpos($status_text, 'closed') !== false) {
-        $status_indicator_class = 'closed';
-      }
-
-      $course_url = home_url('/course/' . $current_term . '/' . $course['class_nbr']);
-
-      echo '<div class="course-row" data-status="' . esc_attr($status_indicator_class) . '">';
-      echo '<div class="course-col status-col"><div class="status-indicator ' . esc_attr($status_indicator_class) . '"></div></div>';
-      echo '<div class="course-col subject">' . esc_html($course['subject']) . '</div>';
-      echo '<div class="course-col course-num">' . esc_html($course['catalog_nbr']) . '</div>';
-      echo '<div class="course-col title"><a href="' . esc_url($course_url) . '">' . esc_html($course['title']) . '</a></div>';
-      echo '<div class="course-col type">' . esc_html($course['component']) . '</div>';
-      echo '<div class="course-col days">' . esc_html($course['meeting_days']) . '</div>';
-      echo '<div class="course-col time">' . esc_html($course['start_time'] . ' - ' . $course['end_time']) . '</div>';
-      echo '<div class="course-col location">' . esc_html($course['location']) . '</div>';
-      echo '<div class="course-col instructor">' . esc_html($instructor_names) . '</div>';
-      echo '<div class="course-col seats">' . esc_html($available . ' / ' . $course['enrl_capacity']) . '</div>';
-      echo '</div>';
-    }
-
-    echo '</div></div></div>';
-
-    $output = ob_get_contents();
-    ob_end_clean();
-
-    return $output;
+    ob_start();
+    include(plugin_dir_path(__FILE__) . '../templates/ClassScheduleTemplate.php');
+    return ob_get_clean();
   }
 }
