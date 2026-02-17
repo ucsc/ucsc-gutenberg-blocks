@@ -10,6 +10,8 @@
  *   5  col-time       (toggleable, default off)
  *   6  col-location   (toggleable, default off)
  *   7  col-instructor (toggleable, default off)
+ *   8  col-class-num  (toggleable, default off)
+ *   9  col-enrollment (toggleable, default off)
  */
 
 // ── Search ────────────────────────────────────────────────────────────────────
@@ -114,7 +116,9 @@ const columnMap = {
     'days':       4,
     'time':       5,
     'location':   6,
-    'instructor': 7
+    'instructor': 7,
+    'class-num':  8,
+    'enrollment': 9
 };
 
 function applyColumnVisibility() {
@@ -178,6 +182,14 @@ window.addEventListener('click', function(event) {
     const modal = document.getElementById('filterModal');
     if (event.target === modal) closeFilterModal();
 });
+
+// ── Term Dropdown ─────────────────────────────────────────────────────────────
+
+function classScheduleChangeTerm(select) {
+    const url = new URL(window.location.href);
+    url.searchParams.set('class_schedule_term', select.value);
+    window.location.href = url.toString();
+}
 
 // ── Init ──────────────────────────────────────────────────────────────────────
 

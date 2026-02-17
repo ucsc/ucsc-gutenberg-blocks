@@ -5,17 +5,35 @@
  * Variables available from ClassSchedule::theHTML():
  *   $courses       array   Course data from the API
  *   $current_term  string  Active term code
+ *   $terms_data    array   Full terms response (terms_data['terms'])
+ *   $attributes    array   Block attributes (department, subject, subjectOrDept)
  */
+$terms = $terms_data['terms'] ?? [];
 ?>
 <div id="classSchedule">
 
   <div class="introText no-print">
+    <label for="quarterDropdown" style="display: none;">Select Quarter</label>
     <label for="courseSearch" style="display: none;">Search Schedule</label>
-    <input type="text" id="courseSearch" placeholder="Search Schedule" onkeyup="classScheduleSearch(event)">
+
+    <div class="input-with-select">
+      <div class="term-select-wrap">
+        <select id="quarterDropdown" onchange="classScheduleChangeTerm(this)">
+          <?php foreach ($terms as $term) : ?>
+            <option value="<?php echo esc_attr($term['code']); ?>"
+              <?php selected($term['code'], $current_term); ?>>
+              <?php echo esc_html($term['description']); ?>
+            </option>
+          <?php endforeach; ?>
+        </select>
+      </div>
+      <input type="text" id="courseSearch" placeholder="Search Schedule" onkeyup="classScheduleSearch(event)">
+    </div>
+
     <div class="button-group">
       <button id="filterButton" class="filter-button" onclick="openFilterModal()">
         <svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" class="icon-filter"><path fill="currentColor" d="M487.976 0H24.028C2.71 0-8.047 25.866 7.058 40.971L192 225.941V432c0 7.831 3.821 15.17 10.237 19.662l80 55.98C298.02 518.69 320 507.493 320 487.98V225.941l184.947-184.97C520.021 25.896 509.338 0 487.976 0z"/></svg>
-        Filter
+        <span>Filter</span>
       </button>
     </div>
   </div>
@@ -30,6 +48,8 @@
           <label><input type="checkbox" class="column-toggle" data-column="time"> Time</label>
           <label><input type="checkbox" class="column-toggle" data-column="location"> Location</label>
           <label><input type="checkbox" class="column-toggle" data-column="instructor"> Instructor</label>
+          <label><input type="checkbox" class="column-toggle" data-column="class-num"> Class #</label>
+          <label><input type="checkbox" class="column-toggle" data-column="enrollment"> Enrollment</label>
         </div>
       </div>
 
@@ -74,6 +94,8 @@
             <th class="col-time is-sortable hidden" onclick="sortClassSchedule(5)"><div class="cell">Time<span class="caret-wrapper"><i class="sort-caret ascending"></i><i class="sort-caret descending"></i></span></div></th>
             <th class="col-location is-sortable hidden" onclick="sortClassSchedule(6)"><div class="cell">Location<span class="caret-wrapper"><i class="sort-caret ascending"></i><i class="sort-caret descending"></i></span></div></th>
             <th class="col-instructor is-sortable hidden" onclick="sortClassSchedule(7)"><div class="cell">Instructor<span class="caret-wrapper"><i class="sort-caret ascending"></i><i class="sort-caret descending"></i></span></div></th>
+            <th class="col-class-num is-sortable hidden" onclick="sortClassSchedule(8)"><div class="cell">Class #<span class="caret-wrapper"><i class="sort-caret ascending"></i><i class="sort-caret descending"></i></span></div></th>
+            <th class="col-enrollment is-sortable hidden" onclick="sortClassSchedule(9)"><div class="cell">Enrollment<span class="caret-wrapper"><i class="sort-caret ascending"></i><i class="sort-caret descending"></i></span></div></th>
           </tr>
         </thead>
       </table>
@@ -114,6 +136,8 @@
               <td class="col-time hidden"><div class="cell"><span><?php echo esc_html($course['start_time'] . ' - ' . $course['end_time']); ?></span></div></td>
               <td class="col-location hidden"><div class="cell"><span><?php echo esc_html($course['location']); ?></span></div></td>
               <td class="col-instructor hidden"><div class="cell"><span><?php echo esc_html($instructor_names); ?></span></div></td>
+              <td class="col-class-num hidden"><div class="cell"><span><?php echo esc_html($course['class_nbr']); ?></span></div></td>
+              <td class="col-enrollment hidden"><div class="cell"><span><?php echo esc_html($course['enrl_total']); ?></span></div></td>
             </tr>
           <?php endforeach; ?>
         </tbody>

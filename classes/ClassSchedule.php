@@ -135,12 +135,25 @@ class ClassSchedule
       return '<p>No terms available.</p>';
     }
 
-    // Find the default term
+    // Allow a specific term to be selected via query param
     $current_term = null;
-    foreach ($terms_data['terms'] as $term) {
-      if ($term['default'] === 'Y') {
-        $current_term = $term['code'];
-        break;
+    $requested_term = sanitize_text_field($_GET['class_schedule_term'] ?? '');
+    if ($requested_term) {
+      foreach ($terms_data['terms'] as $term) {
+        if ($term['code'] === $requested_term) {
+          $current_term = $term['code'];
+          break;
+        }
+      }
+    }
+
+    // Fall back to the default term
+    if (!$current_term) {
+      foreach ($terms_data['terms'] as $term) {
+        if ($term['default'] === 'Y') {
+          $current_term = $term['code'];
+          break;
+        }
       }
     }
 

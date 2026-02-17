@@ -53,17 +53,46 @@ a.cancelled {
   margin-bottom: 10px;
 }
 
-#courseSearch {
+/* Term dropdown + search input grouped together */
+.input-with-select {
+  display: flex;
   flex: 1;
-  max-width: 400px;
-  padding: 7px 10px;
-  font-size: 14px;
+  max-width: 550px;
   border: 1px solid #dcdfe6;
   border-radius: 4px;
-  outline: none;
+  overflow: hidden;
 }
 
-#courseSearch:focus {
+.term-select-wrap {
+  background-color: #fff;
+  border-right: 1px solid #dcdfe6;
+  flex-shrink: 0;
+}
+
+.term-select-wrap select {
+  appearance: none;
+  -webkit-appearance: none;
+  background: transparent url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath fill='%23999' d='M0 0l5 6 5-6z'/%3E%3C/svg%3E") no-repeat right 10px center;
+  padding: 7px 28px 7px 10px;
+  font-size: 14px;
+  color: #606266;
+  border: none;
+  outline: none;
+  cursor: pointer;
+  min-width: 160px;
+}
+
+#courseSearch {
+  flex: 1;
+  padding: 7px 10px;
+  font-size: 14px;
+  border: none;
+  outline: none;
+  color: #606266;
+  min-width: 0;
+}
+
+.input-with-select:focus-within {
   border-color: #003c6c;
 }
 
@@ -259,6 +288,10 @@ a.cancelled {
 .el-table td.col-location { width: 140px; min-width: 100px; }
 .el-table th.col-instructor,
 .el-table td.col-instructor { width: 160px; min-width: 120px; }
+.el-table th.col-class-num,
+.el-table td.col-class-num  { width: 90px;  min-width: 70px; }
+.el-table th.col-enrollment,
+.el-table td.col-enrollment { width: 100px; min-width: 80px; }
 
 /* Hide columns marked hidden */
 .el-table th.hidden,
