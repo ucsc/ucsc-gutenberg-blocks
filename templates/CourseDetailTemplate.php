@@ -1,7 +1,11 @@
 <?php
 /**
  * Course Detail Template
- * Displays full course information including description, requirements, instructors, and sections
+ * Matches the original WCSI app's course detail layout.
+ *
+ * Variables available from query vars:
+ *   course_term  – term code (e.g. "2262")
+ *   course_id    – class number
  */
 
 if ( file_exists( get_theme_file_path( 'header-plugin.php' ) ) ) {
@@ -10,14 +14,15 @@ if ( file_exists( get_theme_file_path( 'header-plugin.php' ) ) ) {
 	get_header();
 }
 
-$term = get_query_var('course_term');
-$course_id = get_query_var('course_id');
+$term      = get_query_var( 'course_term' );
+$course_id = get_query_var( 'course_id' );
 
-// Fetch course details from API using internal REST API call
-$request = new WP_REST_Request('GET', '/ucsc/v1/course/' . $term . '/' . $course_id);
-$response = rest_do_request($request);
+// ── Fetch course details ───────────────────────────────────────────────────────
 
-if (is_wp_error($response)) {
+$request  = new WP_REST_Request( 'GET', '/ucsc/v1/course/' . $term . '/' . $course_id );
+$response = rest_do_request( $request );
+
+if ( is_wp_error( $response ) ) {
 	echo '<p>Error loading course details. Please try again later.</p>';
 	get_footer();
 	exit;
@@ -25,26 +30,150 @@ if (is_wp_error($response)) {
 
 $course_data = $response->get_data();
 
-if (empty($course_data)) {
+if ( empty( $course_data ) ) {
 	echo '<p>Course not found.</p>';
 	get_footer();
 	exit;
 }
 
-// Extract data
-$primary = $course_data['primary_section'] ?? null;
-$meetings = $course_data['meetings'] ?? [];
+$primary            = $course_data['primary_section']   ?? null;
+$meetings           = $course_data['meetings']          ?? [];
 $secondary_sections = $course_data['secondary_sections'] ?? [];
+$notes_array        = $course_data['notes']             ?? [];
 
-if (!$primary) {
+if ( ! $primary ) {
 	echo '<p>Course information unavailable.</p>';
 	get_footer();
 	exit;
 }
 
-// Enqueue styles
-wp_enqueue_style('classschedule', plugins_url('../src/components/ClassSchedule/classschedule.css', dirname(__FILE__)));
+// Enqueue shared styles (status dot shapes reused here)
+wp_enqueue_style( 'classschedule', plugins_url( '../src/components/ClassSchedule/classschedule.css', dirname( __FILE__ ) ) );
 
+// ── Computed values ───────────────────────────────────────────────────────────
+
+// Status class
+$status_text  = strtolower( $primary['enrl_status'] ?? '' );
+if ( strpos( $status_text, 'wait' ) !== false ) {
+	$status_class = 'waitlist';
+} elseif ( strpos( $status_text, 'closed' ) !== false ) {
+	$status_class = 'closed';
+} else {
+	$status_class = 'open';
+}
+
+// Term name from term code: "2262" → "Winter 2026"
+$term_qtrs   = [ '0' => 'Winter', '2' => 'Spring', '4' => 'Summer', '6' => 'Summer', '8' => 'Fall' ];
+$term_name   = ( $term_qtrs[ substr( $term, 3, 1 ) ] ?? '' ) . ' 20' . substr( $term, 1, 2 );
+
+// Course identifier: "ANCS 49-01"
+$course_name = $primary['subject'] . ' ' . $primary['catalog_nbr'] . '-' . $primary['class_section'];
+
+// Available seats
+$available = max( 0, ( (int) ( $primary['capacity']   ?? 0 ) ) - ( (int) ( $primary['enrl_total'] ?? 0 ) ) );
+
+// Notes
+$notes_text = '';
+foreach ( $notes_array as $note ) {
+	$notes_text .= $note . '. ';
+}
+$notes_text = trim( $notes_text );
+
+// Time formatter — "TBA" passthrough, otherwise "g:i A"
+function format_course_time( $t ) {
+	if ( ! $t || strtoupper( trim( $t ) ) === 'TBA' ) return 'TBA';
+	$parsed = strtotime( '2001-01-01 ' . $t );
+	return $parsed ? date( 'g:i A', $parsed ) : $t;
+}
+
+// Aggregate meeting info from all meetings
+$day_times_parts = [];
+$locations       = [];
+$instructor_map  = []; // name → instructor array (deduped)
+
+foreach ( $meetings as $meeting ) {
+	$days  = $meeting['days']       ?? '';
+	$start = $meeting['start_time'] ?? '';
+	$end   = $meeting['end_time']   ?? '';
+
+	if ( strtoupper( trim( $start ) ) === 'TBA' || strtoupper( trim( $end ) ) === 'TBA' ) {
+		$time_str = trim( $days . ' TBA' );
+	} else {
+		$time_str = trim( $days . ' ' . format_course_time( $start ) . ' - ' . format_course_time( $end ) );
+	}
+	$day_times_parts[] = $time_str;
+	$locations[]       = $meeting['location'] ?? '';
+
+	if ( ! empty( $meeting['instructors'] ) ) {
+		foreach ( $meeting['instructors'] as $inst ) {
+			$iname = $inst['name'] ?? '';
+			if ( $iname && ! isset( $instructor_map[ $iname ] ) ) {
+				$instructor_map[ $iname ] = $inst;
+			}
+		}
+	}
+}
+
+$day_times = implode( '; ', $day_times_parts );
+$location  = implode( ', ', array_unique( $locations ) );
+
+// Meeting dates  e.g. "1/5/2026 - 3/13/2026"
+$dates = '';
+$start_ts = $primary['start_date'] ? strtotime( $primary['start_date'] ) : 0;
+$end_ts   = $primary['end_date']   ? strtotime( $primary['end_date'] )   : 0;
+if ( $start_ts && $end_ts ) {
+	$dates = date( 'n/j/Y', $start_ts ) . ' - ' . date( 'n/j/Y', $end_ts );
+}
+
+// Secondary sections — normalize to array, preprocess meeting data
+$sections = [];
+if ( ! empty( $secondary_sections['secondary_section'] ) ) {
+	$secs = $secondary_sections['secondary_section'];
+	if ( isset( $secs['class_section'] ) ) {
+		$secs = [ $secs ]; // single section → wrap in array
+	}
+	foreach ( $secs as $sec ) {
+		// Skip if same section as primary
+		if ( $sec['class_section'] === $primary['class_section'] ) continue;
+
+		$sm        = $sec['meetings']['meeting'] ?? [];
+		$sec_days  = $sm['days']       ?? '';
+		$sec_start = $sm['start_time'] ?? '';
+		$sec_end   = $sm['end_time']   ?? '';
+
+		if ( strtoupper( trim( $sec_start ) ) === 'TBA' || strtoupper( trim( $sec_end ) ) === 'TBA' ) {
+			$sec_times = 'TBA';
+		} else {
+			$sec_times = format_course_time( $sec_start ) . ' - ' . format_course_time( $sec_end );
+		}
+
+		// Instructor HTML for section
+		$sec_inst_html = '';
+		if ( ! empty( $sm['instructors']['instructor'] ) ) {
+			$si_list = $sm['instructors']['instructor'];
+			if ( isset( $si_list['name'] ) ) $si_list = [ $si_list ];
+			$si_parts = [];
+			foreach ( $si_list as $si ) {
+				$iname   = $si['name']   ?? '';
+				$icruzid = $si['cruzid'] ?? '';
+				if ( $icruzid && $iname ) {
+					$si_parts[] = '<a href="' . esc_url( home_url( '/directory/' . $icruzid ) ) . '">' . esc_html( $iname ) . '</a>';
+				} else {
+					$si_parts[] = esc_html( $iname );
+				}
+			}
+			$sec_inst_html = implode( ', ', $si_parts );
+		}
+
+		$sections[] = [
+			'data'     => $sec,
+			'days'     => $sec_days,
+			'times'    => $sec_times,
+			'location' => $sm['location'] ?? '',
+			'inst_html' => $sec_inst_html,
+		];
+	}
+}
 ?>
 
 <main class="is-layout-flow wp-block-group content-region" id="wp--skip-link--target" style="margin-block-start: var(--wp--preset--font-size--one);">
@@ -52,314 +181,207 @@ wp_enqueue_style('classschedule', plugins_url('../src/components/ClassSchedule/c
 		<nav class="breadcrumbs alignwide" role="navigation" aria-label="Breadcrumbs" itemprop="breadcrumb">
 			<ul class="breadcrumbs__trail" itemscope="" itemtype="https://schema.org/BreadcrumbList">
 				<li class="breadcrumbs__crumb breadcrumbs__crumb--home" itemprop="itemListElement" itemscope="" itemtype="https://schema.org/ListItem">
-					<a href="/" itemprop="item">
-						<span itemprop="name">Home</span>
-					</a>
+					<a href="/" itemprop="item"><span itemprop="name">Home</span></a>
 				</li>
 				<li class="breadcrumbs__crumb" itemprop="itemListElement" itemscope="" itemtype="https://schema.org/ListItem">
-					<span itemprop="name">Course Details</span>
+					<a href="javascript:history.back()" itemprop="item"><span itemprop="name">Class Schedule</span></a>
+				</li>
+				<li class="breadcrumbs__crumb" itemprop="itemListElement" itemscope="" itemtype="https://schema.org/ListItem">
+					<span itemprop="name"><?php echo esc_html( $course_name ); ?></span>
 				</li>
 			</ul>
 		</nav>
 	</div>
 
 	<div class="has-global-padding is-layout-constrained wp-block-group alignwide">
-		<article class="course-detail">
-			<header class="course-header">
-				<h1><?php echo esc_html($primary['subject'] . ' ' . $primary['catalog_nbr'] . ': ' . $primary['title_long']); ?></h1>
-				<div class="course-meta">
-					<span class="course-component"><?php echo esc_html($primary['component']); ?></span>
-					<span class="course-credits"><?php echo esc_html($primary['credits']); ?> Units</span>
-					<span class="course-grading"><?php echo esc_html($primary['grading']); ?></span>
-				</div>
-			</header>
 
-			<?php if (!empty($primary['description'])): ?>
-			<section class="course-description">
-				<h2>Description</h2>
-				<p><?php echo nl2br(esc_html($primary['description'])); ?></p>
-			</section>
-			<?php endif; ?>
+		<link href="//static.ucsc.edu/css/directory-page.css" media="all" rel="stylesheet" type="text/css">
 
-			<?php if (!empty($primary['requirements'])): ?>
-			<section class="course-requirements">
-				<h2>Requirements</h2>
-				<p><?php echo nl2br(esc_html($primary['requirements'])); ?></p>
-			</section>
-			<?php endif; ?>
+		<i class="<?php echo esc_attr( $status_class ); ?>"></i>
+		<span><?php echo esc_html( $primary['enrl_status'] ); ?></span>
 
-			<?php if (!empty($primary['gened'])): ?>
-			<section class="course-gened">
-				<h2>General Education</h2>
-				<p><?php echo esc_html($primary['gened']); ?></p>
-			</section>
-			<?php endif; ?>
+		<h1 id="title" class="page-title"><span class="p-name"><?php echo esc_html( $primary['title_long'] ); ?></span></h1>
 
-			<section class="course-enrollment">
-				<h2>Enrollment Information</h2>
-				<ul class="course-info-list">
-					<li>
-						<strong>Class Number</strong>
-						<span><?php echo esc_html($primary['class_nbr']); ?></span>
-					</li>
-					<li>
-						<strong>Section</strong>
-						<span><?php echo esc_html($primary['class_section']); ?></span>
-					</li>
-					<li>
-						<strong>Status</strong>
-						<span class="status-<?php echo esc_attr(strtolower($primary['enrl_status'])); ?>">
-							<?php echo esc_html($primary['enrl_status']); ?>
-						</span>
-					</li>
-					<li>
-						<strong>Enrollment</strong>
-						<span><?php echo esc_html($primary['enrl_total'] . ' / ' . $primary['capacity']); ?></span>
-					</li>
-					<li>
-						<strong>Waitlist</strong>
-						<span><?php echo esc_html($primary['waitlist_total'] . ' / ' . $primary['waitlist_capacity']); ?></span>
-					</li>
-					<li>
-						<strong>Term Dates</strong>
-						<span><?php echo esc_html(date('M j, Y', strtotime($primary['start_date'])) . ' - ' . date('M j, Y', strtotime($primary['end_date']))); ?></span>
-					</li>
-				</ul>
-			</section>
+		<div class="section-container person list-page">
+			<span><?php echo esc_html( $term_name ); ?></span> -
+			<span><?php echo esc_html( $course_name ); ?></span>
 
-			<?php if (!empty($meetings)): ?>
-			<section class="course-meetings">
-				<h2>Meeting Times</h2>
-				<div class="meeting-list">
-					<?php foreach ($meetings as $meeting): ?>
-					<div class="meeting-item">
-						<div class="meeting-detail">
-							<strong>Days & Times</strong>
-							<span><?php echo esc_html($meeting['days'] . ' ' . $meeting['start_time'] . ' - ' . $meeting['end_time']); ?></span>
+			<div class="section-body">
+				<div id="class-info" class="section-item h-card wrap">
+					<div class="item-body">
+
+						<?php if ( ! empty( $primary['description'] ) ) : ?>
+						<div class="item-expertise">
+							<h3>Description</h3>
+							<div class="item-expertise">
+								<span><?php echo nl2br( esc_html( $primary['description'] ) ); ?></span>
+								<?php if ( ! empty( $primary['gened'] ) ) : ?>
+								<span>(General Education Code(s): <?php echo esc_html( $primary['gened'] ); ?>.)</span>
+								<?php endif; ?>
+							</div>
 						</div>
-						<div class="meeting-detail">
-							<strong>Location</strong>
-							<span><?php echo esc_html($meeting['location']); ?></span>
+						<?php endif; ?>
+
+						<div>
+							<h3>Capacity and Available Seats</h3>
+							<ul class="item-info">
+								<li><strong>Available Seats</strong> <?php echo esc_html( $available ); ?></li>
+								<?php if ( ! empty( $primary['capacity'] ) ) : ?>
+								<li><strong>Enrollment Capacity</strong> <?php echo esc_html( $primary['capacity'] ); ?></li>
+								<?php endif; ?>
+								<?php if ( ! empty( $primary['enrl_total'] ) ) : ?>
+								<li><strong>Enrolled</strong> <?php echo esc_html( $primary['enrl_total'] ); ?></li>
+								<?php endif; ?>
+							</ul>
 						</div>
-						<div class="meeting-detail">
-							<strong>Instructor(s)</strong>
-							<span>
-								<?php
-								if (!empty($meeting['instructors'])) {
-									$instructor_links = array_map(function($instructor) {
-										if (!empty($instructor['cruzid'])) {
-											return '<a href="' . esc_url(home_url('/directory/' . $instructor['cruzid'])) . '">' . esc_html($instructor['name']) . '</a>';
+
+						<?php if ( ! empty( $primary['requirements'] ) ) : ?>
+						<div class="item-expertise">
+							<h3>Enrollment Requirements</h3>
+							<div class="item-expertise"><?php echo nl2br( esc_html( $primary['requirements'] ) ); ?></div>
+						</div>
+						<?php endif; ?>
+
+						<?php if ( $notes_text ) : ?>
+						<div class="item-expertise">
+							<h3>Class Notes</h3>
+							<div class="item-expertise"><?php echo nl2br( esc_html( $notes_text ) ); ?></div>
+						</div>
+						<?php endif; ?>
+
+						<div>
+							<h3>Class Details</h3>
+							<ul class="item-info">
+								<?php if ( ! empty( $primary['acad_career'] ) ) : ?>
+								<li><strong>Career</strong> <?php echo esc_html( $primary['acad_career'] ); ?></li>
+								<?php endif; ?>
+								<?php if ( ! empty( $primary['grading'] ) ) : ?>
+								<li><strong>Grading</strong> <?php echo esc_html( $primary['grading'] ); ?></li>
+								<?php endif; ?>
+								<?php if ( ! empty( $primary['class_nbr'] ) ) : ?>
+								<li><strong>Class Number</strong> <?php echo esc_html( $primary['class_nbr'] ); ?></li>
+								<?php endif; ?>
+								<?php if ( ! empty( $primary['component'] ) ) : ?>
+								<li><strong>Type</strong> <?php echo esc_html( $primary['component'] ); ?></li>
+								<?php endif; ?>
+								<?php if ( ! empty( $primary['credits'] ) ) : ?>
+								<li><strong>Credits</strong> <?php echo esc_html( $primary['credits'] ); ?></li>
+								<?php endif; ?>
+								<?php if ( ! empty( $primary['gened'] ) ) : ?>
+								<li><strong>General Education</strong> <?php echo esc_html( $primary['gened'] ); ?></li>
+								<?php endif; ?>
+							</ul>
+						</div>
+
+						<?php if ( ! empty( $meetings ) ) : ?>
+						<div>
+							<h3>Meeting Information</h3>
+							<ul class="item-info">
+								<li><strong>Days &amp; Times</strong> <?php echo esc_html( $day_times ); ?></li>
+								<li><strong>Room</strong> <?php echo esc_html( $location ); ?></li>
+								<?php if ( ! empty( $instructor_map ) ) : ?>
+								<li><strong>Instructor</strong>
+									<?php
+									$inst_parts = [];
+									foreach ( $instructor_map as $iname => $inst ) {
+										$icruzid = $inst['cruzid'] ?? '';
+										if ( $icruzid && $iname !== 'Staff' ) {
+											$inst_parts[] = '<a href="' . esc_url( home_url( '/directory/' . $icruzid ) ) . '">' . esc_html( $iname ) . '</a>';
+										} else {
+											$inst_parts[] = esc_html( $iname );
 										}
-										return esc_html($instructor['name']);
-									}, $meeting['instructors']);
-									echo implode(', ', $instructor_links);
-								}
-								?>
-							</span>
-						</div>
-					</div>
-					<?php endforeach; ?>
-				</div>
-			</section>
-			<?php endif; ?>
-
-			<?php if (!empty($secondary_sections['secondary_section'])): ?>
-			<section class="course-sections">
-				<h2>Sections</h2>
-				<div class="section-list">
-					<?php
-					$sections = $secondary_sections['secondary_section'];
-					// Ensure it's an array of sections
-					if (isset($sections['class_section'])) {
-						$sections = [$sections];
-					}
-					foreach ($sections as $section):
-						$section_meeting = $section['meetings']['meeting'] ?? [];
-					?>
-					<div class="section-item">
-						<div class="section-detail">
-							<strong>Section</strong>
-							<span><?php echo esc_html($section['class_section']); ?></span>
-						</div>
-						<div class="section-detail">
-							<strong>Type</strong>
-							<span><?php echo esc_html($section['component']); ?></span>
-						</div>
-						<div class="section-detail">
-							<strong>Days & Times</strong>
-							<span><?php echo esc_html(($section_meeting['days'] ?? '') . ' ' . ($section_meeting['start_time'] ?? '') . ' - ' . ($section_meeting['end_time'] ?? '')); ?></span>
-						</div>
-						<div class="section-detail">
-							<strong>Location</strong>
-							<span><?php echo esc_html($section_meeting['location'] ?? ''); ?></span>
-						</div>
-						<div class="section-detail">
-							<strong>Instructor</strong>
-							<span>
-								<?php
-								if (!empty($section_meeting['instructors']['instructor'])) {
-									$instructor = $section_meeting['instructors']['instructor'];
-									$instructor_name = $instructor['name'] ?? '';
-									if (!empty($instructor['cruzid']) && !empty($instructor_name)) {
-										echo '<a href="' . esc_url(home_url('/directory/' . $instructor['cruzid'])) . '">' . esc_html($instructor_name) . '</a>';
-									} else {
-										echo esc_html($instructor_name);
 									}
-								}
-								?>
-							</span>
+									echo implode( ', ', $inst_parts );
+									?>
+								</li>
+								<?php endif; ?>
+								<?php if ( $dates ) : ?>
+								<li><strong>Meeting Dates</strong> <?php echo esc_html( $dates ); ?></li>
+								<?php endif; ?>
+							</ul>
 						</div>
-						<div class="section-detail">
-							<strong>Status</strong>
-							<span class="status-<?php echo esc_attr(strtolower($section['enrl_status'])); ?>">
-								<?php echo esc_html($section['enrl_status']); ?>
-							</span>
-						</div>
-						<div class="section-detail">
-							<strong>Enrollment</strong>
-							<span><?php echo esc_html($section['enrl_total'] . ' / ' . $section['capacity']); ?></span>
-						</div>
-					</div>
-					<?php endforeach; ?>
-				</div>
-			</section>
-			<?php endif; ?>
+						<?php endif; ?>
 
-		</article>
+						<?php if ( ! empty( $sections ) ) : ?>
+						<h3>Associated Discussion Sections or Labs</h3>
+						<?php foreach ( $sections as $sec_info ) :
+							$sec = $sec_info['data'];
+						?>
+						<div class="class-section">
+							<ul class="item-info">
+								<?php if ( ! empty( $sec['class_section'] ) ) : ?>
+								<li><strong>Section</strong> <?php echo esc_html( $sec['class_section'] ); ?></li>
+								<?php endif; ?>
+								<?php if ( ! empty( $sec['component'] ) ) : ?>
+								<li><strong>Type</strong> <?php echo esc_html( $sec['component'] ); ?></li>
+								<?php endif; ?>
+								<?php if ( ! empty( $sec['class_nbr'] ) ) : ?>
+								<li><strong>Class Number</strong> <?php echo esc_html( $sec['class_nbr'] ); ?></li>
+								<?php endif; ?>
+								<?php if ( ! empty( $sec_info['days'] ) ) : ?>
+								<li><strong>Days</strong> <?php echo esc_html( $sec_info['days'] ); ?></li>
+								<?php endif; ?>
+								<?php if ( ! empty( $sec_info['times'] ) ) : ?>
+								<li><strong>Time</strong> <?php echo esc_html( $sec_info['times'] ); ?></li>
+								<?php endif; ?>
+								<?php if ( ! empty( $sec_info['inst_html'] ) ) : ?>
+								<li><strong>Instructor</strong> <?php echo $sec_info['inst_html']; ?></li>
+								<?php endif; ?>
+								<?php if ( ! empty( $sec_info['location'] ) ) : ?>
+								<li><strong>Location</strong> <?php echo esc_html( $sec_info['location'] ); ?></li>
+								<?php endif; ?>
+								<?php if ( ! empty( $sec['capacity'] ) ) : ?>
+								<li><strong>Enrollment Capacity</strong> <?php echo esc_html( $sec['capacity'] ); ?></li>
+								<?php endif; ?>
+								<?php if ( ! empty( $sec['enrl_total'] ) ) : ?>
+								<li><strong>Enrolled</strong> <?php echo esc_html( $sec['enrl_total'] ); ?></li>
+								<?php endif; ?>
+							</ul>
+						</div>
+						<?php endforeach; ?>
+						<?php endif; ?>
+
+					</div><!-- .item-body -->
+				</div><!-- #class-info -->
+			</div><!-- .section-body -->
+		</div><!-- .section-container -->
+
 	</div>
 </main>
 
 <style>
-.course-detail {
-	padding: 20px 0;
+/* Secondary sections get a light-blue tinted background, matching old WCSI */
+.class-section {
+	margin: 10px 0;
+	background-color: #F0F7FD;
 }
-
-.course-header {
-	margin-bottom: 30px;
-	padding-bottom: 20px;
-	border-bottom: 2px solid #003c6c;
+.class-section .item-info {
+	margin: 20px 0 !important;
 }
-
-.course-header h1 {
-	margin-bottom: 10px;
-	color: #003c6c;
+.class-section .item-info li {
+	border-bottom: 2px solid #fff !important;
 }
-
-.course-meta {
-	display: flex;
-	gap: 20px;
-	flex-wrap: wrap;
-}
-
-.course-meta span {
-	padding: 5px 10px;
-	background: #f0f0f0;
-	border-radius: 4px;
-	font-size: 14px;
-}
-
-.course-detail section {
-	margin-bottom: 30px;
-}
-
-.course-detail h2 {
-	color: #000;
-	margin: 40px 0 20px 0;
-	font-size: 2.2em;
-	font-weight: bold;
-	text-align: left;
-}
-
-.course-info-list {
-	list-style: none;
-	padding: 0;
-	margin: 30px auto;
-	max-width: 600px;
-}
-
-.course-info-list li {
-	display: grid;
-	grid-template-columns: 200px 1fr;
-	padding: 5px 0;
-	border-bottom: 1px solid #e0e0e0;
-	gap: 20px;
-}
-
-.course-info-list li:last-child {
-	border-bottom: none;
-}
-
-.course-info-list li strong {
-	font-weight: bold;
-	color: #000;
-	text-align: right;
-	font-size: 1.1em;
-	white-space: nowrap;
-}
-
-.course-info-list li span {
-	color: #000;
-	text-align: left;
-	font-size: 1.1em;
-}
-
-.meeting-list,
-.section-list {
-	margin: 30px auto;
-	max-width: 600px;
-}
-
-.meeting-item,
-.section-item {
-	margin-bottom: 30px;
-}
-
-.meeting-detail,
-.section-detail {
-	display: grid;
-	grid-template-columns: 200px 1fr;
-	padding: 5px 0;
-	border-bottom: 1px solid #e0e0e0;
-	gap: 20px;
-}
-
-.meeting-item .meeting-detail:last-child,
-.section-item .section-detail:last-child {
-	border-bottom: none;
-}
-
-.meeting-detail strong,
-.section-detail strong {
-	font-weight: bold;
-	color: #000;
-	text-align: right;
-	font-size: 1.1em;
-	white-space: nowrap;
-}
-
-.meeting-detail span,
-.section-detail span {
-	color: #000;
-	text-align: left;
-	font-size: 1.1em;
-}
-
-@media (max-width: 768px) {
-	.course-info-list li,
-	.meeting-detail,
-	.section-detail {
-		grid-template-columns: 1fr;
-		gap: 5px;
+@media (min-width: 768px) {
+	#class-info .item-info li strong {
+		flex-basis: 180px;
 	}
-
-	.course-info-list li strong,
-	.meeting-detail strong,
-	.section-detail strong {
-		text-align: left;
+}
+@media print {
+	.no-print { display: none !important; }
+	#class-info .item-info > li {
+		align-items: flex-start;
+		flex-direction: row;
+		border-bottom: 1px solid rgba(0,0,0,0.12);
+	}
+	#class-info .item-info > li:last-of-type {
+		border-bottom: 0;
+	}
+	#class-info .item-info li strong {
+		flex: 0 0 180px;
+		text-align: right;
+		padding-right: 1.5em;
 	}
 }
 </style>
 
-<?php
-get_footer();
-?>
+<?php get_footer(); ?>
