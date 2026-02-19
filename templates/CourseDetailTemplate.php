@@ -127,50 +127,92 @@ if ( $start_ts && $end_ts ) {
 
 // Secondary sections — normalize to array, preprocess meeting data
 $sections = [];
-if ( ! empty( $secondary_sections['secondary_section'] ) ) {
-	$secs = $secondary_sections['secondary_section'];
+if ( ! empty( $secondary_sections ) ) {
+	$secs = $secondary_sections['secondary_section'] ?? $secondary_sections;
+
 	if ( isset( $secs['class_section'] ) ) {
 		$secs = [ $secs ]; // single section → wrap in array
 	}
+
 	foreach ( $secs as $sec ) {
-		// Skip if same section as primary
-		if ( $sec['class_section'] === $primary['class_section'] ) continue;
-
-		$sm        = $sec['meetings']['meeting'] ?? [];
-		$sec_days  = $sm['days']       ?? '';
-		$sec_start = $sm['start_time'] ?? '';
-		$sec_end   = $sm['end_time']   ?? '';
-
-		if ( strtoupper( trim( $sec_start ) ) === 'TBA' || strtoupper( trim( $sec_end ) ) === 'TBA' ) {
-			$sec_times = 'TBA';
-		} else {
-			$sec_times = format_course_time( $sec_start ) . ' - ' . format_course_time( $sec_end );
+		if ( ! is_array( $sec ) ) {
+			continue;
 		}
 
-		// Instructor HTML for section
-		$sec_inst_html = '';
-		if ( ! empty( $sm['instructors']['instructor'] ) ) {
-			$si_list = $sm['instructors']['instructor'];
-			if ( isset( $si_list['name'] ) ) $si_list = [ $si_list ];
-			$si_parts = [];
-			foreach ( $si_list as $si ) {
-				$iname   = $si['name']   ?? '';
+		// Skip if same section as primary
+		if ( ( $sec['class_section'] ?? '' ) === ( $primary['class_section'] ?? '' ) ) {
+			continue;
+		}
+
+		$sec_meetings = $sec['meetings'] ?? [];
+		if ( isset( $sec_meetings['meeting'] ) ) {
+			$sec_meetings = $sec_meetings['meeting'];
+		}
+		if ( isset( $sec_meetings['days'] ) || isset( $sec_meetings['start_time'] ) || isset( $sec_meetings['end_time'] ) ) {
+			$sec_meetings = [ $sec_meetings ];
+		}
+
+		$sec_days_parts  = [];
+		$sec_time_parts  = [];
+		$sec_locations   = [];
+		$sec_instructors = [];
+
+		foreach ( (array) $sec_meetings as $meeting ) {
+			if ( ! is_array( $meeting ) ) {
+				continue;
+			}
+
+			$meeting_days  = $meeting['days'] ?? '';
+			$meeting_start = $meeting['start_time'] ?? '';
+			$meeting_end   = $meeting['end_time'] ?? '';
+
+			if ( $meeting_days !== '' ) {
+				$sec_days_parts[] = $meeting_days;
+			}
+
+			if ( strtoupper( trim( $meeting_start ) ) === 'TBA' || strtoupper( trim( $meeting_end ) ) === 'TBA' ) {
+				$sec_time_parts[] = 'TBA';
+			} elseif ( $meeting_start !== '' || $meeting_end !== '' ) {
+				$sec_time_parts[] = format_course_time( $meeting_start ) . ' - ' . format_course_time( $meeting_end );
+			}
+
+			if ( ! empty( $meeting['location'] ) ) {
+				$sec_locations[] = $meeting['location'];
+			}
+
+			$meeting_instructors = $meeting['instructors']['instructor'] ?? $meeting['instructors'] ?? [];
+			if ( isset( $meeting_instructors['name'] ) || isset( $meeting_instructors['text'] ) ) {
+				$meeting_instructors = [ $meeting_instructors ];
+			}
+
+			foreach ( (array) $meeting_instructors as $si ) {
+				if ( ! is_array( $si ) ) {
+					continue;
+				}
+
+				$iname   = $si['name'] ?? $si['text'] ?? '';
 				$icruzid = $si['cruzid'] ?? '';
-				if ( $icruzid && $iname ) {
-					$si_parts[] = '<a href="' . esc_url( home_url( '/directory/' . $icruzid ) ) . '">' . esc_html( $iname ) . '</a>';
-				} else {
-					$si_parts[] = esc_html( $iname );
+				if ( $iname === '' ) {
+					continue;
+				}
+
+				$inst_key = $iname . '|' . $icruzid;
+				if ( ! isset( $sec_instructors[ $inst_key ] ) ) {
+					if ( $icruzid && $iname !== 'Staff' ) {
+						$sec_instructors[ $inst_key ] = '<a href="' . esc_url( home_url( '/directory/' . $icruzid ) ) . '">' . esc_html( $iname ) . '</a>';
+					} else {
+						$sec_instructors[ $inst_key ] = esc_html( $iname );
+					}
 				}
 			}
-			$sec_inst_html = implode( ', ', $si_parts );
 		}
 
 		$sections[] = [
-			'data'     => $sec,
-			'days'     => $sec_days,
-			'times'    => $sec_times,
-			'location' => $sm['location'] ?? '',
-			'inst_html' => $sec_inst_html,
+			'data'      => $sec,
+			'days'      => implode( ', ', array_unique( $sec_days_parts ) ),
+			'times'     => implode( ', ', array_unique( $sec_time_parts ) ),
+			'location'  => implode( ', ', array_unique( $sec_locations ) ),
+			'inst_html' => implode( ', ', array_values( $sec_instructors ) ),
 		];
 	}
 }
