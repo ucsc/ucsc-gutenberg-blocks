@@ -1,14 +1,17 @@
 /* ============================================================
-   Class Schedule — styles matching the old WCSI app
+   Class Schedule — styles ported from old WCSI Vue/Element UI app
+   Adapted selectors: #wcsi → #classSchedule,
+                      .el-table_1_column_* → .col-*
    ============================================================ */
 
-/* Status indicator shapes — used as <span> in rows and <div> in legend */
+/* ============================================================
+   Status indicator shapes
+   ============================================================ */
 .open,
 .closed,
 .waitlist {
   display: inline-block;
-  margin: 0 4px;
-  vertical-align: middle;
+  margin: 0 5px;
 }
 
 .open {
@@ -30,22 +33,23 @@
   border-left: 6px solid transparent;
   border-right: 6px solid transparent;
   border-bottom: 12px solid #FAC509;
-  background: none;
 }
 
 /* Cancelled course link */
 a.cancelled {
   text-decoration: line-through;
-  color: #999;
 }
 
 /* ============================================================
-   Toolbar: search + filter button
+   Main container
    ============================================================ */
 #classSchedule {
   margin: 20px 0;
 }
 
+/* ============================================================
+   Toolbar: search + filter buttons
+   ============================================================ */
 .introText {
   display: flex;
   align-items: center;
@@ -53,7 +57,8 @@ a.cancelled {
   margin-bottom: 10px;
 }
 
-/* Term dropdown + search input grouped together */
+/* Term dropdown + search input grouped together
+   (replaces old el-input with el-select prepend) */
 .input-with-select {
   display: flex;
   flex: 1;
@@ -61,12 +66,16 @@ a.cancelled {
   border: 1px solid #dcdfe6;
   border-radius: 4px;
   overflow: hidden;
+  background-color: #fff;
 }
 
 .term-select-wrap {
   background-color: #fff;
   border-right: 1px solid #dcdfe6;
   flex-shrink: 0;
+  margin-left: 0;
+  text-align: left;
+  padding-left: 0;
 }
 
 .term-select-wrap select {
@@ -79,7 +88,7 @@ a.cancelled {
   border: none;
   outline: none;
   cursor: pointer;
-  min-width: 160px;
+  min-width: 200px;
 }
 
 #courseSearch {
@@ -88,14 +97,19 @@ a.cancelled {
   font-size: 14px;
   border: none;
   outline: none;
-  color: #606266;
+  color: #666;
   min-width: 0;
 }
 
-.input-with-select:focus-within {
-  border-color: #003c6c;
+#courseSearch::placeholder {
+  color: #bbb;
 }
 
+.input-with-select:focus-within {
+  border-color: #409EFF;
+}
+
+/* Button group (replaces old el-button-group) */
 .button-group {
   display: flex;
   gap: 0;
@@ -108,7 +122,7 @@ a.cancelled {
   padding: 7px 15px;
   font-size: 14px;
   background-color: #fff;
-  color: #333;
+  color: #606266;
   border: 1px solid #dcdfe6;
   border-radius: 0;
   cursor: pointer;
@@ -129,8 +143,9 @@ a.cancelled {
 }
 
 .filter-button:hover {
-  border-color: #003c6c;
-  color: #003c6c;
+  border-color: #c6e2ff;
+  background-color: #ecf5ff;
+  color: #409EFF;
 }
 
 .filter-button .icon-filter {
@@ -138,8 +153,18 @@ a.cancelled {
   height: 14px;
 }
 
+.filter-active {
+  color: #409EFF !important;
+}
+
+.right-btn {
+  padding-left: 0;
+  margin-left: 0;
+}
+
 /* ============================================================
-   Filter Modal
+   Filter Modal (replaces old el-popover)
+   Styled to match old popover appearance
    ============================================================ */
 .filter-modal {
   display: none;
@@ -160,33 +185,29 @@ a.cancelled {
 
 .filter-modal-content {
   background-color: #fff;
-  padding: 20px 30px;
+  padding: 0;
   border-radius: 4px;
   box-shadow: 0 2px 12px rgba(0, 0, 0, 0.15);
-  max-width: 500px;
+  max-width: 400px;
   width: 90%;
 }
 
 .filter-modal-content .divider {
-  display: flex;
-  align-items: flex-start;
-  gap: 20px;
-  padding: 12px 0;
-  border-bottom: 1px solid #ebeef5;
+  padding: 14px 15px;
+  border-bottom: 1px solid #eee;
 }
 
 .filter-modal-content .divider strong {
-  min-width: 120px;
+  display: block;
   font-size: 14px;
   color: #303133;
-  padding-top: 2px;
+  margin-bottom: 10px;
 }
 
 .column-toggles,
 .status-filters {
   display: flex;
   flex-wrap: wrap;
-  gap: 10px 20px;
 }
 
 .column-toggles label,
@@ -197,92 +218,144 @@ a.cancelled {
   font-size: 14px;
   color: #606266;
   cursor: pointer;
+  width: 90px;
+  padding-bottom: 10px;
+  margin-left: 0;
+}
+
+.column-toggles label:nth-last-child(-n+3),
+.status-filters label:nth-last-child(-n+3) {
+  padding-bottom: 0;
 }
 
 .advButtons {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding-top: 15px;
+  padding: 6px 15px;
+}
+
+.advButtons button:hover {
+  opacity: 0.8;
 }
 
 .reset-filters {
   background: none;
   border: none;
-  color: #f56c6c;
+  color: #F56C6C;
   font-size: 12px;
   cursor: pointer;
   padding: 4px 0;
 }
 
-.reset-filters:hover {
-  color: #c0392b;
-}
-
 .apply-button,
 .cancel-button {
-  padding: 5px 12px;
+  background: none;
+  border: none;
   font-size: 12px;
-  border-radius: 3px;
   cursor: pointer;
-  border: 1px solid #dcdfe6;
+  padding: 5px 12px;
+  margin-right: 10px;
 }
 
 .apply-button {
-  background: none;
-  color: #333;
-  margin-left: 8px;
-}
-
-.apply-button:hover {
-  border-color: #003c6c;
-  color: #003c6c;
+  color: #606266;
 }
 
 .cancel-button {
-  background: none;
-  color: #999;
-}
-
-.cancel-button:hover {
-  color: #333;
+  color: #909399;
 }
 
 /* ============================================================
    Display key (count + legend)
    ============================================================ */
 .display-key {
+  background-color: #f8f8f8;
+  margin: 0;
+  font-size: 13px;
+  padding: 10px 5px 0;
+  color: #666;
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin: 10px 0;
-  font-size: 13px;
-  color: #606266;
 }
 
 .display-key .right {
-  display: flex;
-  align-items: center;
-  gap: 4px;
+  text-align: right;
 }
 
 /* ============================================================
-   Table
+   Table — matching Element UI defaults
    ============================================================ */
 .el-table {
   width: 100%;
   overflow-x: auto;
-  border: 1px solid #ebeef5;
   font-size: 14px;
   color: #606266;
+}
+
+table {
+  margin: 0;
+  padding: 0;
 }
 
 .el-table__header,
 .el-table__body {
   width: 100%;
   border-collapse: collapse;
-  table-layout: fixed;
+  table-layout: auto;
 }
+
+/* Header row — Element UI default light style */
+.el-table__header thead tr {
+  background-color: #fff;
+}
+
+.el-table__header th {
+  padding: 10px 8px;
+  text-align: left;
+  font-weight: 500;
+  white-space: nowrap;
+  border-bottom: 1px solid #ebeef5;
+  color: #73777D;
+}
+
+.el-table__header th.is-sortable {
+  cursor: pointer;
+  user-select: none;
+}
+
+.el-table__header th.is-sortable:hover {
+  background-color: #f5f7fa;
+}
+
+/* Sort carets — matching old Element UI style */
+.caret-wrapper {
+  display: inline-flex;
+  flex-direction: column;
+  align-items: center;
+  vertical-align: middle;
+  margin-left: 5px;
+  line-height: 0;
+}
+
+.sort-caret {
+  width: 0;
+  height: 0;
+  border: 5px solid transparent;
+}
+
+.sort-caret.ascending {
+  border-bottom-color: #c0c4cc;
+  margin-bottom: 2px;
+}
+
+.sort-caret.descending {
+  border-top-color: #c0c4cc;
+}
+
+th.ascending .sort-caret.ascending  { border-bottom-color: #409EFF; }
+th.descending .sort-caret.descending { border-top-color: #409EFF; }
 
 /* Column widths */
 .el-table th.col-status,
@@ -312,58 +385,7 @@ a.cancelled {
   display: none;
 }
 
-/* Header row */
-.el-table__header thead tr {
-  background-color: #003c6c;
-  color: #fff;
-}
-
-.el-table__header th {
-  padding: 10px 8px;
-  text-align: left;
-  font-weight: bold;
-  white-space: nowrap;
-  border-bottom: 2px solid #00305a;
-}
-
-.el-table__header th.is-sortable {
-  cursor: pointer;
-  user-select: none;
-}
-
-.el-table__header th.is-sortable:hover {
-  background-color: #00549e;
-}
-
-/* Sort carets — matching old Element UI style */
-.caret-wrapper {
-  display: inline-flex;
-  flex-direction: column;
-  align-items: center;
-  vertical-align: middle;
-  margin-left: 5px;
-  line-height: 0;
-}
-
-.sort-caret {
-  width: 0;
-  height: 0;
-  border: 5px solid transparent;
-}
-
-.sort-caret.ascending {
-  border-bottom-color: rgba(255,255,255,0.4);
-  margin-bottom: 2px;
-}
-
-.sort-caret.descending {
-  border-top-color: rgba(255,255,255,0.4);
-}
-
-th.ascending .sort-caret.ascending  { border-bottom-color: #fff; }
-th.descending .sort-caret.descending { border-top-color: #fff; }
-
-/* Body rows */
+/* Body rows — matching Element UI hover behavior */
 .el-table__body tr.el-table__row {
   background-color: #fff;
   transition: background-color 0.15s;
@@ -373,24 +395,15 @@ th.descending .sort-caret.descending { border-top-color: #fff; }
   background-color: #f5f7fa;
 }
 
-.el-table__body tr.el-table__row:nth-child(even) {
-  background-color: #fafafa;
-}
-
-.el-table__body tr.el-table__row:nth-child(even):hover {
-  background-color: #f5f7fa;
-}
-
 .el-table__body td {
-  padding: 8px;
+  padding: 0;
   border-bottom: 1px solid #ebeef5;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
 }
 
-.el-table td .cell {
-  padding: 0 4px;
+/* Cell padding — matching old #wcsi div.cell */
+.el-table .cell {
+  padding: 4px 5px;
+  word-break: keep-all;
 }
 
 /* Status column — center the dot */
@@ -400,20 +413,26 @@ th.descending .sort-caret.descending { border-top-color: #fff; }
   align-items: center;
 }
 
-/* Seats column */
+/* Seats column — matching old style */
+.seats {
+  font-size: 80%;
+  color: #888;
+}
+
 .seats .available {
-  color: green;
-  font-weight: 500;
+  color: #606266;
+  font-size: 125%;
+  padding-right: 3px;
 }
 
 /* Title link */
 .el-table__body td.col-title a {
-  color: #003c6c;
+  color: #409EFF;
   text-decoration: none;
 }
 
 .el-table__body td.col-title a:hover {
-  text-decoration: underline;
+  color: #66b1ff;
 }
 
 /* ============================================================
@@ -450,8 +469,94 @@ th.descending .sort-caret.descending { border-top-color: #fff; }
 }
 
 /* ============================================================
-   Print styles
+   Misc
+   ============================================================ */
+.right {
+  text-align: right;
+}
+
+*:focus {
+  outline: none;
+}
+
+div.print-only {
+  display: none;
+}
+
+/* ============================================================
+   Print styles — matching old WCSI print styles
    ============================================================ */
 @media print {
-  .no-print { display: none !important; }
+  html, body {
+    width: auto;
+    height: auto;
+  }
+
+  body {
+    overflow: auto;
+    height: auto;
+    margin: 0 !important;
+    -webkit-print-color-adjust: exact !important;
+  }
+
+  .scroll-y {
+    height: auto;
+    overflow: visible;
+  }
+
+  @page {
+    size: landscape;
+    margin-top: 0.35in;
+    margin-left: 0.30in;
+    margin-right: 0.30in;
+    margin-bottom: 0.35in;
+  }
+
+  table {
+    font-size: 100%;
+  }
+
+  div.no-print {
+    display: none !important;
+  }
+
+  div.print-only {
+    display: block;
+  }
+
+  #classSchedule .el-table td,
+  #classSchedule .el-table th,
+  div.cell {
+    padding: 0;
+  }
+
+  .el-table span.caret-wrapper {
+    display: none;
+  }
+
+  #classSchedule .el-table td .closed {
+    width: 10px !important;
+    height: 10px !important;
+    background: red !important;
+    display: inline-block !important;
+  }
+
+  #classSchedule .el-table td div.cell span.open {
+    height: 10px !important;
+    background: green !important;
+    border-radius: 50% !important;
+    display: inline-block !important;
+  }
+
+  #classSchedule table.el-table__body {
+    table-layout: auto;
+  }
+
+  #classSchedule div.el-table {
+    zoom: 92%;
+  }
+
+  #classSchedule div.el-table__body-wrapper {
+    overflow: hidden;
+  }
 }
