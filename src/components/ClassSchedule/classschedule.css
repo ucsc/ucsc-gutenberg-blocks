@@ -113,12 +113,15 @@ a.cancelled {
   border-radius: 0;
   cursor: pointer;
   white-space: nowrap;
+  margin: 0;
+}
+
+.button-group .filter-button + .filter-button {
   margin-left: -1px;
 }
 
 .button-group .filter-button:first-child {
   border-radius: 4px 0 0 4px;
-  margin-left: 0;
 }
 
 .button-group .filter-button:last-child {
