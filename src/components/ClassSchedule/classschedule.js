@@ -183,6 +183,92 @@ window.addEventListener('click', function(event) {
     if (event.target === modal) closeFilterModal();
 });
 
+// ── Copy URL ──────────────────────────────────────────────────────────────────
+
+function classScheduleCopyUrl() {
+    var url = window.location.href;
+    navigator.clipboard.writeText(url).then(function() {
+        classScheduleShowToast('<strong>Copied </strong><i>' + url + '</i>');
+    }, function() {
+        // Fallback for older browsers
+        var textArea = document.createElement('textarea');
+        textArea.value = url;
+        textArea.style.position = 'fixed';
+        textArea.style.opacity = '0';
+        document.body.appendChild(textArea);
+        textArea.select();
+        document.execCommand('copy');
+        document.body.removeChild(textArea);
+        classScheduleShowToast('<strong>Copied </strong><i>' + url + '</i>');
+    });
+}
+
+function classScheduleShowToast(html) {
+    var toast = document.createElement('div');
+    toast.className = 'cs-toast';
+    toast.innerHTML = html;
+    document.body.appendChild(toast);
+    setTimeout(function() { toast.classList.add('cs-toast-visible'); }, 10);
+    setTimeout(function() {
+        toast.classList.remove('cs-toast-visible');
+        setTimeout(function() { toast.remove(); }, 300);
+    }, 3000);
+}
+
+// ── Download CSV ──────────────────────────────────────────────────────────────
+
+function classScheduleDownloadCSV() {
+    var table = document.getElementById('classScheduleTable');
+    var headerCells = table.querySelectorAll('.el-table__header th');
+    var rows = table.querySelectorAll('.el-table__body .course-row');
+
+    // Determine which columns are visible
+    var visibleCols = [];
+    headerCells.forEach(function(th, i) {
+        if (!th.classList.contains('hidden') && i > 0) { // skip status column
+            visibleCols.push({
+                index: i,
+                label: th.textContent.trim()
+            });
+        }
+    });
+
+    // Build CSV header
+    var csvRows = [];
+    csvRows.push(visibleCols.map(function(c) { return '"' + c.label + '"'; }).join(','));
+
+    // Build CSV data rows (only visible/filtered rows)
+    rows.forEach(function(row) {
+        if (row.style.display === 'none') return; // skip filtered-out rows
+
+        var cells = row.querySelectorAll('td');
+        var csvCols = visibleCols.map(function(c) {
+            var text = (cells[c.index] ? cells[c.index].textContent.trim() : '');
+            // Escape quotes in CSV
+            return '"' + text.replace(/"/g, '""') + '"';
+        });
+        csvRows.push(csvCols.join(','));
+    });
+
+    var csvContent = csvRows.join('\n');
+    var blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+    var url = URL.createObjectURL(blob);
+
+    // Build filename from term dropdown
+    var termSelect = document.getElementById('quarterDropdown');
+    var termName = termSelect ? termSelect.options[termSelect.selectedIndex].text : 'ClassSchedule';
+    var filename = termName.replace(/\s+/g, '_') + '.csv';
+
+    var link = document.createElement('a');
+    link.href = url;
+    link.download = filename;
+    link.style.display = 'none';
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
+}
+
 // ── Term Dropdown ─────────────────────────────────────────────────────────────
 
 function classScheduleChangeTerm(select) {

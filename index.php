@@ -12,6 +12,7 @@ if (!defined('ABSPATH')) exit; // Exit if accessed directly
 include_once(plugin_dir_path(__FILE__) . 'classes/CourseCatalog.php');
 include_once(plugin_dir_path(__FILE__) . 'classes/CampusDirectory.php');
 include_once(plugin_dir_path(__FILE__) . 'classes/ClassSchedule.php');
+include_once(plugin_dir_path(__FILE__) . 'src/API/Course_Schedule_API.php');
 include_once(plugin_dir_path(__FILE__) . 'classes/Accordion.php');
 include_once(plugin_dir_path(__FILE__) . 'classes/AccordionWrapper.php');
 
@@ -48,6 +49,9 @@ function registerJSBuild() {
 $CourseCatalog = new CourseCatalog();
 $CampusDirectory = new CampusDirectory();
 $ClassSchedule = new ClassSchedule();
+
+// Initialize Course Schedule API
+( new \UCSC\Blocks\API\Course_Schedule_API() )->init();
 $Accordion = new Accordion();
 $AccordionWrapper = new AccordionWrapper();
 $SiteSettings = new SiteSettings();
