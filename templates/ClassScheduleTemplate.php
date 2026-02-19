@@ -123,10 +123,20 @@ $terms = $terms_data['terms'] ?? [];
               $is_cancelled     = strtolower(trim($course['meeting_days'] ?? '')) === 'cancelled';
               $course_id        = esc_html($course['subject'] . '-' . $course['catalog_nbr']);
               $course_url       = home_url('/course/' . $current_term . '/' . $course['class_nbr']);
-              $instructor_names = '';
+              $instructor_html = '';
               if (!empty($course['instructors']) && is_array($course['instructors'])) {
-                $names = array_map(function($i) { return $i['name']; }, $course['instructors']);
-                $instructor_names = implode(', ', $names);
+                $inst_parts = [];
+                foreach ($course['instructors'] as $inst) {
+                  $iname = $inst['name'] ?? '';
+                  $icruzid = $inst['cruzid'] ?? '';
+                  if ($iname === '') continue;
+                  if ($icruzid && $iname !== 'Staff') {
+                    $inst_parts[] = '<a href="' . esc_url(home_url('/directory/' . $icruzid)) . '">' . esc_html($iname) . '</a>';
+                  } else {
+                    $inst_parts[] = esc_html($iname);
+                  }
+                }
+                $instructor_html = implode(', ', $inst_parts);
               }
             ?>
             <tr class="el-table__row course-row" data-status="<?php echo esc_attr($status_class); ?>">
@@ -141,7 +151,7 @@ $terms = $terms_data['terms'] ?? [];
               <td class="col-days"><div class="cell"><span><?php echo $is_cancelled ? 'Cancelled' : esc_html($course['meeting_days']); ?></span></div></td>
               <td class="col-time hidden"><div class="cell"><span><?php echo esc_html($course['start_time'] . ' - ' . $course['end_time']); ?></span></div></td>
               <td class="col-location hidden"><div class="cell"><span><?php echo esc_html($course['location']); ?></span></div></td>
-              <td class="col-instructor hidden"><div class="cell"><span><?php echo esc_html($instructor_names); ?></span></div></td>
+              <td class="col-instructor hidden"><div class="cell"><span><?php echo $instructor_html; ?></span></div></td>
               <td class="col-class-num hidden"><div class="cell"><span><?php echo esc_html($course['class_nbr']); ?></span></div></td>
               <td class="col-enrollment hidden"><div class="cell"><span><?php echo esc_html($course['enrl_total']); ?></span></div></td>
             </tr>
