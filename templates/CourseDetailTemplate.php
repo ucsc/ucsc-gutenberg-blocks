@@ -229,9 +229,7 @@ if ( ! empty( $secondary_sections['secondary_section'] ) ) {
 								<?php if ( ! empty( $primary['capacity'] ) ) : ?>
 								<li><strong>Enrollment Capacity</strong> <?php echo esc_html( $primary['capacity'] ); ?></li>
 								<?php endif; ?>
-								<?php if ( ! empty( $primary['enrl_total'] ) ) : ?>
-								<li><strong>Enrolled</strong> <?php echo esc_html( $primary['enrl_total'] ); ?></li>
-								<?php endif; ?>
+								<li><strong>Enrolled</strong> <?php echo esc_html( $primary['enrl_total'] ?? 0 ); ?></li>
 							</ul>
 						</div>
 
