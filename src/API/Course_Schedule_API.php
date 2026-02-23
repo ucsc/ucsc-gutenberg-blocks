@@ -183,8 +183,6 @@ class Course_Schedule_API {
 			$url .= '?' . $query_string;
 		}
 
-		error_log( 'Course_Schedule_API CLASS_LIST URL: ' . $url ); //TODO:RJD REMOVE
-
 		$response = wp_remote_get( $url, [
 			'timeout' => 30,
 		] );
@@ -234,8 +232,6 @@ class Course_Schedule_API {
 
 		// Fetch from PeopleSoft API
 		$url      = self::PS_BASE_URL . '/SCX_CLASS_DETAIL.v1/' . $term . '/' . $course;
-		error_log( 'Course_Schedule_API CLASS_DETAIL URL: ' . $url ); //TODO:RJD REMOVE
-
 		$response = wp_remote_get( $url, [
 			'timeout' => 30,
 		] );

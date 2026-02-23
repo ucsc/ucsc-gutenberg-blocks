@@ -80,10 +80,13 @@ foreach ( $notes_array as $note ) {
 $notes_text = trim( $notes_text );
 
 // Time formatter — "TBA" passthrough, otherwise "g:i A"
-function format_course_time( $t ) {
-	if ( ! $t || strtoupper( trim( $t ) ) === 'TBA' ) return 'TBA';
-	$parsed = strtotime( '2001-01-01 ' . $t );
-	return $parsed ? date( 'g:i A', $parsed ) : $t;
+// If this template ever gets included twice, PHP will fatal error with "Cannot redeclare."
+if ( ! function_exists( 'format_course_time' ) ) {
+	function format_course_time( $t ) {
+		if ( ! $t || strtoupper( trim( $t ) ) === 'TBA' ) return 'TBA';
+		$parsed = strtotime( '2001-01-01 ' . $t );
+		return $parsed ? date( 'g:i A', $parsed ) : $t;
+	}
 }
 
 // Aggregate meeting info from all meetings
