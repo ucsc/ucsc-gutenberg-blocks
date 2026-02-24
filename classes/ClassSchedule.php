@@ -77,46 +77,33 @@ class ClassSchedule
 
   function getCachedCourses($term, $attributes) {
     $subjectOrDept = $attributes['subjectOrDept'] ?? 'dept';
-    $cache_key = 'class-schedule-' . $term . '-';
 
     if ($subjectOrDept == 'dept') {
       $dept = strtoupper($attributes['department'] ?? '');
-      // Skip if department is empty or default value
       if (empty($dept) || $dept === '---') {
         return array();
       }
-      $cache_key .= 'dept-' . $dept;
-      $query_param = 'dept=' . $dept;
+      $param_key = 'dept';
+      $param_value = $dept;
     } else {
       $subject = strtoupper($attributes['subject'] ?? '');
-      // Skip if subject is empty or default value
       if (empty($subject) || $subject === '---') {
         return array();
       }
-      $cache_key .= 'subject-' . $subject;
-      $query_param = 'subject=' . $subject;
+      $param_key = 'subject';
+      $param_value = $subject;
     }
 
-    // Try to get cached data
-    $courses_data = get_transient($cache_key);
+    // Fetch via internal REST API call; caching is handled by Course_Schedule_API
+    $request = new WP_REST_Request('GET', '/ucsc/v1/courses/' . $term);
+    $request->set_query_params(array($param_key => $param_value));
+    $response = rest_do_request($request);
 
-    if (!$courses_data) {
-      // Fetch from API using internal REST API call
-      $request = new WP_REST_Request('GET', '/ucsc/v1/courses/' . $term);
-      $request->set_query_params(array($subjectOrDept == 'dept' ? 'dept' : 'subject' => $subjectOrDept == 'dept' ? strtoupper($attributes['department'] ?? '') : strtoupper($attributes['subject'] ?? '')));
-      $response = rest_do_request($request);
-
-      if (is_wp_error($response)) {
-        return array();
-      }
-
-      $courses_data = $response->get_data();
-
-      // Cache for 15 minutes
-      set_transient($cache_key, $courses_data, 15 * MINUTE_IN_SECONDS);
+    if (is_wp_error($response)) {
+      return array();
     }
 
-    return $courses_data;
+    return $response->get_data();
   }
 
   function theHTML($attributes)

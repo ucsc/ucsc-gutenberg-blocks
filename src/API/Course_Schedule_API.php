@@ -7,7 +7,7 @@ namespace UCSC\Blocks\API;
  *
  * Provides WordPress REST API endpoints for PeopleSoft course schedule data.
  *
- * @package ucsc-custom-functionality
+ * @package ucsc-gutenberg-blocks
  */
 class Course_Schedule_API {
 
