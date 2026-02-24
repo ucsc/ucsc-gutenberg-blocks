@@ -32,6 +32,7 @@ class CampusDirectory
   }
 
   function add_directory_profile_rewrite() {
+    // instead of something like ?directoryprofilecruzid=jsmith, users see /directory/jsmith/
     add_rewrite_rule(
       '^directory/([^/]+)/?$',
       'index.php?directoryprofilecruzid=$matches[1]',
@@ -62,6 +63,12 @@ class CampusDirectory
             filemtime(plugin_dir_path(__FILE__) .$file)
     );
     wp_enqueue_style('campusdirectory');
+
+    wp_enqueue_style( 'ucsc-shared-templates',
+        plugins_url('../src/components/shared/templates.css', __FILE__),
+        array(),
+        filemtime(plugin_dir_path(__FILE__) . '../src/components/shared/templates.css')
+    );
 
     // Load UCSC directory page CSS for profile pages (matches class-schedule styling)
     if (get_query_var('directoryprofilecruzid')) {

@@ -92,7 +92,7 @@ $terms = $terms_data['terms'] ?? [];
       <table class="el-table__header">
         <thead>
           <tr>
-            <th class="col-status"><div class="cell"></div></th>
+            <td class="col-status"><div class="cell"></div></td>
             <th class="col-course-id is-sortable" onclick="sortClassSchedule(1)"><div class="cell">Course ID<span class="caret-wrapper"><i class="sort-caret ascending"></i><i class="sort-caret descending"></i></span></div></th>
             <th class="col-title is-sortable" onclick="sortClassSchedule(2)"><div class="cell">Title<span class="caret-wrapper"><i class="sort-caret ascending"></i><i class="sort-caret descending"></i></span></div></th>
             <th class="col-seats is-sortable" onclick="sortClassSchedule(3)"><div class="cell">Seats<span class="caret-wrapper"><i class="sort-caret ascending"></i><i class="sort-caret descending"></i></span></div></th>

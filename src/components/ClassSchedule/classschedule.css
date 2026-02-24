@@ -416,18 +416,18 @@ th.descending .sort-caret.descending { border-top-color: #409EFF; }
 /* Seats column — matching old style */
 .seats {
   font-size: 80%;
-  color: #888;
+  color: #515256;
 }
 
 .seats .available {
-  color: #606266;
+  color: #515256;
   font-size: 125%;
   padding-right: 3px;
 }
 
 /* Title link */
 .el-table__body td.col-title a {
-  color: #409EFF;
+  color: #2563EB;
   text-decoration: none;
 }
 

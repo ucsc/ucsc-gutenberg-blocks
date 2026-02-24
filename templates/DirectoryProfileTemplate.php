@@ -268,7 +268,7 @@ if (count($profileData)) {
                             foreach ($expertiseFields as $key => $title) {
                                 if (!empty($profileData[$key]) && $profileData[$key]['count']) {
                                     echo '<div class="item-expertise">';
-                                    echo '<h3>' . esc_html($title) . '</h3>';
+                                    echo '<h2 class="h3-style">' . esc_html($title) . '</h2>';
                                     echo '<div class="item-expertise">';
                                     for ($i = 0; $i < $profileData[$key]['count']; $i++) {
                                         echo '<p>' . linkify($key, $profileData[$key][$i]) . '</p>';
@@ -287,7 +287,7 @@ if (count($profileData)) {
     </div>
     <?php
 } else {
-  echo "<div class=\"has-global-padding is-layout-constrained wp-block-group alignwide\"><h3>CruzID: " . esc_html($cruzid) . " not found.</h3></div>";
+  echo "<div class=\"has-global-padding is-layout-constrained wp-block-group alignwide\"><h2 class=\"h3-style\">CruzID: " . esc_html($cruzid) . " not found.</h2></div>";
 }
 if ( file_exists( get_theme_file_path( 'footer-plugin.php' ) ) ) {
 	get_footer( 'plugin' );

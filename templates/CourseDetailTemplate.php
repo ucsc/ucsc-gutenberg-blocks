@@ -49,6 +49,7 @@ if ( ! $primary ) {
 
 // Enqueue shared styles (status dot shapes reused here)
 wp_enqueue_style( 'classschedule', plugins_url( '../src/components/ClassSchedule/classschedule.css', dirname( __FILE__ ) ) );
+wp_enqueue_style( 'ucsc-shared-templates', plugins_url( '../src/components/shared/templates.css', dirname( __FILE__ ) ) );
 
 // ── Computed values ───────────────────────────────────────────────────────────
 
@@ -257,7 +258,7 @@ if ( ! empty( $secondary_sections ) ) {
 
 						<?php if ( ! empty( $primary['description'] ) ) : ?>
 						<div class="item-expertise">
-							<h3>Description</h3>
+							<h2 class="h3-style">Description</h2>
 							<div class="item-expertise">
 								<span><?php echo nl2br( esc_html( $primary['description'] ) ); ?></span>
 								<?php if ( ! empty( $primary['gened'] ) ) : ?>
@@ -268,7 +269,7 @@ if ( ! empty( $secondary_sections ) ) {
 						<?php endif; ?>
 
 						<div>
-							<h3>Capacity and Available Seats</h3>
+							<h2 class="h3-style">Capacity and Available Seats</h2>
 							<ul class="item-info">
 								<li><strong>Available Seats</strong> <?php echo esc_html( $available ); ?></li>
 								<?php if ( ! empty( $primary['capacity'] ) ) : ?>
@@ -280,20 +281,20 @@ if ( ! empty( $secondary_sections ) ) {
 
 						<?php if ( ! empty( $primary['requirements'] ) ) : ?>
 						<div class="item-expertise">
-							<h3>Enrollment Requirements</h3>
+							<h2 class="h3-style">Enrollment Requirements</h2>
 							<div class="item-expertise"><?php echo nl2br( esc_html( $primary['requirements'] ) ); ?></div>
 						</div>
 						<?php endif; ?>
 
 						<?php if ( $notes_text ) : ?>
 						<div class="item-expertise">
-							<h3>Class Notes</h3>
+							<h2 class="h3-style">Class Notes</h2>
 							<div class="item-expertise"><?php echo nl2br( esc_html( $notes_text ) ); ?></div>
 						</div>
 						<?php endif; ?>
 
 						<div>
-							<h3>Class Details</h3>
+							<h2 class="h3-style">Class Details</h2>
 							<ul class="item-info">
 								<?php if ( ! empty( $primary['acad_career'] ) ) : ?>
 								<li><strong>Career</strong> <?php echo esc_html( $primary['acad_career'] ); ?></li>
@@ -318,7 +319,7 @@ if ( ! empty( $secondary_sections ) ) {
 
 						<?php if ( ! empty( $meetings ) ) : ?>
 						<div>
-							<h3>Meeting Information</h3>
+							<h2 class="h3-style">Meeting Information</h2>
 							<ul class="item-info">
 								<li><strong>Days &amp; Times</strong> <?php echo esc_html( $day_times ); ?></li>
 								<li><strong>Room</strong> <?php echo esc_html( $location ); ?></li>
@@ -346,7 +347,7 @@ if ( ! empty( $secondary_sections ) ) {
 						<?php endif; ?>
 
 						<?php if ( ! empty( $sections ) ) : ?>
-						<h3>Associated Discussion Sections or Labs</h3>
+						<h2 class="h3-style">Associated Discussion Sections or Labs</h2>
 						<?php foreach ( $sections as $sec_info ) :
 							$sec = $sec_info['data'];
 						?>

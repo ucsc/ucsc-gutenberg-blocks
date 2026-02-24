@@ -19,6 +19,7 @@ class ClassSchedule
   }
 
   function add_course_detail_rewrite() {
+    // instead of something like index.php?course_term=2258&course_id=12345, users see /course/2258/12345/
     add_rewrite_rule(
       '^course/([0-9]+)/([0-9]+)/?$',
       'index.php?course_term=$matches[1]&course_id=$matches[2]',

@@ -1,0 +1,7 @@
+/* Shared styles for plugin page templates */
+
+/* Keep h2 headings visually styled like h3 to fix accessibility issue
+   "heading level is skipped" without changing the look */
+.h3-style {
+	font-size: var(--wp--preset--font-size--three, 1.728rem);
+}
