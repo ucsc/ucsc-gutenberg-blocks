@@ -124,7 +124,7 @@ class ClassSchedule
 
     // Allow a specific term to be selected via query param
     $current_term = null;
-    $requested_term = sanitize_text_field($_GET['class_schedule_term'] ?? '');
+    $requested_term = sanitize_text_field( filter_input( INPUT_GET, 'class_schedule_term', FILTER_DEFAULT ) ?? '' );
     if ($requested_term) {
       foreach ($terms_data['terms'] as $term) {
         if ($term['code'] === $requested_term) {

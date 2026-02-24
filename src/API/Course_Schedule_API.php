@@ -1,7 +1,5 @@
 <?php declare(strict_types=1);
 
-namespace UCSC\Blocks\API;
-
 /**
  * Course Schedule API
  *
@@ -104,10 +102,10 @@ class Course_Schedule_API {
 	/**
 	 * Get available terms
 	 *
-	 * @param \WP_REST_Request $request Request object.
-	 * @return \WP_REST_Response|\WP_Error
+	 * @param WP_REST_Request $request Request object.
+	 * @return WP_REST_Response|WP_Error
 	 */
-	public function get_terms( \WP_REST_Request $request ) {
+	public function get_terms( WP_REST_Request $request ) {
 		$cache_key = 'ucsc_ps_terms';
 
 		// Try to get from cache
@@ -123,7 +121,7 @@ class Course_Schedule_API {
 		] );
 
 		if ( is_wp_error( $response ) ) {
-			return new \WP_Error(
+			return new WP_Error(
 				'api_error',
 				'Failed to fetch terms from PeopleSoft API',
 				[ 'status' => 500 ]
@@ -134,7 +132,7 @@ class Course_Schedule_API {
 		$data = json_decode( $body, true );
 
 		if ( json_last_error() !== JSON_ERROR_NONE ) {
-			return new \WP_Error(
+			return new WP_Error(
 				'json_error',
 				'Invalid JSON response from PeopleSoft API',
 				[ 'status' => 500 ]
@@ -150,10 +148,10 @@ class Course_Schedule_API {
 	/**
 	 * Get courses for a term
 	 *
-	 * @param \WP_REST_Request $request Request object.
-	 * @return \WP_REST_Response|\WP_Error
+	 * @param WP_REST_Request $request Request object.
+	 * @return WP_REST_Response|WP_Error
 	 */
-	public function get_courses( \WP_REST_Request $request ) {
+	public function get_courses( WP_REST_Request $request ) {
 		$term    = $request->get_param( 'term' );
 		$subject = $request->get_param( 'subject' );
 		$dept    = $request->get_param( 'dept' );
@@ -188,7 +186,7 @@ class Course_Schedule_API {
 		] );
 
 		if ( is_wp_error( $response ) ) {
-			return new \WP_Error(
+			return new WP_Error(
 				'api_error',
 				'Failed to fetch courses from PeopleSoft API',
 				[ 'status' => 500 ]
@@ -199,7 +197,7 @@ class Course_Schedule_API {
 		$data = json_decode( $body, true );
 
 		if ( json_last_error() !== JSON_ERROR_NONE ) {
-			return new \WP_Error(
+			return new WP_Error(
 				'json_error',
 				'Invalid JSON response from PeopleSoft API',
 				[ 'status' => 500 ]
@@ -215,10 +213,10 @@ class Course_Schedule_API {
 	/**
 	 * Get course details
 	 *
-	 * @param \WP_REST_Request $request Request object.
-	 * @return \WP_REST_Response|\WP_Error
+	 * @param WP_REST_Request $request Request object.
+	 * @return WP_REST_Response|WP_Error
 	 */
-	public function get_course_details( \WP_REST_Request $request ) {
+	public function get_course_details( WP_REST_Request $request ) {
 		$term   = $request->get_param( 'term' );
 		$course = $request->get_param( 'course' );
 
@@ -237,7 +235,7 @@ class Course_Schedule_API {
 		] );
 
 		if ( is_wp_error( $response ) ) {
-			return new \WP_Error(
+			return new WP_Error(
 				'api_error',
 				'Failed to fetch course details from PeopleSoft API',
 				[ 'status' => 500 ]
@@ -248,7 +246,7 @@ class Course_Schedule_API {
 		$data = json_decode( $body, true );
 
 		if ( json_last_error() !== JSON_ERROR_NONE ) {
-			return new \WP_Error(
+			return new WP_Error(
 				'json_error',
 				'Invalid JSON response from PeopleSoft API',
 				[ 'status' => 500 ]

@@ -51,7 +51,7 @@ $CampusDirectory = new CampusDirectory();
 $ClassSchedule = new ClassSchedule();
 
 // Initialize Course Schedule API
-( new \UCSC\Blocks\API\Course_Schedule_API() )->init();
+( new Course_Schedule_API() )->init();
 $Accordion = new Accordion();
 $AccordionWrapper = new AccordionWrapper();
 $SiteSettings = new SiteSettings();
