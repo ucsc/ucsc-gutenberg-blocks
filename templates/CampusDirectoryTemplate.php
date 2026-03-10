@@ -51,16 +51,19 @@ $individualPageUrl = $items['nodeContent']['linkOutToCampusDirectory'] ?
                     echo '</td>';
                     foreach($items['informationToDisplay'] as $disItem) {
                       foreach($disItem as $key => $value) {
+                        if ($value == "Email") continue;
+                        $cellValue = (array_key_exists($key, $people[$i]) && !empty($people[$i][$key][0])) ? $people[$i][$key][0] : '';
                         echo '<td class="item-info table-renderer">';
-                          echo '<strong>' . $people[$i][$key][0] . '</strong>';
-                          echo '<ul class="inline-list">';
-                            if ($value == "Campus Email" || $value == "Other Email") {
-                              echo '<li><a href="mailto:' . $people[$i][$key][0] . '">' . $people[$i][$key][0] . '</a></li>';
-                            } else {
-                              if ($value == "Email") continue;
-                              echo '<li>' . $people[$i][$key][0] . '</li>';
-                            }
-                          echo '</ul>';
+                          if ($cellValue) {
+                            echo '<strong>' . esc_html($cellValue) . '</strong>';
+                            echo '<ul class="inline-list">';
+                              if ($value == "Campus Email" || $value == "Other Email") {
+                                echo '<li><a href="mailto:' . esc_attr($cellValue) . '">' . esc_html($cellValue) . '</a></li>';
+                              } else {
+                                echo '<li>' . esc_html($cellValue) . '</li>';
+                              }
+                            echo '</ul>';
+                          }
                         echo '</td>';
                       }
                     }
