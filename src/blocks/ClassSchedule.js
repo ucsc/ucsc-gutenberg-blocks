@@ -1,4 +1,4 @@
-import { Panel, PanelBody, RadioControl, CheckboxControl } from '@wordpress/components';
+import { Panel, PanelBody, RadioControl } from '@wordpress/components';
 
 import DepartmentDropdown from '../components/DepartmentDropdown';
 import SubjectDropdown from '../components/SubjectDropdown';
@@ -23,17 +23,12 @@ const ClassSchedule = () => {
       subject: {
         type: "string"
       },
-      useNewServer: {
-        type: "boolean",
-        default: false
-      },
     },
     edit: ({ setAttributes, attributes }) => {
       const {
         department,
         subject,
         subjectOrDept,
-        useNewServer
       } = attributes;
 
       let localSubjectOrDept;
@@ -87,16 +82,6 @@ const ClassSchedule = () => {
                 setAttributes={setAttributes}
                 disabled={subjectOrDept !== "subject"}
               />
-              {isDevEnvironment() && (
-                <>
-                  <hr />
-                  <CheckboxControl
-                    label="Use New Server for Testing"
-                    checked={useNewServer}
-                    onChange={(newUseNewServer) => setAttributes({ useNewServer: newUseNewServer })}
-                  />
-                </>
-              )}
             </PanelBody>
           </Panel>
         </>

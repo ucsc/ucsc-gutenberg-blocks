@@ -81,7 +81,7 @@ foreach ( $notes_array as $note ) {
 $notes_text = trim( $notes_text );
 
 // Time formatter — "TBA" passthrough, otherwise "g:i A"
-// If this template ever gets included twice, PHP will fatal error with "Cannot redeclare."
+// function_exists protects us if this template ever gets included twice, PHP won't have a fatal error with "Cannot redeclare."
 if ( ! function_exists( 'format_course_time' ) ) {
 	function format_course_time( $t ) {
 		if ( ! $t || strtoupper( trim( $t ) ) === 'TBA' ) return 'TBA';
