@@ -86,9 +86,12 @@ function sortClassSchedule(columnIndex) {
 }
 
 function updateSortIndicators(columnIndex, ascending) {
+    // columnIndex is 1-based (0 = status td, 1 = course-id th, etc.)
+    // th selection skips the status td, so offset by 1
+    const thIndex = columnIndex - 1;
     document.querySelectorAll('#classScheduleTable .el-table__header th').forEach((th, i) => {
         th.classList.remove('ascending', 'descending');
-        if (i === columnIndex) {
+        if (i === thIndex) {
             th.classList.add(ascending ? 'ascending' : 'descending');
         }
     });
@@ -96,52 +99,68 @@ function updateSortIndicators(columnIndex, ascending) {
 
 // ── Filter Modal ──────────────────────────────────────────────────────────────
 
+// Saved checkbox states so Cancel can restore them
+let savedColumnStates = {};
+let savedStatusStates = {};
+
 function openFilterModal() {
+    // Snapshot current checkbox states before the user makes changes
+    savedColumnStates = {};
+    document.querySelectorAll('.column-toggle').forEach(t => {
+        savedColumnStates[t.dataset.column] = t.checked;
+    });
+    savedStatusStates = {};
+    document.querySelectorAll('.status-filter').forEach(f => {
+        savedStatusStates[f.dataset.status] = f.checked;
+    });
+
     document.getElementById('filterModal').classList.add('active');
 }
 
 function closeFilterModal() {
+    // Restore checkbox states to what they were when the modal opened
+    document.querySelectorAll('.column-toggle').forEach(t => {
+        if (savedColumnStates.hasOwnProperty(t.dataset.column)) {
+            t.checked = savedColumnStates[t.dataset.column];
+        }
+    });
+    document.querySelectorAll('.status-filter').forEach(f => {
+        if (savedStatusStates.hasOwnProperty(f.dataset.status)) {
+            f.checked = savedStatusStates[f.dataset.status];
+        }
+    });
+
     document.getElementById('filterModal').classList.remove('active');
 }
 
 function applyFilters() {
     applyColumnVisibility();
     applyStatusFilters();
-    closeFilterModal();
+
+    // Update saved states so Cancel reflects the newly applied state
+    document.querySelectorAll('.column-toggle').forEach(t => {
+        savedColumnStates[t.dataset.column] = t.checked;
+    });
+    document.querySelectorAll('.status-filter').forEach(f => {
+        savedStatusStates[f.dataset.status] = f.checked;
+    });
+
+    document.getElementById('filterModal').classList.remove('active');
 }
 
-// Map data-column values to their 0-based td/th index in each row
-const columnMap = {
-    'seats':      3,
-    'days':       4,
-    'time':       5,
-    'location':   6,
-    'instructor': 7,
-    'class-num':  8,
-    'enrollment': 9
-};
+// Default checked columns (matches the original Vue app defaults)
+const defaultColumns = ['seats', 'days'];
 
 function applyColumnVisibility() {
     const table = document.getElementById('classScheduleTable');
 
     document.querySelectorAll('.column-toggle').forEach(toggle => {
-        const colIndex = columnMap[toggle.dataset.column];
-        if (colIndex === undefined) return;
-
+        const colClass = 'col-' + toggle.dataset.column;
         const isVisible = toggle.checked;
 
-        // Toggle header th
-        const headerCells = table.querySelectorAll('.el-table__header th');
-        if (headerCells[colIndex]) {
-            headerCells[colIndex].classList.toggle('hidden', !isVisible);
-        }
-
-        // Toggle body td in every row
-        table.querySelectorAll('.course-row').forEach(row => {
-            const cells = row.querySelectorAll('td');
-            if (cells[colIndex]) {
-                cells[colIndex].classList.toggle('hidden', !isVisible);
-            }
+        // Toggle all header and body cells with this column class
+        table.querySelectorAll('.' + colClass).forEach(cell => {
+            cell.classList.toggle('hidden', !isVisible);
         });
     });
 }
@@ -167,14 +186,14 @@ function applyStatusFilters() {
 }
 
 function resetFilters() {
-    document.querySelectorAll('.column-toggle').forEach(t => t.checked = true);
+    // Reset columns to defaults (only Seats and Days checked, matching original Vue app)
+    document.querySelectorAll('.column-toggle').forEach(t => {
+        t.checked = defaultColumns.includes(t.dataset.column);
+    });
     document.querySelectorAll('.status-filter').forEach(f => f.checked = true);
 
     const searchInput = document.getElementById('courseSearch');
     if (searchInput) searchInput.value = '';
-
-    applyColumnVisibility();
-    applyStatusFilters();
 }
 
 // Close modal when clicking the backdrop
@@ -223,11 +242,13 @@ function classScheduleDownloadCSV() {
     var rows = table.querySelectorAll('.el-table__body .course-row');
 
     // Determine which columns are visible
+    // th elements don't include the status td, so th index 0 = course-id (td index 1).
+    // Add 1 to map th index → td index for body cell lookup.
     var visibleCols = [];
     headerCells.forEach(function(th, i) {
-        if (!th.classList.contains('hidden') && i > 0) { // skip status column
+        if (!th.classList.contains('hidden')) {
             visibleCols.push({
-                index: i,
+                index: i + 1, // offset by 1 because body rows have status td at index 0
                 label: th.textContent.trim()
             });
         }
