@@ -106,7 +106,7 @@ a.cancelled {
 }
 
 .input-with-select:focus-within {
-  border-color: #409EFF;
+  border-color: #2272D6;
 }
 
 /* Button group (replaces old el-button-group) */
@@ -130,6 +130,10 @@ a.cancelled {
   margin: 0;
 }
 
+#filterButton {
+  color: #2272D6;
+}
+
 .button-group .filter-button + .filter-button {
   margin-left: -1px;
 }
@@ -145,7 +149,6 @@ a.cancelled {
 .filter-button:hover {
   border-color: #c6e2ff;
   background-color: #ecf5ff;
-  color: #409EFF;
 }
 
 .filter-button .icon-filter {
@@ -154,7 +157,7 @@ a.cancelled {
 }
 
 .filter-active {
-  color: #409EFF !important;
+  color: #2272D6 !important;
 }
 
 .right-btn {
@@ -354,8 +357,8 @@ table {
   border-top-color: #c0c4cc;
 }
 
-th.ascending .sort-caret.ascending  { border-bottom-color: #409EFF; }
-th.descending .sort-caret.descending { border-top-color: #409EFF; }
+th.ascending .sort-caret.ascending  { border-bottom-color: #2272D6; }
+th.descending .sort-caret.descending { border-top-color: #2272D6; }
 
 /* Column widths */
 .el-table th.col-status,
