@@ -9,6 +9,7 @@ class ClassSchedule
     add_action('wp_enqueue_scripts', array($this, 'register_plugin_styles'));
     add_filter('query_vars', array($this, 'add_query_vars'));
     add_action('template_include', array($this, 'course_detail_template'));
+    add_filter('document_title_parts', array($this, 'course_detail_title'));
     add_action('rest_api_init', function () {
       register_rest_route('ucscgutenbergblocks/v1', '/classscheduledept/', array(
         'methods' => 'GET',
@@ -38,6 +39,28 @@ class ClassSchedule
       return plugin_dir_path(__FILE__) . '../templates/CourseDetailTemplate.php';
     }
     return $template;
+  }
+
+  // a11y: set a descriptive <title> for course detail pages
+  function course_detail_title($title_parts) {
+    $term      = get_query_var('course_term');
+    $course_id = get_query_var('course_id');
+
+    if ($term && $course_id) {
+      $request  = new WP_REST_Request('GET', '/ucsc/v1/course/' . $term . '/' . $course_id);
+      $response = rest_do_request($request);
+
+      if (!is_wp_error($response)) {
+        $data    = $response->get_data();
+        $primary = $data['primary_section'] ?? null;
+        if ($primary) {
+          $course_name = ($primary['subject'] ?? '') . ' ' . ($primary['catalog_nbr'] ?? '') . ' - ' . ($primary['title_long'] ?? 'Course Detail');
+          $title_parts['title'] = trim($course_name);
+        }
+      }
+    }
+
+    return $title_parts;
   }
 
   function classscheduledept() {
