@@ -303,4 +303,12 @@ function classScheduleChangeTerm(select) {
 // Apply default column visibility (time/location/instructor are unchecked by default)
 document.addEventListener('DOMContentLoaded', function() {
     applyColumnVisibility();
+
+    // a11y: attach change listener here instead of inline onchange to avoid jump menu a11y warning
+    var quarterDropdown = document.getElementById('quarterDropdown');
+    if (quarterDropdown) {
+        quarterDropdown.addEventListener('change', function() {
+            classScheduleChangeTerm(this);
+        });
+    }
 });

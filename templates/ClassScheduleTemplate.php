@@ -18,8 +18,8 @@ $terms = $terms_data['terms'] ?? [];
 
     <div class="input-with-select">
       <div class="term-select-wrap">
-        <!-- a11y: onkeydown defers action until Enter key so keyboard users can arrow through options without triggering navigation -->
-        <select id="quarterDropdown" onchange="if(!this.dataset.keyNav){classScheduleChangeTerm(this)}" onkeydown="this.dataset.keyNav='true'" onkeyup="if(event.key==='Enter'){delete this.dataset.keyNav;classScheduleChangeTerm(this)}" onblur="delete this.dataset.keyNav">
+        <!-- a11y: no inline onchange to avoid jump menu warning; change handled via addEventListener in classschedule.js -->
+        <select id="quarterDropdown">
           <?php foreach ($terms as $term) : ?>
             <option value="<?php echo esc_attr($term['code']); ?>"
               <?php selected($term['code'], $current_term); ?>>
