@@ -23,7 +23,7 @@ function classScheduleSearch(event) {
     const activeStatuses = getActiveStatuses();
 
     rows.forEach(row => {
-        const cells = row.querySelectorAll('td');
+        const cells = row.querySelectorAll('[role="cell"]');
         let matchesSearch = false;
 
         cells.forEach(cell => {
@@ -60,13 +60,13 @@ function sortClassSchedule(columnIndex) {
         currentSortColumn = columnIndex;
     }
 
-    const tbody = document.querySelector('#classScheduleTable .el-table__body tbody');
+    const tbody = document.querySelector('#classScheduleTable .el-table__body');
     const rows  = Array.from(tbody.querySelectorAll('.course-row'));
     const dir   = sortAscending ? 1 : -1;
 
     rows.sort((a, b) => {
-        const aCells = a.querySelectorAll('td');
-        const bCells = b.querySelectorAll('td');
+        const aCells = a.querySelectorAll('[role="cell"]');
+        const bCells = b.querySelectorAll('[role="cell"]');
         const aText  = (aCells[columnIndex] ? aCells[columnIndex].textContent.trim() : '');
         const bText  = (bCells[columnIndex] ? bCells[columnIndex].textContent.trim() : '');
 
@@ -86,13 +86,11 @@ function sortClassSchedule(columnIndex) {
 }
 
 function updateSortIndicators(columnIndex, ascending) {
-    // columnIndex is 1-based (0 = status td, 1 = course-id th, etc.)
-    // th selection skips the status td, so offset by 1
-    const thIndex = columnIndex - 1;
-    document.querySelectorAll('#classScheduleTable .el-table__header th').forEach((th, i) => {
-        th.classList.remove('ascending', 'descending');
-        if (i === thIndex) {
-            th.classList.add(ascending ? 'ascending' : 'descending');
+    // columnIndex matches the column position (0 = status, 1 = course-id, etc.)
+    document.querySelectorAll('#classScheduleTable .el-table__header-row > [role="columnheader"]').forEach((col, i) => {
+        col.classList.remove('ascending', 'descending');
+        if (i === columnIndex) {
+            col.classList.add(ascending ? 'ascending' : 'descending');
         }
     });
 }
@@ -163,6 +161,35 @@ function applyColumnVisibility() {
             cell.classList.toggle('hidden', !isVisible);
         });
     });
+
+    updateGridTemplate();
+}
+
+// Rebuild CSS Grid column tracks based on which columns are visible.
+// Hidden columns get 0px tracks so the grid collapses them properly.
+var gridColumnDefs = [
+    { cls: 'col-status',     width: '40px' },
+    { cls: 'col-course-id',  width: '120px' },
+    { cls: 'col-title',      width: '1fr' },
+    { cls: 'col-seats',      width: '150px' },
+    { cls: 'col-days',       width: '80px' },
+    { cls: 'col-time',       width: '170px' },
+    { cls: 'col-location',   width: '180px' },
+    { cls: 'col-instructor', width: '160px' },
+    { cls: 'col-class-num',  width: '90px' },
+    { cls: 'col-enrollment', width: '100px' }
+];
+
+function updateGridTemplate() {
+    var table = document.getElementById('classScheduleTable');
+    var gridCols = gridColumnDefs.map(function(col) {
+        var sample = table.querySelector('.' + col.cls);
+        return (sample && sample.classList.contains('hidden')) ? '0px' : col.width;
+    }).join(' ');
+
+    table.querySelectorAll('.el-table__header-row, .el-table__row').forEach(function(row) {
+        row.style.gridTemplateColumns = gridCols;
+    });
 }
 
 function applyStatusFilters() {
@@ -173,7 +200,7 @@ function applyStatusFilters() {
         const matchesStatus = activeStatuses.length === 0 || activeStatuses.includes(row.dataset.status);
 
         // Re-check search too so both filters stay in sync
-        const cells = row.querySelectorAll('td');
+        const cells = row.querySelectorAll('[role="cell"]');
         let matchesSearch = !searchTerm;
         if (searchTerm) {
             cells.forEach(cell => {
@@ -238,18 +265,19 @@ function classScheduleShowToast(html) {
 
 function classScheduleDownloadCSV() {
     var table = document.getElementById('classScheduleTable');
-    var headerCells = table.querySelectorAll('.el-table__header th');
+    var headerCells = table.querySelectorAll('.el-table__header-row > [role="columnheader"]');
     var rows = table.querySelectorAll('.el-table__body .course-row');
 
     // Determine which columns are visible
-    // th elements don't include the status td, so th index 0 = course-id (td index 1).
-    // Add 1 to map th index → td index for body cell lookup.
+    // Header and body divs share the same indices (both include status at index 0)
     var visibleCols = [];
-    headerCells.forEach(function(th, i) {
-        if (!th.classList.contains('hidden')) {
+    headerCells.forEach(function(col, i) {
+        // Skip the status column (index 0) — it only contains a visual indicator, not text data
+        if (i === 0) return;
+        if (!col.classList.contains('hidden')) {
             visibleCols.push({
-                index: i + 1, // offset by 1 because body rows have status td at index 0
-                label: th.textContent.trim()
+                index: i,
+                label: col.textContent.trim()
             });
         }
     });
@@ -262,7 +290,7 @@ function classScheduleDownloadCSV() {
     rows.forEach(function(row) {
         if (row.style.display === 'none') return; // skip filtered-out rows
 
-        var cells = row.querySelectorAll('td');
+        var cells = row.querySelectorAll('[role="cell"]');
         var csvCols = visibleCols.map(function(c) {
             var text = (cells[c.index] ? cells[c.index].textContent.trim() : '');
             // Escape quotes in CSV

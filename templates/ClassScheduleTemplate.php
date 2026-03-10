@@ -88,78 +88,71 @@ $terms = $terms_data['terms'] ?? [];
     </div>
   </div>
 
-  <div class="el-table" id="classScheduleTable">
-    <div class="el-table__header-wrapper">
-      <table class="el-table__header">
-        <thead>
-          <tr>
-            <td class="col-status"><div class="cell"></div></td>
-            <!-- a11y: tabindex, role, and onkeydown added so sortable columns are keyboard-accessible, not just onclick -->
-            <th class="col-course-id is-sortable" tabindex="0" role="button" onclick="sortClassSchedule(1)" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();sortClassSchedule(1)}"><div class="cell">Course ID<span class="caret-wrapper"><i class="sort-caret ascending"></i><i class="sort-caret descending"></i></span></div></th>
-            <th class="col-title is-sortable" tabindex="0" role="button" onclick="sortClassSchedule(2)" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();sortClassSchedule(2)}"><div class="cell">Title<span class="caret-wrapper"><i class="sort-caret ascending"></i><i class="sort-caret descending"></i></span></div></th>
-            <th class="col-seats is-sortable" tabindex="0" role="button" onclick="sortClassSchedule(3)" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();sortClassSchedule(3)}"><div class="cell">Seats<span class="caret-wrapper"><i class="sort-caret ascending"></i><i class="sort-caret descending"></i></span></div></th>
-            <th class="col-days is-sortable" tabindex="0" role="button" onclick="sortClassSchedule(4)" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();sortClassSchedule(4)}"><div class="cell">Days<span class="caret-wrapper"><i class="sort-caret ascending"></i><i class="sort-caret descending"></i></span></div></th>
-            <th class="col-time is-sortable hidden" tabindex="0" role="button" onclick="sortClassSchedule(5)" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();sortClassSchedule(5)}"><div class="cell">Time<span class="caret-wrapper"><i class="sort-caret ascending"></i><i class="sort-caret descending"></i></span></div></th>
-            <th class="col-location is-sortable hidden" tabindex="0" role="button" onclick="sortClassSchedule(6)" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();sortClassSchedule(6)}"><div class="cell">Location<span class="caret-wrapper"><i class="sort-caret ascending"></i><i class="sort-caret descending"></i></span></div></th>
-            <th class="col-instructor is-sortable hidden" tabindex="0" role="button" onclick="sortClassSchedule(7)" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();sortClassSchedule(7)}"><div class="cell">Instructor<span class="caret-wrapper"><i class="sort-caret ascending"></i><i class="sort-caret descending"></i></span></div></th>
-            <th class="col-class-num is-sortable hidden" tabindex="0" role="button" onclick="sortClassSchedule(8)" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();sortClassSchedule(8)}"><div class="cell">Class #<span class="caret-wrapper"><i class="sort-caret ascending"></i><i class="sort-caret descending"></i></span></div></th>
-            <th class="col-enrollment is-sortable hidden" tabindex="0" role="button" onclick="sortClassSchedule(9)" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();sortClassSchedule(9)}"><div class="cell">Enrollment<span class="caret-wrapper"><i class="sort-caret ascending"></i><i class="sort-caret descending"></i></span></div></th>
-          </tr>
-        </thead>
-      </table>
+  <!-- a11y: uses divs with ARIA table roles instead of <table> elements to avoid "layout table" scanner warnings -->
+  <div class="el-table" id="classScheduleTable" role="table" aria-label="Class Schedule">
+    <div class="el-table__header" role="rowgroup">
+      <div class="el-table__header-row" role="row">
+        <div class="col-status" role="columnheader"><div class="cell"><span class="screen-reader-text">Status</span></div></div>
+        <!-- a11y: tabindex and onkeydown added so sortable columns are keyboard-accessible, not just onclick -->
+        <div class="col-course-id is-sortable" role="columnheader" tabindex="0" onclick="sortClassSchedule(1)" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();sortClassSchedule(1)}"><div class="cell">Course ID<span class="caret-wrapper"><i class="sort-caret ascending"></i><i class="sort-caret descending"></i></span></div></div>
+        <div class="col-title is-sortable" role="columnheader" tabindex="0" onclick="sortClassSchedule(2)" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();sortClassSchedule(2)}"><div class="cell">Title<span class="caret-wrapper"><i class="sort-caret ascending"></i><i class="sort-caret descending"></i></span></div></div>
+        <div class="col-seats is-sortable" role="columnheader" tabindex="0" onclick="sortClassSchedule(3)" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();sortClassSchedule(3)}"><div class="cell">Seats<span class="caret-wrapper"><i class="sort-caret ascending"></i><i class="sort-caret descending"></i></span></div></div>
+        <div class="col-days is-sortable" role="columnheader" tabindex="0" onclick="sortClassSchedule(4)" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();sortClassSchedule(4)}"><div class="cell">Days<span class="caret-wrapper"><i class="sort-caret ascending"></i><i class="sort-caret descending"></i></span></div></div>
+        <div class="col-time is-sortable hidden" role="columnheader" tabindex="0" onclick="sortClassSchedule(5)" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();sortClassSchedule(5)}"><div class="cell">Time<span class="caret-wrapper"><i class="sort-caret ascending"></i><i class="sort-caret descending"></i></span></div></div>
+        <div class="col-location is-sortable hidden" role="columnheader" tabindex="0" onclick="sortClassSchedule(6)" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();sortClassSchedule(6)}"><div class="cell">Location<span class="caret-wrapper"><i class="sort-caret ascending"></i><i class="sort-caret descending"></i></span></div></div>
+        <div class="col-instructor is-sortable hidden" role="columnheader" tabindex="0" onclick="sortClassSchedule(7)" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();sortClassSchedule(7)}"><div class="cell">Instructor<span class="caret-wrapper"><i class="sort-caret ascending"></i><i class="sort-caret descending"></i></span></div></div>
+        <div class="col-class-num is-sortable hidden" role="columnheader" tabindex="0" onclick="sortClassSchedule(8)" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();sortClassSchedule(8)}"><div class="cell">Class #<span class="caret-wrapper"><i class="sort-caret ascending"></i><i class="sort-caret descending"></i></span></div></div>
+        <div class="col-enrollment is-sortable hidden" role="columnheader" tabindex="0" onclick="sortClassSchedule(9)" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();sortClassSchedule(9)}"><div class="cell">Enrollment<span class="caret-wrapper"><i class="sort-caret ascending"></i><i class="sort-caret descending"></i></span></div></div>
+      </div>
     </div>
 
-    <div class="el-table__body-wrapper">
-      <table class="el-table__body">
-        <tbody>
-          <?php foreach ($courses as $course) : ?>
-            <?php
-              $available        = max(0, $course['enrl_capacity'] - $course['enrl_total']);
-              $status_text      = strtolower($course['enrl_status']);
-              $status_class     = 'open';
-              if (strpos($status_text, 'wait') !== false) {
-                $status_class = 'waitlist';
-              } elseif (strpos($status_text, 'closed') !== false) {
-                $status_class = 'closed';
+    <div class="el-table__body" role="rowgroup">
+      <?php foreach ($courses as $course) : ?>
+        <?php
+          $available        = max(0, $course['enrl_capacity'] - $course['enrl_total']);
+          $status_text      = strtolower($course['enrl_status']);
+          $status_class     = 'open';
+          if (strpos($status_text, 'wait') !== false) {
+            $status_class = 'waitlist';
+          } elseif (strpos($status_text, 'closed') !== false) {
+            $status_class = 'closed';
+          }
+          $is_cancelled     = strtolower(trim($course['meeting_days'] ?? '')) === 'cancelled';
+          $course_id        = esc_html($course['subject'] . '-' . $course['catalog_nbr']);
+          $course_url       = home_url('/course/' . $current_term . '/' . $course['class_nbr']);
+          $instructor_html = '';
+          if (!empty($course['instructors']) && is_array($course['instructors'])) {
+            $inst_parts = [];
+            foreach ($course['instructors'] as $inst) {
+              $iname = $inst['name'] ?? '';
+              $icruzid = $inst['cruzid'] ?? '';
+              if ($iname === '') continue;
+              if ($icruzid && $iname !== 'Staff') {
+                $inst_parts[] = '<a href="' . esc_url(home_url('/directory/' . $icruzid)) . '">' . esc_html($iname) . '</a>';
+              } else {
+                $inst_parts[] = esc_html($iname);
               }
-              $is_cancelled     = strtolower(trim($course['meeting_days'] ?? '')) === 'cancelled';
-              $course_id        = esc_html($course['subject'] . '-' . $course['catalog_nbr']);
-              $course_url       = home_url('/course/' . $current_term . '/' . $course['class_nbr']);
-              $instructor_html = '';
-              if (!empty($course['instructors']) && is_array($course['instructors'])) {
-                $inst_parts = [];
-                foreach ($course['instructors'] as $inst) {
-                  $iname = $inst['name'] ?? '';
-                  $icruzid = $inst['cruzid'] ?? '';
-                  if ($iname === '') continue;
-                  if ($icruzid && $iname !== 'Staff') {
-                    $inst_parts[] = '<a href="' . esc_url(home_url('/directory/' . $icruzid)) . '">' . esc_html($iname) . '</a>';
-                  } else {
-                    $inst_parts[] = esc_html($iname);
-                  }
-                }
-                $instructor_html = implode(', ', $inst_parts);
-              }
-            ?>
-            <tr class="el-table__row course-row" data-status="<?php echo esc_attr($status_class); ?>">
-              <td class="col-status"><div class="cell"><span class="<?php echo esc_attr($status_class); ?>"></span></div></td>
-              <td class="col-course-id"><div class="cell"><span><?php echo $course_id; ?></span></div></td>
-              <td class="col-title"><div class="cell">
-                <a href="<?php echo esc_url($course_url); ?>"<?php if ($is_cancelled) echo ' class="cancelled"'; ?>><?php echo esc_html($course['title']); ?></a>
-              </div></td>
-              <td class="col-seats"><div class="cell">
-                <span class="seats"><span class="available"><?php echo esc_html($available); ?> open</span> / <?php echo esc_html($course['enrl_capacity']); ?> total</span>
-              </div></td>
-              <td class="col-days"><div class="cell"><span><?php echo $is_cancelled ? 'Cancelled' : esc_html($course['meeting_days']); ?></span></div></td>
-              <td class="col-time hidden"><div class="cell"><span><?php echo esc_html($course['start_time'] . ' - ' . $course['end_time']); ?></span></div></td>
-              <td class="col-location hidden"><div class="cell"><span><?php echo esc_html($course['location']); ?></span></div></td>
-              <td class="col-instructor hidden"><div class="cell"><span><?php echo $instructor_html; ?></span></div></td>
-              <td class="col-class-num hidden"><div class="cell"><span><?php echo esc_html($course['class_nbr']); ?></span></div></td>
-              <td class="col-enrollment hidden"><div class="cell"><span><?php echo esc_html($course['enrl_total']); ?></span></div></td>
-            </tr>
-          <?php endforeach; ?>
-        </tbody>
-      </table>
+            }
+            $instructor_html = implode(', ', $inst_parts);
+          }
+        ?>
+        <div class="el-table__row course-row" role="row" data-status="<?php echo esc_attr($status_class); ?>">
+          <div class="col-status" role="cell"><div class="cell"><span class="<?php echo esc_attr($status_class); ?>"></span></div></div>
+          <div class="col-course-id" role="cell"><div class="cell"><span><?php echo $course_id; ?></span></div></div>
+          <div class="col-title" role="cell"><div class="cell">
+            <a href="<?php echo esc_url($course_url); ?>"<?php if ($is_cancelled) echo ' class="cancelled"'; ?>><?php echo esc_html($course['title']); ?></a>
+          </div></div>
+          <div class="col-seats" role="cell"><div class="cell">
+            <span class="seats"><span class="available"><?php echo esc_html($available); ?> open</span> / <?php echo esc_html($course['enrl_capacity']); ?> total</span>
+          </div></div>
+          <div class="col-days" role="cell"><div class="cell"><span><?php echo $is_cancelled ? 'Cancelled' : esc_html($course['meeting_days']); ?></span></div></div>
+          <div class="col-time hidden" role="cell"><div class="cell"><span><?php echo esc_html($course['start_time'] . ' - ' . $course['end_time']); ?></span></div></div>
+          <div class="col-location hidden" role="cell"><div class="cell"><span><?php echo esc_html($course['location']); ?></span></div></div>
+          <div class="col-instructor hidden" role="cell"><div class="cell"><span><?php echo $instructor_html; ?></span></div></div>
+          <div class="col-class-num hidden" role="cell"><div class="cell"><span><?php echo esc_html($course['class_nbr']); ?></span></div></div>
+          <div class="col-enrollment hidden" role="cell"><div class="cell"><span><?php echo esc_html($course['enrl_total']); ?></span></div></div>
+        </div>
+      <?php endforeach; ?>
     </div>
   </div>
 

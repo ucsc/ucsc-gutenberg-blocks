@@ -288,7 +288,7 @@ a.cancelled {
 }
 
 /* ============================================================
-   Table — matching Element UI defaults
+   Table — div-based layout with CSS Grid (replaces HTML tables)
    ============================================================ */
 .el-table {
   width: 100%;
@@ -297,24 +297,22 @@ a.cancelled {
   color: #606266;
 }
 
-table {
-  margin: 0;
-  padding: 0;
-}
-
-.el-table__header,
-.el-table__body {
-  width: 100%;
-  border-collapse: collapse;
-  table-layout: auto;
+/* CSS Grid row layout — shared by header and body rows.
+   grid-template-columns is set dynamically by updateGridTemplate() in JS
+   to handle column visibility toggling. This is the default. */
+.el-table__header-row,
+.el-table__row {
+  display: grid;
+  grid-template-columns: 40px 120px 1fr 150px 80px 170px 180px 160px 90px 100px;
+  align-items: center;
 }
 
 /* Header row — Element UI default light style */
-.el-table__header thead tr {
+.el-table__header-row {
   background-color: #fff;
 }
 
-.el-table__header th {
+.el-table__header-row > [role="columnheader"] {
   padding: 10px 8px;
   text-align: left;
   font-weight: 500;
@@ -323,12 +321,12 @@ table {
   color: #73777D;
 }
 
-.el-table__header th.is-sortable {
+.el-table__header-row > .is-sortable {
   cursor: pointer;
   user-select: none;
 }
 
-.el-table__header th.is-sortable:hover {
+.el-table__header-row > .is-sortable:hover {
   background-color: #f5f7fa;
 }
 
@@ -357,48 +355,42 @@ table {
   border-top-color: #c0c4cc;
 }
 
-th.ascending .sort-caret.ascending  { border-bottom-color: #2272D6; }
-th.descending .sort-caret.descending { border-top-color: #2272D6; }
+.ascending .sort-caret.ascending  { border-bottom-color: #2272D6; }
+.descending .sort-caret.descending { border-top-color: #2272D6; }
 
-/* Column widths */
-.el-table th.col-status,
-.el-table td.col-status   { width: 40px;  min-width: 40px; }
-.el-table th.col-course-id,
-.el-table td.col-course-id { width: 120px; min-width: 80px; }
-.el-table th.col-title,
-.el-table td.col-title    { width: auto;  min-width: 180px; }
-.el-table th.col-seats,
-.el-table td.col-seats    { width: 150px; min-width: 100px; }
-.el-table th.col-days,
-.el-table td.col-days     { width: 80px;  min-width: 60px; }
-.el-table th.col-time,
-.el-table td.col-time     { width: 130px; min-width: 100px; }
-.el-table th.col-location,
-.el-table td.col-location { width: 140px; min-width: 100px; }
-.el-table th.col-instructor,
-.el-table td.col-instructor { width: 160px; min-width: 120px; }
-.el-table th.col-class-num,
-.el-table td.col-class-num  { width: 90px;  min-width: 70px; }
-.el-table th.col-enrollment,
-.el-table td.col-enrollment { width: 100px; min-width: 80px; }
+/* Explicit grid-column placement so cells stay in the correct column
+   even if a global .hidden rule removes them from flow */
+.el-table .col-status      { grid-column: 1; }
+.el-table .col-course-id   { grid-column: 2; }
+.el-table .col-title       { grid-column: 3; }
+.el-table .col-seats       { grid-column: 4; }
+.el-table .col-days        { grid-column: 5; }
+.el-table .col-time        { grid-column: 6; }
+.el-table .col-location    { grid-column: 7; }
+.el-table .col-instructor  { grid-column: 8; }
+.el-table .col-class-num   { grid-column: 9; }
+.el-table .col-enrollment  { grid-column: 10; }
 
-/* Hide columns marked hidden */
-.el-table th.hidden,
-.el-table td.hidden {
-  display: none;
+/* Hide columns marked hidden — collapse in grid via overflow */
+.el-table .hidden {
+  overflow: hidden;
+  padding: 0 !important;
+  visibility: hidden;
+  min-width: 0;
+  border: none;
 }
 
 /* Body rows — matching Element UI hover behavior */
-.el-table__body tr.el-table__row {
+.el-table__row {
   background-color: #fff;
   transition: background-color 0.15s;
 }
 
-.el-table__body tr.el-table__row:hover {
+.el-table__row:hover {
   background-color: #f5f7fa;
 }
 
-.el-table__body td {
+.el-table__row > [role="cell"] {
   padding: 0;
   border-bottom: 1px solid #ebeef5;
 }
@@ -410,7 +402,7 @@ th.descending .sort-caret.descending { border-top-color: #2272D6; }
 }
 
 /* Status column — center the dot */
-.el-table td.col-status .cell {
+.el-table .col-status .cell {
   display: flex;
   justify-content: center;
   align-items: center;
@@ -429,13 +421,21 @@ th.descending .sort-caret.descending { border-top-color: #2272D6; }
 }
 
 /* Title link */
-.el-table__body td.col-title a {
+.el-table .col-title a {
   color: #2563EB;
   text-decoration: none;
 }
 
-.el-table__body td.col-title a:hover {
+.el-table .col-title a:hover {
   color: #66b1ff;
+}
+
+/* Responsive — horizontal scroll on small screens */
+@media (max-width: 768px) {
+  .el-table__header-row,
+  .el-table__row {
+    min-width: 700px;
+  }
 }
 
 /* ============================================================
@@ -515,10 +515,6 @@ div.print-only {
     margin-bottom: 0.35in;
   }
 
-  table {
-    font-size: 100%;
-  }
-
   div.no-print {
     display: none !important;
   }
@@ -527,8 +523,8 @@ div.print-only {
     display: block;
   }
 
-  #classSchedule .el-table td,
-  #classSchedule .el-table th,
+  #classSchedule .el-table [role="cell"],
+  #classSchedule .el-table [role="columnheader"],
   div.cell {
     padding: 0;
   }
@@ -537,29 +533,25 @@ div.print-only {
     display: none;
   }
 
-  #classSchedule .el-table td .closed {
+  #classSchedule .el-table [role="cell"] .closed {
     width: 10px !important;
     height: 10px !important;
     background: red !important;
     display: inline-block !important;
   }
 
-  #classSchedule .el-table td div.cell span.open {
+  #classSchedule .el-table [role="cell"] div.cell span.open {
     height: 10px !important;
     background: green !important;
     border-radius: 50% !important;
     display: inline-block !important;
   }
 
-  #classSchedule table.el-table__body {
-    table-layout: auto;
-  }
-
   #classSchedule div.el-table {
     zoom: 92%;
   }
 
-  #classSchedule div.el-table__body-wrapper {
+  #classSchedule div.el-table__body {
     overflow: hidden;
   }
 }
