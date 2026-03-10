@@ -13,8 +13,8 @@ $terms = $terms_data['terms'] ?? [];
 <div id="classSchedule">
 
   <div class="introText no-print">
-    <label for="quarterDropdown" style="display: none;">Select Quarter</label>
-    <label for="courseSearch" style="display: none;">Search Schedule</label>
+    <label for="quarterDropdown" class="screen-reader-text">Select Quarter</label>
+    <label for="courseSearch" class="screen-reader-text">Search Schedule</label>
 
     <div class="input-with-select">
       <div class="term-select-wrap">
