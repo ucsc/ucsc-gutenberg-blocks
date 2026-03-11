@@ -37,8 +37,6 @@ if (count($profileData)) {
     </main>
     <div class="has-global-padding is-layout-constrained wp-block-group alignwide">
 
-        <link href="//static.ucsc.edu/css/directory-page.css" media="all" rel="stylesheet" type="text/css">
-
         <h1 id="title" class="page-title"><span class="p-name"><?php echo esc_html($profileData["cn"][0]); ?></span></h1>
 
         <div id="teacher-info" class="section-container person list-page">

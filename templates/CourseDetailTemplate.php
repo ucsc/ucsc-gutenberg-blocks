@@ -50,6 +50,7 @@ if ( ! $primary ) {
 // Enqueue shared styles (status dot shapes reused here)
 wp_enqueue_style( 'classschedule', plugins_url( '../src/components/ClassSchedule/classschedule.css', dirname( __FILE__ ) ) );
 wp_enqueue_style( 'ucsc-shared-templates', plugins_url( '../src/components/shared/templates.css', dirname( __FILE__ ) ) );
+wp_enqueue_style( 'static-directory-page', plugins_url( '../src/components/shared/static-directory-page.css', dirname( __FILE__ ) ) );
 
 // ── Computed values ───────────────────────────────────────────────────────────
 
@@ -240,8 +241,6 @@ if ( ! empty( $secondary_sections ) ) {
 	</div>
 
 	<div class="has-global-padding is-layout-constrained wp-block-group alignwide">
-
-		<link href="//static.ucsc.edu/css/directory-page.css" media="all" rel="stylesheet" type="text/css">
 
 		<i class="<?php echo esc_attr( $status_class ); ?>"></i>
 		<span><?php echo esc_html( $primary['enrl_status'] ); ?></span>
