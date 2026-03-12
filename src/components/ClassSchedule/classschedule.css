@@ -82,18 +82,19 @@ a.cancelled {
   appearance: none;
   -webkit-appearance: none;
   background: transparent url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath fill='%23999' d='M0 0l5 6 5-6z'/%3E%3C/svg%3E") no-repeat right 10px center;
-  padding: 7px 28px 7px 10px;
+  padding: 10px 28px 10px 10px;
   font-size: 14px;
   color: #606266;
   border: none;
   outline: none;
   cursor: pointer;
   min-width: 200px;
+  height: 40px;
 }
 
 #courseSearch {
   flex: 1;
-  padding: 7px 10px;
+  padding: 10px 10px;
   font-size: 14px;
   border: none;
   outline: none;
@@ -119,8 +120,9 @@ a.cancelled {
   display: inline-flex;
   align-items: center;
   gap: 6px;
-  padding: 7px 15px;
+  padding: 12px 20px;
   font-size: 14px;
+  font-weight: 500;
   background-color: #fff;
   color: #606266;
   border: 1px solid #dcdfe6;
@@ -128,10 +130,12 @@ a.cancelled {
   cursor: pointer;
   white-space: nowrap;
   margin: 0;
+  height: 40px;
+  box-sizing: border-box;
 }
 
 #filterButton {
-  color: #2272D6;
+  color: #409EFF;
 }
 
 .button-group .filter-button + .filter-button {
@@ -313,12 +317,17 @@ a.cancelled {
 }
 
 .el-table__header-row > [role="columnheader"] {
-  padding: 10px 8px;
+  padding: 12px 0;
   text-align: left;
-  font-weight: 500;
+  font-weight: 700;
   white-space: nowrap;
   border-bottom: 1px solid #ebeef5;
   color: #73777D;
+  background-color: #fff;
+  min-height: 67px;
+  box-sizing: border-box;
+  display: flex;
+  align-items: center;
 }
 
 .el-table__header-row > .is-sortable {
@@ -391,7 +400,7 @@ a.cancelled {
 }
 
 .el-table__row > [role="cell"] {
-  padding: 0;
+  padding: 12px 0;
   border-bottom: 1px solid #ebeef5;
 }
 
@@ -422,12 +431,14 @@ a.cancelled {
 
 /* Title link */
 .el-table .col-title a {
-  color: #2563EB;
-  text-decoration: none;
+  color: #003C6C;
+  text-decoration: underline;
+  line-height: 23px;
 }
 
 .el-table .col-title a:hover {
-  color: #66b1ff;
+  color: #003C6C;
+  opacity: 0.8;
 }
 
 /* Responsive — horizontal scroll on small screens */
