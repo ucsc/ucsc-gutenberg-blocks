@@ -96,7 +96,9 @@
 
 .section-item .item-image img {
   width: 160px;
+  height: 160px;
   padding: 0;
+  object-fit: cover;
 }
 
 .square-img {

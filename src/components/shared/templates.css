@@ -3,5 +3,13 @@
 /* Keep h2 headings visually styled like h3 to fix accessibility issue
    "heading level is skipped" without changing the look */
 .h3-style {
-	font-size: var(--wp--preset--font-size--three, 1.728rem);
+	font-size: 25.45px;
+	color: rgb(0, 60, 108);
+	margin-top: 25.45px;
+	margin-bottom: 25.45px;
+}
+
+/* "Description" heading gets extra top padding to match production */
+.section-container .h3-style:first-of-type {
+	padding-top: 12.73px;
 }
