@@ -17,6 +17,20 @@ function linkify($key, $str) {
         $website = explode(" ", $str);
         $str = "<a target='_blank' href='{$website[0]}'>{$website[1]}</a>";
     }
+    // Remove title attributes from links only when they duplicate the link text (a11y: WCAG 2.4.4)
+    $dom = new DOMDocument();
+    @$dom->loadHTML(mb_convert_encoding($str, 'HTML-ENTITIES', 'UTF-8'), LIBXML_HTML_NOIMPLIED | LIBXML_HTML_NODEFDTD);
+    foreach ($dom->getElementsByTagName('a') as $link) {
+        if (!$link->hasAttribute('title')) continue;
+        $titleText = trim($link->getAttribute('title'));
+        $linkText  = trim($link->textContent);
+        if (strcasecmp($titleText, $linkText) === 0 || str_starts_with($titleText, $linkText)) {
+            $link->removeAttribute('title');
+        }
+    }
+    $str = $dom->saveHTML();
+    // DOMDocument wraps output in html/body tags; strip them
+    $str = preg_replace('~^.*<body>|</body>.*$~s', '', $str);
     return $str;
 }
 if (count($profileData)) {
