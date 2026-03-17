@@ -87,7 +87,7 @@ $individualPageUrl = $items['nodeContent']['linkOutToCampusDirectory'] ?
               ?>
               <div class="section-item h-card wrap">
                 <div class="item-body">
-                  <h3 class="item-name">
+                  <h2 class="h3-style item-name">
                     <?php
                       if ($items['linkToProfile']) {
                         echo '<a class="u-url" href="' . $individualPageUrl . $people[$i]['uid'][0] . '">';
