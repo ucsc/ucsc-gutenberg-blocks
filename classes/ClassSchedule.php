@@ -188,6 +188,11 @@ class ClassSchedule
 
     $courses = $courses_data['classes'];
 
+    // Sort by catalog number numerically to match prod default order
+    usort($courses, function ($a, $b) {
+      return (int) $a['catalog_nbr'] - (int) $b['catalog_nbr'];
+    });
+
     ob_start();
     include(plugin_dir_path(__FILE__) . '../templates/ClassScheduleTemplate.php');
     return ob_get_clean();
