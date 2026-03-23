@@ -14,6 +14,18 @@
  *   9  col-enrollment (toggleable, default off)
  */
 
+// ── A11Y: Live count update (aria-live region) ───────────────────────────────
+
+function updateClassCount() {
+    var rows = document.querySelectorAll('#classScheduleTable .course-row');
+    var visible = 0;
+    rows.forEach(function(row) {
+        if (row.style.display !== 'none') visible++;
+    });
+    var el = document.getElementById('classCount');
+    if (el) el.innerHTML = 'Displaying <strong>' + visible + '</strong> classes';
+}
+
 // ── Search ────────────────────────────────────────────────────────────────────
 
 function classScheduleSearch(event) {
@@ -37,6 +49,8 @@ function classScheduleSearch(event) {
 
         row.style.display = (matchesSearch && matchesStatus) ? '' : 'none';
     });
+
+    updateClassCount();
 }
 
 function getActiveStatuses() {
@@ -91,6 +105,9 @@ function updateSortIndicators(columnIndex, ascending) {
         col.classList.remove('ascending', 'descending');
         if (i === columnIndex) {
             col.classList.add(ascending ? 'ascending' : 'descending');
+            col.setAttribute('aria-sort', ascending ? 'ascending' : 'descending');
+        } else if (col.classList.contains('is-sortable')) {
+            col.setAttribute('aria-sort', 'none');
         }
     });
 }
@@ -159,6 +176,11 @@ function applyColumnVisibility() {
         // Toggle all header and body cells with this column class
         table.querySelectorAll('.' + colClass).forEach(cell => {
             cell.classList.toggle('hidden', !isVisible);
+
+            // A11Y: prevent keyboard focus on hidden sortable headers
+            if (cell.getAttribute('role') === 'columnheader' && cell.classList.contains('is-sortable')) {
+                cell.setAttribute('tabindex', isVisible ? '0' : '-1');
+            }
         });
     });
 
@@ -210,6 +232,8 @@ function applyStatusFilters() {
 
         row.style.display = (matchesStatus && matchesSearch) ? '' : 'none';
     });
+
+    updateClassCount();
 }
 
 function resetFilters() {

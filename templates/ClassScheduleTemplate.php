@@ -80,11 +80,11 @@ $terms = $terms_data['terms'] ?? [];
   </div>
 
   <div class="display-key no-print">
-    <div>Displaying <strong><?php echo count($courses); ?></strong> classes</div>
+    <div id="classCount" aria-live="polite">Displaying <strong><?php echo count($courses); ?></strong> classes</div>
     <div class="right">
-      <div class="open"></div>Open
-      <div class="closed"></div>Closed
-      <div class="waitlist"></div>Closed w/ Wait List
+      <span class="open" aria-hidden="true"></span>Open
+      <span class="closed" aria-hidden="true"></span>Closed
+      <span class="waitlist" aria-hidden="true"></span>Closed w/ Wait List
     </div>
   </div>
 
@@ -93,16 +93,16 @@ $terms = $terms_data['terms'] ?? [];
     <div class="el-table__header" role="rowgroup">
       <div class="el-table__header-row" role="row">
         <div class="col-status" role="columnheader"><div class="cell"><span class="screen-reader-text">Status</span></div></div>
-        <!-- a11y: tabindex and onkeydown added so sortable columns are keyboard-accessible, not just onclick -->
-        <div class="col-course-id is-sortable" role="columnheader" tabindex="0" onclick="sortClassSchedule(1)" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();sortClassSchedule(1)}"><div class="cell">Course ID<span class="caret-wrapper"><i class="sort-caret ascending"></i><i class="sort-caret descending"></i></span></div></div>
-        <div class="col-title is-sortable" role="columnheader" tabindex="0" onclick="sortClassSchedule(2)" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();sortClassSchedule(2)}"><div class="cell">Title<span class="caret-wrapper"><i class="sort-caret ascending"></i><i class="sort-caret descending"></i></span></div></div>
-        <div class="col-seats is-sortable" role="columnheader" tabindex="0" onclick="sortClassSchedule(3)" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();sortClassSchedule(3)}"><div class="cell">Seats<span class="caret-wrapper"><i class="sort-caret ascending"></i><i class="sort-caret descending"></i></span></div></div>
-        <div class="col-days is-sortable" role="columnheader" tabindex="0" onclick="sortClassSchedule(4)" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();sortClassSchedule(4)}"><div class="cell">Days<span class="caret-wrapper"><i class="sort-caret ascending"></i><i class="sort-caret descending"></i></span></div></div>
-        <div class="col-time is-sortable hidden" role="columnheader" tabindex="0" onclick="sortClassSchedule(5)" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();sortClassSchedule(5)}"><div class="cell">Time<span class="caret-wrapper"><i class="sort-caret ascending"></i><i class="sort-caret descending"></i></span></div></div>
-        <div class="col-location is-sortable hidden" role="columnheader" tabindex="0" onclick="sortClassSchedule(6)" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();sortClassSchedule(6)}"><div class="cell">Location<span class="caret-wrapper"><i class="sort-caret ascending"></i><i class="sort-caret descending"></i></span></div></div>
-        <div class="col-instructor is-sortable hidden" role="columnheader" tabindex="0" onclick="sortClassSchedule(7)" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();sortClassSchedule(7)}"><div class="cell">Instructor<span class="caret-wrapper"><i class="sort-caret ascending"></i><i class="sort-caret descending"></i></span></div></div>
-        <div class="col-class-num is-sortable hidden" role="columnheader" tabindex="0" onclick="sortClassSchedule(8)" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();sortClassSchedule(8)}"><div class="cell">Class #<span class="caret-wrapper"><i class="sort-caret ascending"></i><i class="sort-caret descending"></i></span></div></div>
-        <div class="col-enrollment is-sortable hidden" role="columnheader" tabindex="0" onclick="sortClassSchedule(9)" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();sortClassSchedule(9)}"><div class="cell">Enrollment<span class="caret-wrapper"><i class="sort-caret ascending"></i><i class="sort-caret descending"></i></span></div></div>
+        <!-- a11y: inner button elements handle both mouse and keyboard activation natively -->
+        <div class="col-course-id is-sortable" role="columnheader" aria-sort="none"><button type="button" class="cell" onclick="sortClassSchedule(1)">Course ID<span class="caret-wrapper"><i class="sort-caret ascending"></i><i class="sort-caret descending"></i></span></button></div>
+        <div class="col-title is-sortable" role="columnheader" aria-sort="none"><button type="button" class="cell" onclick="sortClassSchedule(2)">Title<span class="caret-wrapper"><i class="sort-caret ascending"></i><i class="sort-caret descending"></i></span></button></div>
+        <div class="col-seats is-sortable" role="columnheader" aria-sort="none"><button type="button" class="cell" onclick="sortClassSchedule(3)">Seats<span class="caret-wrapper"><i class="sort-caret ascending"></i><i class="sort-caret descending"></i></span></button></div>
+        <div class="col-days is-sortable" role="columnheader" aria-sort="none"><button type="button" class="cell" onclick="sortClassSchedule(4)">Days<span class="caret-wrapper"><i class="sort-caret ascending"></i><i class="sort-caret descending"></i></span></button></div>
+        <div class="col-time is-sortable hidden" role="columnheader" aria-sort="none"><button type="button" class="cell" tabindex="-1" onclick="sortClassSchedule(5)">Time<span class="caret-wrapper"><i class="sort-caret ascending"></i><i class="sort-caret descending"></i></span></button></div>
+        <div class="col-location is-sortable hidden" role="columnheader" aria-sort="none"><button type="button" class="cell" tabindex="-1" onclick="sortClassSchedule(6)">Location<span class="caret-wrapper"><i class="sort-caret ascending"></i><i class="sort-caret descending"></i></span></button></div>
+        <div class="col-instructor is-sortable hidden" role="columnheader" aria-sort="none"><button type="button" class="cell" tabindex="-1" onclick="sortClassSchedule(7)">Instructor<span class="caret-wrapper"><i class="sort-caret ascending"></i><i class="sort-caret descending"></i></span></button></div>
+        <div class="col-class-num is-sortable hidden" role="columnheader" aria-sort="none"><button type="button" class="cell" tabindex="-1" onclick="sortClassSchedule(8)">Class #<span class="caret-wrapper"><i class="sort-caret ascending"></i><i class="sort-caret descending"></i></span></button></div>
+        <div class="col-enrollment is-sortable hidden" role="columnheader" aria-sort="none"><button type="button" class="cell" tabindex="-1" onclick="sortClassSchedule(9)">Enrollment<span class="caret-wrapper"><i class="sort-caret ascending"></i><i class="sort-caret descending"></i></span></button></div>
       </div>
     </div>
 
@@ -137,7 +137,12 @@ $terms = $terms_data['terms'] ?? [];
           }
         ?>
         <div class="el-table__row course-row" role="row" data-status="<?php echo esc_attr($status_class); ?>">
-          <div class="col-status" role="cell"><div class="cell"><span class="<?php echo esc_attr($status_class); ?>"></span></div></div>
+          <?php
+            $status_label = 'Open';
+            if ($status_class === 'closed') $status_label = 'Closed';
+            elseif ($status_class === 'waitlist') $status_label = 'Closed with Wait List';
+          ?>
+          <div class="col-status" role="cell"><div class="cell"><span class="<?php echo esc_attr($status_class); ?>" aria-label="<?php echo esc_attr($status_label); ?>" role="img"></span></div></div>
           <div class="col-course-id" role="cell"><div class="cell"><span><?php echo $course_id; ?></span></div></div>
           <div class="col-title" role="cell"><div class="cell">
             <a href="<?php echo esc_url($course_url); ?>"<?php if ($is_cancelled) echo ' class="cancelled"'; ?>><?php echo esc_html($course['title']); ?></a>
