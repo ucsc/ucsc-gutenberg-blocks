@@ -232,7 +232,7 @@ if ( ! empty( $secondary_sections ) ) {
 
 <main class="is-layout-flow wp-block-group content-region" id="wp--skip-link--target" style="margin-block-start: var(--wp--preset--font-size--one);">
 	<div class="has-global-padding is-layout-constrained wp-block-group">
-		<nav class="breadcrumbs alignwide" role="navigation" aria-label="Breadcrumbs" itemprop="breadcrumb">
+		<nav class="breadcrumbs alignwide" aria-label="Breadcrumbs" itemprop="breadcrumb">
 			<ul class="breadcrumbs__trail" itemscope="" itemtype="https://schema.org/BreadcrumbList">
 				<li class="breadcrumbs__crumb breadcrumbs__crumb--home" itemprop="itemListElement" itemscope="" itemtype="https://schema.org/ListItem">
 					<a href="/" itemprop="item"><span itemprop="name">Home</span></a>

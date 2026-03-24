@@ -106,8 +106,8 @@ function updateSortIndicators(columnIndex, ascending) {
         if (i === columnIndex) {
             col.classList.add(ascending ? 'ascending' : 'descending');
             col.setAttribute('aria-sort', ascending ? 'ascending' : 'descending');
-        } else if (col.classList.contains('is-sortable')) {
-            col.setAttribute('aria-sort', 'none');
+        } else {
+            col.removeAttribute('aria-sort');
         }
     });
 }
@@ -129,7 +129,52 @@ function openFilterModal() {
         savedStatusStates[f.dataset.status] = f.checked;
     });
 
-    document.getElementById('filterModal').classList.add('active');
+    // A11Y: remember which element opened the modal so we can restore focus
+    filterModalOpener = document.activeElement;
+
+    var modal = document.getElementById('filterModal');
+    modal.classList.add('active');
+
+    // A11Y: move focus into the modal
+    var firstFocusable = modal.querySelector('input, button, [tabindex]:not([tabindex="-1"])');
+    if (firstFocusable) firstFocusable.focus();
+
+    // A11Y: trap focus and handle Escape
+    document.addEventListener('keydown', filterModalKeyHandler);
+}
+
+// A11Y: element that opened the modal (for focus restoration)
+var filterModalOpener = null;
+
+// A11Y: keyboard handler for focus trapping and Escape
+function filterModalKeyHandler(event) {
+    var modal = document.getElementById('filterModal');
+    if (!modal.classList.contains('active')) return;
+
+    if (event.key === 'Escape') {
+        event.preventDefault();
+        closeFilterModal();
+        return;
+    }
+
+    if (event.key === 'Tab') {
+        var focusable = modal.querySelectorAll('input, button, [tabindex]:not([tabindex="-1"])');
+        if (focusable.length === 0) return;
+        var first = focusable[0];
+        var last = focusable[focusable.length - 1];
+
+        if (event.shiftKey) {
+            if (document.activeElement === first) {
+                event.preventDefault();
+                last.focus();
+            }
+        } else {
+            if (document.activeElement === last) {
+                event.preventDefault();
+                first.focus();
+            }
+        }
+    }
 }
 
 function closeFilterModal() {
@@ -146,6 +191,13 @@ function closeFilterModal() {
     });
 
     document.getElementById('filterModal').classList.remove('active');
+
+    // A11Y: remove focus trap handler and restore focus to opener
+    document.removeEventListener('keydown', filterModalKeyHandler);
+    if (filterModalOpener) {
+        filterModalOpener.focus();
+        filterModalOpener = null;
+    }
 }
 
 function applyFilters() {
@@ -161,6 +213,13 @@ function applyFilters() {
     });
 
     document.getElementById('filterModal').classList.remove('active');
+
+    // A11Y: remove focus trap handler and restore focus to opener
+    document.removeEventListener('keydown', filterModalKeyHandler);
+    if (filterModalOpener) {
+        filterModalOpener.focus();
+        filterModalOpener = null;
+    }
 }
 
 // Default checked columns (matches the original Vue app defaults)

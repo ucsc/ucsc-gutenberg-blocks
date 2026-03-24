@@ -82,6 +82,7 @@ const ClassSchedule = () => {
                 setAttributes={setAttributes}
                 disabled={subjectOrDept !== "subject"}
               />
+              <small style={{ display: 'block', marginTop: '3em', fontSize: '0.7em', color: '#666' }}>version 2.0</small>
             </PanelBody>
           </Panel>
         </>

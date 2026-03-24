@@ -38,7 +38,7 @@ if (count($profileData)) {
   ?>
     <main class="is-layout-flow wp-block-group content-region" id="wp--skip-link--target" style="margin-block-start: var(--wp--preset--font-size--one);">
         <div class="has-global-padding is-layout-constrained wp-block-group">
-            <nav class="breadcrumbs alignwide" role="navigation" aria-label="Breadcrumbs" itemprop="breadcrumb">
+            <nav class="breadcrumbs alignwide" aria-label="Breadcrumbs" itemprop="breadcrumb">
                 <ul class="breadcrumbs__trail" itemscope="" itemtype="https://schema.org/BreadcrumbList">
                     <li class="breadcrumbs__crumb breadcrumbs__crumb--home" itemprop="itemListElement" itemscope="" itemtype="https://schema.org/ListItem">
                         <a href="/" itemprop="item">
@@ -48,7 +48,7 @@ if (count($profileData)) {
                 </ul>
             </nav>
         </div>
-    </main>
+
     <div class="has-global-padding is-layout-constrained wp-block-group alignwide">
 
         <h1 id="title" class="page-title"><span class="p-name"><?php echo esc_html($profileData["cn"][0]); ?></span></h1>
@@ -65,7 +65,7 @@ if (count($profileData)) {
                                 $imgSrc = '//static.ucsc.edu/images/icon-slug.jpg';
                             }
                         ?>
-                        <img src="<?php echo esc_url($imgSrc); ?>" alt="<?php echo esc_attr($profileData["cn"][0]); ?>">
+                        <img src="<?php echo esc_url($imgSrc); ?>" alt="Portrait of <?php echo esc_attr($profileData["cn"][0]); ?>">
                     </div>
                     <div class="item-body">
                         <dl class="item-info">
@@ -297,6 +297,7 @@ if (count($profileData)) {
         </div><!-- #teacher-info -->
 
     </div>
+    </main>
     <?php
 } else {
   echo "<div class=\"has-global-padding is-layout-constrained wp-block-group alignwide\"><h2 class=\"h3-style\">CruzID: " . esc_html($cruzid) . " not found.</h2></div>";
