@@ -81,6 +81,13 @@ foreach ( $notes_array as $note ) {
 }
 $notes_text = trim( $notes_text );
 
+// A11Y: Breadcrumb back URL — use the HTTP referer if it's on the same site, otherwise fall back to home
+$breadcrumb_back_url = home_url( '/' );
+$referer = wp_get_referer();
+if ( $referer && wp_validate_redirect( $referer, false ) && strpos( $referer, home_url() ) === 0 ) {
+	$breadcrumb_back_url = $referer;
+}
+
 // Time formatter — "TBA" passthrough, otherwise "g:i A"
 // function_exists protects us if this template ever gets included twice, PHP won't have a fatal error with "Cannot redeclare."
 if ( ! function_exists( 'format_course_time' ) ) {
@@ -231,7 +238,7 @@ if ( ! empty( $secondary_sections ) ) {
 					<a href="/" itemprop="item"><span itemprop="name">Home</span></a>
 				</li>
 				<li class="breadcrumbs__crumb" itemprop="itemListElement" itemscope="" itemtype="https://schema.org/ListItem">
-					<a href="javascript:history.back()" itemprop="item"><span itemprop="name">Class Schedule</span></a>
+					<a href="<?php echo esc_url( $breadcrumb_back_url ); ?>" itemprop="item"><span itemprop="name">Class Schedule</span></a>
 				</li>
 				<li class="breadcrumbs__crumb" itemprop="itemListElement" itemscope="" itemtype="https://schema.org/ListItem">
 					<span itemprop="name"><?php echo esc_html( $course_name ); ?></span>
@@ -242,7 +249,7 @@ if ( ! empty( $secondary_sections ) ) {
 
 	<div class="has-global-padding is-layout-constrained wp-block-group alignwide">
 
-		<i class="<?php echo esc_attr( $status_class ); ?>"></i>
+		<i class="<?php echo esc_attr( $status_class ); ?>" aria-hidden="true"></i>
 		<span><?php echo esc_html( $primary['enrl_status'] ); ?></span>
 
 		<h1 id="title" class="page-title"><span class="p-name"><?php echo esc_html( $primary['title_long'] ); ?></span></h1>
@@ -269,13 +276,13 @@ if ( ! empty( $secondary_sections ) ) {
 
 						<div>
 							<h2 class="h3-style">Capacity and Available Seats</h2>
-							<ul class="item-info">
-								<li><strong>Available Seats</strong> <?php echo esc_html( $available ); ?></li>
+							<dl class="item-info">
+								<div><dt>Available Seats</dt><dd><?php echo esc_html( $available ); ?></dd></div>
 								<?php if ( ! empty( $primary['capacity'] ) ) : ?>
-								<li><strong>Enrollment Capacity</strong> <?php echo esc_html( $primary['capacity'] ); ?></li>
+								<div><dt>Enrollment Capacity</dt><dd><?php echo esc_html( $primary['capacity'] ); ?></dd></div>
 								<?php endif; ?>
-								<li><strong>Enrolled</strong> <?php echo esc_html( $primary['enrl_total'] ?? 0 ); ?></li>
-							</ul>
+								<div><dt>Enrolled</dt><dd><?php echo esc_html( $primary['enrl_total'] ?? 0 ); ?></dd></div>
+							</dl>
 						</div>
 
 						<?php if ( ! empty( $primary['requirements'] ) ) : ?>
@@ -294,36 +301,36 @@ if ( ! empty( $secondary_sections ) ) {
 
 						<div>
 							<h2 class="h3-style">Class Details</h2>
-							<ul class="item-info">
+							<dl class="item-info">
 								<?php if ( ! empty( $primary['acad_career'] ) ) : ?>
-								<li><strong>Career</strong> <?php echo esc_html( $primary['acad_career'] ); ?></li>
+								<div><dt>Career</dt><dd><?php echo esc_html( $primary['acad_career'] ); ?></dd></div>
 								<?php endif; ?>
 								<?php if ( ! empty( $primary['grading'] ) ) : ?>
-								<li><strong>Grading</strong> <?php echo esc_html( $primary['grading'] ); ?></li>
+								<div><dt>Grading</dt><dd><?php echo esc_html( $primary['grading'] ); ?></dd></div>
 								<?php endif; ?>
 								<?php if ( ! empty( $primary['class_nbr'] ) ) : ?>
-								<li><strong>Class Number</strong> <?php echo esc_html( $primary['class_nbr'] ); ?></li>
+								<div><dt>Class Number</dt><dd><?php echo esc_html( $primary['class_nbr'] ); ?></dd></div>
 								<?php endif; ?>
 								<?php if ( ! empty( $primary['component'] ) ) : ?>
-								<li><strong>Type</strong> <?php echo esc_html( $primary['component'] ); ?></li>
+								<div><dt>Type</dt><dd><?php echo esc_html( $primary['component'] ); ?></dd></div>
 								<?php endif; ?>
 								<?php if ( ! empty( $primary['credits'] ) ) : ?>
-								<li><strong>Credits</strong> <?php echo esc_html( $primary['credits'] ); ?></li>
+								<div><dt>Credits</dt><dd><?php echo esc_html( $primary['credits'] ); ?></dd></div>
 								<?php endif; ?>
 								<?php if ( ! empty( $primary['gened'] ) ) : ?>
-								<li><strong>General Education</strong> <?php echo esc_html( $primary['gened'] ); ?></li>
+								<div><dt>General Education</dt><dd><?php echo esc_html( $primary['gened'] ); ?></dd></div>
 								<?php endif; ?>
-							</ul>
+							</dl>
 						</div>
 
 						<?php if ( ! empty( $meetings ) ) : ?>
 						<div>
 							<h2 class="h3-style">Meeting Information</h2>
-							<ul class="item-info">
-								<li><strong>Days &amp; Times</strong> <?php echo esc_html( $day_times ); ?></li>
-								<li><strong>Room</strong> <?php echo esc_html( $location ); ?></li>
+							<dl class="item-info">
+								<div><dt>Days &amp; Times</dt><dd><?php echo esc_html( $day_times ); ?></dd></div>
+								<div><dt>Room</dt><dd><?php echo esc_html( $location ); ?></dd></div>
 								<?php if ( ! empty( $instructor_map ) ) : ?>
-								<li><strong>Instructor</strong>
+								<div><dt>Instructor</dt><dd>
 									<?php
 									$inst_parts = [];
 									foreach ( $instructor_map as $iname => $inst ) {
@@ -336,12 +343,12 @@ if ( ! empty( $secondary_sections ) ) {
 									}
 									echo implode( ', ', $inst_parts );
 									?>
-								</li>
+								</dd></div>
 								<?php endif; ?>
 								<?php if ( $dates ) : ?>
-								<li><strong>Meeting Dates</strong> <?php echo esc_html( $dates ); ?></li>
+								<div><dt>Meeting Dates</dt><dd><?php echo esc_html( $dates ); ?></dd></div>
 								<?php endif; ?>
-							</ul>
+							</dl>
 						</div>
 						<?php endif; ?>
 
@@ -351,35 +358,35 @@ if ( ! empty( $secondary_sections ) ) {
 							$sec = $sec_info['data'];
 						?>
 						<div class="class-section">
-							<ul class="item-info">
+							<dl class="item-info">
 								<?php if ( ! empty( $sec['class_section'] ) ) : ?>
-								<li><strong>Section</strong> <?php echo esc_html( $sec['class_section'] ); ?></li>
+								<div><dt>Section</dt><dd><?php echo esc_html( $sec['class_section'] ); ?></dd></div>
 								<?php endif; ?>
 								<?php if ( ! empty( $sec['component'] ) ) : ?>
-								<li><strong>Type</strong> <?php echo esc_html( $sec['component'] ); ?></li>
+								<div><dt>Type</dt><dd><?php echo esc_html( $sec['component'] ); ?></dd></div>
 								<?php endif; ?>
 								<?php if ( ! empty( $sec['class_nbr'] ) ) : ?>
-								<li><strong>Class Number</strong> <?php echo esc_html( $sec['class_nbr'] ); ?></li>
+								<div><dt>Class Number</dt><dd><?php echo esc_html( $sec['class_nbr'] ); ?></dd></div>
 								<?php endif; ?>
 								<?php if ( ! empty( $sec_info['days'] ) ) : ?>
-								<li><strong>Days</strong> <?php echo esc_html( $sec_info['days'] ); ?></li>
+								<div><dt>Days</dt><dd><?php echo esc_html( $sec_info['days'] ); ?></dd></div>
 								<?php endif; ?>
 								<?php if ( ! empty( $sec_info['times'] ) ) : ?>
-								<li><strong>Time</strong> <?php echo esc_html( $sec_info['times'] ); ?></li>
+								<div><dt>Time</dt><dd><?php echo esc_html( $sec_info['times'] ); ?></dd></div>
 								<?php endif; ?>
 								<?php if ( ! empty( $sec_info['inst_html'] ) ) : ?>
-								<li><strong>Instructor</strong> <?php echo $sec_info['inst_html']; ?></li>
+								<div><dt>Instructor</dt><dd><?php echo $sec_info['inst_html']; ?></dd></div>
 								<?php endif; ?>
 								<?php if ( ! empty( $sec_info['location'] ) ) : ?>
-								<li><strong>Location</strong> <?php echo esc_html( $sec_info['location'] ); ?></li>
+								<div><dt>Location</dt><dd><?php echo esc_html( $sec_info['location'] ); ?></dd></div>
 								<?php endif; ?>
 								<?php if ( ! empty( $sec['capacity'] ) ) : ?>
-								<li><strong>Enrollment Capacity</strong> <?php echo esc_html( $sec['capacity'] ); ?></li>
+								<div><dt>Enrollment Capacity</dt><dd><?php echo esc_html( $sec['capacity'] ); ?></dd></div>
 								<?php endif; ?>
 								<?php if ( ! empty( $sec['enrl_total'] ) ) : ?>
-								<li><strong>Enrolled</strong> <?php echo esc_html( $sec['enrl_total'] ); ?></li>
+								<div><dt>Enrolled</dt><dd><?php echo esc_html( $sec['enrl_total'] ); ?></dd></div>
 								<?php endif; ?>
-							</ul>
+							</dl>
 						</div>
 						<?php endforeach; ?>
 						<?php endif; ?>
@@ -401,25 +408,25 @@ if ( ! empty( $secondary_sections ) ) {
 .class-section .item-info {
 	margin: 20px 0 !important;
 }
-.class-section .item-info li {
+.class-section .item-info > div {
 	border-bottom: 2px solid #fff !important;
 }
 @media (min-width: 768px) {
-	#class-info .item-info li strong {
+	#class-info .item-info dt {
 		flex-basis: 180px;
 	}
 }
 @media print {
 	.no-print { display: none !important; }
-	#class-info .item-info > li {
+	#class-info .item-info > div {
 		align-items: flex-start;
 		flex-direction: row;
 		border-bottom: 1px solid rgba(0,0,0,0.12);
 	}
-	#class-info .item-info > li:last-of-type {
+	#class-info .item-info > div:last-of-type {
 		border-bottom: 0;
 	}
-	#class-info .item-info li strong {
+	#class-info .item-info dt {
 		flex: 0 0 180px;
 		text-align: right;
 		padding-right: 1.5em;

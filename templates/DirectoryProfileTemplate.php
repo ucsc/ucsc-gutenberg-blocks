@@ -68,57 +68,57 @@ if (count($profileData)) {
                         <img src="<?php echo esc_url($imgSrc); ?>" alt="<?php echo esc_attr($profileData["cn"][0]); ?>">
                     </div>
                     <div class="item-body">
-                        <ul class="item-info">
+                        <dl class="item-info">
                             <?php if (!empty($profileData['title']) && $profileData['title']['count']): ?>
-                            <li>
-                                <strong>Title</strong>
-                                <ul class="inline-list">
+                            <div>
+                                <dt>Title</dt>
+                                <dd><ul class="inline-list">
                                     <?php for ($i = 0; $i < $profileData['title']['count']; $i++): ?>
                                         <li><?php echo esc_html($profileData['title'][$i]); ?></li>
                                     <?php endfor; ?>
-                                </ul>
-                            </li>
+                                </ul></dd>
+                            </div>
                             <?php endif; ?>
 
                             <?php if (!empty($profileData['ucscpersonpubdivision']) && $profileData['ucscpersonpubdivision']['count']): ?>
-                            <li>
-                                <strong>Division</strong>
-                                <?php
+                            <div>
+                                <dt>Division</dt>
+                                <dd><?php
                                 for ($i = 0; $i < $profileData['ucscpersonpubdivision']['count']; $i++) {
                                     if ($i > 0) echo '; ';
                                     echo esc_html($profileData['ucscpersonpubdivision'][$i]);
                                 }
-                                ?>
-                            </li>
+                                ?></dd>
+                            </div>
                             <?php endif; ?>
 
                             <?php if (!empty($profileData['ucscpersonpubdepartmentnumber']) && $profileData['ucscpersonpubdepartmentnumber']['count']): ?>
-                            <li>
-                                <strong>Department</strong>
-                                <ul class="inline-list">
+                            <div>
+                                <dt>Department</dt>
+                                <dd><ul class="inline-list">
                                     <?php for ($i = 0; $i < $profileData['ucscpersonpubdepartmentnumber']['count']; $i++): ?>
                                         <li><?php echo esc_html($profileData['ucscpersonpubdepartmentnumber'][$i]); ?></li>
                                     <?php endfor; ?>
-                                </ul>
-                            </li>
+                                </ul></dd>
+                            </div>
                             <?php endif; ?>
 
                             <?php if (!empty($profileData['ucscpersonpubaffiliateddepartment']) && $profileData['ucscpersonpubaffiliateddepartment']['count']): ?>
-                            <li>
-                                <strong>Affiliations</strong>
-                                <?php
+                            <div>
+                                <dt>Affiliations</dt>
+                                <dd><?php
                                 for ($i = 0; $i < $profileData['ucscpersonpubaffiliateddepartment']['count']; $i++) {
                                     if ($i > 0) echo ', ';
                                     echo esc_html($profileData['ucscpersonpubaffiliateddepartment'][$i]);
                                 }
-                                ?>
-                            </li>
+                                ?></dd>
+                            </div>
                             <?php endif; ?>
 
                             <?php if (!empty($profileData['telephonenumber']) && $profileData['telephonenumber']['count']): ?>
-                            <li>
-                                <strong>Phone</strong>
-                                <div>
+                            <div>
+                                <dt>Phone</dt>
+                                <dd>
                                     <span style="white-space: nowrap" class="p-tel">
                                         <?php
                                         for ($i = 0; $i < $profileData['telephonenumber']['count']; $i++) {
@@ -127,14 +127,14 @@ if (count($profileData)) {
                                         }
                                         ?>
                                     </span>
-                                </div>
-                            </li>
+                                </dd>
+                            </div>
                             <?php endif; ?>
 
                             <?php if (!empty($profileData['mail']) || !empty($profileData['ucscpersonpubalternatemail'])): ?>
-                            <li>
-                                <strong>Email</strong>
-                                <ul class="inline-list">
+                            <div>
+                                <dt>Email</dt>
+                                <dd><ul class="inline-list">
                                     <?php
                                     $seenEmails = [];
                                     if (!empty($profileData['mail']) && $profileData['mail']['count']) {
@@ -153,25 +153,25 @@ if (count($profileData)) {
                                         }
                                     }
                                     ?>
-                                </ul>
-                            </li>
+                                </ul></dd>
+                            </div>
                             <?php endif; ?>
 
                             <?php if (!empty($profileData['facsimiletelephonenumber']) && $profileData['facsimiletelephonenumber']['count']): ?>
-                            <li>
-                                <strong>Fax</strong>
-                                <ul class="inline-list">
+                            <div>
+                                <dt>Fax</dt>
+                                <dd><ul class="inline-list">
                                     <?php for ($i = 0; $i < $profileData['facsimiletelephonenumber']['count']; $i++): ?>
                                         <li><span style="white-space: nowrap" class="p-tel"><?php echo esc_html($profileData['facsimiletelephonenumber'][$i]); ?></span></li>
                                     <?php endfor; ?>
-                                </ul>
-                            </li>
+                                </ul></dd>
+                            </div>
                             <?php endif; ?>
 
                             <?php if (!empty($profileData['ucscpersonpubwebsite']) && $profileData['ucscpersonpubwebsite']['count']): ?>
-                            <li>
-                                <strong>Website</strong>
-                                <ul class="inline-list">
+                            <div>
+                                <dt>Website</dt>
+                                <dd><ul class="inline-list">
                                     <?php for ($i = 0; $i < $profileData['ucscpersonpubwebsite']['count']; $i++): ?>
                                         <?php
                                         $parts = explode(' ', $profileData['ucscpersonpubwebsite'][$i], 2);
@@ -180,14 +180,14 @@ if (count($profileData)) {
                                         ?>
                                         <li><span class="u-url"><a href="<?php echo esc_url($url); ?>" target="_website"><?php echo esc_html($label); ?></a></span></li>
                                     <?php endfor; ?>
-                                </ul>
-                            </li>
+                                </ul></dd>
+                            </div>
                             <?php endif; ?>
 
                             <?php if (!empty($profileData['ucscprimarylocationpubofficialname'])): ?>
-                            <li>
-                                <strong>Office Location</strong>
-                                <ul class="inline-list">
+                            <div>
+                                <dt>Office Location</dt>
+                                <dd><ul class="inline-list">
                                     <li>
                                         <span class="p-extended-address">
                                             <?php
@@ -201,64 +201,64 @@ if (count($profileData)) {
                                     <?php if (!empty($profileData['roomnumber'])): ?>
                                     <li><span class="p-extended-address"><?php echo esc_html($profileData['roomnumber'][0]); ?></span></li>
                                     <?php endif; ?>
-                                </ul>
-                            </li>
+                                </ul></dd>
+                            </div>
                             <?php endif; ?>
 
                             <?php if (!empty($profileData['ucscpersonpubofficehours']) && $profileData['ucscpersonpubofficehours']['count']): ?>
-                            <li>
-                                <strong>Office Hours</strong>
-                                <ul class="inline-list">
+                            <div>
+                                <dt>Office Hours</dt>
+                                <dd><ul class="inline-list">
                                     <?php for ($i = 0; $i < $profileData['ucscpersonpubofficehours']['count']; $i++): ?>
                                         <li><?php echo esc_html($profileData['ucscpersonpubofficehours'][$i]); ?></li>
                                     <?php endfor; ?>
-                                </ul>
-                            </li>
+                                </ul></dd>
+                            </div>
                             <?php endif; ?>
 
                             <?php if (!empty($profileData['ucscpersonpubmailstop'])): ?>
-                            <li>
-                                <strong>Mail Stop</strong>
-                                <?php echo esc_html($profileData['ucscpersonpubmailstop'][0]); ?>
-                            </li>
+                            <div>
+                                <dt>Mail Stop</dt>
+                                <dd><?php echo esc_html($profileData['ucscpersonpubmailstop'][0]); ?></dd>
+                            </div>
                             <?php endif; ?>
 
                             <?php if (!empty($profileData['street'])): ?>
-                            <li>
-                                <strong>Mailing Address</strong>
-                                <ul class="inline-list">
+                            <div>
+                                <dt>Mailing Address</dt>
+                                <dd><ul class="inline-list">
                                     <li><?php echo esc_html($profileData['street'][0]); ?></li>
                                     <li>Santa Cruz CA 95064</li>
-                                </ul>
-                            </li>
+                                </ul></dd>
+                            </div>
                             <?php endif; ?>
 
                             <?php if (!empty($profileData['ucscpersonpubexpertisereference']) && $profileData['ucscpersonpubexpertisereference']['count']): ?>
-                            <li>
-                                <strong>Faculty Areas of Expertise</strong>
-                                <span class="p-label">
+                            <div>
+                                <dt>Faculty Areas of Expertise</dt>
+                                <dd><span class="p-label">
                                     <?php
                                     for ($i = 0; $i < $profileData['ucscpersonpubexpertisereference']['count']; $i++) {
                                         if ($i > 0) echo ', ';
                                         echo esc_html($profileData['ucscpersonpubexpertisereference'][$i]);
                                     }
                                     ?>
-                                </span>
-                            </li>
+                                </span></dd>
+                            </div>
                             <?php endif; ?>
 
                             <?php if (!empty($profileData['ucscpersonpubfacultycourses']) && $profileData['ucscpersonpubfacultycourses']['count']): ?>
-                            <li>
-                                <strong>Courses Taught</strong>
-                                <?php
+                            <div>
+                                <dt>Courses Taught</dt>
+                                <dd><?php
                                 for ($i = 0; $i < $profileData['ucscpersonpubfacultycourses']['count']; $i++) {
                                     if ($i > 0) echo '; ';
                                     echo esc_html($profileData['ucscpersonpubfacultycourses'][$i]);
                                 }
-                                ?>
-                            </li>
+                                ?></dd>
+                            </div>
                             <?php endif; ?>
-                        </ul>
+                        </dl>
                     </div><!-- .item-body -->
                 </div><!-- .section-item.h-card.wrap -->
 

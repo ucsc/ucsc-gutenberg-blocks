@@ -14,6 +14,9 @@
 .section-body p,
 .section-body ul,
 .section-body li,
+.section-body dl,
+.section-body dt,
+.section-body dd,
 .section-item .item-body .item-info {
   padding: 0;
   margin: 0;
@@ -72,6 +75,41 @@
   line-height: 1.5;
 }
 
+/* ── dl/dt/dd variants (semantic key-value pairs) ─────────────────────────── */
+
+.section-item .item-body dl.item-info > div {
+  display: flex;
+  flex-direction: column;
+}
+
+.section-item .item-body dl.item-info dt,
+.section-item .item-body dl.item-info dd span {
+  display: inline-block;
+  line-height: 1.5;
+}
+
+.section-item .item-body dl.item-info dt {
+  flex: 0 1 auto;
+  font-weight: 600;
+  text-align: left;
+}
+
+.section-item .item-body dl.item-info dd {
+  flex: 1 0 auto;
+  margin: 0;
+}
+
+.section-item .item-body dl.item-info .inline-list {
+  list-style: none;
+  margin-bottom: 0;
+  padding: 0;
+}
+
+.section-item .item-body dl.item-info .inline-list li {
+  border-bottom: 0;
+  line-height: 1.5;
+}
+
 /* ── Person / profile styles ────────────────────────────────────────────────── */
 
 .person .section-item {
@@ -79,7 +117,8 @@
   padding-bottom: 1em;
 }
 
-.person .section-item .item-body .item-info li {
+.person .section-item .item-body .item-info li,
+.person .section-item .item-body dl.item-info > div {
   padding: .1em 0;
 }
 
@@ -152,7 +191,8 @@ div.item-expertise > ul li {
     margin: 0;
     font-size: .9em;
   }
-  .list-page .section-item .item-body .item-info > li {
+  .list-page .section-item .item-body .item-info > li,
+  .list-page .section-item .item-body dl.item-info > div {
     padding: 0;
     margin: 0;
     list-style: none;
@@ -160,10 +200,12 @@ div.item-expertise > ul li {
     flex-direction: column;
     border-bottom: 1px solid rgba(0, 0, 0, 0.12);
   }
-  .list-page .section-item .item-body .item-info > li:last-of-type {
+  .list-page .section-item .item-body .item-info > li:last-of-type,
+  .list-page .section-item .item-body dl.item-info > div:last-of-type {
     border-bottom: 0;
   }
-  .list-page .section-item .item-body .item-info li span {
+  .list-page .section-item .item-body .item-info li span,
+  .list-page .section-item .item-body dl.item-info dd span {
     flex-basis: auto;
     text-align: left;
     display: inline;
@@ -188,20 +230,24 @@ div.item-expertise > ul li {
 }
 
 @media all and (min-width: 768px) {
-  .list-page .section-item .item-body .item-info > li {
+  .list-page .section-item .item-body .item-info > li,
+  .list-page .section-item .item-body dl.item-info > div {
     align-items: flex-start;
     flex-direction: row;
     border-bottom: 1px solid rgba(0, 0, 0, 0.12);
   }
-  .list-page .section-item .item-body .item-info > li:last-of-type {
+  .list-page .section-item .item-body .item-info > li:last-of-type,
+  .list-page .section-item .item-body dl.item-info > div:last-of-type {
     border-bottom: 0;
   }
-  .list-page .section-item .item-body .item-info li strong {
+  .list-page .section-item .item-body .item-info li strong,
+  .list-page .section-item .item-body dl.item-info dt {
     flex: 0 0 150px;
     text-align: right;
     padding-right: 1.5em;
   }
-  .list-page .section-item .item-body .item-info li span {
+  .list-page .section-item .item-body .item-info li span,
+  .list-page .section-item .item-body dl.item-info dd {
     flex: 0 1 auto;
   }
 }
