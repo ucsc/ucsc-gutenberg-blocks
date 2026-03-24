@@ -160,5 +160,5 @@ $terms = $terms_data['terms'] ?? [];
       <?php endforeach; ?>
     </div>
   </div>
-
+version 2.0
 </div>
