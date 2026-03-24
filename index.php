@@ -21,6 +21,28 @@ include_once(plugin_dir_path(__FILE__) . 'classes/CampusDirectoryShortcode.php')
 
 include_once(plugin_dir_path(__FILE__) . 'classes/SiteSettings.php');
 
+// Ensure custom rewrite-based detail pages work immediately after activation.
+// Without this, fresh installs can see 404s on routes like /course/<term>/<id>/ and /directory/<cruzid>/
+// until permalinks are flushed.
+register_activation_hook(__FILE__, 'ucsc_gutenberg_blocks_activate');
+register_deactivation_hook(__FILE__, 'ucsc_gutenberg_blocks_deactivate');
+
+function ucsc_gutenberg_blocks_activate() {
+  // Register rewrite rules before flushing.
+  if (class_exists('ClassSchedule')) {
+    (new ClassSchedule())->add_course_detail_rewrite();
+  }
+  if (class_exists('CampusDirectory')) {
+    (new CampusDirectory())->add_directory_profile_rewrite();
+  }
+
+  flush_rewrite_rules();
+}
+
+function ucsc_gutenberg_blocks_deactivate() {
+  flush_rewrite_rules();
+}
+
 
 add_action('admin_enqueue_scripts', 'registerJSBuild');
 
