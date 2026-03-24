@@ -236,9 +236,13 @@ function applyColumnVisibility() {
         table.querySelectorAll('.' + colClass).forEach(cell => {
             cell.classList.toggle('hidden', !isVisible);
 
-            // A11Y: prevent keyboard focus on hidden sortable headers
+            // A11Y: prevent keyboard focus on hidden sortable header buttons
+            // (tabindex goes on the inner <button>, not the div, to avoid a double focus stop)
             if (cell.getAttribute('role') === 'columnheader' && cell.classList.contains('is-sortable')) {
-                cell.setAttribute('tabindex', isVisible ? '0' : '-1');
+                var btn = cell.querySelector('button');
+                if (btn) {
+                    btn.setAttribute('tabindex', isVisible ? '0' : '-1');
+                }
             }
         });
     });

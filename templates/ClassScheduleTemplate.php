@@ -47,7 +47,10 @@ $terms = $terms_data['terms'] ?? [];
 
   <div id="filterModal" class="filter-modal" role="dialog" aria-modal="true" aria-labelledby="filterModalTitle">
     <div class="filter-modal-content">
-      <h2 id="filterModalTitle" class="screen-reader-text">Filter Options</h2>
+      <div class="filter-modal-header">
+        <h2 id="filterModalTitle">Filter Options</h2>
+        <button type="button" class="filter-modal-close" onclick="closeFilterModal()" aria-label="Close">&times;</button>
+      </div>
       <div class="divider">
         <strong>Display Columns</strong>
         <div class="column-toggles">

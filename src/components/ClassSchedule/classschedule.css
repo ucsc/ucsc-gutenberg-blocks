@@ -199,6 +199,35 @@ a.cancelled {
   width: 90%;
 }
 
+.filter-modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px 15px;
+  border-bottom: 1px solid #eee;
+}
+
+.filter-modal-header h2 {
+  font-size: 16px;
+  font-weight: 700;
+  color: #303133;
+  margin: 0;
+}
+
+.filter-modal-close {
+  background: none;
+  border: none;
+  font-size: 22px;
+  line-height: 1;
+  color: #909399;
+  cursor: pointer;
+  padding: 0 4px;
+}
+
+.filter-modal-close:hover {
+  color: #303133;
+}
+
 .filter-modal-content .divider {
   padding: 14px 15px;
   border-bottom: 1px solid #eee;
@@ -333,6 +362,16 @@ a.cancelled {
 .el-table__header-row > .is-sortable {
   cursor: pointer;
   user-select: none;
+}
+
+.el-table__header-row > .is-sortable button.cell {
+  background: none;
+  border: none;
+  font: inherit;
+  color: inherit;
+  cursor: pointer;
+  text-align: left;
+  width: 100%;
 }
 
 .el-table__header-row > .is-sortable:hover {
