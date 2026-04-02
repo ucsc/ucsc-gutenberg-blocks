@@ -187,7 +187,7 @@ if (count($profileData)) {
                                         $url = $parts[0];
                                         $label = isset($parts[1]) ? $parts[1] : $url;
                                         ?>
-                                        <li><span class="u-url"><a href="<?php echo esc_url($url); ?>" target="_website"><?php echo esc_html($label); ?></a></span></li>
+                                        <li><span class="u-url"><a href="<?php echo esc_url($url); ?>" target="_website" rel="noopener"><?php echo esc_html($label); ?></a></span></li>
                                     <?php endfor; ?>
                                 </ul></dd>
                             </div>
