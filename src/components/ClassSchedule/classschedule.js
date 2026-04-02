@@ -14,6 +14,10 @@
  *   9  col-enrollment (toggleable, default off)
  */
 
+// Wrap classschedule.js in IIFE to avoid global scope pollution
+(function() {
+'use strict';
+
 // ── A11Y: Live count update (aria-live region) ───────────────────────────────
 
 function updateClassCount() {
@@ -443,3 +447,15 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
 });
+
+// Expose functions used by inline event handlers in the template
+window.classScheduleSearch = classScheduleSearch;
+window.sortClassSchedule = sortClassSchedule;
+window.openFilterModal = openFilterModal;
+window.closeFilterModal = closeFilterModal;
+window.applyFilters = applyFilters;
+window.resetFilters = resetFilters;
+window.classScheduleCopyUrl = classScheduleCopyUrl;
+window.classScheduleDownloadCSV = classScheduleDownloadCSV;
+
+})();
