@@ -29,7 +29,6 @@ function linkify($key, $str) {
     foreach ($dom->getElementsByTagName('a') as $link) {
         if (!$link->hasAttribute('title')) continue;
         $titleText = trim($link->getAttribute('title'));
-        // $titleText = "TESTING123"; //TODO:RJD: for debugging only
         $linkText  = trim($link->textContent);
         if (strcasecmp($titleText, $linkText) === 0 || str_starts_with($titleText, $linkText)) {
             $link->removeAttribute('title');
