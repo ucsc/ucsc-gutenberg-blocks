@@ -19,7 +19,7 @@ $terms = $terms_data['terms'] ?? [];
     <div class="input-with-select">
       <div class="term-select-wrap">
         <!-- a11y: no inline onchange to avoid jump menu warning; change handled via addEventListener in classschedule.js -->
-        <select id="quarterDropdown" aria-label="Select Quarter">
+        <select id="quarterDropdown">
           <?php foreach ($terms as $term) : ?>
             <option value="<?php echo esc_attr($term['code']); ?>"
               <?php selected($term['code'], $current_term); ?>>
@@ -28,7 +28,7 @@ $terms = $terms_data['terms'] ?? [];
           <?php endforeach; ?>
         </select>
       </div>
-      <input type="text" id="courseSearch" placeholder="Search Schedule" aria-label="Search Schedule" onkeyup="classScheduleSearch(event)">
+      <input type="text" id="courseSearch" placeholder="Search Schedule" onkeyup="classScheduleSearch(event)">
     </div>
 
     <div class="button-group">
