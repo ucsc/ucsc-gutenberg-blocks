@@ -9,6 +9,7 @@ class ClassSchedule
     add_action('wp_enqueue_scripts', array($this, 'register_plugin_styles'));
     add_filter('query_vars', array($this, 'add_query_vars'));
     add_action('template_include', array($this, 'course_detail_template'));
+    add_action('template_redirect', array($this, 'maybe_redirect_legacy_course'));
     add_filter('document_title_parts', array($this, 'course_detail_title'));
     add_action('rest_api_init', function () {
       register_rest_route('ucscgutenbergblocks/v1', '/classscheduledept/', array(
@@ -26,12 +27,32 @@ class ClassSchedule
       'index.php?course_term=$matches[1]&course_id=$matches[2]',
       'top'
     );
+
+    // legacy redirect: prod URLs like /courses/course/2262-50222/history-of-the-present
+    // or /course/2262-50222/class — match hyphenated term-id with optional page prefix and class
+    add_rewrite_rule(
+      '(?:.+/)?course/([0-9]+)-([0-9]+)(?:/[^/]*)?/?$',
+      'index.php?course_term=$matches[1]&course_id=$matches[2]&legacy_redirect=1',
+      'top'
+    );
   }
 
   function add_query_vars($query_vars) {
     $query_vars[] = 'course_term';
     $query_vars[] = 'course_id';
+    $query_vars[] = 'legacy_redirect';
     return $query_vars;
+  }
+
+  function maybe_redirect_legacy_course() {
+    if (get_query_var('legacy_redirect')) {
+      $term = get_query_var('course_term');
+      $id   = get_query_var('course_id');
+      if ($term && $id) {
+        wp_redirect(home_url('/course/' . $term . '/' . $id . '/'), 301);
+        exit;
+      }
+    }
   }
 
   function course_detail_template($template) {
