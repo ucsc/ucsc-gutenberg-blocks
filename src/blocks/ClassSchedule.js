@@ -82,7 +82,7 @@ const ClassSchedule = () => {
                 setAttributes={setAttributes}
                 disabled={subjectOrDept !== "subject"}
               />
-              <small style={{ display: 'block', marginTop: '3em', fontSize: '0.7em', color: '#666' }}>version 2.0</small>
+              <small style={{ display: 'block', marginTop: '3em', fontSize: '0.7em', color: '#666' }}>version 1.1.32</small>
             </PanelBody>
           </Panel>
         </>
@@ -90,7 +90,25 @@ const ClassSchedule = () => {
     },
     save: (props) => {
       return null;
-    }
+    },
+    deprecated: [
+      // The useNewServer attribute was removed from the block in the class_schedule_2.0 branch. Without a 
+      // deprecated entry, existing posts that saved this attribute will trigger a block validation error in 
+      // the editor. A deprecation migration silently strips it.
+      {
+        attributes: {
+          subjectOrDept: { type: "string" },
+          department:    { type: "string" },
+          subject:       { type: "string" },
+          useNewServer:  { type: "boolean" },
+        },
+        migrate( attributes ) {
+          const { useNewServer, ...rest } = attributes;
+          return rest;
+        },
+        save: () => null,
+      },
+    ],
   })
 }
 
