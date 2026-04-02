@@ -331,6 +331,8 @@ div.item-expertise>ul li {
     height: 160px;
     overflow: hidden;
     border-radius: 5px;
+    object-fit: cover;
+    object-position: top;
 }
 
 .tiled-page {
