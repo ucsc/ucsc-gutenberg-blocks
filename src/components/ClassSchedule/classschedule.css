@@ -524,9 +524,6 @@ a.cancelled {
 /* ============================================================
    Misc
    ============================================================ */
-.right {
-  text-align: right;
-}
 
 /* A11Y: Suppress outline only for mouse/touch clicks; keyboard focus keeps the ring */
 *:focus:not(:focus-visible) {
