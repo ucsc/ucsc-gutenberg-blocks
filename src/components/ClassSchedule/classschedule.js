@@ -320,26 +320,42 @@ window.addEventListener('click', function(event) {
 
 function classScheduleCopyUrl() {
     var url = window.location.href;
-    navigator.clipboard.writeText(url).then(function() {
-        classScheduleShowToast('<strong>Copied </strong><i>' + url + '</i>');
-    }, function() {
-        // Fallback for older browsers
-        var textArea = document.createElement('textarea');
-        textArea.value = url;
-        textArea.style.position = 'fixed';
-        textArea.style.opacity = '0';
-        document.body.appendChild(textArea);
-        textArea.select();
-        document.execCommand('copy');
-        document.body.removeChild(textArea);
-        classScheduleShowToast('<strong>Copied </strong><i>' + url + '</i>');
-    });
+
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(url).then(function() {
+            classScheduleShowCopyToast(url);
+        }, function() {
+            classScheduleCopyFallback(url);
+        });
+    } else {
+        classScheduleCopyFallback(url);
+    }
 }
 
-function classScheduleShowToast(html) {
+function classScheduleCopyFallback(url) {
+    var textArea = document.createElement('textarea');
+    textArea.value = url;
+    textArea.style.position = 'fixed';
+    textArea.style.opacity = '0';
+    document.body.appendChild(textArea);
+    textArea.select();
+    try { document.execCommand('copy'); } catch (e) { /* ignore */ }
+    document.body.removeChild(textArea);
+    classScheduleShowCopyToast(url);
+}
+
+function classScheduleShowCopyToast(url) {
     var toast = document.createElement('div');
     toast.className = 'cs-toast';
-    toast.innerHTML = html;
+
+    var strong = document.createElement('strong');
+    strong.textContent = 'Copied ';
+    toast.appendChild(strong);
+
+    var em = document.createElement('em');
+    em.textContent = url;
+    toast.appendChild(em);
+
     document.body.appendChild(toast);
     setTimeout(function() { toast.classList.add('cs-toast-visible'); }, 10);
     setTimeout(function() {
