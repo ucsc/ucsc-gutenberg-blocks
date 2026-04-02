@@ -14,15 +14,22 @@ $cruzidEmail = $profileData['0']['mail'][0];
 
 function linkify($key, $str) {
     if ($key == "ucscpersonpubwebsite") {
-        $website = explode(" ", $str);
-        $str = "<a target='_blank' href='{$website[0]}'>{$website[1]}</a>";
+        $parts = explode(" ", $str, 2);
+        $url   = esc_url($parts[0]);
+        $label = isset($parts[1]) ? esc_html($parts[1]) : esc_html($parts[0]);
+        $str   = "<a target='_blank' rel='noopener' href='{$url}'>{$label}</a>";
     }
+
+    // Sanitize LDAP HTML content — allow safe markup, strip dangerous tags/attributes
+    $str = wp_kses_post($str);
+
     // Remove title attributes from links only when they duplicate the link text (a11y: WCAG 2.4.4)
     $dom = new DOMDocument();
-    @$dom->loadHTML(mb_convert_encoding($str, 'HTML-ENTITIES', 'UTF-8'), LIBXML_HTML_NOIMPLIED | LIBXML_HTML_NODEFDTD);
+    @$dom->loadHTML('<?xml encoding="UTF-8">' . $str, LIBXML_HTML_NOIMPLIED | LIBXML_HTML_NODEFDTD);
     foreach ($dom->getElementsByTagName('a') as $link) {
         if (!$link->hasAttribute('title')) continue;
         $titleText = trim($link->getAttribute('title'));
+        // $titleText = "TESTING123"; //TODO:RJD: for debugging only
         $linkText  = trim($link->textContent);
         if (strcasecmp($titleText, $linkText) === 0 || str_starts_with($titleText, $linkText)) {
             $link->removeAttribute('title');
@@ -31,6 +38,8 @@ function linkify($key, $str) {
     $str = $dom->saveHTML();
     // DOMDocument wraps output in html/body tags; strip them
     $str = preg_replace('~^.*<body>|</body>.*$~s', '', $str);
+    // Remove the XML encoding declaration
+    $str = str_replace('<?xml encoding="UTF-8">', '', $str);
     return $str;
 }
 if (count($profileData)) {
