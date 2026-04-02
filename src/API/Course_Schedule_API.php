@@ -120,12 +120,9 @@ class Course_Schedule_API {
 			'timeout' => 30,
 		] );
 
-		if ( is_wp_error( $response ) ) {
-			return new WP_Error(
-				'api_error',
-				'Failed to fetch terms from PeopleSoft API',
-				[ 'status' => 500 ]
-			);
+		$error = $this->validate_remote_response( $response, 'terms' );
+		if ( is_wp_error( $error ) ) {
+			return $error;
 		}
 
 		$body = wp_remote_retrieve_body( $response );
@@ -159,10 +156,10 @@ class Course_Schedule_API {
 		// Build query string
 		$query_params = [];
 		if ( $subject ) {
-			$query_params['subject'] = strtoupper( $subject );
+			$query_params['subject'] = strtoupper( sanitize_text_field( $subject ) );
 		}
 		if ( $dept ) {
-			$query_params['dept'] = strtoupper( $dept );
+			$query_params['dept'] = strtoupper( sanitize_text_field( $dept ) );
 		}
 		$query_string = http_build_query( $query_params );
 
@@ -185,12 +182,9 @@ class Course_Schedule_API {
 			'timeout' => 30,
 		] );
 
-		if ( is_wp_error( $response ) ) {
-			return new WP_Error(
-				'api_error',
-				'Failed to fetch courses from PeopleSoft API',
-				[ 'status' => 500 ]
-			);
+		$error = $this->validate_remote_response( $response, 'courses' );
+		if ( is_wp_error( $error ) ) {
+			return $error;
 		}
 
 		$body = wp_remote_retrieve_body( $response );
@@ -234,12 +228,9 @@ class Course_Schedule_API {
 			'timeout' => 30,
 		] );
 
-		if ( is_wp_error( $response ) ) {
-			return new WP_Error(
-				'api_error',
-				'Failed to fetch course details from PeopleSoft API',
-				[ 'status' => 500 ]
-			);
+		$error = $this->validate_remote_response( $response, 'course details' );
+		if ( is_wp_error( $error ) ) {
+			return $error;
 		}
 
 		$body = wp_remote_retrieve_body( $response );
@@ -257,5 +248,33 @@ class Course_Schedule_API {
 		set_transient( $cache_key, $data, self::CACHE_DURATION );
 
 		return rest_ensure_response( $data );
+	}
+
+	/**
+	 * Validate a wp_remote_get response — checks for WP_Error and non-2xx HTTP status.
+	 *
+	 * @param array|WP_Error $response Response from wp_remote_get.
+	 * @param string         $label    Human-readable label for error messages.
+	 * @return WP_Error|null WP_Error on failure, null on success.
+	 */
+	private function validate_remote_response( $response, string $label ) {
+		if ( is_wp_error( $response ) ) {
+			return new WP_Error(
+				'api_error',
+				'Failed to fetch ' . $label . ' from PeopleSoft API',
+				[ 'status' => 500 ]
+			);
+		}
+
+		$status_code = wp_remote_retrieve_response_code( $response );
+		if ( $status_code < 200 || $status_code >= 300 ) {
+			return new WP_Error(
+				'api_error',
+				'PeopleSoft API returned HTTP ' . $status_code . ' for ' . $label,
+				[ 'status' => $status_code >= 400 ? $status_code : 502 ]
+			);
+		}
+
+		return null;
 	}
 }
