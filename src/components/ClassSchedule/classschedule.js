@@ -161,6 +161,13 @@ function filterModalKeyHandler(event) {
         return;
     }
 
+    // A11Y: let Enter toggle checkboxes (native checkboxes only respond to Space)
+    if (event.key === 'Enter' && document.activeElement.type === 'checkbox') {
+        event.preventDefault();
+        document.activeElement.checked = !document.activeElement.checked;
+        return;
+    }
+
     if (event.key === 'Tab') {
         var focusable = modal.querySelectorAll('input, button, [tabindex]:not([tabindex="-1"])');
         if (focusable.length === 0) return;
