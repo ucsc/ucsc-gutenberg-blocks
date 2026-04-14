@@ -336,7 +336,20 @@ a.cancelled {
 .el-table__header-row,
 .el-table__row {
   display: grid;
-  grid-template-columns: 40px 120px 1fr 150px 80px 170px 180px 160px 90px 100px;
+  /* Column mins mirror the old Vue/Element UI app (resources/js/pages/courses.vue).
+     We use fr units so leftover width is shared across visible columns,
+     which keeps Title→Seats spacing similar to the old table behavior. */
+  grid-template-columns:
+    45px
+    minmax(108px, 1.35fr)
+    minmax(175px, 2.19fr)
+    minmax(145px, 1.81fr)
+    minmax(80px,  1fr)
+    minmax(150px, 1.88fr)
+    minmax(140px, 1.75fr)
+    minmax(120px, 1.50fr)
+    minmax(90px,  1.13fr)
+    minmax(120px, 1.50fr);
   align-items: center;
 }
 

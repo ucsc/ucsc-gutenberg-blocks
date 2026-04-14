@@ -257,16 +257,18 @@ function applyColumnVisibility() {
 // Rebuild CSS Grid column tracks based on which columns are visible.
 // Hidden columns get 0px tracks so the grid collapses them properly.
 var gridColumnDefs = [
-    { cls: 'col-status',     width: '40px' },
-    { cls: 'col-course-id',  width: '120px' },
-    { cls: 'col-title',      width: '1fr' },
-    { cls: 'col-seats',      width: '150px' },
-    { cls: 'col-days',       width: '80px' },
-    { cls: 'col-time',       width: '170px' },
-    { cls: 'col-location',   width: '180px' },
-    { cls: 'col-instructor', width: '160px' },
-    { cls: 'col-class-num',  width: '90px' },
-    { cls: 'col-enrollment', width: '100px' }
+    // Column mins mirror the old Vue/Element UI app (resources/js/pages/courses.vue).
+    // Use fr units so extra width is distributed across visible columns.
+    { cls: 'col-status',     width: '45px' },
+    { cls: 'col-course-id',  width: 'minmax(108px, 1.35fr)' },
+    { cls: 'col-title',      width: 'minmax(175px, 2.19fr)' },
+    { cls: 'col-seats',      width: 'minmax(145px, 1.81fr)' },
+    { cls: 'col-days',       width: 'minmax(80px, 1fr)' },
+    { cls: 'col-time',       width: 'minmax(150px, 1.88fr)' },
+    { cls: 'col-location',   width: 'minmax(140px, 1.75fr)' },
+    { cls: 'col-instructor', width: 'minmax(120px, 1.50fr)' },
+    { cls: 'col-class-num',  width: 'minmax(90px, 1.13fr)' },
+    { cls: 'col-enrollment', width: 'minmax(120px, 1.50fr)' }
 ];
 
 function updateGridTemplate() {
