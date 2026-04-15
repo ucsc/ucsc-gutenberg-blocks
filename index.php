@@ -41,8 +41,20 @@ function ucsc_gutenberg_blocks_activate() {
 
 function ucsc_gutenberg_blocks_deactivate() {
   flush_rewrite_rules();
+  delete_option('ucsc_gutenberg_blocks_rwflush');
 }
 
+// Auto-flush rewrite rules once after any deploy that modifies plugin files.
+// This prevents 404s on /directory/<cruzid>/ and /course/<term>/<id>/ routes
+// without requiring manual permalink saves or plugin reactivation.
+add_action('init', 'ucsc_gutenberg_blocks_maybe_flush_rewrites', 20);
+function ucsc_gutenberg_blocks_maybe_flush_rewrites() {
+  $file_mod = (string) filemtime(__FILE__);
+  if (get_option('ucsc_gutenberg_blocks_rwflush') !== $file_mod) {
+    flush_rewrite_rules();
+    update_option('ucsc_gutenberg_blocks_rwflush', $file_mod, true);
+  }
+}
 
 add_action('admin_enqueue_scripts', 'registerJSBuild');
 
