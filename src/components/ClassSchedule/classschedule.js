@@ -216,6 +216,8 @@ function applyFilters() {
         savedStatusStates[f.dataset.status] = f.checked;
     });
 
+    saveColumnState();
+
     document.getElementById('filterModal').classList.remove('active');
 
     // A11Y: remove focus trap handler and restore focus to opener
@@ -228,6 +230,29 @@ function applyFilters() {
 
 // Default checked columns (matches the original Vue app defaults)
 const defaultColumns = ['seats', 'days'];
+
+// Persist column visibility choices in sessionStorage so they survive
+// navigation (e.g. clicking an instructor link and pressing Back).
+function saveColumnState() {
+    var state = {};
+    document.querySelectorAll('.column-toggle').forEach(function(t) {
+        state[t.dataset.column] = t.checked;
+    });
+    try { sessionStorage.setItem('cs_columns', JSON.stringify(state)); } catch(e) { /* ignore */ }
+}
+
+function restoreColumnState() {
+    try {
+        var saved = sessionStorage.getItem('cs_columns');
+        if (!saved) return;
+        var state = JSON.parse(saved);
+        document.querySelectorAll('.column-toggle').forEach(function(t) {
+            if (state.hasOwnProperty(t.dataset.column)) {
+                t.checked = state[t.dataset.column];
+            }
+        });
+    } catch(e) { /* ignore */ }
+}
 
 function applyColumnVisibility() {
     const table = document.getElementById('classScheduleTable');
@@ -314,6 +339,8 @@ function resetFilters() {
 
     const searchInput = document.getElementById('courseSearch');
     if (searchInput) searchInput.value = '';
+
+    try { sessionStorage.removeItem('cs_columns'); } catch(e) { /* ignore */ }
 }
 
 // Close modal when clicking the backdrop
@@ -437,8 +464,9 @@ function classScheduleChangeTerm(select) {
 
 // ── Init ──────────────────────────────────────────────────────────────────────
 
-// Apply default column visibility (time/location/instructor are unchecked by default)
+// Apply column visibility — restore any saved choices, then apply
 document.addEventListener('DOMContentLoaded', function() {
+    restoreColumnState();
     applyColumnVisibility();
 
     // a11y: attach change listener here instead of inline onchange to avoid jump menu a11y warning
@@ -447,6 +475,15 @@ document.addEventListener('DOMContentLoaded', function() {
         quarterDropdown.addEventListener('change', function() {
             classScheduleChangeTerm(this);
         });
+    }
+});
+
+// Re-apply column visibility on back/forward navigation.
+// Browsers restore checkbox state *after* DOMContentLoaded, so columns can
+// get out of sync with the checkboxes when the user navigates back.
+window.addEventListener('pageshow', function(event) {
+    if (event.persisted) {
+        applyColumnVisibility();
     }
 });
 
