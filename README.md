@@ -1,3 +1,10 @@
+* Start the WordPress server environment
+  * `docker compose up -d`
+OR
+* Start the WordPress server environment AND the Node development environments for the theme and blocks plugin
+  * `docker compose -f docker-compose.yml -f docker-compose-start.yml up -d`
+
+
 ## About The Plugin
 
 This is a plugin that contains multiple custom gutenberg blocks.
@@ -50,6 +57,15 @@ npm install
 ```
 npm run start
 ```
+
+## Running the Docker services for development
+
+Now that WordPress is installed and the plugins and theme are built, we can start watching for changes to code and rebuild when necessary
+* Start the WordPress server environment
+  * `docker compose up -d`
+OR
+* Start the WordPress server environment AND the Node development environments for the theme and blocks plugin
+  * `docker compose -f docker-compose.yml -f docker-compose-start.yml up -d`
 
 ### Basic Block Development
 
