@@ -100,7 +100,6 @@ class ClassSchedule
       filemtime(plugin_dir_path(__FILE__) . $js_file),
       true
     );
-    wp_enqueue_script('classschedule-js');
 
     $css_file = '../src/components/ClassSchedule/classschedule.css';
     wp_register_style(
@@ -109,7 +108,6 @@ class ClassSchedule
       array(),
       filemtime(plugin_dir_path(__FILE__) . $css_file)
     );
-    wp_enqueue_style('classschedule');
   }
 
   function adminAssets()
@@ -213,6 +211,10 @@ class ClassSchedule
     usort($courses, function ($a, $b) {
       return (int) $a['catalog_nbr'] - (int) $b['catalog_nbr'];
     });
+
+    // Only enqueue JS/CSS when the block is actually rendered on the page
+    wp_enqueue_script('classschedule-js');
+    wp_enqueue_style('classschedule');
 
     ob_start();
     include(plugin_dir_path(__FILE__) . '../templates/ClassScheduleTemplate.php');
