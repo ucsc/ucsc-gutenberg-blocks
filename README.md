@@ -7,7 +7,7 @@ OR
 
 ## About The Plugin
 
-This is a plugin that contains multiple custom gutenberg blocks.
+This is a plugin that contains multiple UCSC custom gutenberg blocks: class schedule, course detail & campus directory.
 
 ## Getting Started
 

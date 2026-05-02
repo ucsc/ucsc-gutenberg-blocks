@@ -141,8 +141,8 @@ $individualPageUrl = $items['nodeContent']['linkOutToCampusDirectory'] ?
                 </div>
                 <?php
                   if ($displayPhoto) {
-                    if (array_key_exists('jpegphoto', $people[$i])) {
-                      $imgSrc = "data:image/jpeg;base64, " .  base64_encode($people[$i]['jpegphoto'][0]);
+                    if (array_key_exists('jpegphoto', $people[$i]) && !empty($people[$i]['jpegphoto'][0])) {
+                      $imgSrc = "data:image/jpeg;base64," . base64_encode($people[$i]['jpegphoto'][0]);
                     } else {
                       $imgSrc = "//static.ucsc.edu/images/icon-slug.jpg";
                     }

@@ -355,7 +355,11 @@ class CampusDirectoryAPI {
       ) {
         for ($attr = ldap_first_attribute($rli, $entry); $attr != false; $attr = ldap_next_attribute($rli, $entry)) {
           $attr = strtolower($attr);
-          $values = ldap_get_values($rli, $entry, $attr);
+          if ($attr === 'jpegphoto') {
+            $values = ldap_get_values_len($rli, $entry, $attr);
+          } else {
+            $values = ldap_get_values($rli, $entry, $attr);
+          }
           $person[$attr] = $values;
         }
         array_push($people, $person);
