@@ -1,83 +1,33 @@
-* Start the WordPress server environment
-  * `docker compose up -d`
-OR
-* Start the WordPress server environment AND the Node development environments for the theme and blocks plugin
-  * `docker compose -f docker-compose.yml -f docker-compose-start.yml up -d`
-
 
 ## About The Plugin
+A WordPress plugin providing UCSC custom Gutenberg blocks: class schedule, course catalog, and campus directory as seen at:
+- https://history.ucsc.edu/courses/?sub=HIS
+- https://literature.ucsc.edu/class-schedule/course-catalog/
+- https://campusdirectory.ucsc.edu/cd_department?ou=soe
 
-This is a plugin that contains multiple UCSC custom gutenberg blocks: class schedule, course detail & campus directory.
+### Development Setup Instructions
+- Follow the setup instructions in the [wp-dev.ucsc README](https://github.com/ucsc/wp-dev.ucsc)
 
-## Getting Started
-
-The following will cover preqrequisites, development environment setup, basic block development and how to contribute.
-
-### Instructions
-
-- First create a Docker account here: https://app.docker.com/signup. Then download, install and start Docker: https://www.docker.com/products/docker-desktop/
-- Make sure you have git install on your system. In order to check if you have git installed use git --version in your terminal. If you do not have git installed follow this link: https://git-scm.com/install/
-- Then head to this repo and follow the readme: https://github.com/ucsc/wp-dev.ucsc
-  - After following the instructions you will have a local dev environment with ldap installed. It will also clone and build both the UCSC theme and plugin. Finally it will start the dev watchers that build the code every time you save a file while developing. Since all the build steps are mainly in docker, the only requirement is that you have docker and git.
-
-### Development Environment Setup
-
-- Create a multisite local site with localwp
-
-- In order for PHP Intelephense to work in VS Code open it with in the public directory.
-
-```
-cd ~/Local\ Sites/kumar-demo/app/public/
-```
-
-```
-code .
-```
-
-- In vscode's terminal clone this repo into the plugin directory
-
-```
-cd wp-content/plugins/
-```
-
-```
-git clone https://github.com/ucsc/ucsc-gutenberg-blocks.git
-```
-
-- Install and start wp-scripts
-
-```
-cd ucsc-gutenberg-blocks
-```
-
-```
-npm install
-```
-
-```
-npm run start
-```
-
-## Running the Docker services for development
-
-Now that WordPress is installed and the plugins and theme are built, we can start watching for changes to code and rebuild when necessary
-* Start the WordPress server environment
-  * `docker compose up -d`
-OR
-* Start the WordPress server environment AND the Node development environments for the theme and blocks plugin
-  * `docker compose -f docker-compose.yml -f docker-compose-start.yml up -d`
+### How To Contribute Code / Develop
+- From the wordpress root (by default wp-dev.ucsc): cd public/wp-content/plugins/ucsc-gutenberg-blocks
+- This is a separate repo that gets cloned to this directory during the initial setup `setup.sh`
+- Create Feature branch `git checkout -b "feature/WPM-xxx_my_feature"`
+- Write code, see [Anatomy of a Custom Block](CustomBlock.md)
+- Commit and push your changes, then create a PR into the `main` branch on GitHub
+- Instructions for pushing to the development and production campus press servers can be found https://docs.google.com/document/d/1XFb_JTMC8SP3HuwXVbqc6exMKpfMfYiO0XRE_QH8tjU/edit?tab=t.0#heading=h.pt501scbu4vi
 
 ### Basic Block Development
 
 As a reference a commit to adding a demo block to this repo can be found here: https://github.com/ucsc/ucsc-gutenberg-blocks/commit/10dafbecede6286ae2ad2868b58e61d90443dc08
 
-This commit show's how to create a Dynamic Block vs a Static block. There are many benefits to using Dynamic Blocks, here are some resources discussing the benefits:
+This commit shows how to create a Dynamic Block vs a Static Block. There are many benefits to using Dynamic Blocks, here are some resources discussing the benefits:
 
 - https://design.oit.ncsu.edu/2019/03/11/choosing-dynamic-blocks-one/
 - https://www.youtube.com/watch?v=0EtQO1kx8Vg
 
-#### Instructions:
 
+#### Instructions:
+```
 - Create a file in `src/classes` to hold the PHP/Wordpress code.
   - Actions can be added
   - Blocks can be registered
@@ -90,13 +40,25 @@ This commit show's how to create a Dynamic Block vs a Static block. There are ma
 - In `src/index.js` import your function and call it so that the block gets registered.
 - If needed, add JS and CSS component code under `src/components`
 
-### How To Contribute
+## VScode/Xdebug setup
+```
+The [PHP Debug plugin](https://marketplace.visualstudio.com/items?itemName=xdebug.php-debug) is required. On the debug tab click `Create a launch.json file` and select type `php`.
 
-- Create Feature branch `git checkout -b "feature/site-level-admin-form"`
-- Write code
-  - See [Anatomy of a Custom Block](CustomBlock.md)
-- Check `git diff` to see files that have been modified.
-- Git add the files you have modified or added: `git add <filename> <filename> <filename>` or use `git add .` if all the modified files need to be checked in
-- Commit with a good message `git commit -m "feat: ✨ Updating README"`
-- push code to github: `git push origin feature/site-level-admin-form`
-- In GitHub create a PR into the main branch
+You can replace the contents of `launch.json` with the following:
+
+```json
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "Listen for Xdebug",
+      "type": "php",
+      "request": "launch",
+      "port": 9003,
+      "pathMappings": {
+        "/var/www/html/wp-content/plugins/ucsc-gutenberg-blocks": "${workspaceRoot}"
+      },
+      "hostname": "wp-dev.ucsc"
+    }
+  ]
+}
