@@ -141,6 +141,8 @@ $individualPageUrl = $items['nodeContent']['linkOutToCampusDirectory'] ?
                 </div>
                 <?php
                   if ($displayPhoto) {
+                    // WPM-87: guard against empty photo data to avoid rendering
+                    // a broken data-URI <img> when no photo exists.
                     if (array_key_exists('jpegphoto', $people[$i]) && !empty($people[$i]['jpegphoto'][0])) {
                       $imgSrc = "data:image/jpeg;base64," . base64_encode($people[$i]['jpegphoto'][0]);
                     } else {

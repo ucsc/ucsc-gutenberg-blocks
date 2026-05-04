@@ -355,6 +355,9 @@ class CampusDirectoryAPI {
       ) {
         for ($attr = ldap_first_attribute($rli, $entry); $attr != false; $attr = ldap_next_attribute($rli, $entry)) {
           $attr = strtolower($attr);
+          // WPM-87: jpegphoto is binary data and must be read with
+          // ldap_get_values_len() to avoid null-byte truncation that
+          // breaks base64 encoding and produces broken images.
           if ($attr === 'jpegphoto') {
             $values = ldap_get_values_len($rli, $entry, $attr);
           } else {
