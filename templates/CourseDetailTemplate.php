@@ -406,6 +406,8 @@ if ( ! empty( $secondary_sections ) ) {
    !important overrides the theme's .is-layout-constrained > * { max-width: 80rem } */
 .course-status-heading {
 	max-width: none !important;
+	margin-left: 0 !important;
+	margin-right: 0 !important;
 }
 /* Secondary sections get a light-blue tinted background, matching old WCSI */
 .class-section {
