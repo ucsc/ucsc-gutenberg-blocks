@@ -402,6 +402,10 @@ if ( ! empty( $secondary_sections ) ) {
 </main>
 
 <style>
+/* Keep status indicator aligned with the title at wide viewports */
+.course-status-heading {
+	max-width: none;
+}
 /* Secondary sections get a light-blue tinted background, matching old WCSI */
 .class-section {
 	margin: 10px 0;
