@@ -39,14 +39,8 @@ function classScheduleSearch(event) {
     const activeStatuses = getActiveStatuses();
 
     rows.forEach(row => {
-        const cells = row.querySelectorAll('[role="cell"]');
-        let matchesSearch = false;
-
-        cells.forEach(cell => {
-            if (cell.textContent.toLowerCase().includes(searchTerm)) {
-                matchesSearch = true;
-            }
-        });
+        const titleCell = row.querySelector('.col-title');
+        const matchesSearch = titleCell && titleCell.textContent.toLowerCase().includes(searchTerm);
 
         const rowStatus = row.dataset.status;
         const matchesStatus = activeStatuses.length === 0 || activeStatuses.includes(rowStatus);
@@ -316,13 +310,8 @@ function applyStatusFilters() {
         const matchesStatus = activeStatuses.length === 0 || activeStatuses.includes(row.dataset.status);
 
         // Re-check search too so both filters stay in sync
-        const cells = row.querySelectorAll('[role="cell"]');
-        let matchesSearch = !searchTerm;
-        if (searchTerm) {
-            cells.forEach(cell => {
-                if (cell.textContent.toLowerCase().includes(searchTerm)) matchesSearch = true;
-            });
-        }
+        const titleCell = row.querySelector('.col-title');
+        const matchesSearch = !searchTerm || (titleCell && titleCell.textContent.toLowerCase().includes(searchTerm));
 
         row.style.display = (matchesStatus && matchesSearch) ? '' : 'none';
     });
