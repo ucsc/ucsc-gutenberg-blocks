@@ -409,7 +409,19 @@ if ( ! empty( $secondary_sections ) ) {
 	display: block;
 	font-size: 1rem;
 	font-weight: normal;
-	margin-bottom: 0.75em;
+	margin-bottom: 0.25em;
+}
+/* Tighten spacing to match production WCSI layout */
+#title.page-title {
+	margin-bottom: 0.25em;
+}
+.section-container.person {
+	margin-top: 0;
+}
+#class-info .h3-style {
+	margin-top: 0.5em;
+	margin-bottom: 0.5em;
+	padding-top: 0;
 }
 /* Secondary sections get a light-blue tinted background, matching old WCSI */
 .class-section {
