@@ -402,9 +402,10 @@ if ( ! empty( $secondary_sections ) ) {
 </main>
 
 <style>
-/* Keep status indicator aligned with the title at wide viewports */
+/* Keep status indicator aligned with the title at wide viewports.
+   !important overrides the theme's .is-layout-constrained > * { max-width: 80rem } */
 .course-status-heading {
-	max-width: none;
+	max-width: none !important;
 }
 /* Secondary sections get a light-blue tinted background, matching old WCSI */
 .class-section {
