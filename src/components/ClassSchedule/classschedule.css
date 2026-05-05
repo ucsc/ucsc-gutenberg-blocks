@@ -115,6 +115,7 @@ a.cancelled {
 .button-group {
   display: flex;
   gap: 0;
+  margin-left: auto;
 }
 
 .filter-button {
