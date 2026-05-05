@@ -409,7 +409,7 @@ if ( ! empty( $secondary_sections ) ) {
 	display: block;
 	font-size: 1rem;
 	font-weight: normal;
-	margin-bottom: 0.5em;
+	margin-bottom: 0.75em;
 }
 /* Secondary sections get a light-blue tinted background, matching old WCSI */
 .class-section {
