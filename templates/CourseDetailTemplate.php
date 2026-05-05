@@ -249,12 +249,13 @@ if ( ! empty( $secondary_sections ) ) {
 
 	<div class="has-global-padding is-layout-constrained wp-block-group alignwide">
 
-		<div class="course-status-heading">
-			<i class="<?php echo esc_attr( $status_class ); ?>" aria-hidden="true"></i>
-			<span><?php echo esc_html( $primary['enrl_status'] ); ?></span>
-		</div>
-
-		<h1 id="title" class="page-title"><span class="p-name"><?php echo esc_html( $primary['title_long'] ); ?></span></h1>
+		<h1 id="title" class="page-title">
+			<span class="course-status-heading">
+				<i class="<?php echo esc_attr( $status_class ); ?>" aria-hidden="true"></i>
+				<span><?php echo esc_html( $primary['enrl_status'] ); ?></span>
+			</span>
+			<span class="p-name"><?php echo esc_html( $primary['title_long'] ); ?></span>
+		</h1>
 
 		<div class="section-container person list-page">
 			<span><?php echo esc_html( $term_name ); ?></span> -
@@ -402,12 +403,13 @@ if ( ! empty( $secondary_sections ) ) {
 </main>
 
 <style>
-/* Keep status indicator aligned with the title at wide viewports.
-   !important overrides the theme's .is-layout-constrained > * { max-width: 80rem } */
+/* Status indicator on its own line above the title, inside the h1 to
+   avoid theme constrained-layout alignment issues */
 .course-status-heading {
-	max-width: none !important;
-	margin-left: 0 !important;
-	margin-right: 0 !important;
+	display: block;
+	font-size: 1rem;
+	font-weight: normal;
+	margin-bottom: 0.5em;
 }
 /* Secondary sections get a light-blue tinted background, matching old WCSI */
 .class-section {
