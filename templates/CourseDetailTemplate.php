@@ -249,8 +249,10 @@ if ( ! empty( $secondary_sections ) ) {
 
 	<div class="has-global-padding is-layout-constrained wp-block-group alignwide">
 
-		<i class="<?php echo esc_attr( $status_class ); ?>" aria-hidden="true"></i>
-		<span><?php echo esc_html( $primary['enrl_status'] ); ?></span>
+		<div class="course-status-heading">
+			<i class="<?php echo esc_attr( $status_class ); ?>" aria-hidden="true"></i>
+			<span><?php echo esc_html( $primary['enrl_status'] ); ?></span>
+		</div>
 
 		<h1 id="title" class="page-title"><span class="p-name"><?php echo esc_html( $primary['title_long'] ); ?></span></h1>
 
