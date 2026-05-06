@@ -39,8 +39,7 @@ function classScheduleSearch(event) {
     const activeStatuses = getActiveStatuses();
 
     rows.forEach(row => {
-        const titleCell = row.querySelector('.col-title');
-        const matchesSearch = titleCell && titleCell.textContent.toLowerCase().includes(searchTerm);
+        const matchesSearch = rowMatchesSearch(row, searchTerm);
 
         const rowStatus = row.dataset.status;
         const matchesStatus = activeStatuses.length === 0 || activeStatuses.includes(rowStatus);
@@ -57,6 +56,26 @@ function getActiveStatuses() {
         if (filter.checked) activeStatuses.push(filter.dataset.status);
     });
     return activeStatuses;
+}
+
+// Check whether a row matches the search term.
+// Mirrors the old Vue class-schedule app (resources/js/pages/courses.vue)
+// which searched: title, location, instructor, enrollment status,
+// class number, and catalog number (course ID).
+function rowMatchesSearch(row, searchTerm) {
+    if (!searchTerm) return true;
+
+    const textOf = cls => {
+        const el = row.querySelector(cls);
+        return el ? el.textContent.toLowerCase() : '';
+    };
+
+    return textOf('.col-title').includes(searchTerm) ||
+           textOf('.col-location').includes(searchTerm) ||
+           textOf('.col-instructor').includes(searchTerm) ||
+           textOf('.col-class-num').includes(searchTerm) ||
+           textOf('.col-course-id').includes(searchTerm) ||
+           (row.dataset.status || '').toLowerCase().includes(searchTerm);
 }
 
 // ── Sort ──────────────────────────────────────────────────────────────────────
@@ -310,8 +329,7 @@ function applyStatusFilters() {
         const matchesStatus = activeStatuses.length === 0 || activeStatuses.includes(row.dataset.status);
 
         // Re-check search too so both filters stay in sync
-        const titleCell = row.querySelector('.col-title');
-        const matchesSearch = !searchTerm || (titleCell && titleCell.textContent.toLowerCase().includes(searchTerm));
+        const matchesSearch = !searchTerm || rowMatchesSearch(row, searchTerm);
 
         row.style.display = (matchesStatus && matchesSearch) ? '' : 'none';
     });
