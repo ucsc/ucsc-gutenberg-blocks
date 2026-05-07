@@ -40,6 +40,40 @@ This commit shows how to create a Dynamic Block vs a Static Block. There are man
 - In `src/index.js` import your function and call it so that the block gets registered.
 - If needed, add JS and CSS component code under `src/components`
 
+## Testing
+
+Unit tests use [Jest](https://jestjs.io/) via `@wordpress/scripts` and [@testing-library/react](https://testing-library.com/docs/react-testing-library/intro/) for rendering Gutenberg block edit components.
+
+### Running Tests
+
+From the `wp-dev.ucsc` project root, run tests inside Docker:
+
+```bash
+docker compose -f docker-compose.yml -f docker-compose-start.yml run --rm \
+  -w /var/www/html/wp-content/plugins/ucsc-gutenberg-blocks \
+  plugin_npm_start npm test
+```
+
+Or to run a single test file:
+
+```bash
+docker compose -f docker-compose.yml -f docker-compose-start.yml run --rm \
+  -w /var/www/html/wp-content/plugins/ucsc-gutenberg-blocks \
+  plugin_npm_start npx wp-scripts test-unit-js --testPathPattern=ClassSchedule
+```
+
+### Writing Tests
+
+Test files live in `src/blocks/__tests__/` and follow the naming convention `BlockName.test.js`. Since WordPress packages like `@wordpress/components` are provided at runtime (not installed as dependencies), they must be mocked with `{ virtual: true }`:
+
+```js
+jest.mock('@wordpress/components', () => ({
+  Panel: ({ children }) => <div>{children}</div>,
+}), { virtual: true });
+```
+
+Child components (dropdowns, layouts, etc.) are also mocked so tests focus on the block's own logic rather than its children.
+
 ## VScode/Xdebug setup
 ```
 The [PHP Debug plugin](https://marketplace.visualstudio.com/items?itemName=xdebug.php-debug) is required. On the debug tab click `Create a launch.json file` and select type `php`.

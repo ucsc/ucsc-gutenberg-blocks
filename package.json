@@ -6,6 +6,7 @@
   "scripts": {
     "build": "wp-scripts build",
     "start": "wp-scripts start",
+    "test": "wp-scripts test-unit-js",
     "plugin-zip": "wp-scripts plugin-zip",
     "release": "standard-version"
   },
@@ -32,6 +33,8 @@
   "author": "UC Santa Cruz",
   "license": "ISC",
   "devDependencies": {
+    "@testing-library/jest-dom": "^5.17.0",
+    "@testing-library/react": "^12.1.5",
     "@wordpress/scripts": "^22.3.0",
     "standard-version": "^9.5.0"
   }
