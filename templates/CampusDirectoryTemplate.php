@@ -141,15 +141,15 @@ $individualPageUrl = $items['nodeContent']['linkOutToCampusDirectory'] ?
                 </div>
                 <?php
                   if ($displayPhoto) {
-                    // WPM-87: guard against empty photo data to avoid rendering
-                    // a broken data-URI <img> when no photo exists.
-                    if (array_key_exists('jpegphoto', $people[$i]) && !empty($people[$i]['jpegphoto'][0])) {
-                      $imgSrc = "data:image/jpeg;base64," . base64_encode($people[$i]['jpegphoto'][0]);
+                    $profileUid = !empty($people[$i]['uid'][0]) ? $people[$i]['uid'][0] : '';
+                    if (!empty($profileUid)) {
+                      $imgSrc = 'https://campusdirectory.ucsc.edu/photo.php?type=people&uid=' . rawurlencode($profileUid);
                     } else {
-                      $imgSrc = "//static.ucsc.edu/images/icon-slug.jpg";
+                      $imgSrc = '//static.ucsc.edu/images/icon-slug.jpg';
                     }
                     if ($items['linkToProfile']) echo '<a class="u-url square-img" href="' . $individualPageUrl . $people[$i]['uid'][0] . '">';
-                    echo "<img src='" . $imgSrc . "' class='item-image square-img imgLiquid imgLiquid_bgSize imgLiquid_ready' alt='Profile picture of ". $people[$i]['cn'][0] ."' />";                  if ($items['linkToProfile']) echo '</a>';
+                    echo '<img src="' . esc_url($imgSrc) . '" class="item-image square-img imgLiquid imgLiquid_bgSize imgLiquid_ready" alt="Profile picture of ' . esc_attr($people[$i]['cn'][0]) . '" />';
+                    if ($items['linkToProfile']) echo '</a>';
                   }
                 ?>
               </div>
