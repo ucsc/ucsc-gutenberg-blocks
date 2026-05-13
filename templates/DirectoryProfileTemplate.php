@@ -73,7 +73,7 @@ if (count($profileData)) {
                                 $imgSrc = '//static.ucsc.edu/images/icon-slug.jpg';
                             }
                         ?>
-                        <img src="<?php echo esc_url($imgSrc); ?>" alt="Portrait of <?php echo esc_attr($profileData["cn"][0]); ?>">
+                        <img src="<?php echo esc_url($imgSrc); ?>" onerror="this.onerror=null;this.src='<?php echo esc_url('//static.ucsc.edu/images/icon-slug.jpg'); ?>';" alt="Portrait of <?php echo esc_attr($profileData["cn"][0]); ?>">
                     </div>
                     <div class="item-body">
                         <dl class="item-info">
