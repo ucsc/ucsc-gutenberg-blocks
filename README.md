@@ -1,33 +1,36 @@
 
 ## About The Plugin
+
 A WordPress plugin providing UCSC custom Gutenberg blocks: class schedule, course catalog, and campus directory as seen at:
-- https://history.ucsc.edu/courses/?sub=HIS
-- https://literature.ucsc.edu/class-schedule/course-catalog/
-- https://campusdirectory.ucsc.edu/cd_department?ou=soe
+
+- [Courses](https://history.ucsc.edu/courses/?sub=HIS)
+- [Class Schedule](https://literature.ucsc.edu/class-schedule/course-catalog/)
+- [Directory](https://campusdirectory.ucsc.edu/cd_department?ou=soe)
 
 ### Development Setup Instructions
+
 - Follow the setup instructions in the [wp-dev.ucsc README](https://github.com/ucsc/wp-dev.ucsc)
 
 ### How To Contribute Code / Develop
+
 - From the wordpress root (by default wp-dev.ucsc): cd public/wp-content/plugins/ucsc-gutenberg-blocks
 - This is a separate repo that gets cloned to this directory during the initial setup `setup.sh`
 - Create Feature branch `git checkout -b "feature/WPM-xxx_my_feature"`
 - Write code, see [Anatomy of a Custom Block](CustomBlock.md)
 - Commit and push your changes, then create a PR into the `main` branch on GitHub
-- Instructions for pushing to the development and production campus press servers can be found https://docs.google.com/document/d/1XFb_JTMC8SP3HuwXVbqc6exMKpfMfYiO0XRE_QH8tjU/edit?tab=t.0#heading=h.pt501scbu4vi
+- [Instructions for pushing](https://docs.google.com/document/d/1XFb_JTMC8SP3HuwXVbqc6exMKpfMfYiO0XRE_QH8tjU/edit?tab=t.0#heading=h.pt501scbu4vi) to the development and production campus press servers
 
 ### Basic Block Development
 
-As a reference a commit to adding a demo block to this repo can be found here: https://github.com/ucsc/ucsc-gutenberg-blocks/commit/10dafbecede6286ae2ad2868b58e61d90443dc08
+As a reference [a commit to adding a demo block](https://github.com/ucsc/ucsc-gutenberg-blocks/commit/10dafbecede6286ae2ad2868b58e61d90443dc08) to this repo
 
 This commit shows how to create a Dynamic Block vs a Static Block. There are many benefits to using Dynamic Blocks, here are some resources discussing the benefits:
 
 - https://design.oit.ncsu.edu/2019/03/11/choosing-dynamic-blocks-one/
 - https://www.youtube.com/watch?v=0EtQO1kx8Vg
 
+#### Instructions
 
-#### Instructions:
-```
 - Create a file in `src/classes` to hold the PHP/Wordpress code.
   - Actions can be added
   - Blocks can be registered
@@ -66,7 +69,7 @@ docker compose -f docker-compose.yml -f docker-compose-start.yml run --rm \
 
 Test files live in `src/blocks/__tests__/` and follow the naming convention `BlockName.test.js`. Since WordPress packages like `@wordpress/components` are provided at runtime (not installed as dependencies), they must be mocked with `{ virtual: true }`:
 
-```js
+```javascript
 jest.mock('@wordpress/components', () => ({
   Panel: ({ children }) => <div>{children}</div>,
 }), { virtual: true });
@@ -75,7 +78,7 @@ jest.mock('@wordpress/components', () => ({
 Child components (dropdowns, layouts, etc.) are also mocked so tests focus on the block's own logic rather than its children.
 
 ## VScode/Xdebug setup
-```
+
 The [PHP Debug plugin](https://marketplace.visualstudio.com/items?itemName=xdebug.php-debug) is required. On the debug tab click `Create a launch.json file` and select type `php`.
 
 You can replace the contents of `launch.json` with the following:
@@ -96,3 +99,4 @@ You can replace the contents of `launch.json` with the following:
     }
   ]
 }
+```
