@@ -1,70 +1,245 @@
 <?php
 /**
- * Plain-PHP tests for ClassSchedule::theHTML().
+ * Dependency-free tests for ClassSchedule::theHTML().
  *
- * The container has PHP 8.1 but no PHPUnit/Composer, so this is a dependency-free
- * runner. theHTML() is a pure function (no WordPress calls), so we only stub the
- * WP hook functions the class constructor touches, then assert on the returned markup.
- *
- * Run inside the Docker WP container:
- *   docker exec ucsc-wordpress-wp php \
- *     /var/www/html/wp-content/plugins/ucsc-gutenberg-blocks/tests/php/ClassScheduleTest.php
+ * Run from the plugin directory:
+ *   docker run --rm -v "$PWD:/plugin" -w /plugin php:8.1-cli \
+ *     php tests/php/ClassScheduleTest.php
  */
 
-// --- Minimal WP stubs so the class file loads and constructs ---------------
-if ( ! function_exists( 'add_action' ) )          { function add_action() {} }
-if ( ! function_exists( 'register_rest_route' ) ) { function register_rest_route() {} }
+$rest_handler     = null;
+$rest_requests    = array();
+$enqueued_scripts = array();
+$enqueued_styles  = array();
+
+function add_action() {}
+function add_filter() {}
+function register_rest_route() {}
+function sanitize_text_field( $value ) {
+	return trim( strip_tags( (string) $value ) );
+}
+function is_wp_error( $value ) {
+	return $value instanceof WP_Error;
+}
+function rest_do_request( $request ) {
+	global $rest_handler, $rest_requests;
+	$rest_requests[] = $request;
+	return $rest_handler( $request );
+}
+function plugin_dir_path( $file ) {
+	return dirname( $file ) . '/';
+}
+function wp_enqueue_script( $handle ) {
+	global $enqueued_scripts;
+	$enqueued_scripts[] = $handle;
+}
+function wp_enqueue_style( $handle ) {
+	global $enqueued_styles;
+	$enqueued_styles[] = $handle;
+}
+function esc_attr( $value ) {
+	return htmlspecialchars( (string) $value, ENT_QUOTES, 'UTF-8' );
+}
+function esc_html( $value ) {
+	return htmlspecialchars( (string) $value, ENT_QUOTES, 'UTF-8' );
+}
+function esc_url( $value ) {
+	return esc_attr( $value );
+}
+function selected( $selected, $current ) {
+	if ( (string) $selected === (string) $current ) {
+		echo 'selected="selected"';
+	}
+}
+function home_url( $path = '' ) {
+	return 'https://example.ucsc.edu' . $path;
+}
+
+class WP_Error {}
+
+class WP_REST_Request {
+	public $method;
+	public $route;
+	public $query_params = array();
+
+	public function __construct( $method, $route ) {
+		$this->method = $method;
+		$this->route  = $route;
+	}
+
+	public function set_query_params( $query_params ) {
+		$this->query_params = $query_params;
+	}
+}
+
+class Test_REST_Response {
+	private $data;
+
+	public function __construct( $data ) {
+		$this->data = $data;
+	}
+
+	public function get_data() {
+		return $this->data;
+	}
+}
 
 require __DIR__ . '/../../classes/ClassSchedule.php';
 
-// --- Tiny assertion harness -------------------------------------------------
 $tests  = 0;
 $failed = 0;
 
-function check( $label, $cond ) {
-    global $tests, $failed;
-    $tests++;
-    if ( $cond ) {
-        echo "  PASS  $label\n";
-    } else {
-        $failed++;
-        echo "  FAIL  $label\n";
-    }
+function check( $label, $condition ) {
+	global $tests, $failed;
+	$tests++;
+
+	if ( $condition ) {
+		echo "  PASS  $label\n";
+		return;
+	}
+
+	$failed++;
+	echo "  FAIL  $label\n";
 }
 
-$cs = new ClassSchedule();
+function reset_test_state() {
+	global $rest_requests, $enqueued_scripts, $enqueued_styles;
+	$rest_requests    = array();
+	$enqueued_scripts = array();
+	$enqueued_styles  = array();
+}
 
-$PROD = 'https://webapps.ucsc.edu/wcsi';
-$STG  = 'https://webapps.stg.web.aws.ucsc.edu/wcsi';
+function render_schedule( $attributes, $terms_response, $courses_response = array() ) {
+	global $rest_handler;
+	reset_test_state();
 
-// --- useNewServer toggles the base URL -------------------------------------
-echo "useNewServer base URL:\n";
-$prod = $cs->theHTML( array( 'subjectOrDept' => 'dept', 'department' => 'CSE' ) );
-check( 'defaults to prod webapps host', strpos( $prod, $PROD ) !== false );
-check( 'prod build does not reference staging host', strpos( $prod, $STG ) === false );
+	$rest_handler = function ( $request ) use ( $terms_response, $courses_response ) {
+		if ( '/ucsc/v1/terms' === $request->route ) {
+			return $terms_response instanceof WP_Error
+				? $terms_response
+				: new Test_REST_Response( $terms_response );
+		}
 
-$staging = $cs->theHTML( array( 'subjectOrDept' => 'dept', 'department' => 'CSE', 'useNewServer' => true ) );
-check( 'useNewServer=true points at staging host', strpos( $staging, $STG ) !== false );
+		if ( 0 === strpos( $request->route, '/ucsc/v1/courses/' ) ) {
+			return $courses_response instanceof WP_Error
+				? $courses_response
+				: new Test_REST_Response( $courses_response );
+		}
 
-$falsey = $cs->theHTML( array( 'subjectOrDept' => 'dept', 'department' => 'CSE', 'useNewServer' => false ) );
-check( 'useNewServer=false stays on prod host', strpos( $falsey, $PROD ) !== false );
+		return new WP_Error();
+	};
 
-// --- dept vs subject branching ---------------------------------------------
-echo "dept/subject branching:\n";
-$dept = $cs->theHTML( array( 'subjectOrDept' => 'dept', 'department' => 'CSE' ) );
-check( 'dept mode emits department attribute', strpos( $dept, 'department="CSE"' ) !== false );
-check( 'dept mode omits subject attribute', strpos( $dept, 'subject=' ) === false );
+	$class_schedule = new ClassSchedule();
+	return $class_schedule->theHTML( $attributes );
+}
 
-$subject = $cs->theHTML( array( 'subjectOrDept' => 'subject', 'subject' => 'AMS' ) );
-check( 'subject mode emits subject attribute', strpos( $subject, 'subject="AMS"' ) !== false );
-check( 'subject mode blanks department attribute', strpos( $subject, 'department=""' ) !== false );
+function course_fixture( $overrides = array() ) {
+	return array_merge(
+		array(
+			'subject'       => 'CSE',
+			'catalog_nbr'   => '101',
+			'title'         => 'Algorithms',
+			'class_nbr'     => '12345',
+			'enrl_capacity' => 100,
+			'enrl_total'    => 90,
+			'enrl_status'   => 'Open',
+			'meeting_days'  => 'MWF',
+			'start_time'    => '10:40 AM',
+			'end_time'      => '11:45 AM',
+			'location'      => 'Engineering 2 192',
+			'instructors'   => array(
+				array(
+					'name'   => 'Ada Lovelace',
+					'cruzid' => 'alovelace',
+				),
+			),
+		),
+		$overrides
+	);
+}
 
-// --- markup shape -----------------------------------------------------------
-echo "markup shape:\n";
-check( 'renders #wcsi mount node', strpos( $dept, 'id="wcsi"' ) !== false );
-check( 'loads app.js from chosen host', strpos( $staging, $STG . '/js/app.js' ) !== false );
-check( 'links app.css from chosen host', strpos( $staging, $STG . '/css/app.css' ) !== false );
+$terms = array(
+	'terms' => array(
+		array(
+			'code'        => '2260',
+			'description' => 'Summer 2026',
+			'default'     => 'N',
+		),
+		array(
+			'code'        => '2262',
+			'description' => 'Fall 2026',
+			'default'     => 'Y',
+		),
+	),
+);
 
-// --- summary ----------------------------------------------------------------
+echo "error and empty states:\n";
+$html = render_schedule( array( 'subjectOrDept' => 'dept', 'department' => 'CSE' ), new WP_Error() );
+check( 'returns a terms error message when the terms request fails', false !== strpos( $html, 'Error loading terms' ) );
+
+$html = render_schedule( array( 'subjectOrDept' => 'dept', 'department' => 'CSE' ), array( 'terms' => array() ) );
+check( 'returns a no-terms message for an empty terms response', '<p>No terms available.</p>' === $html );
+
+$html = render_schedule( array( 'subjectOrDept' => 'dept', 'department' => '' ), $terms );
+check( 'prompts for block settings when no department is selected', false !== strpos( $html, 'Please select a department or subject' ) );
+check( 'does not request courses without a selected criterion', 1 === count( $rest_requests ) );
+
+$html = render_schedule(
+	array( 'subjectOrDept' => 'dept', 'department' => 'CSE' ),
+	$terms,
+	new WP_Error()
+);
+check( 'returns a no-courses message when the courses request fails', '<p>No courses found for the selected criteria.</p>' === $html );
+
+echo "REST requests and rendered template:\n";
+$html = render_schedule(
+	array( 'subjectOrDept' => 'dept', 'department' => 'cse' ),
+	$terms,
+	array(
+		'classes' => array(
+			course_fixture(
+				array(
+					'catalog_nbr' => '101',
+					'title'       => 'Algorithms',
+					'class_nbr'   => '12345',
+				)
+			),
+			course_fixture(
+				array(
+					'catalog_nbr' => '20',
+					'title'       => 'Beginning Programming',
+					'class_nbr'   => '54321',
+				)
+			),
+		),
+	)
+);
+
+check( 'requests courses for the default term', '/ucsc/v1/courses/2262' === $rest_requests[1]->route );
+check( 'uppercases the department query parameter', array( 'dept' => 'CSE' ) === $rest_requests[1]->query_params );
+check( 'renders the current ClassSchedule template', false !== strpos( $html, 'id="classSchedule"' ) );
+check( 'selects the default term in the quarter dropdown', false !== strpos( $html, 'value="2262"' . "\n              " . 'selected="selected"' ) );
+check( 'sorts courses numerically by catalog number', strpos( $html, 'CSE-20' ) < strpos( $html, 'CSE-101' ) );
+check( 'renders course detail links', false !== strpos( $html, 'https://example.ucsc.edu/course/2262/54321' ) );
+check( 'renders directory links for instructors', false !== strpos( $html, 'https://example.ucsc.edu/directory/alovelace' ) );
+check( 'enqueues the schedule script after successful rendering', array( 'classschedule-js' ) === $enqueued_scripts );
+check( 'enqueues the schedule stylesheet after successful rendering', array( 'classschedule' ) === $enqueued_styles );
+
+$html = render_schedule(
+	array( 'subjectOrDept' => 'subject', 'subject' => 'ams' ),
+	array(
+		'terms' => array(
+			array(
+				'code'        => '2260',
+				'description' => 'Summer 2026',
+				'default'     => 'N',
+			),
+		),
+	),
+	array( 'classes' => array( course_fixture( array( 'subject' => 'AMS' ) ) ) )
+);
+check( 'falls back to the first term when no term is marked default', '/ucsc/v1/courses/2260' === $rest_requests[1]->route );
+check( 'uppercases the subject query parameter', array( 'subject' => 'AMS' ) === $rest_requests[1]->query_params );
+
 echo "\n" . ( $tests - $failed ) . "/$tests passed\n";
-exit( $failed === 0 ? 0 : 1 );
+exit( 0 === $failed ? 0 : 1 );
