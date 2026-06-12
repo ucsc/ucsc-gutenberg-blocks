@@ -51,6 +51,11 @@ function selected( $selected, $current ) {
 		echo 'selected="selected"';
 	}
 }
+function checked( $checked, $current = true ) {
+	if ( (string) $checked === (string) $current ) {
+		echo 'checked="checked"';
+	}
+}
 function home_url( $path = '' ) {
 	return 'https://example.ucsc.edu' . $path;
 }
@@ -218,12 +223,53 @@ $html = render_schedule(
 check( 'requests courses for the default term', '/ucsc/v1/courses/2262' === $rest_requests[1]->route );
 check( 'uppercases the department query parameter', array( 'dept' => 'CSE' ) === $rest_requests[1]->query_params );
 check( 'renders the current ClassSchedule template', false !== strpos( $html, 'id="classSchedule"' ) );
+check( 'renders #classScheduleTable mount node', false !== strpos( $html, 'id="classScheduleTable"' ) );
 check( 'selects the default term in the quarter dropdown', false !== strpos( $html, 'value="2262"' . "\n              " . 'selected="selected"' ) );
 check( 'sorts courses numerically by catalog number', strpos( $html, 'CSE-20' ) < strpos( $html, 'CSE-101' ) );
 check( 'renders course detail links', false !== strpos( $html, 'https://example.ucsc.edu/course/2262/54321' ) );
 check( 'renders directory links for instructors', false !== strpos( $html, 'https://example.ucsc.edu/directory/alovelace' ) );
 check( 'enqueues the schedule script after successful rendering', array( 'classschedule-js' ) === $enqueued_scripts );
 check( 'enqueues the schedule stylesheet after successful rendering', array( 'classschedule' ) === $enqueued_styles );
+check( 'does not render the legacy WCSI mount node', false === strpos( $html, 'id="wcsi"' ) );
+check( 'does not render the legacy WCSI host', false === strpos( $html, 'webapps.ucsc.edu' ) );
+
+echo "default visible columns:\n";
+check( 'emits data-default-columns="seats,days"', false !== strpos( $html, 'data-default-columns="seats,days"' ) );
+check( 'Seats header is visible', false !== strpos( $html, 'col-seats is-sortable"' ) );
+check( 'Time header is hidden', false !== strpos( $html, 'col-time is-sortable hidden' ) );
+check( 'Class # header is hidden', false !== strpos( $html, 'col-class-num is-sortable hidden' ) );
+check( 'Seats toggle is checked', false !== strpos( $html, 'data-column="seats" checked="checked"' ) );
+check( 'Time toggle is unchecked', false === strpos( $html, 'data-column="time" checked="checked"' ) );
+
+echo "editor-configured default columns:\n";
+$html = render_schedule(
+	array(
+		'subjectOrDept'  => 'dept',
+		'department'     => 'CSE',
+		'defaultColumns' => array( 'class-num', 'time' ),
+	),
+	$terms,
+	array( 'classes' => array( course_fixture() ) )
+);
+check( 'emits data-default-columns="class-num,time"', false !== strpos( $html, 'data-default-columns="class-num,time"' ) );
+check( 'Class # header is visible', false !== strpos( $html, 'col-class-num is-sortable"' ) );
+check( 'Time header is visible', false !== strpos( $html, 'col-time is-sortable"' ) );
+check( 'Seats header is hidden', false !== strpos( $html, 'col-seats is-sortable hidden' ) );
+check( 'Class # toggle is checked', false !== strpos( $html, 'data-column="class-num" checked="checked"' ) );
+check( 'Seats toggle is unchecked', false === strpos( $html, 'data-column="seats" checked="checked"' ) );
+
+echo "empty default columns:\n";
+$html = render_schedule(
+	array(
+		'subjectOrDept'  => 'dept',
+		'department'     => 'CSE',
+		'defaultColumns' => array(),
+	),
+	$terms,
+	array( 'classes' => array( course_fixture() ) )
+);
+check( 'emits empty data-default-columns', false !== strpos( $html, 'data-default-columns=""' ) );
+check( 'Seats header is hidden when no defaults set', false !== strpos( $html, 'col-seats is-sortable hidden' ) );
 
 $html = render_schedule(
 	array( 'subjectOrDept' => 'subject', 'subject' => 'ams' ),
