@@ -15,12 +15,24 @@ class CampusDirectory
     });
 
     add_action('template_include', function ($template) {
-      if (get_query_var('directoryprofilecruzid') == false || get_query_var('directoryprofilecruzid') == '') {
+      $cruzid = get_query_var('directoryprofilecruzid');
+      if ($cruzid === false || $cruzid === '') {
+        return $template;
+      }
+
+      // On a real page/post, render the profile inline via the_content (see
+      // renderDirectoryProfile) so the active theme supplies its own header,
+      // navigation, and footer. Block (FSE) themes have no header.php for the
+      // standalone template to load, which dropped the site nav (WPM-99). Only
+      // fall back to the standalone template for pretty /directory/<cruzid>/
+      // URLs that do not resolve to a singular page.
+      if (is_singular()) {
         return $template;
       }
 
       return plugin_dir_path(__FILE__) . '../templates/DirectoryProfileTemplate.php';
     });
+    add_filter('the_content', array($this, 'renderDirectoryProfile'), 20);
     add_filter('document_title_parts', array($this, 'directory_profile_title'));
     add_action('wp_enqueue_scripts', array($this, 'register_plugin_styles'));
     add_action('rest_api_init', function () {
@@ -130,5 +142,22 @@ class CampusDirectory
     ob_end_clean(); // Turn off output buffer
 
     return $output;
+  }
+
+  // Render a directory profile inline within the queried page's content so the
+  // active theme keeps its header, navigation, and footer (WPM-99). Only fires
+  // for the main query's singular page when a directoryprofilecruzid is set.
+  function renderDirectoryProfile($content)
+  {
+    $cruzid = get_query_var('directoryprofilecruzid');
+    if ($cruzid === false || $cruzid === '') return $content;
+    if (is_admin() || !is_singular() || !is_main_query()) return $content;
+    if (get_the_ID() !== get_queried_object_id()) return $content;
+
+    $attributes = [];
+    $directory_profile_inline = true;
+    ob_start();
+    include(plugin_dir_path(__FILE__) . '../templates/DirectoryProfileTemplate.php');
+    return ob_get_clean();
   }
 }
