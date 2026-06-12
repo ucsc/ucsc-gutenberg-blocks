@@ -5,13 +5,16 @@
  *   0  col-status     (always visible)
  *   1  col-course-id  (always visible)
  *   2  col-title      (always visible)
- *   3  col-seats      (toggleable, default on)
- *   4  col-days       (toggleable, default on)
- *   5  col-time       (toggleable, default off)
- *   6  col-location   (toggleable, default off)
- *   7  col-instructor (toggleable, default off)
- *   8  col-class-num  (toggleable, default off)
- *   9  col-enrollment (toggleable, default off)
+ *   3  col-seats      (toggleable)
+ *   4  col-days       (toggleable)
+ *   5  col-time       (toggleable)
+ *   6  col-location   (toggleable)
+ *   7  col-instructor (toggleable)
+ *   8  col-class-num  (toggleable)
+ *   9  col-enrollment (toggleable)
+ *
+ * Which toggleable columns are shown by default is configured by the site editor
+ * per-block and emitted as data-default-columns on #classScheduleTable.
  */
 
 // Wrap classschedule.js in IIFE to avoid global scope pollution
@@ -241,8 +244,16 @@ function applyFilters() {
     }
 }
 
-// Default checked columns (matches the original Vue app defaults)
-const defaultColumns = ['seats', 'days'];
+// Default checked columns. The site editor configures these per-block; the chosen
+// set is emitted on #classScheduleTable as data-default-columns. Falls back to the
+// original Vue app defaults (Seats + Days) when the attribute is absent.
+function getDefaultColumns() {
+    var table = document.getElementById('classScheduleTable');
+    var attr = table ? table.getAttribute('data-default-columns') : null;
+    if (attr === null) return ['seats', 'days'];
+    if (attr.trim() === '') return [];
+    return attr.split(',').map(function(s) { return s.trim(); }).filter(Boolean);
+}
 
 // Persist column visibility choices in sessionStorage so they survive
 // navigation (e.g. clicking an instructor link and pressing Back).
@@ -338,7 +349,8 @@ function applyStatusFilters() {
 }
 
 function resetFilters() {
-    // Reset columns to defaults (only Seats and Days checked, matching original Vue app)
+    // Reset columns to the site-editor-configured defaults for this block
+    const defaultColumns = getDefaultColumns();
     document.querySelectorAll('.column-toggle').forEach(t => {
         t.checked = defaultColumns.includes(t.dataset.column);
     });

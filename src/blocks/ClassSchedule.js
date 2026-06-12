@@ -1,4 +1,4 @@
-import { Panel, PanelBody, RadioControl } from '@wordpress/components';
+import { Panel, PanelBody, RadioControl, CheckboxControl } from '@wordpress/components';
 
 import DepartmentDropdown from '../components/DepartmentDropdown';
 import SubjectDropdown from '../components/SubjectDropdown';
@@ -23,6 +23,9 @@ const ClassSchedule = () => {
       subject: {
         type: "string"
       },
+      defaultColumns: {
+        type: "array"
+      },
     },
     edit: ({ setAttributes, attributes }) => {
       const {
@@ -30,6 +33,29 @@ const ClassSchedule = () => {
         subject,
         subjectOrDept,
       } = attributes;
+
+      // Toggleable columns the visitor sees in the front-end Filter modal. Status,
+      // Course ID, and Title are always shown and are intentionally not listed here.
+      const columnOptions = [
+        { key: 'seats', label: 'Seats' },
+        { key: 'days', label: 'Days' },
+        { key: 'time', label: 'Time' },
+        { key: 'location', label: 'Location' },
+        { key: 'instructor', label: 'Instructor' },
+        { key: 'class-num', label: 'Class #' },
+        { key: 'enrollment', label: 'Enrollment' },
+      ];
+
+      // Undefined means "never configured" — fall back to the historical Seats + Days defaults.
+      const defaultColumns = attributes.defaultColumns || ['seats', 'days'];
+
+      const toggleColumn = (key, isChecked) => {
+        const current = attributes.defaultColumns || ['seats', 'days'];
+        const next = isChecked
+          ? (current.includes(key) ? current : [...current, key])
+          : current.filter(c => c !== key);
+        setAttributes({ defaultColumns: next });
+      };
 
       let localSubjectOrDept;
       let setLocalSubjectOrDept;
@@ -82,7 +108,21 @@ const ClassSchedule = () => {
                 setAttributes={setAttributes}
                 disabled={subjectOrDept !== "subject"}
               />
-              <small style={{ display: 'block', marginTop: '3em', fontSize: '0.7em', color: '#666' }}>version 1.1.37</small>
+              <small style={{ display: 'block', marginTop: '3em', fontSize: '0.7em', color: '#666' }}>version 1.1.38</small>
+            </PanelBody>
+            <PanelBody title="Default Visible Columns" initialOpen={false}>
+              <p style={{ fontSize: '0.85em', color: '#555' }}>
+                Choose which columns show by default. Status, Course ID, and Title are always shown.
+                Visitors can still change columns using the Filter button on the page.
+              </p>
+              {columnOptions.map(opt => (
+                <CheckboxControl
+                  key={opt.key}
+                  label={opt.label}
+                  checked={defaultColumns.includes(opt.key)}
+                  onChange={(isChecked) => toggleColumn(opt.key, isChecked)}
+                />
+              ))}
             </PanelBody>
           </Panel>
         </>

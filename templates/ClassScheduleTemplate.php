@@ -9,6 +9,27 @@
  *   $attributes    array   Block attributes (department, subject, subjectOrDept)
  */
 $terms = $terms_data['terms'] ?? [];
+
+// Toggleable columns and the site-editor-configured defaults. Status, Course ID,
+// and Title are always shown and are not configurable here. When the block has no
+// saved preference, fall back to the original Seats + Days defaults.
+$toggle_columns  = ['seats', 'days', 'time', 'location', 'instructor', 'class-num', 'enrollment'];
+$default_columns = $attributes['defaultColumns'] ?? ['seats', 'days'];
+if (!is_array($default_columns)) {
+  $default_columns = ['seats', 'days'];
+}
+$default_columns = array_values(array_intersect($default_columns, $toggle_columns));
+
+// Helpers: is a toggleable column shown by default, and the class/tabindex that follow.
+$cs_is_default   = function ($col) use ($default_columns) {
+  return in_array($col, $default_columns, true);
+};
+$cs_hidden_class = function ($col) use ($default_columns) {
+  return in_array($col, $default_columns, true) ? '' : ' hidden';
+};
+$cs_header_tabindex = function ($col) use ($default_columns) {
+  return in_array($col, $default_columns, true) ? '' : ' tabindex="-1"';
+};
 ?>
 <div id="classSchedule">
 
@@ -54,13 +75,13 @@ $terms = $terms_data['terms'] ?? [];
       <div class="divider">
         <strong>Display Columns</strong>
         <div class="column-toggles">
-          <label><input type="checkbox" class="column-toggle" data-column="seats" checked> Seats</label>
-          <label><input type="checkbox" class="column-toggle" data-column="days" checked> Days</label>
-          <label><input type="checkbox" class="column-toggle" data-column="time"> Time</label>
-          <label><input type="checkbox" class="column-toggle" data-column="location"> Location</label>
-          <label><input type="checkbox" class="column-toggle" data-column="instructor"> Instructor</label>
-          <label><input type="checkbox" class="column-toggle" data-column="class-num"> Class #</label>
-          <label><input type="checkbox" class="column-toggle" data-column="enrollment"> Enrollment</label>
+          <label><input type="checkbox" class="column-toggle" data-column="seats" <?php checked($cs_is_default('seats')); ?>> Seats</label>
+          <label><input type="checkbox" class="column-toggle" data-column="days" <?php checked($cs_is_default('days')); ?>> Days</label>
+          <label><input type="checkbox" class="column-toggle" data-column="time" <?php checked($cs_is_default('time')); ?>> Time</label>
+          <label><input type="checkbox" class="column-toggle" data-column="location" <?php checked($cs_is_default('location')); ?>> Location</label>
+          <label><input type="checkbox" class="column-toggle" data-column="instructor" <?php checked($cs_is_default('instructor')); ?>> Instructor</label>
+          <label><input type="checkbox" class="column-toggle" data-column="class-num" <?php checked($cs_is_default('class-num')); ?>> Class #</label>
+          <label><input type="checkbox" class="column-toggle" data-column="enrollment" <?php checked($cs_is_default('enrollment')); ?>> Enrollment</label>
         </div>
       </div>
 
@@ -93,20 +114,20 @@ $terms = $terms_data['terms'] ?? [];
   </div>
 
   <!-- a11y: uses divs with ARIA table roles instead of <table> elements to avoid "layout table" scanner warnings -->
-  <div class="el-table" id="classScheduleTable" role="table" aria-label="Class Schedule">
+  <div class="el-table" id="classScheduleTable" role="table" aria-label="Class Schedule" data-default-columns="<?php echo esc_attr(implode(',', $default_columns)); ?>">
     <div class="el-table__header" role="rowgroup">
       <div class="el-table__header-row" role="row">
         <div class="col-status" role="columnheader"><div class="cell"><span class="screen-reader-text">Status</span></div></div>
         <!-- a11y: inner button elements handle both mouse and keyboard activation natively -->
         <div class="col-course-id is-sortable" role="columnheader"><button type="button" class="cell" onclick="sortClassSchedule(1)">Course ID<span class="caret-wrapper"><i class="sort-caret ascending"></i><i class="sort-caret descending"></i></span></button></div>
         <div class="col-title is-sortable" role="columnheader"><button type="button" class="cell" onclick="sortClassSchedule(2)">Title<span class="caret-wrapper"><i class="sort-caret ascending"></i><i class="sort-caret descending"></i></span></button></div>
-        <div class="col-seats is-sortable" role="columnheader"><button type="button" class="cell" onclick="sortClassSchedule(3)">Seats<span class="caret-wrapper"><i class="sort-caret ascending"></i><i class="sort-caret descending"></i></span></button></div>
-        <div class="col-days is-sortable" role="columnheader"><button type="button" class="cell" onclick="sortClassSchedule(4)">Days<span class="caret-wrapper"><i class="sort-caret ascending"></i><i class="sort-caret descending"></i></span></button></div>
-        <div class="col-time is-sortable hidden" role="columnheader"><button type="button" class="cell" tabindex="-1" onclick="sortClassSchedule(5)">Time<span class="caret-wrapper"><i class="sort-caret ascending"></i><i class="sort-caret descending"></i></span></button></div>
-        <div class="col-location is-sortable hidden" role="columnheader"><button type="button" class="cell" tabindex="-1" onclick="sortClassSchedule(6)">Location<span class="caret-wrapper"><i class="sort-caret ascending"></i><i class="sort-caret descending"></i></span></button></div>
-        <div class="col-instructor is-sortable hidden" role="columnheader"><button type="button" class="cell" tabindex="-1" onclick="sortClassSchedule(7)">Instructor<span class="caret-wrapper"><i class="sort-caret ascending"></i><i class="sort-caret descending"></i></span></button></div>
-        <div class="col-class-num is-sortable hidden" role="columnheader"><button type="button" class="cell" tabindex="-1" onclick="sortClassSchedule(8)">Class #<span class="caret-wrapper"><i class="sort-caret ascending"></i><i class="sort-caret descending"></i></span></button></div>
-        <div class="col-enrollment is-sortable hidden" role="columnheader"><button type="button" class="cell" tabindex="-1" onclick="sortClassSchedule(9)">Enrollment<span class="caret-wrapper"><i class="sort-caret ascending"></i><i class="sort-caret descending"></i></span></button></div>
+        <div class="col-seats is-sortable<?php echo $cs_hidden_class('seats'); ?>" role="columnheader"><button type="button" class="cell"<?php echo $cs_header_tabindex('seats'); ?> onclick="sortClassSchedule(3)">Seats<span class="caret-wrapper"><i class="sort-caret ascending"></i><i class="sort-caret descending"></i></span></button></div>
+        <div class="col-days is-sortable<?php echo $cs_hidden_class('days'); ?>" role="columnheader"><button type="button" class="cell"<?php echo $cs_header_tabindex('days'); ?> onclick="sortClassSchedule(4)">Days<span class="caret-wrapper"><i class="sort-caret ascending"></i><i class="sort-caret descending"></i></span></button></div>
+        <div class="col-time is-sortable<?php echo $cs_hidden_class('time'); ?>" role="columnheader"><button type="button" class="cell"<?php echo $cs_header_tabindex('time'); ?> onclick="sortClassSchedule(5)">Time<span class="caret-wrapper"><i class="sort-caret ascending"></i><i class="sort-caret descending"></i></span></button></div>
+        <div class="col-location is-sortable<?php echo $cs_hidden_class('location'); ?>" role="columnheader"><button type="button" class="cell"<?php echo $cs_header_tabindex('location'); ?> onclick="sortClassSchedule(6)">Location<span class="caret-wrapper"><i class="sort-caret ascending"></i><i class="sort-caret descending"></i></span></button></div>
+        <div class="col-instructor is-sortable<?php echo $cs_hidden_class('instructor'); ?>" role="columnheader"><button type="button" class="cell"<?php echo $cs_header_tabindex('instructor'); ?> onclick="sortClassSchedule(7)">Instructor<span class="caret-wrapper"><i class="sort-caret ascending"></i><i class="sort-caret descending"></i></span></button></div>
+        <div class="col-class-num is-sortable<?php echo $cs_hidden_class('class-num'); ?>" role="columnheader"><button type="button" class="cell"<?php echo $cs_header_tabindex('class-num'); ?> onclick="sortClassSchedule(8)">Class #<span class="caret-wrapper"><i class="sort-caret ascending"></i><i class="sort-caret descending"></i></span></button></div>
+        <div class="col-enrollment is-sortable<?php echo $cs_hidden_class('enrollment'); ?>" role="columnheader"><button type="button" class="cell"<?php echo $cs_header_tabindex('enrollment'); ?> onclick="sortClassSchedule(9)">Enrollment<span class="caret-wrapper"><i class="sort-caret ascending"></i><i class="sort-caret descending"></i></span></button></div>
       </div>
     </div>
 
@@ -151,15 +172,15 @@ $terms = $terms_data['terms'] ?? [];
           <div class="col-title" role="cell"><div class="cell">
             <a href="<?php echo esc_url($course_url); ?>"<?php if ($is_cancelled) echo ' class="cancelled"'; ?>><?php echo esc_html($course['title']); ?></a>
           </div></div>
-          <div class="col-seats" role="cell"><div class="cell">
+          <div class="col-seats<?php echo $cs_hidden_class('seats'); ?>" role="cell"><div class="cell">
             <span class="seats"><span class="available"><?php echo esc_html($available); ?> open</span> / <?php echo esc_html($course['enrl_capacity']); ?> total</span>
           </div></div>
-          <div class="col-days" role="cell"><div class="cell"><span><?php echo $is_cancelled ? 'Cancelled' : esc_html($course['meeting_days']); ?></span></div></div>
-          <div class="col-time hidden" role="cell"><div class="cell"><span><?php echo esc_html($course['start_time'] . ' - ' . $course['end_time']); ?></span></div></div>
-          <div class="col-location hidden" role="cell"><div class="cell"><span><?php echo esc_html($course['location']); ?></span></div></div>
-          <div class="col-instructor hidden" role="cell"><div class="cell"><span><?php echo $instructor_html; ?></span></div></div>
-          <div class="col-class-num hidden" role="cell"><div class="cell"><span><?php echo esc_html($course['class_nbr']); ?></span></div></div>
-          <div class="col-enrollment hidden" role="cell"><div class="cell"><span><?php echo esc_html($course['enrl_total']); ?></span></div></div>
+          <div class="col-days<?php echo $cs_hidden_class('days'); ?>" role="cell"><div class="cell"><span><?php echo $is_cancelled ? 'Cancelled' : esc_html($course['meeting_days']); ?></span></div></div>
+          <div class="col-time<?php echo $cs_hidden_class('time'); ?>" role="cell"><div class="cell"><span><?php echo esc_html($course['start_time'] . ' - ' . $course['end_time']); ?></span></div></div>
+          <div class="col-location<?php echo $cs_hidden_class('location'); ?>" role="cell"><div class="cell"><span><?php echo esc_html($course['location']); ?></span></div></div>
+          <div class="col-instructor<?php echo $cs_hidden_class('instructor'); ?>" role="cell"><div class="cell"><span><?php echo $instructor_html; ?></span></div></div>
+          <div class="col-class-num<?php echo $cs_hidden_class('class-num'); ?>" role="cell"><div class="cell"><span><?php echo esc_html($course['class_nbr']); ?></span></div></div>
+          <div class="col-enrollment<?php echo $cs_hidden_class('enrollment'); ?>" role="cell"><div class="cell"><span><?php echo esc_html($course['enrl_total']); ?></span></div></div>
         </div>
       <?php endforeach; ?>
     </div>
