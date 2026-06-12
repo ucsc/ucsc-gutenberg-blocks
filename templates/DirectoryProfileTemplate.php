@@ -1,7 +1,19 @@
 <?php
 
-if ( file_exists( get_theme_file_path( 'header-plugin.php' ) ) ) {
-	get_header( 'plugin' );
+// When set by CampusDirectory::renderDirectoryProfile, this template is being
+// included inside the queried page's the_content, so the theme already renders
+// the header, navigation, footer, and <main>. When unset (standalone
+// template_include path for pretty /directory/<cruzid>/ URLs) we render that
+// chrome ourselves.
+$directory_profile_inline = !empty($directory_profile_inline);
+if (!isset($attributes)) $attributes = [];
+
+if (!$directory_profile_inline) {
+	if ( file_exists( get_theme_file_path( 'header-plugin.php' ) ) ) {
+		get_header( 'plugin' );
+	} else {
+		get_header();
+	}
 }
 ?>
 <?php
@@ -44,7 +56,9 @@ function linkify($key, $str) {
 if (count($profileData)) {
   $profileData = $profileData[0];
   ?>
+    <?php if (!$directory_profile_inline) : ?>
     <main class="is-layout-flow wp-block-group content-region" id="wp--skip-link--target" style="margin-block-start: var(--wp--preset--font-size--one);">
+    <?php endif; ?>
         <div class="has-global-padding is-layout-constrained wp-block-group">
             <nav class="breadcrumbs alignwide" aria-label="Breadcrumbs" itemprop="breadcrumb">
                 <ul class="breadcrumbs__trail" itemscope="" itemtype="https://schema.org/BreadcrumbList">
@@ -305,11 +319,17 @@ if (count($profileData)) {
         </div><!-- #teacher-info -->
 
     </div>
+    <?php if (!$directory_profile_inline) : ?>
     </main>
+    <?php endif; ?>
     <?php
 } else {
   echo "<div class=\"has-global-padding is-layout-constrained wp-block-group alignwide\"><h2 class=\"h3-style\">CruzID: " . esc_html($cruzid) . " not found.</h2></div>";
 }
-if ( file_exists( get_theme_file_path( 'footer-plugin.php' ) ) ) {
-	get_footer( 'plugin' );
+if (!$directory_profile_inline) {
+	if ( file_exists( get_theme_file_path( 'footer-plugin.php' ) ) ) {
+		get_footer( 'plugin' );
+	} else {
+		get_footer();
+	}
 }
