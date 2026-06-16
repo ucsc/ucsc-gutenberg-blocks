@@ -158,6 +158,6 @@ class CampusDirectory
     $directory_profile_inline = true;
     ob_start();
     include(plugin_dir_path(__FILE__) . '../templates/DirectoryProfileTemplate.php');
-    return ob_get_clean();
+    return $content . ob_get_clean();
   }
 }
