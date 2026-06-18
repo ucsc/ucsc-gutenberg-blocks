@@ -24,6 +24,6 @@ jobs:
       # Uncomment / adjust any of these to override defaults:
       # node-version: '24'
       # build-command: 'build'
-      # use-composer: true
+      use-composer: false
       # composer-args: '--no-dev --no-progress --optimize-autoloader'
       # generate-release-notes: true
