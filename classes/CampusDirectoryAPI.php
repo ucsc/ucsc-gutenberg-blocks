@@ -83,7 +83,8 @@ class CampusDirectoryAPI {
       $q = '(|';
       for ($i = 0; $i < count($arrCruzids); $i++) {
         $arrCruzids[$i] = trim($arrCruzids[$i]);
-        $q .= "(uid={$arrCruzids[$i]})";
+        $escaped_uid = ldap_escape($arrCruzids[$i], "", LDAP_ESCAPE_FILTER);
+        $q .= "(uid={$escaped_uid})";
       }
       $q .= ")";
     } else {

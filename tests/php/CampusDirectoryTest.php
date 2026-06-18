@@ -75,6 +75,7 @@ if (!defined('LDAP_OPT_PROTOCOL_VERSION')) define('LDAP_OPT_PROTOCOL_VERSION', 0
 if (!defined('LDAP_OPT_REFERRALS')) define('LDAP_OPT_REFERRALS', 0);
 if (!defined('LDAP_OPT_NETWORK_TIMEOUT')) define('LDAP_OPT_NETWORK_TIMEOUT', 0);
 if (!defined('LDAP_OPT_SIZELIMIT')) define('LDAP_OPT_SIZELIMIT', 0);
+if (!defined('LDAP_ESCAPE_FILTER')) define('LDAP_ESCAPE_FILTER', 1);
 
 function ldap_connect() { return true; }
 function ldap_set_option() { return true; }

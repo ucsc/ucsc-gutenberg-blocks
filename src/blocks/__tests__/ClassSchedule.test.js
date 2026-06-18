@@ -5,6 +5,16 @@ import '@testing-library/jest-dom';
 jest.mock('@wordpress/components', () => ({
   Panel: ({ children, header }) => <div data-testid="panel" data-header={header}>{children}</div>,
   PanelBody: ({ children, title }) => <div data-testid="panel-body" data-title={title}>{children}</div>,
+  CheckboxControl: ({ checked, label, onChange }) => (
+    <label data-testid="checkbox-control">
+      <input
+        type="checkbox"
+        checked={checked}
+        onChange={(e) => onChange(e.target.checked)}
+      />
+      {label}
+    </label>
+  ),
   RadioControl: ({ selected, options, onChange }) => (
     <div data-testid="radio-control" data-selected={selected}>
       {options.map((opt) => (
@@ -71,6 +81,7 @@ describe('ClassSchedule block', () => {
         subjectOrDept: { type: 'string' },
         department: { type: 'string' },
         subject: { type: 'string' },
+        defaultColumns: { type: 'array' },
       });
     });
   });
