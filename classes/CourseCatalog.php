@@ -99,6 +99,7 @@ class CourseCatalog
         }
 
         $host = isset($_SERVER['HTTP_HOST']) ? strtolower($_SERVER['HTTP_HOST']) : '';
+        $host = preg_replace('/:\d+$/', '', $host);
         $allowedHosts = array(
             'wp-dev.ucsc',
             'wordpress-dev.ucsc.edu',
