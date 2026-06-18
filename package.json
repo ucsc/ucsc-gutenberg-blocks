@@ -1,6 +1,6 @@
 {
   "name": "ucsc-gutenberg-blocks",
-  "version": "1.1.37",
+  "version": "1.1.38",
   "description": "Adds custom blocks to UCSC WordPress websites",
   "main": "test.js",
   "scripts": {
@@ -8,8 +8,8 @@
     "start": "wp-scripts start",
     "test": "wp-scripts test-unit-js",
     "plugin-zip": "wp-scripts plugin-zip",
-		"release": "commit-and-tag-version",
-		"dryrun": "commit-and-tag-version --dry-run"
+    "release": "commit-and-tag-version",
+    "dryrun": "commit-and-tag-version --dry-run"
   },
   "repository": {
     "type": "git",
@@ -33,22 +33,22 @@
     "@testing-library/jest-dom": "^5.17.0",
     "@testing-library/react": "^12.1.5",
     "@wordpress/scripts": "^22.3.0",
-		"commit-and-tag-version": "^12.7.3"
-	},
-	"commit-and-tag-version": {
-		"bumpFiles": [
-			{
-				"filename": "package-lock.json",
-				"type": "json"
-			},
-			{
-				"filename": "package.json",
-				"type": "json"
-			},
-			{
-				"filename": "index.php",
-				"updater": "wp-plugin-version-updater.js"
-			}
-		]
-	}
+    "commit-and-tag-version": "^12.7.3"
+  },
+  "commit-and-tag-version": {
+    "bumpFiles": [
+      {
+        "filename": "package-lock.json",
+        "type": "json"
+      },
+      {
+        "filename": "package.json",
+        "type": "json"
+      },
+      {
+        "filename": "index.php",
+        "updater": "wp-plugin-version-updater.js"
+      }
+    ]
+  }
 }

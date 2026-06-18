@@ -1,6 +1,14 @@
 # Changelog
 
-All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
+All notable changes to this project will be documented in this file. See [commit-and-tag-version](https://github.com/absolute-version/commit-and-tag-version) for commit guidelines.
+
+## [1.1.38](https://github.com/ucsc/ucsc-gutenberg-blocks/compare/v1.1.37...v1.1.38) (2026-06-18)
+
+
+### Bug Fixes
+
+* **campus-directory:** WPM-99 keep site nav on profile pages for block themes ([20572cf](https://github.com/ucsc/ucsc-gutenberg-blocks/commit/20572cfd01c94db1294ecff12c7d6f7aac51f015))
+* **directory:** WPM-99 preserve original content when mounting profile via the_content filter ([7ea491a](https://github.com/ucsc/ucsc-gutenberg-blocks/commit/7ea491a9410228f826d8bfede0180c6f9bd385c7))
 
 ### [1.1.29](https://github.com/ucsc/ucsc-gutenberg-blocks/compare/v1.1.28...v1.1.29) (2024-06-27)
 
