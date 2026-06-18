@@ -73,6 +73,19 @@ function registerJSBuild() {
   wp_enqueue_script('ucscblocks', plugin_dir_url(__FILE__) . 'build/index.js', array('wp-blocks','wp-element', 'wp-components', 'wp-block-editor'), $script_version);
 }
 
+if (defined('WP_CLI') && WP_CLI) {
+  WP_CLI::add_command('ucsc course-catalog-cache clear', function($args, $assoc_args) {
+    $target = isset($assoc_args['target']) ? $assoc_args['target'] : 'all';
+    $deleted = CourseCatalog::clearCachedCourses($target);
+
+    WP_CLI::success(sprintf(
+      'Deleted %d Course Catalog transient row(s) for target "%s".',
+      $deleted,
+      $target
+    ));
+  });
+}
+
 
 
 
