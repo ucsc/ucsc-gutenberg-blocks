@@ -105,3 +105,31 @@ span.secret {
     text-decoration: underline;
     cursor: pointer;
 }
+
+@media (max-width: 600px) {
+    #courseCatalog {
+        overflow-x: auto;
+    }
+
+    .table-sortable {
+        width: 100%;
+    }
+
+    .table-sortable thead th {
+        white-space: nowrap;
+    }
+
+    .table-sortable tbody tr.pointer td:first-child {
+        white-space: nowrap;
+    }
+
+    .introText {
+        height: auto;
+        min-height: 30px;
+    }
+
+    .collapseExpandLinks {
+        padding: 0 10px;
+        white-space: nowrap;
+    }
+}
