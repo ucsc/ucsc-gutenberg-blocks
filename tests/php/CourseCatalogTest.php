@@ -33,9 +33,6 @@ function plugins_url( $path ) {
 function plugin_dir_path( $file ) {
 	return dirname( $file ) . '/';
 }
-function filemtime( $file ) {
-	return 1;
-}
 function is_user_logged_in() {
 	global $current_user_id;
 	return 0 !== $current_user_id;
@@ -270,11 +267,13 @@ echo "cache clearing:\n";
 
 $deleted = CourseCatalog::clearCachedCourses( 'qa' );
 check( 'cache clear returns deleted row count', 2 === $deleted );
-check( 'cache clear maps qa alias to csqa transient prefix', false !== strpos( $wpdb->last_query, '_transient_course-catalog-csqa-' ) );
+// $wpdb->esc_like() escapes the underscores in "_transient_", so assert on the
+// escape-safe prefix that still proves the qa -> csqa mapping.
+check( 'cache clear maps qa alias to csqa transient prefix', false !== strpos( $wpdb->last_query, 'course-catalog-csqa-' ) );
 
 $deleted = CourseCatalog::clearCachedCourses();
 check( 'cache clear all returns deleted row count', 2 === $deleted );
-check( 'cache clear all targets all course catalog transients', false !== strpos( $wpdb->last_query, '_transient_course-catalog-' ) );
+check( 'cache clear all targets all course catalog transients', false !== strpos( $wpdb->last_query, 'course-catalog-' ) );
 
 echo "\n" . ( $tests - $failed ) . "/$tests passed\n";
 exit( 0 === $failed ? 0 : 1 );

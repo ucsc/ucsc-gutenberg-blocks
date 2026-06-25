@@ -1,0 +1,1 @@
+{"version":1,"defects":{"CampusDirectoryTemplateTest::test_template_escapes_malicious_input":3},"times":{"CampusDirectoryTemplateTest::test_template_escapes_malicious_input":0.001}}

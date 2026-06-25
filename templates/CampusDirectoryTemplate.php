@@ -35,7 +35,7 @@ $individualPageUrl = $items['nodeContent']['linkOutToCampusDirectory'] ?
                   foreach($items['informationToDisplay'] as $disItem) {
                     foreach($disItem as $headerInfo) {
                       if ($headerInfo == "Email") continue;
-                      echo '<th scope="col" class="titles">' . $headerInfo . '</th>';
+                      echo '<th scope="col" class="titles">' . esc_html($headerInfo) . '</th>';
                     }
                   }
                 ?>
@@ -45,20 +45,21 @@ $individualPageUrl = $items['nodeContent']['linkOutToCampusDirectory'] ?
                 for($i = 0; $i < count($people); $i++) {
                   echo '<tr class="item-body">';
                     echo '<td class="item-name">';
-                      if ($items['linkToProfile']) echo '<a class="u-url" href="' . $individualPageUrl . $people[$i]['uid'][0] . '">';
-                        echo '<span class="p-name" style="white-space: nowrap;">' . $people[$i]['cn'][0] . '</span>';
+                      if ($items['linkToProfile']) echo '<a class="u-url" href="' . esc_url($individualPageUrl . $people[$i]['uid'][0]) . '">';
+                        echo '<span class="p-name" style="white-space: nowrap;">' . esc_html($people[$i]['cn'][0]) . '</span>';
                       if ($items['linkToProfile']) echo '</a>';
                     echo '</td>';
                     foreach($items['informationToDisplay'] as $disItem) {
                       foreach($disItem as $key => $value) {
                         echo '<td class="item-info table-renderer">';
-                          echo '<strong>' . $people[$i][$key][0] . '</strong>';
+                          echo '<strong>' . esc_html($people[$i][$key][0]) . '</strong>';
                           echo '<ul class="inline-list">';
                             if ($value == "Campus Email" || $value == "Other Email") {
-                              echo '<li><a href="mailto:' . $people[$i][$key][0] . '">' . $people[$i][$key][0] . '</a></li>';
+                              $mail = $people[$i][$key][0];
+                              echo '<li><a href="' . esc_url('mailto:' . $mail) . '">' . esc_html($mail) . '</a></li>';
                             } else {
                               if ($value == "Email") continue;
-                              echo '<li>' . $people[$i][$key][0] . '</li>';
+                              echo '<li>' . esc_html($people[$i][$key][0]) . '</li>';
                             }
                           echo '</ul>';
                         echo '</td>';
@@ -90,9 +91,9 @@ $individualPageUrl = $items['nodeContent']['linkOutToCampusDirectory'] ?
                   <h3 class="item-name">
                     <?php
                       if ($items['linkToProfile']) {
-                        echo '<a class="u-url" href="' . $individualPageUrl . $people[$i]['uid'][0] . '">';
+                        echo '<a class="u-url" href="' . esc_url($individualPageUrl . $people[$i]['uid'][0]) . '">';
                       }
-                      echo '<span class="p-name">' . $people[$i]['cn'][0] . '</span>';
+                      echo '<span class="p-name">' . esc_html($people[$i]['cn'][0]) . '</span>';
                       if ($items['linkToProfile']) {
                         echo '</a>';
                       }
@@ -104,32 +105,34 @@ $individualPageUrl = $items['nodeContent']['linkOutToCampusDirectory'] ?
                         foreach($disItem as $key => $value){
                           if (array_key_exists($key, $people[$i]) && $people[$i][$key][0]) {
                             echo "<li>";
-                              echo "<strong>{$disItem[$key]}</strong>";
+                              echo "<strong>" . esc_html($disItem[$key]) . "</strong>";
                               echo '<ul class="inline-list">';
                                 if ($disItem[$key] == "Campus Email" ) {
                                   if (array_key_exists("mail", $people[$i])) {
                                     for($j=0; $j<$people[$i]["mail"]['count']; $j++) {
-                                        echo "<li><span><a class=\"u-email kwa\" href=\"mailto:{$people[$i]['mail'][$j]}\">{$people[$i]['mail'][$j]}</a></span></li>";
+                                        $mail = $people[$i]['mail'][$j];
+                                        echo '<li><span><a class="u-email kwa" href="' . esc_url('mailto:' . $mail) . '">' . esc_html($mail) . '</a></span></li>';
                                     }
                                   }
                                 } else if ($disItem[$key] == "Other Email") {
                                   if (array_key_exists("ucscpersonpubalternatemail", $people[$i])) {
                                     for($j=0; $j<$people[$i]["ucscpersonpubalternatemail"]["count"]; $j++) {
-                                        echo "<li><span><a class=\"u-email\" href=\"mailto:{$people[$i]['ucscpersonpubalternatemail'][$j]}\">{$people[$i]['ucscpersonpubalternatemail'][$j]}</a></span></li>";
+                                        $altMail = $people[$i]['ucscpersonpubalternatemail'][$j];
+                                        echo '<li><span><a class="u-email" href="' . esc_url('mailto:' . $altMail) . '">' . esc_html($altMail) . '</a></span></li>';
                                     }
                                   }
                                 } else if ($disItem[$key] == "Office Location") {
-                                  echo "<li>{$people[$i]['ucscprimarylocationpubofficialname'][0]}, {$people[$i]['ucscpersonpubofficelocationdetail'][0]}</li>";
+                                  echo "<li>" . esc_html($people[$i]['ucscprimarylocationpubofficialname'][0] . ', ' . $people[$i]['ucscpersonpubofficelocationdetail'][0]) . "</li>";
 
                                 } else if ($disItem[$key] == "Website") {
                                   for($j=0; $j<$people[$i]["ucscpersonpubwebsite"]["count"]; $j++) {
                                     $arrWebsite = explode(" ", $people[$i]["ucscpersonpubwebsite"][$j]);
                                     $url = array_shift($arrWebsite);
                                     $label = implode(" ", $arrWebsite);
-                                    echo "<li><span><a class=\"u-website\" href='{$url}'>{$label}</a></span></li>";
+                                    echo "<li><span><a class=\"u-website\" href='" . esc_url($url) . "'>" . esc_html($label) . "</a></span></li>";
                                   }
                                 } else {
-                                  echo "<li>{$people[$i][$key][0]}</li>";
+                                  echo "<li>" . esc_html($people[$i][$key][0]) . "</li>";
                                 }
                               echo '</ul>';
                             echo "</li>";
@@ -147,7 +150,7 @@ $individualPageUrl = $items['nodeContent']['linkOutToCampusDirectory'] ?
                     } else {
                       $imgSrc = '//static.ucsc.edu/images/icon-slug.jpg';
                     }
-                    if ($items['linkToProfile']) echo '<a class="u-url square-img" href="' . $individualPageUrl . $people[$i]['uid'][0] . '">';
+                    if ($items['linkToProfile']) echo '<a class="u-url square-img" href="' . esc_url($individualPageUrl . $people[$i]['uid'][0]) . '">';
                     $fallbackSrc = esc_url('//static.ucsc.edu/images/icon-slug.jpg');
                     echo '<img src="' . esc_url($imgSrc) . '" onerror="this.onerror=null;this.src=\'' . $fallbackSrc . '\';" class="item-image square-img imgLiquid imgLiquid_bgSize imgLiquid_ready" alt="Profile picture of ' . esc_attr($people[$i]['cn'][0]) . '" />';
                     if ($items['linkToProfile']) echo '</a>';
