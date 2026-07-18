@@ -16,6 +16,10 @@ $is_main_query             = false;
 $queried_object_id         = 1;
 $current_post_id           = 1;
 $included_files            = array();
+$ldap_searches             = array();
+$ldap_options              = array();
+$ldap_search_result        = true;
+$transients                = array();
 
 // Fake ABSPATH to avoid fatal errors when CampusDirectoryAPI requires wp-admin files.
 define( 'ABSPATH', sys_get_temp_dir() . '/wp-mock/' );
@@ -75,11 +79,27 @@ if (!defined('LDAP_OPT_PROTOCOL_VERSION')) define('LDAP_OPT_PROTOCOL_VERSION', 0
 if (!defined('LDAP_OPT_REFERRALS')) define('LDAP_OPT_REFERRALS', 0);
 if (!defined('LDAP_OPT_NETWORK_TIMEOUT')) define('LDAP_OPT_NETWORK_TIMEOUT', 0);
 if (!defined('LDAP_OPT_SIZELIMIT')) define('LDAP_OPT_SIZELIMIT', 0);
+if (!defined('LDAP_ESCAPE_FILTER')) define('LDAP_ESCAPE_FILTER', 0);
 
 function ldap_connect() { return true; }
-function ldap_set_option() { return true; }
+function ldap_set_option($link, $option, $value) {
+	global $ldap_options;
+	$ldap_options[] = array(
+		'option' => $option,
+		'value'  => $value,
+	);
+	return true;
+}
 function ldap_bind() { return true; }
-function ldap_search() { return true; }
+function ldap_search($link, $base_dn, $filter, $attributes = array()) {
+	global $ldap_searches, $ldap_search_result;
+	$ldap_searches[] = array(
+		'base_dn'    => $base_dn,
+		'filter'     => $filter,
+		'attributes' => $attributes,
+	);
+	return $ldap_search_result;
+}
 function ldap_first_entry() { return false; }
 function ldap_next_entry() { return false; }
 function ldap_get_attributes() { return array(); }
@@ -89,9 +109,27 @@ function ldap_first_attribute() { return false; }
 function ldap_next_attribute() { return false; }
 function ldap_close() { return true; }
 function ldap_error() { return ''; }
-function ldap_escape($str) { return $str; }
-function get_transient() { return false; }
-function set_transient() { return true; }
+// Mirror the real extension's filter escaping for the characters that matter
+// so tests can prove wildcard/injection input is neutralized.
+function ldap_escape($str, $ignore = '', $flags = 0) {
+	return str_replace(
+		array( '\\', '*', '(', ')' ),
+		array( '\5c', '\2a', '\28', '\29' ),
+		$str
+	);
+}
+function get_transient($key) {
+	global $transients;
+	return isset( $transients[ $key ] ) ? $transients[ $key ]['value'] : false;
+}
+function set_transient($key, $value, $expiration) {
+	global $transients;
+	$transients[ $key ] = array(
+		'value'      => $value,
+		'expiration' => $expiration,
+	);
+	return true;
+}
 function get_option() { return ''; }
 
 // We also need to mock a few template functions that DirectoryProfileTemplate calls
@@ -118,14 +156,69 @@ function check( $label, $condition ) {
 	echo "  FAIL  $label\n";
 }
 
+function campus_directory_api_fixture( $overrides = array() ) {
+	$defaults = array(
+		'cruzidList'                    => 'jsmith',
+		'pageLayout'                    => 'list',
+		'linkToProfile'                 => false,
+		'automatedFeeds'                => false,
+		'manualAdd'                     => false,
+		'excludeCruzids'                => '',
+		'addCruzids'                    => '',
+		'department'                    => '---',
+		'division'                      => '---',
+		'deptOrDiv'                     => 'dept',
+		'displayDeptartmentAffiliates'  => false,
+		'objGradTypes'                  => array(
+			'Grad Students' => false,
+		),
+		'objFacultyTypes'               => array(
+			'All'       => false,
+			'Senate'    => false,
+			'Lecturer'  => false,
+			'Emeritus'  => false,
+		),
+		'objStaffTypes'                 => array(
+			'Regular Staff'          => false,
+			'Researcher'             => false,
+			'Postdoctoral Scholar'   => false,
+		),
+		'objInformationTypes'           => array(),
+		'objInformationTypesTable'      => array(),
+	);
+
+	return new CampusDirectoryAPI( array_replace_recursive( $defaults, $overrides ) );
+}
+
+function ldap_size_limit_was_set_to( $expected ) {
+	global $ldap_options;
+
+	foreach ( $ldap_options as $option ) {
+		if ( LDAP_OPT_SIZELIMIT === $option['option'] && $expected === $option['value'] ) {
+			return true;
+		}
+	}
+
+	return false;
+}
+
+function transient_keys() {
+	global $transients;
+	return array_keys( $transients );
+}
+
 function reset_test_state() {
-	global $query_vars, $is_admin, $is_singular, $is_main_query, $queried_object_id, $current_post_id;
-	$query_vars        = array();
-	$is_admin          = false;
-	$is_singular       = false;
-	$is_main_query     = false;
-	$queried_object_id = 1;
-	$current_post_id   = 1;
+	global $query_vars, $is_admin, $is_singular, $is_main_query, $queried_object_id, $current_post_id, $ldap_searches, $ldap_options, $ldap_search_result, $transients;
+	$query_vars         = array();
+	$is_admin           = false;
+	$is_singular        = false;
+	$is_main_query      = false;
+	$queried_object_id  = 1;
+	$current_post_id    = 1;
+	$ldap_searches      = array();
+	$ldap_options       = array();
+	$ldap_search_result = true;
+	$transients         = array();
 }
 
 $campus_directory = new CampusDirectory();
@@ -191,6 +284,134 @@ $current_post_id = 1;
 $content = $the_content_callback( '<p>Original</p>' );
 check( 'concatenates the profile output to the original content', false !== strpos( $content, '<p>Original</p>' ) && false !== strpos( $content, 'jsmith' ) );
 check( 'does not render the <main> wrapper since it is inline', false === strpos( $content, '<main class="is-layout-flow' ) );
+
+echo "CampusDirectoryAPI LDAP query tests:\n";
+
+reset_test_state();
+$api = campus_directory_api_fixture();
+$api->getCampusDirData( 'jsmith' );
+check( 'list views request a limited LDAP attribute list', isset( $ldap_searches[0] ) && in_array( 'uid', $ldap_searches[0]['attributes'], true ) && ! in_array( 'jpegphoto', $ldap_searches[0]['attributes'], true ) );
+check( 'list views apply the configured-feed size ceiling', ldap_size_limit_was_set_to( 1000 ) );
+
+reset_test_state();
+$api = campus_directory_api_fixture();
+$api->getCampusDirData( 'jsmith', true );
+check( 'profile views request all LDAP attributes for profile rendering', isset( $ldap_searches[0] ) && array( '*' ) === $ldap_searches[0]['attributes'] );
+
+reset_test_state();
+$api = campus_directory_api_fixture();
+$api->getCampusDirData( 'jsmith' );
+$listKeys = transient_keys();
+$api->getCampusDirData( 'jsmith', true );
+$listAndProfileKeys = transient_keys();
+check( 'list and profile queries use separate transient keys for different LDAP attribute sets', 1 === count( $listKeys ) && 2 === count( $listAndProfileKeys ) && $listKeys[0] !== $listAndProfileKeys[1] );
+
+reset_test_state();
+$api = campus_directory_api_fixture(
+	array(
+		'automatedFeeds' => true,
+		'department'     => 'MATH',
+		'objFacultyTypes' => array(
+			'All'       => true,
+			'Senate'    => false,
+			'Lecturer'  => false,
+			'Emeritus'  => false,
+		),
+	)
+);
+$api->getCampusDirData( '' );
+check( 'automated feed list queries also use limited LDAP attributes', isset( $ldap_searches[0] ) && in_array( 'uid', $ldap_searches[0]['attributes'], true ) && ! in_array( 'jpegphoto', $ldap_searches[0]['attributes'], true ) );
+
+reset_test_state();
+$api = campus_directory_api_fixture(
+	array(
+		'automatedFeeds' => true,
+		'manualAdd'      => true,
+		'excludeCruzids' => 'jsmith',
+	)
+);
+$filter = $api->buildFilterString();
+check( 'exclude-only automated feeds do not build a whole-directory LDAP filter', '' === $filter );
+$api->getCampusDirData( '' );
+check( 'exclude-only automated feeds do not issue an empty LDAP search', 0 === count( $ldap_searches ) );
+
+reset_test_state();
+$api = campus_directory_api_fixture(
+	array(
+		'automatedFeeds' => true,
+		'manualAdd'      => true,
+		'excludeCruzids' => 'jsmith',
+		'department'     => 'MATH',
+		'objFacultyTypes' => array(
+			'All'       => true,
+			'Senate'    => false,
+			'Lecturer'  => false,
+			'Emeritus'  => false,
+		),
+	)
+);
+$filter = $api->buildFilterString();
+check( 'exclude is retained when there is an automated feed filter to subtract from', false !== strpos( $filter, '(!(uid=jsmith))' ) );
+
+echo "CampusDirectoryAPI hardening tests (WPM-103):\n";
+
+reset_test_state();
+$api = campus_directory_api_fixture( array( 'cruzidList' => 'jsmith, *' ) );
+$data = $api->getCampusDirData( 'jsmith, *' );
+check( 'wildcard cruzids are escaped in manual list filters', false !== strpos( $data[1], '(uid=\2a)' ) && false === strpos( $data[1], '(uid=*)' ) );
+
+reset_test_state();
+$api = campus_directory_api_fixture(
+	array(
+		'automatedFeeds' => true,
+		'manualAdd'      => true,
+		'addCruzids'     => '*',
+	)
+);
+$filter = $api->buildFilterString();
+check( 'wildcard add cruzids are escaped in feed filters', false !== strpos( $filter, '(uid=\2a)' ) && false === strpos( $filter, '(uid=*)' ) );
+
+reset_test_state();
+$api = campus_directory_api_fixture( array( 'cruzidList' => '' ) );
+$data = $api->getCampusDirData( '' );
+check( 'empty manual cruzid list issues no LDAP search', 0 === count( $ldap_searches ) && array() === $data[0] );
+
+reset_test_state();
+$api = campus_directory_api_fixture( array( 'cruzidList' => 'jsmith,, ' ) );
+$data = $api->getCampusDirData( 'jsmith,, ' );
+check( 'blank entries in a cruzid list are skipped', 1 === substr_count( $data[1], '(uid=' ) );
+
+reset_test_state();
+$ldap_search_result = false;
+$api = campus_directory_api_fixture();
+$data = $api->getCampusDirData( 'jsmith' );
+check( 'a failed LDAP search returns an empty result instead of fataling', array() === $data[0] );
+
+reset_test_state();
+$api = campus_directory_api_fixture();
+$api->getCampusDirData( 'jsmith' );
+$api->getCampusDirData( 'jsmith' );
+$transient_values = array_values( $transients );
+check( 'empty results are cached so repeat views issue one LDAP search', 1 === count( $ldap_searches ) );
+check( 'empty results use the short negative-cache expiration', 1 === count( $transient_values ) && 60 === $transient_values[0]['expiration'] );
+
+reset_test_state();
+$api = campus_directory_api_fixture();
+$api->getCampusDirData( 'jsmith' );
+$time_limit_ok = false;
+foreach ( $ldap_options as $option ) {
+	if ( LDAP_OPT_TIMELIMIT === $option['option'] && 15 === $option['value'] ) {
+		$time_limit_ok = true;
+	}
+}
+check( 'LDAP time limit stays under the 30s edge proxy timeout', $time_limit_ok );
+
+reset_test_state();
+$api = campus_directory_api_fixture();
+$api->getDirDropdowns( 'ucscpersonpubdepartmentnumber' );
+$api->getDirDropdowns( 'ucscpersonpubdivision' );
+check( 'getDirDropdowns can run twice in one request without redeclaring its sorter', true );
+check( 'getDirDropdowns requests only the grouping attribute from LDAP', isset( $ldap_searches[0] ) && in_array( 'ucscpersonpubdepartmentnumber', $ldap_searches[0]['attributes'], true ) && ! in_array( '*', $ldap_searches[0]['attributes'], true ) );
 
 echo "\n" . ( $tests - $failed ) . "/$tests passed\n";
 exit( 0 === $failed ? 0 : 1 );

@@ -8,6 +8,8 @@ class CampusDirectoryAPI {
   public $ldap_password;
   public $count;
   public $deptOrDivSet = true;
+  public $ldap_cn;
+  public $ldap_url;
 
   function __construct($content = [])
   {
@@ -78,28 +80,54 @@ class CampusDirectoryAPI {
 
   public function getCampusDirData($strCruzids, $profileView = false)
   {
+    $arrCruzids = [];
     if ($profileView || !$this->nodeContent['automatedFeeds']) {
       $arrCruzids = explode(",", $strCruzids);
       $q = '(|';
       for ($i = 0; $i < count($arrCruzids); $i++) {
         $arrCruzids[$i] = trim($arrCruzids[$i]);
-        $q .= "(uid={$arrCruzids[$i]})";
+        if (!strlen($arrCruzids[$i])) continue;
+        $q .= "(uid=" . ldap_escape($arrCruzids[$i], "", LDAP_ESCAPE_FILTER) . ")";
       }
       $q .= ")";
+      if ($q === '(|)') $q = '';
     } else {
       $q = $this->buildFilterString();
     }
+    if (!strlen($q)) {
+      return [[], $q];
+    }
+
     // check to see if $q is in cache
-    $md5_q = md5($q);
+    $attributes = $profileView ? [] : $this->listAttributes();
+    $md5_q = md5($q . '|' . implode(',', $attributes));
     $people = get_transient($md5_q);
-    if (!$people) {
-      $people = $this->doLDAPQuery($q, $arrCruzids);
-      set_transient($md5_q, $people, 600);
+    if ($people === false) {
+      // List/table layouts never render jpegphoto or the profile-only
+      // attributes, so restrict what LDAP returns for those queries; profile
+      // and shortcode views (profileView) still need the full entry.
+      $people = $this->doLDAPQuery($q, $arrCruzids, $attributes);
+      // Cache empty results too (briefly), so an unreachable LDAP server or a
+      // no-match filter is not re-queried on every page view.
+      set_transient($md5_q, $people, count($people) ? 600 : 60);
     }
     return [$people, $q];
   }
 
-  public function doLDAPQuery($q, $arrCruzids) {
+  public function listAttributes()
+  {
+    return [
+      'uid', 'cn', 'sn', 'givenname', 'ucscpersonpubdisplay',
+      'ucscpersonpubpronouns', 'title', 'ucscpersonpubdepartmentnumber',
+      'telephonenumber', 'mail', 'ucscpersonpubalternatemail',
+      'facsimiletelephonenumber', 'ucscpersonpubwebsite',
+      'ucscprimarylocationpubofficialname', 'ucscpersonpubofficelocationdetail',
+      'ucscpersonpubofficehours', 'ucscpersonpubmailstop', 'street', 'roomnumber',
+      'ucscpersonpubexpertisereference', 'ucscpersonpubareaofexpertise'
+    ];
+  }
+
+  public function doLDAPQuery($q, $arrCruzids, $attributes = []) {
     $dev_env = getenv("DOCKER_DEV") == "docker_dev";
     if ($dev_env) {
       $rli = ldap_connect("ldap://" . $this->ldap_url);
@@ -108,24 +136,30 @@ class CampusDirectoryAPI {
     }
 
     if ($rli) {
-      ldap_set_option($rli, LDAP_OPT_TIMELIMIT, 90);
+      // Keep well under the CampusPress edge's 30s proxy timeout so a slow
+      // LDAP server degrades to an empty section instead of a 504 page.
+      ldap_set_option($rli, LDAP_OPT_TIMELIMIT, 15);
       ldap_set_option($rli, LDAP_OPT_NETWORK_TIMEOUT, 5);
       ldap_set_option($rli, LDAP_OPT_PROTOCOL_VERSION, 3);
 
       if (!$this->deptOrDivSet) {
         ldap_set_option($rli, LDAP_OPT_SIZELIMIT, 50);
+      } else {
+        // Hard ceiling so no block configuration can pull the whole directory.
+        ldap_set_option($rli, LDAP_OPT_SIZELIMIT, 1000);
       }
 
       if ($dev_env) @$ldapbind = ldap_bind($rli);
       else @$ldapbind = ldap_bind($rli, "cn=" . $this->ldap_cn . ",ou=apps,dc=ucsc,dc=edu", $this->ldap_password);
       if ($ldapbind) {
-        $sr = ldap_search($rli, "ou=people,dc=ucsc,dc=edu", "(|{$q})");
+        if (!count($attributes)) $attributes = ['*'];
+        $sr = ldap_search($rli, "ou=people,dc=ucsc,dc=edu", "(|{$q})", $attributes);
         $people = $this->processSearchResults($rli, $sr);
         $people = $this->addVacantPositions($people, $this->nodeContent['automatedFeeds'], $arrCruzids);
         ldap_close($rli);
         return $people;
       } else {
-        echo ldap_error($rli );
+        error_log('CampusDirectory LDAP bind failed: ' . ldap_error($rli));
       }
     }
 
@@ -135,7 +169,7 @@ class CampusDirectoryAPI {
   public function getDirDropdowns($deptOrDiv) {
     $retDepts = get_transient('ucsc_campus_directory_departments_' . $deptOrDiv);
     if (!$retDepts) {
-      $people = $this->doLDAPQuery("(|(ucscpersonpubaffiliation=Graduate)(ucscpersonpubaffiliation=Faculty)(ucscpersonpubaffiliation=Staff))", []);
+      $people = $this->doLDAPQuery("(|(ucscpersonpubaffiliation=Graduate)(ucscpersonpubaffiliation=Faculty)(ucscpersonpubaffiliation=Staff))", [], [$deptOrDiv, 'ucscpersonpubdisplay']);
 
       $uniqueDepts = [];
       for($i=0; $i<count($people); $i++) {
@@ -152,11 +186,9 @@ class CampusDirectoryAPI {
         ];
       }
 
-      function cmp($a, $b) {
+      usort($retDepts, function ($a, $b) {
         return strcmp($a['label'], $b['label']);
-      }
-
-      usort($retDepts, "cmp");
+      });
 
       array_unshift($retDepts, [
         'label' => '---',
@@ -293,7 +325,7 @@ class CampusDirectoryAPI {
     $division = ldap_escape($this->nodeContent['division'], "", LDAP_ESCAPE_FILTER);
     $deptOrDiv = ldap_escape($this->nodeContent['deptOrDiv'], "", LDAP_ESCAPE_FILTER);
 
-    if ($this->nodeContent['automatedFeeds'] && ($deptOrDiv === "dept" && $department !== "---") || ($deptOrDiv === "div" && $division !== "---")) {
+    if ($this->nodeContent['automatedFeeds'] && (($deptOrDiv === "dept" && $department !== "---") || ($deptOrDiv === "div" && $division !== "---"))) {
       if ($this->count > 0) {
         if ($this->count > 1) $filterString = "(|$filterString)";
 
@@ -315,16 +347,21 @@ class CampusDirectoryAPI {
   public function processAddExcludeFilterString(&$filterString)
   {
     if ($this->nodeContent['manualAdd']) {
-      if (strlen($this->nodeContent['excludeCruzids'])) {
+      // Excluding against an empty feed filter would produce (&(!(uid=x))),
+      // which matches the entire directory; only subtract excludes when a
+      // feed filter exists to subtract from.
+      if (strlen($this->nodeContent['excludeCruzids']) && strlen($filterString)) {
         $sectionExclude = $this->nodeContent['excludeCruzids'];
         $exclude = "";
         $excludeCount = 0;
         foreach (explode(',', $sectionExclude) as $excludeMe) {
-          $exclude .= "(uid=" . trim($excludeMe) . ")";
+          $excludeMe = trim($excludeMe);
+          if (!strlen($excludeMe)) continue;
+          $exclude .= "(uid=" . ldap_escape($excludeMe, "", LDAP_ESCAPE_FILTER) . ")";
           $excludeCount++;
         }
         if ($excludeCount > 1) $exclude = "(|$exclude)";
-        $filterString = "(&$filterString(!$exclude))";
+        if ($excludeCount > 0) $filterString = "(&$filterString(!$exclude))";
       }
 
       if (strlen($this->nodeContent['addCruzids'])) {
@@ -332,20 +369,24 @@ class CampusDirectoryAPI {
         $add = "";
         $includeCount = 0;
         foreach (explode(',', $sectionInclude) as $cruzid) {
-          $add .= "(uid=" . trim($cruzid) . ")";
+          $cruzid = trim($cruzid);
+          if (!strlen($cruzid)) continue;
+          $add .= "(uid=" . ldap_escape($cruzid, "", LDAP_ESCAPE_FILTER) . ")";
           $includeCount++;
         }
         if ($includeCount > 1) $add = "(|$add)";
-        $filterString = "(|$filterString$add)";
+        if ($includeCount > 0) $filterString = "(|$filterString$add)";
       }
     }
   }
 
   public function processSearchResults($rli, $sr)
   {
-
-
     $people = [];
+    if (!$sr) {
+      error_log('CampusDirectory LDAP search failed: ' . ldap_error($rli));
+      return $people;
+    }
 
     for ($entry = ldap_first_entry($rli, $sr); $entry != false; $entry = ldap_next_entry($rli, $entry)) {
       $attrs = ldap_get_attributes($rli, $entry);
@@ -371,10 +412,10 @@ class CampusDirectoryAPI {
 
     if ($this->nodeContent['automatedFeeds']) {
       usort($people, function($a, $b) {
-        return strnatcasecmp($a['givenname'][0], $b['givenname'][0]);
+        return strnatcasecmp($a['givenname'][0] ?? '', $b['givenname'][0] ?? '');
       });
       usort($people, function($a, $b) {
-        return strnatcasecmp($a['sn'][0], $b['sn'][0]);
+        return strnatcasecmp($a['sn'][0] ?? '', $b['sn'][0] ?? '');
       });
     }
 
