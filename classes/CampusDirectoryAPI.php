@@ -82,15 +82,8 @@ class CampusDirectoryAPI {
   {
     $arrCruzids = [];
     if ($profileView || !$this->nodeContent['automatedFeeds']) {
-      $arrCruzids = explode(",", $strCruzids);
-      $q = '(|';
-      for ($i = 0; $i < count($arrCruzids); $i++) {
-        $arrCruzids[$i] = trim($arrCruzids[$i]);
-        if (!strlen($arrCruzids[$i])) continue;
-        $q .= "(uid=" . ldap_escape($arrCruzids[$i], "", LDAP_ESCAPE_FILTER) . ")";
-      }
-      $q .= ")";
-      if ($q === '(|)') $q = '';
+      $arrCruzids = array_map('trim', explode(",", $strCruzids));
+      $q = $this->buildUidFilter($arrCruzids);
     } else {
       $q = $this->buildFilterString();
     }
@@ -98,20 +91,38 @@ class CampusDirectoryAPI {
       return [[], $q];
     }
 
-    // check to see if $q is in cache
-    $attributes = $profileView ? [] : $this->listAttributes();
-    $md5_q = md5($q . '|' . implode(',', $attributes));
+    // check to see if $q is in cache; list and profile views request
+    // different attribute sets, so they must not share cache entries
+    $md5_q = md5($q) . ($profileView ? '_p' : '_l');
     $people = get_transient($md5_q);
     if ($people === false) {
       // List/table layouts never render jpegphoto or the profile-only
       // attributes, so restrict what LDAP returns for those queries; profile
       // and shortcode views (profileView) still need the full entry.
+      $attributes = $profileView ? [] : $this->listAttributes();
       $people = $this->doLDAPQuery($q, $arrCruzids, $attributes);
       // Cache empty results too (briefly), so an unreachable LDAP server or a
       // no-match filter is not re-queried on every page view.
       set_transient($md5_q, $people, count($people) ? 600 : 60);
     }
     return [$people, $q];
+  }
+
+  // Trim, drop blanks, escape, and OR-combine uids into an LDAP clause.
+  // Returns '' when no valid uids remain — callers must treat that as
+  // "no query", never splice it into a larger filter.
+  public function buildUidFilter($uids)
+  {
+    if (!is_array($uids)) $uids = explode(',', $uids);
+    $clauses = '';
+    $count = 0;
+    foreach ($uids as $uid) {
+      $uid = trim($uid);
+      if (!strlen($uid)) continue;
+      $clauses .= "(uid=" . ldap_escape($uid, "", LDAP_ESCAPE_FILTER) . ")";
+      $count++;
+    }
+    return $count > 1 ? "(|$clauses)" : $clauses;
   }
 
   public function listAttributes()
@@ -128,6 +139,10 @@ class CampusDirectoryAPI {
   }
 
   public function doLDAPQuery($q, $arrCruzids, $attributes = []) {
+    // Chokepoint guard: an empty filter would become the malformed search
+    // "(|)" — bail here so every caller is protected, not just getCampusDirData.
+    if (!strlen($q)) return [];
+
     $dev_env = getenv("DOCKER_DEV") == "docker_dev";
     if ($dev_env) {
       $rli = ldap_connect("ldap://" . $this->ldap_url);
@@ -351,31 +366,13 @@ class CampusDirectoryAPI {
       // which matches the entire directory; only subtract excludes when a
       // feed filter exists to subtract from.
       if (strlen($this->nodeContent['excludeCruzids']) && strlen($filterString)) {
-        $sectionExclude = $this->nodeContent['excludeCruzids'];
-        $exclude = "";
-        $excludeCount = 0;
-        foreach (explode(',', $sectionExclude) as $excludeMe) {
-          $excludeMe = trim($excludeMe);
-          if (!strlen($excludeMe)) continue;
-          $exclude .= "(uid=" . ldap_escape($excludeMe, "", LDAP_ESCAPE_FILTER) . ")";
-          $excludeCount++;
-        }
-        if ($excludeCount > 1) $exclude = "(|$exclude)";
-        if ($excludeCount > 0) $filterString = "(&$filterString(!$exclude))";
+        $exclude = $this->buildUidFilter($this->nodeContent['excludeCruzids']);
+        if (strlen($exclude)) $filterString = "(&$filterString(!$exclude))";
       }
 
       if (strlen($this->nodeContent['addCruzids'])) {
-        $sectionInclude = $this->nodeContent['addCruzids'];
-        $add = "";
-        $includeCount = 0;
-        foreach (explode(',', $sectionInclude) as $cruzid) {
-          $cruzid = trim($cruzid);
-          if (!strlen($cruzid)) continue;
-          $add .= "(uid=" . ldap_escape($cruzid, "", LDAP_ESCAPE_FILTER) . ")";
-          $includeCount++;
-        }
-        if ($includeCount > 1) $add = "(|$add)";
-        if ($includeCount > 0) $filterString = "(|$filterString$add)";
+        $add = $this->buildUidFilter($this->nodeContent['addCruzids']);
+        if (strlen($add)) $filterString = "(|$filterString$add)";
       }
     }
   }
