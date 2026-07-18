@@ -198,6 +198,7 @@ class CourseCatalog
         }
         $cacheKey = 'course-catalog-' . $peopleSoftTarget['target'] . '-' . $lowerTitle . '-' . $subjectOrDept;
         $body = $this->shouldBypassCache() ? false : get_transient($cacheKey);
+        $fetchedFromFeed = false;
         if (!$body) {
             $request_body = '<?xml version="1.0"?>
       <catalog>
@@ -234,9 +235,7 @@ class CourseCatalog
                 );
             }
 
-            if (!$this->shouldBypassCache()) {
-                set_transient($cacheKey, $body, WEEK_IN_SECONDS);
-            }
+            $fetchedFromFeed = true;
         }
 
         libxml_use_internal_errors(true);
@@ -252,6 +251,12 @@ class CourseCatalog
             );
         }
         libxml_clear_errors();
+
+        // Only cache once the body has parsed as XML, so a malformed 200
+        // response can never poison the cache for a week.
+        if ($fetchedFromFeed && !$this->shouldBypassCache()) {
+            set_transient($cacheKey, $body, WEEK_IN_SECONDS);
+        }
 
         return $xmlBody;
     }
@@ -300,6 +305,8 @@ class CourseCatalog
                 case 'Graduate':
                     $lvlval = 3;
                     break;
+                default:
+                    $lvlval = 0;
             }
             // the class 'intsort' isn't really necessary at this point, in the future it could signal a type of sorting
             // the class 'secret' is used to include a value, but not display it. the name is such because 'hidden' was already used

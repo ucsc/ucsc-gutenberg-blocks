@@ -33,9 +33,6 @@ function plugins_url( $path ) {
 function plugin_dir_path( $file ) {
 	return dirname( $file ) . '/';
 }
-function filemtime( $file ) {
-	return 1;
-}
 function is_user_logged_in() {
 	global $current_user_id;
 	return 0 !== $current_user_id;
@@ -266,15 +263,97 @@ $catalog->getCachedCourses(
 check( 'cache bypass does not store successful response', array() === $transients );
 check( 'cache bypass still calls the remote feed', 1 === count( $remote_requests ) );
 
+echo "feed error handling:\n";
+
+$catalog         = make_catalog();
+$remote_response = new WP_Error( 'http_request_failed', 'cURL error 28: connection timed out' );
+$result          = $catalog->getCachedCourses(
+	array(
+		'subjectOrDept' => 'dept',
+		'department'    => 'lit',
+		'subject'       => '',
+	)
+);
+check( 'transport WP_Error is returned to the caller', $result instanceof WP_Error && 'http_request_failed' === $result->get_error_code() );
+check( 'transport error is not cached', array() === $transients );
+
+$catalog                 = make_catalog();
+$remote_response['code'] = 500;
+$result                  = $catalog->getCachedCourses(
+	array(
+		'subjectOrDept' => 'dept',
+		'department'    => 'lit',
+		'subject'       => '',
+	)
+);
+check( 'non-2xx response returns a feed error', $result instanceof WP_Error && 'course_catalog_feed_error' === $result->get_error_code() );
+check( 'non-2xx response reports the upstream status code', 500 === $result->get_error_data()['status'] );
+check( 'non-2xx response is not cached', array() === $transients );
+
+$catalog                 = make_catalog();
+$remote_response['body'] = 'PeopleSoft is down for maintenance';
+$result                  = $catalog->getCachedCourses(
+	array(
+		'subjectOrDept' => 'dept',
+		'department'    => 'lit',
+		'subject'       => '',
+	)
+);
+check( 'invalid XML in a 200 response returns a feed XML error', $result instanceof WP_Error && 'course_catalog_feed_xml_error' === $result->get_error_code() );
+check( 'invalid XML in a 200 response is not cached', array() === $transients );
+
+echo "subject queries:\n";
+
+$catalog = make_catalog();
+$catalog->getCachedCourses(
+	array(
+		'subjectOrDept' => 'subject',
+		'department'    => '',
+		'subject'       => 'LIT',
+	)
+);
+check( 'subject query is cached under subject-aware key', isset( $transients['course-catalog-prod-lit-subject'] ) );
+check( 'subject query requests the lowercased subject element', false !== strpos( $remote_requests[0]['args']['body'], '<subject>lit</subject>' ) );
+
+echo "rendered HTML:\n";
+
+$catalog                 = make_catalog();
+$remote_response['code'] = 500;
+$html                    = $catalog->theHTML(
+	array(
+		'subjectOrDept' => 'dept',
+		'department'    => 'lit',
+		'subject'       => '',
+	)
+);
+check( 'feed failure renders the unavailable fallback', false !== strpos( $html, 'temporarily unavailable' ) );
+check( 'feed failure fallback keeps the block wrapper', false !== strpos( $html, 'id="courseCatalog"' ) );
+
+$catalog                 = make_catalog();
+$remote_response['body'] = '<?xml version="1.0"?><catalog>'
+	. '<course><subject>LIT</subject><catalog_nbr>80A</catalog_nbr><title>Intro</title><level>Graduate</level><units>5</units><description>Test</description></course>'
+	. '<course><subject>LIT</subject><catalog_nbr>80B</catalog_nbr><title>Mystery</title><level>Mystery Level</level><units>5</units><description>Test</description></course>'
+	. '</catalog>';
+$html                    = $catalog->theHTML(
+	array(
+		'subjectOrDept' => 'dept',
+		'department'    => 'lit',
+		'subject'       => '',
+	)
+);
+check( 'course rows render the course title', false !== strpos( $html, '<td class="collapseExpandText">Intro</td>' ) );
+check( 'graduate level maps to sort value 3', false !== strpos( $html, 'Graduate<span class="secret">3</span>' ) );
+check( 'unknown level maps to sort value 0 instead of reusing the previous row', false !== strpos( $html, 'Mystery Level<span class="secret">0</span>' ) );
+
 echo "cache clearing:\n";
 
 $deleted = CourseCatalog::clearCachedCourses( 'qa' );
 check( 'cache clear returns deleted row count', 2 === $deleted );
-check( 'cache clear maps qa alias to csqa transient prefix', false !== strpos( $wpdb->last_query, '_transient_course-catalog-csqa-' ) );
+check( 'cache clear maps qa alias to csqa transient prefix', false !== strpos( $wpdb->last_query, $wpdb->esc_like( '_transient_course-catalog-csqa-' ) ) );
 
 $deleted = CourseCatalog::clearCachedCourses();
 check( 'cache clear all returns deleted row count', 2 === $deleted );
-check( 'cache clear all targets all course catalog transients', false !== strpos( $wpdb->last_query, '_transient_course-catalog-' ) );
+check( 'cache clear all targets all course catalog transients', false !== strpos( $wpdb->last_query, $wpdb->esc_like( '_transient_course-catalog-' ) ) );
 
 echo "\n" . ( $tests - $failed ) . "/$tests passed\n";
 exit( 0 === $failed ? 0 : 1 );
