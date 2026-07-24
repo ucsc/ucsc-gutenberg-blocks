@@ -129,10 +129,11 @@ class CourseCatalog
             $target = getenv('UCSC_COURSE_CATALOG_PEOPLESOFT_TARGET');
         }
 
-        $requestTarget = $this->getRequestTargetOverride();
-        if ($requestTarget !== null && $requestTarget !== '') {
-            $target = $requestTarget;
-        }
+        // Stage/QA feed testing override (GET arg based) — disabled now that testing is done.
+        // $requestTarget = $this->getRequestTargetOverride();
+        // if ($requestTarget !== null && $requestTarget !== '') {
+        //     $target = $requestTarget;
+        // }
 
         $target = $this->normalizePeopleSoftTarget($target);
         $config = self::PEOPLESOFT_TARGETS[$target];
@@ -144,15 +145,16 @@ class CourseCatalog
 
     function shouldBypassCache() {
         $bypassCache = $this->getBooleanConfig('UCSC_COURSE_CATALOG_BYPASS_CACHE', 'UCSC_COURSE_CATALOG_BYPASS_CACHE');
-        if ($this->isRequestOverrideAllowed()) {
-            $requestBypassCache = $this->getRequestValue(array(
-                'ucsc_course_catalog_bypass_cache',
-                'ucsc-course-catalog-bypass-cache',
-            ));
-            if ($requestBypassCache !== null) {
-                $bypassCache = filter_var($requestBypassCache, FILTER_VALIDATE_BOOLEAN);
-            }
-        }
+        // Stage/QA feed testing override (GET arg based) — disabled now that testing is done.
+        // if ($this->isRequestOverrideAllowed()) {
+        //     $requestBypassCache = $this->getRequestValue(array(
+        //         'ucsc_course_catalog_bypass_cache',
+        //         'ucsc-course-catalog-bypass-cache',
+        //     ));
+        //     if ($requestBypassCache !== null) {
+        //         $bypassCache = filter_var($requestBypassCache, FILTER_VALIDATE_BOOLEAN);
+        //     }
+        // }
 
         return $bypassCache;
     }
