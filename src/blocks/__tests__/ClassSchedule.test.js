@@ -14,6 +14,16 @@ jest.mock('@wordpress/components', () => ({
       ))}
     </div>
   ),
+  CheckboxControl: ({ label, checked, onChange }) => (
+    <label>
+      <input
+        type="checkbox"
+        checked={checked}
+        onChange={(e) => onChange(e.target.checked)}
+      />
+      {label}
+    </label>
+  ),
 }), { virtual: true });
 
 // Mock child components
@@ -66,11 +76,12 @@ describe('ClassSchedule block', () => {
       expect(registeredBlock.category).toBe('common');
     });
 
-    it('defines subjectOrDept, department, and subject attributes', () => {
+    it('defines subjectOrDept, department, subject, and defaultColumns attributes', () => {
       expect(registeredBlock.attributes).toEqual({
         subjectOrDept: { type: 'string' },
         department: { type: 'string' },
         subject: { type: 'string' },
+        defaultColumns: { type: 'array' },
       });
     });
   });
