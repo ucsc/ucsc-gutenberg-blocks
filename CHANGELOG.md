@@ -2,6 +2,19 @@
 
 All notable changes to this project will be documented in this file. See [commit-and-tag-version](https://github.com/absolute-version/commit-and-tag-version) for commit guidelines.
 
+## [1.2.0](https://github.com/ucsc/ucsc-gutenberg-blocks/compare/v1.1.39...v1.2.0) (2026-07-29)
+
+
+### Features
+
+* **class-schedule:** WPM-98 let site editor set default visible columns ([5784ff6](https://github.com/ucsc/ucsc-gutenberg-blocks/commit/5784ff6fd947a256de2b697d099d773b54d046ac))
+
+
+### Bug Fixes
+
+* **class-schedule:** WPM-98 update Jest coverage for default-columns panel ([6bd0cda](https://github.com/ucsc/ucsc-gutenberg-blocks/commit/6bd0cdaec071a36e5a67970299ec8473f49ed750))
+* **course-catalog:** WPM-104 unbreak PHP suite, validate feed XML before caching ([bffe6ec](https://github.com/ucsc/ucsc-gutenberg-blocks/commit/bffe6ecb63b5e244268fba8e67500176eb47dba6))
+
 ## [1.1.39](https://github.com/ucsc/ucsc-gutenberg-blocks/compare/v1.1.38...v1.1.39) (2026-06-18)
 
 ## [1.1.38](https://github.com/ucsc/ucsc-gutenberg-blocks/compare/v1.1.37...v1.1.38) (2026-06-18)
