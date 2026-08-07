@@ -49,6 +49,10 @@
       {
         "filename": "index.php",
         "updater": "wp-plugin-version-updater.js"
+      },
+      {
+        "filename": "src/blocks/ClassSchedule.js",
+        "updater": "js-version-updater.js"
       }
     ]
   }
