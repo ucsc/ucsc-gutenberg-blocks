@@ -267,7 +267,7 @@ describe('classschedule.js frontend', () => {
       expect(document.getElementById('filterModal').classList.contains('active')).toBe(false);
     });
 
-    it('resets columns to defaults, statuses on, and clears search', () => {
+    it('resets columns to defaults, statuses on, clears search, and commits the table state', () => {
       document.querySelectorAll('.column-toggle').forEach((t) => (t.checked = true));
       document.querySelector('.status-filter[data-status="open"]').checked = false;
       document.getElementById('courseSearch').value = 'algo';
@@ -281,7 +281,64 @@ describe('classschedule.js frontend', () => {
       expect(checked).toEqual(['seats', 'days']);
       document.querySelectorAll('.status-filter').forEach((f) => expect(f.checked).toBe(true));
       expect(document.getElementById('courseSearch').value).toBe('');
-      expect(sessionStorage.getItem('cs_columns')).toBeNull();
+      // Reset now commits: the defaults are persisted (the old removeItem was
+      // dead code on Reset→Apply), and the committed state is the defaults.
+      expect(JSON.parse(sessionStorage.getItem('cs_columns'))).toEqual({
+        seats: true, days: true, time: false, location: false,
+        instructor: false, 'class-num': false, enrollment: false,
+      });
+
+      // Reset is committed: the table must actually change, not just the checkboxes.
+      // (The old reset only flipped checkboxes, so .col-time cells stayed un-hidden
+      // and the class count stayed stale.)
+      document.querySelectorAll('#classScheduleTable .col-time').forEach((cell) => {
+        expect(cell.classList.contains('hidden')).toBe(true);
+      });
+      document.querySelectorAll('#classScheduleTable .col-seats').forEach((cell) => {
+        expect(cell.classList.contains('hidden')).toBe(false);
+      });
+    });
+
+    it('re-filters the table when a live search is active (reset clears search AND filter)', () => {
+      // User has a live search term — table filtered, count stale
+      window.classScheduleSearch({ target: { value: 'compiler' } });
+      expect(visibleCourseIds()).toEqual(['CSE-150']);
+      expect(classCountText()).toContain('1');
+
+      window.resetFilters();
+
+      // Search box empty and table fully unfiltered — no orphaned filter state
+      expect(document.getElementById('courseSearch').value).toBe('');
+      expect(visibleCourseIds()).toEqual(['CSE-20', 'CSE-101', 'CSE-150']);
+      expect(classCountText()).toContain('3');
+    });
+
+    it('does not desync checkboxes from the table when the modal closes after reset', () => {
+      // Reset→Cancel path: if reset refreshed the table but not the saved
+      // snapshot, a subsequent closeFilterModal() would restore the stale
+      // pre-reset checkboxes while the table stays in the reset state.
+      // Commit a custom column set first (time visible), then reset.
+      document.querySelector('.column-toggle[data-column="time"]').checked = true;
+      window.applyFilters();
+
+      window.resetFilters();
+      expect(document.querySelector('.column-toggle[data-column="time"]').checked).toBe(false);
+      document.querySelectorAll('#classScheduleTable .col-time').forEach((cell) => {
+        expect(cell.classList.contains('hidden')).toBe(true);
+      });
+
+      // Closing the modal restores checkboxes from the saved snapshot.
+      // With the fix the snapshot holds the committed reset, so the
+      // checkboxes stay in the reset state — no stale restoration.
+      window.closeFilterModal();
+      expect(document.querySelector('.column-toggle[data-column="time"]').checked).toBe(false);
+      document.querySelectorAll('#classScheduleTable .col-time').forEach((cell) => {
+        expect(cell.classList.contains('hidden')).toBe(true);
+      });
+      expect(JSON.parse(sessionStorage.getItem('cs_columns'))).toEqual({
+        seats: true, days: true, time: false, location: false,
+        instructor: false, 'class-num': false, enrollment: false,
+      });
     });
 
     it('restores saved column choices on DOMContentLoaded', () => {

@@ -4,7 +4,7 @@ import DepartmentDropdown from '../components/DepartmentDropdown';
 import SubjectDropdown from '../components/SubjectDropdown';
 
 
-import { useState } from '@wordpress/element';
+import { useEffect, useState } from '@wordpress/element';
 
 
 
@@ -57,16 +57,15 @@ const ClassSchedule = () => {
         setAttributes({ defaultColumns: next });
       };
 
-      let localSubjectOrDept;
-      let setLocalSubjectOrDept;
-      if (typeof subjectOrDept === 'undefined') {
-        [localSubjectOrDept, setLocalSubjectOrDept] = useState("dept");
-        setAttributes({
-          subjectOrDept: "dept",
-        });
-      } else {
-        [localSubjectOrDept, setLocalSubjectOrDept] = useState(subjectOrDept);
-      }
+      // Single stable hook call. The default is committed after mount, not
+      // during render — calling setAttributes in the render body makes React
+      // warn "Cannot update a component while rendering a different component".
+      const [localSubjectOrDept, setLocalSubjectOrDept] = useState(subjectOrDept === undefined ? "dept" : subjectOrDept);
+      useEffect(() => {
+        if (subjectOrDept === undefined) {
+          setAttributes({ subjectOrDept: "dept" });
+        }
+      }, []);
 
       const isDevEnvironment = () => {
         const isDevEnv = window.location.href.includes('https://wordpress-dev.ucsc.edu/')

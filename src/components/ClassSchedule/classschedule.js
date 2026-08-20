@@ -359,7 +359,35 @@ function resetFilters() {
     const searchInput = document.getElementById('courseSearch');
     if (searchInput) searchInput.value = '';
 
-    try { sessionStorage.removeItem('cs_columns'); } catch(e) { /* ignore */ }
+    // Reset is a committed action (same contract as Apply): re-apply column
+    // visibility and status so the table, the checkboxes, and the class count
+    // all match the reset state. Without this, a live search left the table
+    // filtered by a term that was just erased from the box.
+    applyColumnVisibility();
+    applyStatusFilters();
+
+    // Refresh the saved snapshot so a later Cancel/Escape restores the
+    // committed reset instead of the stale pre-reset state (no desync).
+    document.querySelectorAll('.column-toggle').forEach(t => {
+        savedColumnStates[t.dataset.column] = t.checked;
+    });
+    document.querySelectorAll('.status-filter').forEach(f => {
+        savedStatusStates[f.dataset.status] = f.checked;
+    });
+
+    // Persist the committed defaults (replaces the old removeItem, which was
+    // dead code on Reset→Apply and incoherent on Reset→Cancel).
+    saveColumnState();
+
+    // Close the modal, same as Apply
+    document.getElementById('filterModal').classList.remove('active');
+
+    // A11Y: remove focus trap handler and restore focus to opener
+    document.removeEventListener('keydown', filterModalKeyHandler);
+    if (filterModalOpener) {
+        filterModalOpener.focus();
+        filterModalOpener = null;
+    }
 }
 
 // Close modal when clicking the backdrop
