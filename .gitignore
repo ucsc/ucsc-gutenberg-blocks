@@ -49,3 +49,9 @@ build/
 
 .DS_Store
 .vscode/
+
+# ignore e2e failure artifacts (jest-puppeteer snapshots/screenshots)
+artifacts/
+
+# ignore serena MCP workspace metadata
+.serena/

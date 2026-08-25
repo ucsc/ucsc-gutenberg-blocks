@@ -233,7 +233,7 @@ reset_test_state();
 $query_vars['directoryprofilecruzid'] = 'jsmith';
 $is_singular = true;
 $template = $template_include_callback( 'index.php' );
-check( 'returns original template for singular pages (relies on the_content)', 'index.php' === $template );
+check( 'returns standalone DirectoryProfileTemplate on singular pages too (WPM-114)', false !== strpos( $template, 'DirectoryProfileTemplate.php' ) );
 
 reset_test_state();
 $query_vars['directoryprofilecruzid'] = 'jsmith';
