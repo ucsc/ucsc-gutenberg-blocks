@@ -20,16 +20,6 @@ class CampusDirectory
         return $template;
       }
 
-      // On a real page/post, render the profile inline via the_content (see
-      // renderDirectoryProfile) so the active theme supplies its own header,
-      // navigation, and footer. Block (FSE) themes have no header.php for the
-      // standalone template to load, which dropped the site nav (WPM-99). Only
-      // fall back to the standalone template for pretty /directory/<cruzid>/
-      // URLs that do not resolve to a singular page.
-      if (is_singular()) {
-        return $template;
-      }
-
       return plugin_dir_path(__FILE__) . '../templates/DirectoryProfileTemplate.php';
     });
     add_filter('the_content', array($this, 'renderDirectoryProfile'), 20);
