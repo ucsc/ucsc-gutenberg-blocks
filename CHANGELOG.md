@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [commit-and-tag-version](https://github.com/absolute-version/commit-and-tag-version) for commit guidelines.
 
+## [1.2.1](https://github.com/ucsc/ucsc-gutenberg-blocks/compare/v1.2.0...v1.2.1) (2026-08-25)
+
+
+### Bug Fixes
+
+* **campus-directory:** WPM-114 restore standalone profile template on singular pages ([3c30ecb](https://github.com/ucsc/ucsc-gutenberg-blocks/commit/3c30ecb0d291b7e4299bad41df52762cc7db863a))
+
 ## [1.2.0](https://github.com/ucsc/ucsc-gutenberg-blocks/compare/v1.1.39...v1.2.0) (2026-07-29)
 
 

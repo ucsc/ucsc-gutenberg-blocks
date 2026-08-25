@@ -1,6 +1,6 @@
 {
   "name": "ucsc-gutenberg-blocks",
-  "version": "1.2.0",
+  "version": "1.2.1",
   "description": "Adds custom blocks to UCSC WordPress websites",
   "main": "test.js",
   "scripts": {
