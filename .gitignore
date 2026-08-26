@@ -55,3 +55,6 @@ artifacts/
 
 # ignore serena MCP workspace metadata
 .serena/
+
+# Test coverage artifacts (WPM-116)
+coverage/
