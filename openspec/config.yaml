@@ -1,0 +1,38 @@
+schema: spec-driven
+githubCopilot:
+  cloudAgent: true
+
+# Project context (optional)
+# This is shown to AI when creating artifacts.
+# Add your tech stack, conventions, style guides, domain knowledge, etc.
+context: |
+  Tech stack: PHP 8.1, WordPress (Gutenberg blocks), React (via @wordpress/element), vanilla JS, wp-scripts build toolchain.
+  Three custom Gutenberg blocks: Campus Directory (ucscblocks/campusdirectory), Class Schedule (ucscblocks/classschedule), Course Catalog (ucscblocks/coursecatalog).
+  All blocks use server-side rendering (save: null); block attributes persist editor config only.
+  REST API: namespace ucsc/v1 proxies PeopleSoft course data; namespace ucscgutenbergblocks/v1 serves Campus Directory config.
+  Data caching: all upstream API and LDAP results cached via WordPress transients.
+  A code test coverage report should be available for both PHP and JS.
+  JS coverage: npm run test:coverage (jest with @wordpress/scripts, config in jest-unit.config.js, output in coverage/).
+  PHP coverage: phpunit with coverage (see tests/php/); test files are CampusDirectoryTest.php, ClassScheduleTest.php, CourseCatalogTest.php.
+
+# Per-artifact rules (optional)
+# Add custom rules for specific artifacts.
+# Example:
+#   rules:
+#     proposal:
+#       - Keep proposals under 500 words
+#       - Always include a "Non-goals" section
+#     tasks:
+#       - Break tasks into chunks of max 2 hours
+
+# Per-operation guidance (optional)
+# Add advisory guidance for how apply and archive work should be conducted.
+# This is separate from artifact rules above.
+# Example:
+#   operations:
+#     apply:
+#       guidance:
+#         - Keep test summaries concise
+#     archive:
+#       guidance:
+#         - Summarize the archive outcome before finishing
