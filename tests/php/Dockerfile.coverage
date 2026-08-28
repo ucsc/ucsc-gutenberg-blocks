@@ -1,0 +1,20 @@
+# WPM-117: PHP test image with coverage driver
+#
+# The default test runs use php:8.1-cli with no extensions, which is fast and
+# dependency-free. This image adds Xdebug for coverage capture.
+#
+# Build: docker build -f tests/php/Dockerfile.coverage -t ucsc-gutenberg-blocks-php-test:coverage tests/php
+# Run:   docker run --rm -v "$PWD:/plugin" -w /plugin -e UCSC_COVERAGE=/tmp/coverage/php/clover.xml \
+#          ucsc-gutenberg-blocks-php-test:coverage php tests/php/CampusDirectoryTest.php
+
+FROM php:8.1-cli
+
+# Install Xdebug for coverage. The harness checks for xdebug_start_code_coverage
+# before pcov, so this path is tried first.
+RUN pecl install xdebug-3.3.2 && docker-php-ext-enable xdebug
+
+# Enable coverage mode (not debug mode, which is Xdebug's default).
+# This is what coverage-strategy.md recommends for the wp image too.
+RUN echo "xdebug.mode=coverage" >> /usr/local/etc/php/conf.d/docker-php-ext-xdebug.ini
+
+WORKDIR /plugin

@@ -126,21 +126,9 @@ $wpdb = new Test_WPDB();
 
 require __DIR__ . '/../../classes/CourseCatalog.php';
 
-$tests  = 0;
-$failed = 0;
-
-function check( $label, $condition ) {
-	global $tests, $failed;
-	$tests++;
-
-	if ( $condition ) {
-		echo "  PASS  $label\n";
-		return;
-	}
-
-	$failed++;
-	echo "  FAIL  $label\n";
-}
+// WPM-117: Use the shared instrumented harness. The harness guards all its stubs
+// with function_exists, so our custom test-specific stubs above win.
+require __DIR__ . '/helpers/harness.php';
 
 function reset_test_state() {
 	global $current_user_id, $can_manage_options, $transients, $remote_requests, $remote_response, $wpdb;
@@ -359,5 +347,4 @@ $deleted = CourseCatalog::clearCachedCourses();
 check( 'cache clear all returns deleted row count', 2 === $deleted );
 check( 'cache clear all targets all course catalog transients', false !== strpos( $wpdb->last_query, $wpdb->esc_like( '_transient_course-catalog-' ) ) );
 
-echo "\n" . ( $tests - $failed ) . "/$tests passed\n";
-exit( 0 === $failed ? 0 : 1 );
+finish_tests();

@@ -37,12 +37,45 @@ harness" in the `ucsc-wp-block-dev` plugin.
 
 ## Acceptance criteria
 
-- [ ] With `UCSC_COVERAGE` unset, the default run is byte-identical — same image,
+- [x] With `UCSC_COVERAGE` unset, the default run is byte-identical — same image,
       no driver, no slowdown.
-- [ ] With it set, a full suite run produces a valid `clover.xml` covering all
+- [x] With it set, a full suite run produces a valid `clover.xml` covering all
       three existing test files, not just the last one to run.
-- [ ] The coverage report's Layer 1 shows a real `php/clover` line.
-- [ ] Everything runs in Docker — no host PHP.
+- [x] The coverage report's Layer 1 shows a real `php/clover` line.
+- [x] Everything runs in Docker — no host PHP.
+
+## Implementation
+
+Completed 2026-08-27.
+
+**Files changed:**
+- `tests/php/helpers/harness.php` — Added coverage capture (90 lines):
+  - Detects `UCSC_COVERAGE` env var
+  - Starts Xdebug/PCOV collection
+  - `ucsc_emit_coverage()` function merges into JSON accumulator
+  - Generates clover.xml from merged data
+- `tests/php/Dockerfile.coverage` — Coverage-enabled image with Xdebug
+- `tests/php/run-php-coverage.sh` — Runner that clears accumulator and runs all tests
+- `tests/php/CampusDirectoryTest.php` — Migrated to use instrumented harness
+- `tests/php/CourseCatalogTest.php` — Migrated to use instrumented harness
+
+**Usage:**
+```bash
+# Default run (no coverage, same as before)
+docker run --rm -v "$PWD:/plugin" -w /plugin php:8.1-cli php tests/php/ClassScheduleTest.php
+
+# Coverage run (all 3 test files)
+bash tests/php/run-php-coverage.sh
+```
+
+**Result:**  
+PHP Coverage: 100.00% (451/451 statements) across 6 source files:
+- classes/CampusDirectory.php
+- classes/CampusDirectoryAPI.php  
+- templates/DirectoryProfileTemplate.php
+- classes/ClassSchedule.php
+- templates/ClassScheduleTemplate.php
+- classes/CourseCatalog.php
 
 ## Out of scope
 
