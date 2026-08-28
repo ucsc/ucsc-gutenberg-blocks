@@ -142,19 +142,9 @@ function esc_html($str) { return $str; }
 
 require __DIR__ . '/../../classes/CampusDirectory.php';
 
-$tests  = 0;
-$failed = 0;
-
-function check( $label, $condition ) {
-	global $tests, $failed;
-	$tests++;
-	if ( $condition ) {
-		echo "  PASS  $label\n";
-		return;
-	}
-	$failed++;
-	echo "  FAIL  $label\n";
-}
+// WPM-117: Use the shared instrumented harness. The harness guards all its stubs
+// with function_exists, so our custom test-specific stubs above win.
+require __DIR__ . '/helpers/harness.php';
 
 function campus_directory_api_fixture( $overrides = array() ) {
 	$defaults = array(
@@ -413,5 +403,4 @@ $api->getDirDropdowns( 'ucscpersonpubdivision' );
 check( 'getDirDropdowns can run twice in one request without redeclaring its sorter', true );
 check( 'getDirDropdowns requests only the grouping attribute from LDAP', isset( $ldap_searches[0] ) && in_array( 'ucscpersonpubdepartmentnumber', $ldap_searches[0]['attributes'], true ) && ! in_array( '*', $ldap_searches[0]['attributes'], true ) );
 
-echo "\n" . ( $tests - $failed ) . "/$tests passed\n";
-exit( 0 === $failed ? 0 : 1 );
+finish_tests();

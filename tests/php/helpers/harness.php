@@ -14,6 +14,14 @@
 $tests  = 0;
 $failed = 0;
 
+// WPM-117: env-gated coverage capture
+$ucsc_coverage = getenv( 'UCSC_COVERAGE' );
+if ( $ucsc_coverage && function_exists( 'xdebug_start_code_coverage' ) ) {
+	xdebug_start_code_coverage( XDEBUG_CC_UNUSED | XDEBUG_CC_DEAD_CODE );
+} elseif ( $ucsc_coverage && extension_loaded( 'pcov' ) ) {
+	pcov\start();
+}
+
 function check( $label, $condition ) {
 	global $tests, $failed;
 	$tests++;
@@ -28,9 +36,79 @@ function check( $label, $condition ) {
 }
 
 function finish_tests() {
-	global $tests, $failed;
+	global $tests, $failed, $ucsc_coverage;
 	echo "\n" . ( $tests - $failed ) . "/$tests passed\n";
+
+	// WPM-117: emit coverage before exit
+	if ( $ucsc_coverage ) {
+		if ( function_exists( 'xdebug_get_code_coverage' ) ) {
+			ucsc_emit_coverage( xdebug_get_code_coverage(), $ucsc_coverage );
+		} elseif ( extension_loaded( 'pcov' ) ) {
+			pcov\stop();
+			ucsc_emit_coverage( pcov\collect( pcov\inclusive ), $ucsc_coverage );
+			pcov\clear();
+		}
+	}
+
 	exit( 0 === $failed ? 0 : 1 );
+}
+
+/**
+ * WPM-117: Merge coverage data into JSON accumulator and emit clover.xml.
+ *
+ * Each test file runs in its own PHP process, so we accumulate raw coverage
+ * into coverage-raw.json and regenerate clover.xml each time to avoid the
+ * last file overwriting the earlier files' reports.
+ *
+ * @param array  $data Raw coverage array from xdebug or pcov.
+ * @param string $clover_path Path to the clover.xml output file.
+ */
+function ucsc_emit_coverage( $data, $clover_path ) {
+	$raw_path = dirname( $clover_path ) . '/coverage-raw.json';
+	$merged   = file_exists( $raw_path )
+		? json_decode( file_get_contents( $raw_path ), true )
+		: array();
+
+	foreach ( $data as $file => $lines ) {
+		// Only plugin source; skip the tests and stubs.
+		if ( false !== strpos( $file, '/tests/' ) ) {
+			continue;
+		}
+		foreach ( $lines as $line => $state ) {
+			// Skip dead code lines (-2 for xdebug).
+			if ( -2 === $state ) {
+				continue;
+			}
+			$prev = isset( $merged[ $file ][ $line ] ) ? $merged[ $file ][ $line ] : 0;
+			// xdebug: 1 = executed, -1 = not executed
+			// pcov: positive integer = hit count, 0 = not executed
+			$hit = ( 1 === $state || $state > 0 ) ? 1 : 0;
+			$merged[ $file ][ $line ] = max( $prev, $hit );
+		}
+	}
+
+	@mkdir( dirname( $clover_path ), 0777, true );
+	file_put_contents( $raw_path, json_encode( $merged ) );
+
+	// Generate clover.xml from the merged data.
+	$ts  = time();
+	$xml = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n";
+	$xml .= "<coverage generated=\"$ts\">\n  <project timestamp=\"$ts\">\n";
+	$total = $covered = 0;
+	foreach ( $merged as $file => $lines ) {
+		$fs = count( $lines );
+		$fc = count( array_filter( $lines ) );
+		$total += $fs;
+		$covered += $fc;
+		$xml .= '    <file name="' . htmlspecialchars( $file, ENT_QUOTES, 'UTF-8' ) . "\">\n";
+		foreach ( $lines as $line => $hit ) {
+			$xml .= "      <line num=\"$line\" type=\"stmt\" count=\"$hit\"/>\n";
+		}
+		$xml .= "      <metrics statements=\"$fs\" coveredstatements=\"$fc\"/>\n    </file>\n";
+	}
+	$xml .= "    <metrics statements=\"$total\" coveredstatements=\"$covered\"/>\n";
+	$xml .= "  </project>\n</coverage>\n";
+	file_put_contents( $clover_path, $xml );
 }
 
 if ( ! function_exists( 'add_action' ) ) {

@@ -35,12 +35,47 @@ docker compose -f docker-compose.yml -f docker-compose-start.yml run --rm \
 
 ## Acceptance criteria
 
-- [ ] `coverage/coverage-summary.json` and `coverage/lcov.info` are produced by a
+- [x] `coverage/coverage-summary.json` and `coverage/lcov.info` are produced by a
       Docker-only run — no host Node.
-- [ ] The coverage report's Layer 1 shows a real `jest/summary` line instead of
+- [x] The coverage report's Layer 1 shows a real `jest/summary` line instead of
       "No coverage artifact found".
-- [ ] Files with **no** test appear in the report at 0%, not absent.
-- [ ] The existing 4 Jest suites still pass.
+- [x] Files with **no** test appear in the report at 0%, not absent.
+- [x] The existing 4 Jest suites still pass.
+
+## Implementation
+
+Completed 2026-08-26 (prior to WPM-117).
+
+**Files changed:**
+- `jest-unit.config.js` — Added coverage configuration:
+  - `collectCoverageFrom: ['src/**/*.js']` with exclusions for `__tests__` and test files
+  - `coverageReporters: ['text-summary', 'json-summary', 'lcov']`
+  - `coverageDirectory: 'coverage'`
+- `package.json` — Added `"test:coverage": "wp-scripts test-unit-js --coverage"`
+- `.gitignore` — Added `coverage/` to ignore coverage artifacts
+
+**Usage:**
+```bash
+# Local run
+npm run test:coverage
+
+# Docker run (from wp-dev.ucsc stack root)
+docker compose -f docker-compose.yml -f docker-compose-start.yml run --rm \
+  -w /var/www/html/wp-content/plugins/ucsc-gutenberg-blocks \
+  plugin_npm_start npm run test:coverage
+```
+
+**Result:**
+Jest Coverage: **35.08% statements (254/724)**, 34.89% lines (239/685)
+
+Coverage artifacts generated:
+- `coverage/coverage-summary.json` — Machine-readable summary
+- `coverage/lcov.info` — LCOV format for IDE/CI integration
+- `coverage/lcov-report/` — HTML coverage report
+
+Files with 0% coverage ARE included (e.g., `Accordion.js`, `ContentSharer.js`, 
+`FeedbackForm.js`) — proving `collectCoverageFrom` is working correctly to surface 
+untested files.
 
 ## Out of scope
 
