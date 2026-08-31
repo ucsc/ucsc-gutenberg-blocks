@@ -359,7 +359,10 @@ function resetFilters() {
     const searchInput = document.getElementById('courseSearch');
     if (searchInput) searchInput.value = '';
 
-    try { sessionStorage.removeItem('cs_columns'); } catch(e) { /* ignore */ }
+    // The search box lives outside the modal and isn't gated by Apply/Cancel,
+    // so clearing it here must immediately re-filter the table and refresh
+    // the aria-live count (WPM-112) instead of leaving stale rows hidden.
+    applyStatusFilters();
 }
 
 // Close modal when clicking the backdrop
