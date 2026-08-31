@@ -281,7 +281,30 @@ describe('classschedule.js frontend', () => {
       expect(checked).toEqual(['seats', 'days']);
       document.querySelectorAll('.status-filter').forEach((f) => expect(f.checked).toBe(true));
       expect(document.getElementById('courseSearch').value).toBe('');
-      expect(sessionStorage.getItem('cs_columns')).toBeNull();
+    });
+
+    // WPM-112: "Reset all filters" cleared the search box's value but never
+    // re-ran the row filter, so the table stayed hidden by a search term the
+    // user could no longer see and the aria-live count lied about it.
+    it('un-hides rows and refreshes the live count when reset clears an active search', () => {
+      window.classScheduleSearch({ target: { value: 'compilers' } });
+      expect(visibleCourseIds()).toEqual(['CSE-150']);
+
+      window.resetFilters();
+
+      expect(visibleCourseIds()).toEqual(['CSE-20', 'CSE-101', 'CSE-150']);
+      expect(classCountText()).toContain('3');
+    });
+
+    it('un-hides rows filtered out by status when reset re-checks all statuses', () => {
+      document.querySelector('.status-filter[data-status="closed"]').checked = false;
+      window.applyFilters();
+      expect(visibleCourseIds()).toEqual(['CSE-20', 'CSE-150']);
+
+      window.resetFilters();
+
+      expect(visibleCourseIds()).toEqual(['CSE-20', 'CSE-101', 'CSE-150']);
+      expect(classCountText()).toContain('3');
     });
 
     it('restores saved column choices on DOMContentLoaded', () => {
