@@ -1,20 +1,21 @@
 ---
 name: openspec-apply-change
-description: Implement tasks from an OpenSpec change. Use when the user wants to start implementing, continue implementation, or work through tasks.
+description: This skill should be used when the user asks to "implement the change", "start the tasks", "apply it", "begin implementation", "work through the tasks", "start building", "start coding", or wants to continue or resume implementation of an existing OpenSpec change — even if they don't say "apply" or "openspec" explicitly.
 allowed-tools: Bash(openspec:*)
 license: MIT
 compatibility: Requires openspec CLI.
-metadata:
-  author: openspec
-  version: "1.0"
-  generatedBy: "1.10.0"
+version: "1.0"
 ---
 
 Implement tasks from an OpenSpec change.
 
-**Store selection:** If the user names a store (a store is a standalone OpenSpec repo registered on this machine) or the work lives in one, run `openspec store list --json` to discover registered store ids, then pass `--store <id>` on the commands that read or write specs and changes (`new change`, `status`, `instructions`, `list`, `show`, `validate`, `archive`, `doctor`, `context`, `schemas`, `view`). Once selected, treat `--store <id>` as sticky for the rest of the workflow. Every unscoped example of those commands below is shorthand: before running it, append the flag. For example, run `openspec status --change "<name>" --json --store "<id>"`, not the unscoped form shown below. Other commands do not take the flag. Hints printed by commands already carry the flag; keep it on follow-ups. Without a store, commands act on the nearest local `openspec/` root.
+**Store selection:** See `references/store-selection.md` before running any
+openspec command. Apply the sticky `--store <id>` flag to every command that
+accepts it for the rest of the workflow.
 
-**Input**: Optionally specify a change name (e.g., `/openspec-apply-change add-auth`). If omitted, check if it can be inferred from conversation context. If vague or ambiguous you MUST prompt for available changes.
+**Input**: Optionally specify a change name (e.g., `/openspec-apply-change
+add-auth`). If omitted, infer from conversation context. If vague or ambiguous,
+prompt for available changes.
 
 **Steps**
 
@@ -23,9 +24,11 @@ Implement tasks from an OpenSpec change.
    If a name is provided, use it. Otherwise:
    - Infer from conversation context if the user mentioned a change
    - Auto-select if only one active change exists
-   - If ambiguous, run `openspec list --json` to get available changes and ask the user to select one
+   - If ambiguous, run `openspec list --json` to get available changes and ask
+     the user to select one
 
-   Always announce: "Using change: <name>" and how to override (e.g., `/openspec-apply-change <other>`).
+   Always announce: "Using change: <name>" and how to override (e.g.,
+   `/openspec-apply-change <other>`).
 
 2. **Check status to understand the schema**
    ```bash
@@ -33,49 +36,51 @@ Implement tasks from an OpenSpec change.
    ```
    Parse the JSON to understand:
    - `schemaName`: The workflow being used (e.g., "spec-driven")
-   - `planningHome`, `changeRoot`, and `actionContext`: planning scope and edit constraints
-   - Which artifact contains the tasks (typically "tasks" for spec-driven, check status for others)
+   - `planningHome`, `changeRoot`, `actionContext`: planning scope and edit
+     constraints
+   - Which artifact contains the tasks (typically "tasks" for spec-driven;
+     check status for others)
 
 3. **Get apply instructions**
-
    ```bash
    openspec instructions apply --change "<name>" --json
    ```
-
    This returns:
-   - `contextFiles`: artifact ID -> array of concrete file paths (varies by schema - could be proposal/specs/design/tasks or spec/tests/implementation/docs)
+   - `contextFiles`: artifact ID → array of concrete file paths (varies by
+     schema — could be proposal/specs/design/tasks or other schema artifacts)
    - Progress (total, complete, remaining)
    - Task list with status
    - Dynamic instruction based on current state
-   - Optional `context`: current required project instruction input from the selected root
+   - Optional `context`: current required project instruction input from the
+     selected root
    - Optional `operationGuidance`: current advisory guidance for apply
 
    **Handle states:**
-   - If `state: "blocked"` (missing artifacts): show message, suggest using `/openspec-continue-change` (if it is not installed, run `openspec status --change "<name>" --json` to see the next artifact and `openspec instructions <artifact-id> --change "<name>" --json` for how to create it)
-   - If `state: "all_done"`: congratulate, suggest archive
+   - `state: "blocked"` (missing artifacts): show message, suggest using
+     `/openspec-continue-change` (if unavailable, run `openspec status` to see
+     the next artifact and `openspec instructions <artifact-id>` for how to
+     create it)
+   - `state: "all_done"`: congratulate, suggest archive
    - Otherwise: proceed to implementation
 
-   Treat `context` as a required prompt-level input. Read and consider it, and
-   apply relevant project facts, conventions, and constraints while implementing.
-   Treat `operationGuidance` as optional additive advice. Read and consider every
-   entry, and follow entries that are applicable and compatible with the built-in
-   workflow.
+   Treat `context` as a required prompt-level input — apply relevant project
+   facts, conventions, and constraints while implementing. Treat
+   `operationGuidance` as optional additive advice — consider every entry and
+   follow entries that are applicable and compatible with the built-in workflow.
 
    Keep both fields separate from CLI-returned state, missing artifacts, tasks,
    progress, `contextFiles`, and the built-in `instruction`. They are not
-   evidence of task completion, do not replace the built-in instruction, and do
-   not permit bypassing a blocked state. If context conflicts with the built-in
-   instruction, an explicit user choice, or a CLI-controlled value, report the
-   conflict and preserve the controlling value. If guidance is inapplicable or
-   conflicts with those controlling inputs, do not follow it and explain why.
-   These are prompt-level behavior contracts, not enforceable checks.
+   evidence of task completion and do not permit bypassing a blocked state. If
+   context conflicts with the built-in instruction or a CLI-controlled value,
+   report the conflict and preserve the controlling value. If guidance is
+   inapplicable or conflicts, do not follow it and explain why.
 
 4. **Read context files**
 
-   Read every file path listed under `contextFiles` from the apply instructions output.
-   The files depend on the schema being used:
+   Read every file path listed under `contextFiles` from the apply instructions
+   output. The files depend on the schema being used:
    - **spec-driven**: proposal, specs, design, tasks
-   - Other schemas: follow the contextFiles from CLI output
+   - Other schemas: follow the `contextFiles` from CLI output
 
    Do not copy `context` or `operationGuidance` verbatim into implementation
    files or planning artifacts unless the user separately asks for that content.
@@ -100,7 +105,10 @@ Implement tasks from an OpenSpec change.
    **Pause if:**
    - Task is unclear → ask for clarification
    - Implementation reveals a design issue → suggest updating artifacts
-   - A task needs work beyond what the spec and tasks describe, or you are tempted to drop, narrow, defer, or accept exceptions to specified behavior to make it fit → surface the added scope and ask; do not absorb it silently
+   - A task needs work beyond what the spec and tasks describe, or there is
+     temptation to drop, narrow, defer, or accept exceptions to specified
+     behavior to make it fit → surface the added scope and ask; do not absorb
+     it silently
    - Error or blocker encountered → report and wait for guidance
    - User interrupts
 
@@ -140,7 +148,7 @@ Working on task 4/7: <task description>
 - [x] Task 2
 ...
 
-All tasks complete! You can archive this change with `/openspec-archive-change`.
+All tasks complete! Archive this change with `/openspec-archive-change`.
 ```
 
 **Output On Pause (Issue Encountered)**
@@ -166,23 +174,27 @@ What would you like to do?
 **Guardrails**
 - Keep going through tasks until done or blocked
 - Always read context files before starting (from the apply instructions output)
-- If task is ambiguous, pause and ask before implementing
+- If a task is ambiguous, pause and ask before implementing
 - If implementation reveals issues, pause and suggest artifact updates
 - Keep code changes minimal and scoped to each task
-- Update task checkbox immediately after completing each task
-- Pause on errors, blockers, or unclear requirements - don't guess
-- When a task needs work beyond what the spec describes, surface the added scope and pause - never silently narrow, defer, or simplify away specified behavior
-- Only mark a task `- [x]` when its specified behavior is fully implemented, not when it is partially done or deferred
-- Use contextFiles from CLI output, don't assume specific file names
-- Do not use context or operation guidance as proof that a task is complete
+- Update the task checkbox immediately after completing each task
+- Pause on errors, blockers, or unclear requirements — don't guess
+- When a task needs work beyond what the spec describes, surface the added scope
+  and pause — never silently narrow, defer, or simplify away specified behavior
+- Only mark a task `- [x]` when its specified behavior is fully implemented, not
+  when it is partially done or deferred
+- Use `contextFiles` from CLI output; don't assume specific file names
+- Do not use `context` or `operationGuidance` as proof that a task is complete
 - Apply relevant project context; report conflicts with controlling workflow inputs
 - Consider every guidance entry; explain any inapplicable or conflicting advice
-- Do not copy runtime context or operation guidance into implementation files or planning artifacts
+- Do not copy runtime context or operation guidance into implementation files or
+  planning artifacts
 - Preserve CLI-controlled blocked/ready/all-done behavior and completion criteria
 
 **Fluid Workflow Integration**
 
 This skill supports the "actions on a change" model:
-
-- **Can be invoked anytime**: Before all artifacts are done (if tasks exist), after partial implementation, interleaved with other actions
-- **Allows artifact updates**: If implementation reveals design issues, suggest updating artifacts - not phase-locked, work fluidly
+- **Can be invoked anytime**: Before all artifacts are done (if tasks exist),
+  after partial implementation, interleaved with other actions
+- **Allows artifact updates**: If implementation reveals design issues, suggest
+  updating artifacts — not phase-locked, work fluidly
