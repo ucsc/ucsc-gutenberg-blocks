@@ -403,4 +403,107 @@ $api->getDirDropdowns( 'ucscpersonpubdivision' );
 check( 'getDirDropdowns can run twice in one request without redeclaring its sorter', true );
 check( 'getDirDropdowns requests only the grouping attribute from LDAP', isset( $ldap_searches[0] ) && in_array( 'ucscpersonpubdepartmentnumber', $ldap_searches[0]['attributes'], true ) && ! in_array( '*', $ldap_searches[0]['attributes'], true ) );
 
+echo "theHTML attribute decode tests (WPM-113):\n";
+
+// Raw block attributes as they arrive at CampusDirectory::theHTML() -- the
+// str* keys are the JSON-encoded strings stored on the block, decoded into
+// obj* keys inside theHTML() before CampusDirectoryAPI is constructed.
+function campus_directory_theHTML_attributes_fixture( $overrides = array() ) {
+	$defaults = array(
+		'cruzidList'                   => '',
+		'pageLayout'                   => 'list',
+		'linkToProfile'                => false,
+		'linkOutToCampusDirectory'     => false,
+		'automatedFeeds'               => true,
+		'manualAdd'                    => false,
+		'excludeCruzids'               => '',
+		'addCruzids'                   => '',
+		'department'                   => '---',
+		'division'                     => '---',
+		'deptOrDiv'                    => 'dept',
+		'displayDeptartmentAffiliates' => false,
+		'strFacultyTypes'              => json_encode( array(
+			'All'      => false,
+			'Senate'   => false,
+			'Lecturer' => false,
+			'Emeritus' => false,
+		) ),
+		'strStaffTypes'                => json_encode( array(
+			'Regular Staff'        => false,
+			'Researcher'           => false,
+			'Postdoctoral Scholar' => false,
+		) ),
+		'strGradTypes'                 => json_encode( array( 'Grad Students' => false ) ),
+		'strInformationTypes'          => json_encode( array( 'Title' => true ) ),
+		'strInformationTypesTable'     => json_encode( array() ),
+	);
+
+	return array_replace( $defaults, $overrides );
+}
+
+// Runs theHTML() and reports whether it fataled/threw and whether it raised
+// any PHP warnings/notices along the way (both are regressions per WPM-113).
+function run_theHTML_capturing_issues( $campus_directory, $attributes ) {
+	$threw    = false;
+	$warnings = array();
+
+	set_error_handler( function ( $errno, $errstr ) use ( &$warnings ) {
+		$warnings[] = $errstr;
+		return true; // swallow so PHP's own handler doesn't echo it
+	} );
+
+	try {
+		$output = $campus_directory->theHTML( $attributes );
+	} catch ( \Throwable $e ) {
+		$threw  = true;
+		$output = '';
+	} finally {
+		restore_error_handler();
+	}
+
+	return array(
+		'threw'    => $threw,
+		'warnings' => $warnings,
+		'output'   => $output,
+	);
+}
+
+reset_test_state();
+$result = run_theHTML_capturing_issues( $campus_directory, campus_directory_theHTML_attributes_fixture() );
+check( 'a fully populated automated-feed block renders with no warnings (control)', ! $result['threw'] && array() === $result['warnings'] );
+
+reset_test_state();
+$attributes = campus_directory_theHTML_attributes_fixture();
+unset( $attributes['strFacultyTypes'], $attributes['strStaffTypes'], $attributes['strGradTypes'], $attributes['strInformationTypes'], $attributes['strInformationTypesTable'] );
+$result = run_theHTML_capturing_issues( $campus_directory, $attributes );
+check( 'a block with all str* attributes absent renders instead of fataling', ! $result['threw'] );
+check( 'a block with all str* attributes absent emits no warnings', array() === $result['warnings'] );
+check( 'a block with all str* attributes absent issues no LDAP search', 0 === count( $ldap_searches ) );
+
+reset_test_state();
+$attributes = campus_directory_theHTML_attributes_fixture( array(
+	'strFacultyTypes'          => '',
+	'strStaffTypes'            => null,
+	'strGradTypes'             => 'not valid json',
+	'strInformationTypes'      => '',
+	'strInformationTypesTable' => '',
+) );
+$result = run_theHTML_capturing_issues( $campus_directory, $attributes );
+check( 'a block with empty/null/malformed str* attributes renders instead of fataling', ! $result['threw'] );
+check( 'a block with empty/null/malformed str* attributes emits no warnings', array() === $result['warnings'] );
+
+reset_test_state();
+$attributes = campus_directory_theHTML_attributes_fixture( array(
+	'department'    => 'MATH',
+	'deptOrDiv'     => 'dept',
+	'strStaffTypes' => json_encode( array(
+		'Regular Staff'        => true,
+		'Researcher'           => false,
+		'Postdoctoral Scholar' => false,
+	) ),
+) );
+$result = run_theHTML_capturing_issues( $campus_directory, $attributes );
+check( 'a block with a staff type selected still renders without fataling', ! $result['threw'] );
+check( 'a selected staff type still reaches the LDAP filter (guard does not swallow real config)', isset( $ldap_searches[0] ) && false !== strpos( $ldap_searches[0]['filter'], 'ucscpersonpubaffiliation=Staff' ) );
+
 finish_tests();
