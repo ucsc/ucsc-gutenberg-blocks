@@ -261,7 +261,9 @@ class CampusDirectoryAPI {
     $filterString = "";
     $vacancies = array();
     $this->count = 0;
-    if ($this->nodeContent["objGradTypes"]["Grad Students"]) {
+    // WPM-113: objGradTypes can be null/empty when strGradTypes was missing;
+    // !empty() short-circuits before the array-key dereference.
+    if (!empty($this->nodeContent["objGradTypes"]["Grad Students"])) {
       $filterString .= "(ucscpersonpubaffiliation=Graduate)";
       $this->count++;
     }
@@ -299,6 +301,10 @@ class CampusDirectoryAPI {
 
   public function processStaffFilterString(&$filterString)
   {
+    // WPM-113: guard against a null/empty objStaffTypes the same way
+    // processFacultyFilterString() already guards objFacultyTypes, so a
+    // missing/empty/malformed str* attribute never reaches array_sum(null).
+    if (empty($this->nodeContent["objStaffTypes"])) return;
     $staffTypes = $this->nodeContent["objStaffTypes"];
     if (array_sum($this->nodeContent["objStaffTypes"]) == 3) {
       $filterString .= "(ucscpersonpubaffiliation=Staff)";

@@ -118,11 +118,15 @@ class CampusDirectory
   function theHTML($attributes)
   {
     $path = plugin_dir_path(__FILE__);
-    $attributes['objFacultyTypes'] = json_decode($attributes['strFacultyTypes'], true);
-    $attributes['objStaffTypes'] = json_decode($attributes['strStaffTypes'], true);
-    $attributes['objGradTypes'] = json_decode($attributes['strGradTypes'], true);
-    $attributes['objInformationTypes'] = json_decode($attributes['strInformationTypes'], true);
-    if ($attributes['strInformationTypesTable'] != null) $attributes['objInformationTypesTable'] = json_decode($attributes['strInformationTypesTable'], true);
+    // WPM-113: missing/empty/malformed str* attributes make json_decode() return
+    // null, which fatals downstream (array_sum(null)) on PHP 8.x. Cast to array
+    // so every decode site always yields an array, even for '' or invalid JSON.
+    $attributes['objFacultyTypes'] = (array) json_decode($attributes['strFacultyTypes'] ?? '', true);
+    $attributes['objStaffTypes'] = (array) json_decode($attributes['strStaffTypes'] ?? '', true);
+    $attributes['objGradTypes'] = (array) json_decode($attributes['strGradTypes'] ?? '', true);
+    $attributes['objInformationTypes'] = (array) json_decode($attributes['strInformationTypes'] ?? '', true);
+    if (($attributes['strInformationTypesTable'] ?? null) != null) $attributes['objInformationTypesTable'] = (array) json_decode($attributes['strInformationTypesTable'], true);
+    else $attributes['objInformationTypesTable'] = array();
     $campusDirectoryAPI = new CampusDirectoryAPI($attributes);
     $items = $campusDirectoryAPI->setDirectoryData();
     ob_start();
