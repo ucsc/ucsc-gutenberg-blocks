@@ -10,6 +10,41 @@ Config: `jest-unit.config.js` — extends `@wordpress/scripts` default; no enzym
 `collectCoverageFrom: src/**/*.js` (explicit, so untouched files appear at 0%);
 reporters: `text-summary`, `json-summary`, `lcov`; output: `coverage/`
 
+## Running Coverage
+
+From the plugin directory:
+
+```bash
+npm run test:coverage
+```
+
+This writes:
+
+```text
+coverage/coverage-summary.json
+coverage/lcov.info
+coverage/lcov-report/index.html
+```
+
+For the Dockerized workflow, run the equivalent command inside the npm container
+(from the `wp-dev.ucsc` project root):
+
+```bash
+docker compose -f docker-compose.yml -f docker-compose-start.yml run --rm \
+  -w /var/www/html/wp-content/plugins/ucsc-gutenberg-blocks \
+  plugin_npm_start npm run test:coverage
+```
+
+The structural gap report groups classes, templates, blocks, and components named
+by no test (read-only, no mutation):
+
+```bash
+python3 /path/to/ucsc-wp-block-dev/skills/validate/scripts/coverage-report.py . --gaps
+```
+
+This is a gap floor — not line or branch coverage. On systems requiring Python 3.10+,
+use that interpreter; Python 3.9 cannot parse its union type syntax.
+
 ---
 
 ## CampusDirectory block — 11 tests

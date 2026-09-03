@@ -35,7 +35,7 @@ echo "Running PHP tests with coverage..."
 echo
 
 # Find all PHP test files
-TEST_FILES=(tests/php/CampusDirectoryTest.php tests/php/CampusDirectoryShortcodeTest.php tests/php/ClassScheduleTest.php tests/php/CourseCatalogTest.php)
+TEST_FILES=(tests/php/CampusDirectoryTest.php tests/php/CampusDirectoryShortcodeTest.php tests/php/ClassScheduleTest.php tests/php/CourseCatalogTest.php tests/php/CourseScheduleAPITest.php)
 
 PASSED=0
 FAILED=0

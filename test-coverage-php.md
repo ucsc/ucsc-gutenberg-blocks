@@ -8,6 +8,36 @@ Scope: `tests/php/CampusDirectoryTest.php`, `tests/php/ClassScheduleTest.php`,
 Runner: plain `php` CLI — no PHPUnit, no framework. Each file is a standalone
 script that defines its own WordPress stubs and calls `check($label, $condition)`.
 
+## Running Coverage
+
+From the plugin directory:
+
+```bash
+bash tests/php/run-php-coverage.sh
+```
+
+This writes:
+
+```text
+coverage/php/clover.xml
+coverage/php/coverage-raw.json
+```
+
+> **Note:** PHP coverage reports 100% statement coverage (545/545), but this is
+> not a clean passing baseline. 3 of 4 suites pass; `CampusDirectoryShortcodeTest.php`
+> contains four intentionally failing XSS assertions documenting existing escaping
+> vulnerabilities. The PHP percentage should not be treated as a passing baseline.
+
+The structural gap report groups classes, templates, blocks, and components that
+are named by no test (read-only, no mutation):
+
+```bash
+python3 /path/to/ucsc-wp-block-dev/skills/validate/scripts/coverage-report.py . --gaps
+```
+
+On systems where the script requires Python 3.10+, use that interpreter; Python 3.9
+cannot parse its union type syntax.
+
 Run command (from repo root):
 ```
 docker run --rm -v "$PWD:/plugin" -w /plugin php:8.1-cli \
