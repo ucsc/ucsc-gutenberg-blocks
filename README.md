@@ -65,6 +65,71 @@ docker compose -f docker-compose.yml -f docker-compose-start.yml run --rm \
   plugin_npm_start npx wp-scripts test-unit-js --testPathPattern=ClassSchedule
 ```
 
+### Coverage
+
+Run JavaScript coverage from the plugin directory:
+
+```bash
+npm run test:coverage
+```
+
+The report is written to:
+
+```text
+coverage/coverage-summary.json
+coverage/lcov.info
+coverage/lcov-report/index.html
+```
+
+The equivalent Docker command, from the `wp-dev.ucsc` project root, is:
+
+```bash
+docker compose -f docker-compose.yml -f docker-compose-start.yml run --rm \
+  -w /var/www/html/wp-content/plugins/ucsc-gutenberg-blocks \
+  plugin_npm_start npm run test:coverage
+```
+
+Run PHP coverage from the plugin directory:
+
+```bash
+bash tests/php/run-php-coverage.sh
+```
+
+The PHP report is written to:
+
+```text
+coverage/php/clover.xml
+coverage/php/coverage-raw.json
+```
+
+The latest three-block assessment is:
+
+| Block | JS statements | JS branches | JS functions | JS lines |
+|---|---:|---:|---:|---:|
+| Campus Directory | 100% | 100% | 100% | 100% |
+| Class Schedule | 74.07% | 33.33% | 63.63% | 74.07% |
+| Course Catalog | 100% | 100% | 100% | 100% |
+
+Overall JavaScript coverage is 38.86% statements, 41.15% branches, 35.53%
+functions, and 38.83% lines because untouched components and legacy files are
+included. The JavaScript suite passed 72 tests across 5 suites.
+
+PHP coverage reports 100% statement coverage (545/545), but the harness is not
+a clean passing baseline: 3 of 4 suites passed. The
+`CampusDirectoryShortcodeTest.php` suite contains four intentionally failing
+XSS assertions documenting existing escaping vulnerabilities.
+
+The plugin's structural gap report is read-only and groups classes, templates,
+blocks, and components that are named by no test:
+
+```bash
+python3 /path/to/ucsc-wp-block-dev/skills/validate/scripts/coverage-report.py . --gaps
+```
+
+This structural report is a gap floor, not line or branch coverage. On systems
+where the script requires Python 3.10 or newer, use that interpreter; Python
+3.9 cannot parse its union type syntax.
+
 ### Writing Tests
 
 Test files live in `src/blocks/__tests__/` and follow the naming convention `BlockName.test.js`. Since WordPress packages like `@wordpress/components` are provided at runtime (not installed as dependencies), they must be mocked with `{ virtual: true }`:
