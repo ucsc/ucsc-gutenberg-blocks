@@ -113,7 +113,7 @@ public function render_profiles_grid($uids, $attrs, $options, $itemsShortcode) {
 		$profile_uid = $entry['uid'][0];
 
 		$result .= '<div class="cdp-profile grid" id="cdp-profile-';
-		$result .= $entry['uid'][0] . '"><ul class="cdp-profile-ul">';
+		$result .= esc_attr( $entry['uid'][0] ) . '"><ul class="cdp-profile-ul">';
 		if($attributes['jpegPhoto']) {
 		 	$result .= $this->render_attr_photo($entry, 'jpegphoto');
 		}
@@ -213,7 +213,7 @@ public function render_profiles_list($uids, $attrs, $options, $itemsShortcode) {
 	 
 		$profile_uid = $entry['uid'][0];
 		$result .= '<div class="cdp-list-profile" id="cdp-profile-';
-		$result .= $profile_uid . '">';
+		$result .= esc_attr( $profile_uid ) . '">';
 		if($attributes['cn'] && !empty($entry['cn'])) {
 			$result .= '<h4>' . $this->render_attr_cn($entry, 'cn', $options, $attributes, $profile_uid) . '</h4>';
 		}
@@ -297,14 +297,12 @@ public function render_profiles_list($uids, $attrs, $options, $itemsShortcode) {
 
 public function render_attr_cn($values, $val_key, $options, $attributes, $uid) {
 	$result = '';
-
-// 	print_r ($values)  ;
 	if(!empty($values[$val_key])) {
 		if($attributes['profLinks']) {
-			$result .= '<a style="text-decoration: none" href="https://campusdirectory.ucsc.edu/cd_detail?uid=' . $uid . '">';
-			$result .= $values[$val_key][0] . '</a>';
+			$result .= '<a style="text-decoration: none" href="https://campusdirectory.ucsc.edu/cd_detail?uid=' . esc_attr( $uid ) . '">';
+			$result .= esc_html( $values[$val_key][0] ) . '</a>';
 		} else {
-			$values[$val_key][0];
+			esc_html( $values[$val_key][0] );
 		}
 	}
 	return $result;
@@ -323,15 +321,15 @@ public function ucsc_cdp_read_more($data, $options, $uid) {
 public function render_attr_single_line($values, $val_key) {
 	$result = '';
 	if(!empty($values[$val_key])) {
-		$result .= $values[$val_key][0];
+		$result .= esc_html( $values[$val_key][0] );
 	}
 	return $result;
 }
 public function render_attr_multi_line($values, $val_key) {
 	$result = '';
-	if(!empty($values[$val_key])) { 
-		unset ($values[$val_key]['count']); 
-		$result .= '<div>' . join('<br />', $values[$val_key]) . '</div>';
+	if(!empty($values[$val_key])) {
+		unset ($values[$val_key]['count']);
+		$result .= '<div>' . join('<br />', array_map( 'esc_html', $values[$val_key] )) . '</div>';
 	}
 	return $result;
 }

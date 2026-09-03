@@ -308,8 +308,9 @@ $result = $shortcode->ucsc_cdp_profile_render_shortcode( array(
 	'cruzids' => 'jgarcia',
 	'phone' => 'true',
 ) );
-// FAIL EXPECTED: Current code does NOT escape phone
-check( 'XSS in phone number is NOT escaped (KNOWN VULNERABILITY - this test should FAIL)', strpos( $result, 'onerror=alert' ) === false );
+// The raw angle brackets must be HTML-encoded; the unescaped payload must not appear.
+check( 'XSS in phone number is escaped', strpos( $result, '<img src=x' ) === false );
+check( 'Phone number value appears escaped', strpos( $result, '&quot;&gt;&lt;img' ) !== false || strpos( $result, '&gt;&lt;img' ) !== false );
 
 // Test 9: Email rendering (should be safe with mailto:)
 echo "\nEmail rendering:\n";
