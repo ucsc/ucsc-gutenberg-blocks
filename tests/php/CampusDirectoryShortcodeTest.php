@@ -410,4 +410,34 @@ check( 'Grid mode has cdp-profile grid class', strpos( $result, 'cdp-profile gri
 check( 'Grid mode has ul.cdp-profile-ul', strpos( $result, 'ul class="cdp-profile-ul"' ) !== false );
 check( 'Title renders in grid mode', strpos( $result, 'Lead Guitarist' ) !== false );
 
+// Test 17: LDAP data escaping - XSS in email
+echo "\nEmail XSS escaping:\n";
+reset_ldap_fixture();
+$ldap_fixture_data[0][0]['mail'] = array( '"><script>alert("xss")</script>' );
+
+$result = $shortcode->ucsc_cdp_profile_render_shortcode( array(
+	'cruzids' => 'jgarcia',
+	'email' => 'true',
+) );
+check( 'XSS in email is escaped', strpos( $result, '<script>alert' ) === false );
+check( 'Email value appears HTML-encoded', strpos( $result, '&quot;&gt;&lt;script&gt;' ) !== false || strpos( $result, '&gt;&lt;script&gt;' ) !== false );
+
+// Test 18: LDAP data escaping - XSS in labeledURI (website)
+echo "\nLabeled URI XSS escaping:\n";
+reset_ldap_fixture();
+$ldap_fixture_data[0][0]['labeleduri'] = array( '"><script>alert("xss")</script> Label' );
+
+$result = $shortcode->ucsc_cdp_profile_render_shortcode( array(
+	'cruzids' => 'jgarcia',
+	'websites' => 'true',
+) );
+check( 'XSS in labeledURI is escaped', strpos( $result, '<script>alert' ) === false );
+check( 'Labeled URI value appears HTML-encoded', strpos( $result, '&quot;&gt;&lt;script&gt;' ) !== false || strpos( $result, '&gt;&lt;script&gt;' ) !== false );
+
+// Test 19: read-more helper escapes the uid used in its href
+echo "\nRead-more uid escaping:\n";
+$long_text = str_repeat( 'x', 200 );
+$result    = $shortcode->ucsc_cdp_read_more( $long_text, array(), '"><script>alert("xss")</script>' );
+check( 'XSS in read-more uid href is escaped', strpos( $result, '<script>alert' ) === false );
+
 finish_tests();

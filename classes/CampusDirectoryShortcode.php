@@ -315,7 +315,7 @@ public function ucsc_cdp_read_more($data, $options, $uid) {
 		return wp_kses_post($data);
 	}
 	$result = '<p>' . substr(strip_tags($data), 0, 128);
-	$result .= ' <a href="https://campusdirectory.ucsc.edu/cd_detail?uid=' . $uid . '">...more</a></p>';
+	$result .= ' <a href="https://campusdirectory.ucsc.edu/cd_detail?uid=' . esc_attr( $uid ) . '">...more</a></p>';
 	return $result;
 }
 public function render_attr_single_line($values, $val_key) {
@@ -347,7 +347,7 @@ public function render_attr_mail($values, $val_key) {
 	$result = '';
 	if(!empty($values[$val_key])) {
 		// print 'keys '.($val_key);
-	   	$result .= '<div> <a style="text-decoration:none" href="mailto:' . $values[$val_key][0] . '">' . $values[$val_key][0] . '</a> </div>';
+	   	$result .= '<div> <a style="text-decoration:none" href="mailto:' . esc_attr( $values[$val_key][0] ) . '">' . esc_html( $values[$val_key][0] ) . '</a> </div>';
 	}
 	return $result;
 }
@@ -371,14 +371,14 @@ public function marshal_or_filter_from_uids($uids) { // unknown use
 	return $result;
 }
 public function render_attr_mail_map($email) {
-	return '<a style="text-decoration:none" href="mailto:' . $email . '">' . $email . '</a>';
+	return '<a style="text-decoration:none" href="mailto:' . esc_attr( $email ) . '">' . esc_html( $email ) . '</a>';
 }
 public function render_attr_labeled_uri_map($labeled_uri) {
 	$split = explode(' ', $labeled_uri, 2);
 	if(sizeof($split) < 2) {
 		return join('<br/>', $labeled_uri);
 	}
-	return '<a href="' . $split[0] . '">' . $split[1] . '</a>';
+	return '<a href="' . esc_url( $split[0] ) . '">' . esc_html( $split[1] ) . '</a>';
 }
 public function render_list_attr($title, $content) {
 	$result = '<li><span class="cdp-li-header">' . $title . '</span><ul class="cdp-inline-list">' . $content . '</ul></li>';
