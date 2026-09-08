@@ -23,8 +23,9 @@ coverage/php/clover.xml
 coverage/php/coverage-raw.json
 ```
 
-> **Note:** PHP coverage reports 100% statement coverage (545/545), but this is
-> not a clean passing baseline. 3 of 4 suites pass; `CampusDirectoryShortcodeTest.php`
+> **Note:** PHP coverage reports 100% statement coverage (758/758, up from
+> 713/713 before WPM-134 added `SiteSettingsTest.php`), but this is not a clean
+> passing baseline. 5 of 6 suites pass; `CampusDirectoryShortcodeTest.php`
 > contains four intentionally failing XSS assertions documenting existing escaping
 > vulnerabilities. The PHP percentage should not be treated as a passing baseline.
 
@@ -229,6 +230,45 @@ stub `Test_WPDB` for cache-clear queries
 
 ---
 
+## SiteSettings (cddepartmentcode) — 11 tests
+
+File: `tests/php/SiteSettingsTest.php`
+
+Loads: `classes/SiteSettings.php`
+
+Stubs: `wp_remote_get`/`wp_remote_retrieve_body`/`wp_remote_retrieve_response_code`,
+`get_transient`/`set_transient`, `is_wp_error`, `WP_Error`, `WP_REST_Response`,
+faked `ABSPATH` + `WP_Filesystem_Base`/`WP_Filesystem_Direct` stub files (needed
+because `SiteSettings.php` loads `CampusDirectoryAPI.php`, which requires them)
+
+WPM-134: `cddepartmentcode()` previously fetched the department dropdown source
+via `file_get_contents()` with no error handling, so a failed fetch or missing
+DOM element caused an unguarded null-method-call fatal, and non-2xx responses
+were parsed as if they were valid HTML. Converted the fetch to `wp_remote_get()`
+(matching the `Course_Schedule_API` convention) with explicit guards. Confirmed
+regression coverage: 7 of these 11 tests fail against the pre-fix code.
+
+### Remote fetch failure paths (5 tests)
+- `WP_Error` from the remote fetch returns a controlled `WP_Error`, not a fatal
+- `WP_Error` result is not cached
+- Non-2xx response returns a controlled `WP_Error`
+- Non-2xx error does not leak the raw upstream response body
+- Non-2xx response is not cached
+
+### Parse failure (2 tests)
+- Unparseable HTML (missing `#ucscpersonpubdepartmentnumber`) does not fatal
+- Unparseable HTML returns only the placeholder option (empty list)
+
+### Happy path (2 tests)
+- Returns a `WP_REST_Response`
+- Parses the department list into the expected `label`/`value` shape
+
+### Caching (2 tests)
+- Successful fetch is cached under `ucsc_cddepartmentcode` for `WEEK_IN_SECONDS`
+- Cache hit makes no remote call
+
+---
+
 ## Coverage gaps
 
 ### Entire class not tested
@@ -246,8 +286,6 @@ stub `Test_WPDB` for cache-clear queries
   and image/style output without escaping (high-priority audit finding)
 
 ### Other untested paths
-- `classes/SiteSettings.php` — department dropdown endpoint failure path when remote
-  fetch fails or DOM parse fails (medium audit finding)
 - `templates/DirectoryProfileTemplate.php` — no rendering tests
 - `templates/CourseDetailTemplate.php` — single-object primary instructor shape
   (medium audit finding); missing `start_date`/`end_date` keys (low audit finding)

@@ -114,10 +114,11 @@ Overall JavaScript coverage is 38.86% statements, 41.15% branches, 35.53%
 functions, and 38.83% lines because untouched components and legacy files are
 included. The JavaScript suite passed 72 tests across 5 suites.
 
-PHP coverage reports 100% statement coverage (545/545), but the harness is not
-a clean passing baseline: 3 of 4 suites passed. The
-`CampusDirectoryShortcodeTest.php` suite contains four intentionally failing
-XSS assertions documenting existing escaping vulnerabilities.
+PHP coverage reports 100% statement coverage (758/758, up from 713/713 before
+WPM-134 added `SiteSettingsTest.php`), but the harness is not a clean passing
+baseline: 5 of 6 suites passed. The `CampusDirectoryShortcodeTest.php` suite
+contains four intentionally failing XSS assertions documenting existing
+escaping vulnerabilities.
 
 The plugin's structural gap report is read-only and groups classes, templates,
 blocks, and components that are named by no test:
