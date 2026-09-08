@@ -45,24 +45,45 @@ class SiteSettings
         "value" => "---"
       ];
 
-      $htmlString = file_get_contents('https://campusdirectory.ucsc.edu/');
+      $response = wp_remote_get('https://campusdirectory.ucsc.edu/', [
+        'timeout' => 30,
+      ]);
+
+      if (is_wp_error($response)) {
+        return new WP_Error(
+          'cddepartmentcode_fetch_error',
+          'Failed to fetch department list from Campus Directory',
+          ['status' => 500]
+        );
+      }
+
+      $status_code = wp_remote_retrieve_response_code($response);
+      if ($status_code < 200 || $status_code >= 300) {
+        return new WP_Error(
+          'cddepartmentcode_fetch_error',
+          'Campus Directory returned HTTP ' . $status_code,
+          ['status' => $status_code >= 400 ? $status_code : 502]
+        );
+      }
+
+      $htmlString = wp_remote_retrieve_body($response);
 
       $doc = new DOMDocument();
       @$doc->loadHTML($htmlString);
       $dept_select = $doc->getElementById('ucscpersonpubdepartmentnumber');
 
-      $deptNodelist = $dept_select->childNodes;
-
-
-      foreach($deptNodelist as $deptNode) {
-        $dept = trim($deptNode->nodeValue);
-        if (strlen($dept)) {
-          $retDepts[] = [
-            "label" => $dept,
-            "value" => $dept
-          ];
+      if ($dept_select) {
+        foreach($dept_select->childNodes as $deptNode) {
+          $dept = trim($deptNode->nodeValue);
+          if (strlen($dept)) {
+            $retDepts[] = [
+              "label" => $dept,
+              "value" => $dept
+            ];
+          }
         }
       }
+
       set_transient('ucsc_cddepartmentcode', $retDepts, WEEK_IN_SECONDS);
     }
 
