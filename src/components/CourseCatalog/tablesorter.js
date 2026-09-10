@@ -7,6 +7,10 @@
  */
 
 function sortTableByColumn(table, column, asc = true) {
+    if (!table || !table.tBodies[0]) {
+        return;
+    }
+
     const dirModifier = asc ? 1 : -1;
     const tBody = table.tBodies[0];
     let rows = Array.from(tBody.querySelectorAll("tr"));
@@ -17,17 +21,24 @@ function sortTableByColumn(table, column, asc = true) {
     for (var i = 0; i < rows.length; i += 2) {
         rowsLinkedToDesc.push({
             row: rows[i],
-            description: rows[i + 1]
+            description: rows[i + 1] || null
         })
     }
 
     // Sort each row
     const sortedLinkedRows = rowsLinkedToDesc.sort((a, b) => {
-        var special = a.row.querySelector(`td:nth-child(${column + 1}) span`) !== null;
+        const aCell = a.row.querySelector(`td:nth-child(${column + 1})`);
+        const bCell = b.row.querySelector(`td:nth-child(${column + 1})`);
+
+        if (!aCell || !bCell) {
+            return 0;
+        }
+
+        var special = aCell.querySelector("span") !== null && bCell.querySelector("span") !== null;
         //if needed, the span can have a type to enable special sorting beyond integer
         if (special) {
-            const aColText = a.row.querySelector(`td:nth-child(${column + 1}) span`).textContent.trim();
-            const bColText = b.row.querySelector(`td:nth-child(${column + 1}) span`).textContent.trim();
+            const aColText = aCell.querySelector("span").textContent.trim();
+            const bColText = bCell.querySelector("span").textContent.trim();
             let aColVal = parseInt(aColText);
             let bColVal = parseInt(bColText);
             if (aColVal === bColVal) {
@@ -36,8 +47,8 @@ function sortTableByColumn(table, column, asc = true) {
             }
             return aColVal > bColVal ? (1 * dirModifier) : (-1 * dirModifier);
         } else {
-            const aColText = a.row.querySelector(`td:nth-child(${column + 1})`).textContent.trim();
-            const bColText = b.row.querySelector(`td:nth-child(${column + 1})`).textContent.trim();
+            const aColText = aCell.textContent.trim();
+            const bColText = bCell.textContent.trim();
             return aColText > bColText ? (1 * dirModifier) : (-1 * dirModifier);
         }
     });
@@ -46,13 +57,14 @@ function sortTableByColumn(table, column, asc = true) {
     for (var i = 0; i <= sortedLinkedRows.length; i++) {
         if (sortedLinkedRows[i]) {
             sortedRows.push(sortedLinkedRows[i].row);
-            sortedRows.push(sortedLinkedRows[i].description);
+            if (sortedLinkedRows[i].description) {
+                sortedRows.push(sortedLinkedRows[i].description);
+            }
         }
     }
 
     // Remove all existing TRs from the table
     while (tBody.firstChild) {
-        // a shange
         tBody.removeChild(tBody.firstChild);
     }
 
@@ -77,7 +89,9 @@ document.querySelectorAll(".table-sortable td").forEach((tableSortable, index) =
     tableSortable.addEventListener("click", (event) => {
         event.stopPropagation();
         var tr = event.target.closest("tr").nextElementSibling;
-        tr.classList.toggle('active');
+        if (tr) {
+            tr.classList.toggle('active');
+        }
     });
 });
 
@@ -86,7 +100,12 @@ function tableSearch(e) {
     var input, filter, table, tr, td;
     input =  e.currentTarget;
     filter = input.value.toUpperCase();
-    table = e.currentTarget.parentElement.parentElement.nextSibling.nextSibling.nextSibling;
+    table = e.currentTarget.closest('.introText').parentElement.querySelector('.table-sortable');
+
+    if (!table) {
+        return;
+    }
+
     tr = table.getElementsByTagName("tr");
 
     // Loop through all table rows, and hide those who don't match the search query
@@ -99,7 +118,7 @@ function tableSearch(e) {
                 break;
             }
         }
-        if (matched !== "") {
+        if (matched !== "" && tr[i + 1]) {
             td = tr[i + 1].getElementsByTagName("td");
             for (var j = 0; j < td.length; j++) {
                 if (td[j].innerHTML.toUpperCase().indexOf(filter) > -1) {
@@ -109,22 +128,31 @@ function tableSearch(e) {
             }
         }
         tr[i].style.display = matched;
-        tr[i + 1].style.display = matched;
+        if (tr[i + 1]) {
+            tr[i + 1].style.display = matched;
+        }
     }
 }
 
 const expandAlls = document.querySelectorAll('.expandAll')
 if (expandAlls) expandAlls.forEach(expandAll => {
     expandAll.addEventListener('click', e => {
-        const currentTable = e.currentTarget.parentElement.parentElement.nextSibling;
-        currentTable.querySelectorAll('.hide').forEach((hiddenRow, index) => hiddenRow.classList.add("active"));
+        const currentTable = e.currentTarget.closest('.introText').parentElement.querySelector('.table-sortable');
+        if (currentTable) {
+            currentTable.querySelectorAll('.hide').forEach((hiddenRow, index) => hiddenRow.classList.add("active"));
+        }
     });
 });
 
 const collapseAlls = document.querySelectorAll('.collapseAll')
 if (collapseAlls) collapseAlls.forEach(collapseAll => {
     collapseAll.addEventListener('click', e => {
-        const currentTable = e.currentTarget.parentElement.parentElement.nextSibling;
-        currentTable.querySelectorAll('.hide').forEach((hiddenRow, index) => hiddenRow.classList.remove("active"));
+        const currentTable = e.currentTarget.closest('.introText').parentElement.querySelector('.table-sortable');
+        if (currentTable) {
+            currentTable.querySelectorAll('.hide').forEach((hiddenRow, index) => hiddenRow.classList.remove("active"));
+        }
     });
 });
+
+window.sortTableByColumn = sortTableByColumn;
+window.tableSearch = tableSearch;
