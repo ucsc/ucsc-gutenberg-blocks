@@ -229,6 +229,40 @@ describe('CampusDirectory block', () => {
       expect(mockUnlockPostSaving).toHaveBeenCalledWith('campusDirectoryInvalidState');
     });
 
+    it('locks post saving when switching back to a department placeholder', async () => {
+      const setAttributes = jest.fn();
+      const validDivisionAttributes = {
+        ...defaultAttributes,
+        automatedFeeds: true,
+        deptOrDiv: 'div',
+        department: '---',
+        division: 'SCI',
+      };
+
+      let rerender;
+      await act(async () => {
+        ({ rerender } = render(<Edit setAttributes={setAttributes} attributes={validDivisionAttributes} />));
+      });
+
+      mockLockPostSaving.mockClear();
+      mockUnlockPostSaving.mockClear();
+
+      await act(async () => {
+        rerender(
+          <Edit
+            setAttributes={setAttributes}
+            attributes={{
+              ...validDivisionAttributes,
+              deptOrDiv: 'dept',
+            }}
+          />
+        );
+      });
+
+      expect(mockLockPostSaving).toHaveBeenCalledWith('campusDirectoryInvalidState');
+      expect(mockUnlockPostSaving).not.toHaveBeenCalledWith('campusDirectoryInvalidState');
+    });
+
     it('shows configuration error when LDAP password is missing', async () => {
       global.fetch = jest.fn(() =>
         Promise.resolve({

@@ -58,7 +58,10 @@ const CampusDirectory = () => {
 
       // Lock or unlock post saving based on attribute state
       useEffect(() => {
-        const invalidState = automatedFeeds && department === '---' && division === '---';
+        const invalidState = automatedFeeds && (
+          (deptOrDiv === 'dept' && department === '---') ||
+          (deptOrDiv === 'div' && division === '---')
+        );
         setIsInvalidState(invalidState);
 
         if (invalidState) {
@@ -66,7 +69,7 @@ const CampusDirectory = () => {
         } else {
           dispatch('core/editor').unlockPostSaving('campusDirectoryInvalidState');
         }
-      }, [automatedFeeds, department, division]);
+      }, [automatedFeeds, department, division, deptOrDiv]);
 
       useEffect(() => {
         fetch("/wp-json/ucscgutenbergblocks/v1/campusdirectoryrequirements")
