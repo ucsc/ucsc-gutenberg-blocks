@@ -13,6 +13,7 @@ decision (or an OpenSpec change) when it is acted on, and delete it from here.
 | 02 | [Normative vs. descriptive baseline](02-normative-vs-descriptive-baseline.md) | Should the archived baseline describe what ships, or the contract the code is held to? | `openspec archive` of campus-directory-block |
 | 03 | [Shared component contracts](03-shared-component-contracts.md) | Where does a contract live when a component is shared across blocks — or across capabilities within one block? | Any cross-block change |
 | 04 | [Spec baseline asymmetry](04-spec-baseline-asymmetry.md) | Do class-schedule and course-catalog get spec files before campus-directory archives? | Archive ordering |
+| 05 | [OpenSpec baseline reverse-engineering notes](05-openspec-baseline-reverse-engineering.md) | What was created when the class-schedule and course-catalog baselines were reverse-engineered, and which Jira follow-ups were identified? | OpenSpec baseline handoff |
 
 ## Context these came out of
 
@@ -20,8 +21,8 @@ decision (or an OpenSpec change) when it is acted on, and delete it from here.
   97 scenarios across 6 capabilities. Complete, unarchived.
 - `openspec/changes/class-schedule-block/`, `.../course-catalog-block/` —
   proposal only, no specs.
-- `openspec/specs/` — empty. Nothing archived yet, so every structural decision
-  below is still cheap.
+- `openspec/specs/` — baseline specs are being introduced for all three blocks.
+  Nothing is archived yet, so every structural decision below is still cheap.
 - `docs/jira/WPM-115-epic-test-coverage.md` and children — the live work.
 - `audit-campus-directory.md` (2026-07-17) — two findings still open, one now
   closed.

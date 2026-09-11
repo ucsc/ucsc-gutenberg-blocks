@@ -53,3 +53,38 @@
       `prove-regression.sh`, no new file committed to this repo)
 - [x] 4.3 Run `openspec validate evaluate-test-effectiveness --strict` and verify the change passes
       validation
+
+## 5. Document and Verify Coverage Reporting
+
+- [ ] 5.1 Verify `coverage-report.py`, `run-php-coverage.sh`, and `npm run test:coverage` together
+      produce a PHP and JS coverage report for all three blocks with no bespoke setup, and record
+      any gap
+- [ ] 5.2 Document the easy-to-use invocation syntax for both reports in
+      `docs/test-effectiveness.md`, and verify a new contributor could run either report from the
+      documented command alone
+- [ ] 5.3 Re-run `openspec validate evaluate-test-effectiveness --strict` and verify the change
+      still passes
+
+## 6. Adapt Baseapp-Inspired Standards
+
+- [ ] 6.1 Review existing `tests/php/*Test.php` and Jest tests for missing intent documentation,
+      and verify a representative sample of new/changed test classes carries a comment or
+      docblock stating why the test exists
+- [ ] 6.2 Verify every LDAP and REST/HTTP call reachable from `tests/php/*Test.php`,
+      `helpers/harness.php`, and Jest suites is faked or stubbed rather than real, and record any
+      gap found
+- [ ] 6.3 Add both requirements to `docs/test-effectiveness.md` review guidance, and verify the
+      guidance names the baseapp standard as the source of the adapted ideas
+- [ ] 6.4 Re-run `openspec validate evaluate-test-effectiveness --strict` and verify the change
+      still passes
+
+## 7. Document External Testing-Skill Sources
+
+- [ ] 7.1 Pin the exact confirmed package name(s) for external WordPress block testing-skill
+      resources (candidates so far: `WordPress/agent-skills` via
+      `npx openskills install WordPress/agent-skills`, `jorgerosal/wordpress-skills`) and verify
+      each named source actually exists and installs before citing it
+- [ ] 7.2 Add the confirmed source(s) to `docs/test-effectiveness.md`, and verify the doc does not
+      assert any package name that was searched for but not found
+- [ ] 7.3 Re-run `openspec validate evaluate-test-effectiveness --strict` and verify the change
+      still passes
