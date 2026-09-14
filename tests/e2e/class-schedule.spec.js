@@ -102,4 +102,61 @@ describe( 'Class Schedule block (frontend)', () => {
 			)
 		).toBe( false );
 	} );
+
+	// WPM-163: the schedule table and CourseDetailTemplate.php each had
+	// coverage in isolation, but nothing exercised the actual navigation
+	// between them — a course title is a real <a href> to
+	// /course/{term}/{class_nbr}/ (templates/ClassScheduleTemplate.php),
+	// which classes/ClassSchedule.php rewrites onto
+	// templates/CourseDetailTemplate.php.
+	describe( 'opening a course detail page', () => {
+		let detailUrl = null;
+
+		beforeAll( async () => {
+			if ( ! hasRows ) return;
+
+			detailUrl = await page.$eval(
+				'#classScheduleTable .course-row .col-title a',
+				( el ) => el.getAttribute( 'href' )
+			);
+		} );
+
+		it( 'the course row title links to /course/{term}/{class_nbr}', () => {
+			if ( ! hasRows ) return;
+			expect( detailUrl ).not.toBeNull();
+			expect( new URL( detailUrl ).pathname ).toMatch(
+				/^\/course\/\d+\/\d+\/?$/
+			);
+		} );
+
+		describe( 'the detail page itself', () => {
+			beforeAll( async () => {
+				if ( ! hasRows || ! detailUrl ) return;
+				await page.goto( detailUrl, {
+					waitUntil: 'networkidle0',
+					timeout: 60000,
+				} );
+			} );
+
+			it( 'renders the course detail page, not an error fallback', async () => {
+				if ( ! hasRows ) return;
+				await page.waitForSelector( '#class-info', { timeout: 15000 } );
+				expect( await page.$( '#class-info' ) ).not.toBeNull();
+			} );
+
+			it( 'breadcrumb links back to Class Schedule', async () => {
+				if ( ! hasRows ) return;
+				const breadcrumbText = await page.$eval(
+					'.breadcrumbs__trail',
+					( el ) => el.textContent
+				);
+				expect( breadcrumbText ).toContain( 'Class Schedule' );
+			} );
+
+			it( 'shows the course title heading', async () => {
+				if ( ! hasRows ) return;
+				expect( await page.$( '#title.page-title' ) ).not.toBeNull();
+			} );
+		} );
+	} );
 } );
