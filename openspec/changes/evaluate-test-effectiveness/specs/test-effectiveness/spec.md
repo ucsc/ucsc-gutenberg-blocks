@@ -72,6 +72,21 @@ work (WPM-116, WPM-117) as a discovery signal rather than proof that behavior is
 - **THEN** the behavior remains a test-effectiveness gap until assertions or another proof are
   added, independent of the structural or line-coverage number reported for it
 
+### Requirement: Coverage reports are easy to produce and documented
+The project SHALL provide a single, documented command path that produces both a PHP and a JS
+coverage report for all three blocks (`campus-directory`, `class-schedule`, `course-catalog`)
+without bespoke setup.
+
+#### Scenario: Coverage report is one documented command
+- **WHEN** a contributor wants current PHP or JS coverage for any of the three blocks
+- **THEN** a documented command (`coverage-report.py`, `run-php-coverage.sh`, or
+  `npm run test:coverage`) produces it without undocumented flags or manual setup
+
+#### Scenario: Documentation stays runnable
+- **WHEN** the coverage-report documentation in `docs/test-effectiveness.md` is followed exactly
+  as written
+- **THEN** it produces a working report for all three blocks on a clean checkout
+
 ### Requirement: Test effectiveness is reviewed with test changes
 The project SHALL review new and changed tests for behavioral value before relying on them as
 regression proof for any of the three blocks.
@@ -86,6 +101,56 @@ regression proof for any of the three blocks.
   or duplicates production logic to compute its own expected value
 - **THEN** the test is revised or documented as smoke coverage only, and is not counted toward
   closing a WPM-115 child ticket's gap
+
+### Requirement: Tests document why they exist
+The project SHALL document, for each test class and each non-trivial test method, the behavior it
+protects and any gap deliberately left unasserted, so a reader does not have to reverse-engineer
+intent from the assertions alone.
+
+#### Scenario: Test intent is documented
+- **WHEN** a new test class or non-trivial test method is added to `tests/php/*Test.php` or a
+  Jest suite
+- **THEN** it carries a comment or docblock stating why the test exists and, if applicable, a
+  ticket reference and any known gap the test does not cover
+
+#### Scenario: Undocumented intent is a review finding
+- **WHEN** a test's purpose cannot be determined from its name, comments, or docblock
+- **THEN** review requests the missing intent documentation before treating the test as effective
+  coverage
+
+### Requirement: External dependencies are faked, not called
+The project SHALL fake LDAP and REST/HTTP calls at the lowest available seam in
+`tests/php/*Test.php`, `helpers/harness.php`, and Jest suites, so no test reaches a real external
+service.
+
+#### Scenario: Test suite makes no real network calls
+- **WHEN** the PHP harness or Jest suite runs for `campus-directory`, `class-schedule`, or
+  `course-catalog`
+- **THEN** every LDAP or REST/HTTP call the code under test would make is faked or stubbed, and no
+  test depends on reaching a live LDAP server or upstream API
+
+#### Scenario: Fake preserves real matching logic
+- **WHEN** a fake or stub replaces an LDAP or REST/HTTP call
+- **THEN** it overrides only the network primitive and lets real business/matching logic run
+  against in-memory data, rather than hardcoding the expected result
+
+### Requirement: External WordPress testing-skill resources are documented
+The project SHALL document where to discover external, community-maintained testing-skill
+resources for WordPress block development, so contributors are not left guessing at unverified
+package names.
+
+#### Scenario: Discoverable skill sources are named
+- **WHEN** a contributor looks for external skill-based guidance on WordPress block unit,
+  dynamic-block, or accessibility testing
+- **THEN** `docs/test-effectiveness.md` names at least one confirmed, installable source (for
+  example `WordPress/agent-skills` via `npx openskills install WordPress/agent-skills`, or
+  `jorgerosal/wordpress-skills`) and states plainly that these are bundled, multi-topic skill
+  collections, not single-purpose unit/dynamic-block/accessibility-testing packages
+
+#### Scenario: Unverified package names are not asserted
+- **WHEN** documentation references an external skill or tool
+- **THEN** it names only sources that have been confirmed to exist, and does not assert an exact
+  package name that was searched for but not found
 
 ### Requirement: AI-generated tests require quality scrutiny
 The project SHALL scrutinize AI-generated or AI-assisted tests for realistic scenarios,
