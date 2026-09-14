@@ -433,6 +433,54 @@ check( 'validate_remote_response: 3xx status mapped to 502 in WP_Error data',
 	is_wp_error( $result ) && isset( $result->data['status'] ) && $result->data['status'] === 502
 );
 
+// ── validate_callback closures (WPM-157) ────────────────────────────────────
+//
+// register_routes() never invokes the validate_callback closures it registers —
+// it only wires them into WordPress's REST route table. Retrieve the closures
+// from the captured $registered_routes args and call them directly with
+// numeric and non-numeric input to prove the route-param validation actually
+// rejects bad input, not just that a callback is present.
+
+reset_state();
+$api = new Course_Schedule_API();
+$api->register_routes();
+
+$courses_route = current( array_filter( $registered_routes, fn( $r ) => str_contains( $r['route'], '/courses/' ) ) );
+$course_details_route = current( array_filter( $registered_routes, fn( $r ) => str_contains( $r['route'], '/course/' ) && str_contains( $r['route'], '/courses/' ) === false ) );
+
+$courses_term_validate = $courses_route['args']['args']['term']['validate_callback'];
+check( 'courses route: term validate_callback accepts numeric string',
+	$courses_term_validate( '2262' ) === true
+);
+check( 'courses route: term validate_callback rejects non-numeric string',
+	$courses_term_validate( 'abc' ) === false
+);
+check( 'courses route: term validate_callback rejects empty string',
+	$courses_term_validate( '' ) === false
+);
+check( 'courses route: term validate_callback accepts numeric-looking float string',
+	$courses_term_validate( '22.62' ) === true
+);
+
+$details_term_validate   = $course_details_route['args']['args']['term']['validate_callback'];
+$details_course_validate = $course_details_route['args']['args']['course']['validate_callback'];
+
+check( 'course details route: term validate_callback accepts numeric string',
+	$details_term_validate( '2262' ) === true
+);
+check( 'course details route: term validate_callback rejects non-numeric string',
+	$details_term_validate( 'abc' ) === false
+);
+check( 'course details route: course validate_callback accepts numeric string',
+	$details_course_validate( '12345' ) === true
+);
+check( 'course details route: course validate_callback rejects non-numeric string',
+	$details_course_validate( 'DROP TABLE' ) === false
+);
+check( 'course details route: course validate_callback rejects non-numeric injection-style input',
+	$details_course_validate( '1; DROP TABLE courses' ) === false
+);
+
 // ── Done ──────────────────────────────────────────────────────────────────────
 
 finish_tests();
