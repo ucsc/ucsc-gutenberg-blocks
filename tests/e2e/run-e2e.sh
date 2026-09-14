@@ -1,6 +1,6 @@
 #!/bin/bash
 #
-# Run the e2e suites (class-schedule, campus-directory) entirely in Docker — no local Node, Chrome,
+# Run the e2e suites (class-schedule, campus-directory, course-catalog) entirely in Docker — no local Node, Chrome,
 # PHP, or Python required. Builds a Node+Chromium image and drives the live
 # wp-dev.ucsc frontend from inside the container, reaching the host's published
 # 443 via --add-host=wp-dev.ucsc:host-gateway.
@@ -54,6 +54,17 @@ if [ -z "${UCSC_CD_E2E_URL:-}" ] && [ -f "$WP_DEV_ROOT/docker-compose.yml" ]; th
 	echo "campus-directory EEB e2e page: $UCSC_CD_E2E_URL"
 fi
 
+# Seed the course-catalog page (WPM-168).
+if [ -z "${UCSC_CC_E2E_URL:-}" ] && [ -f "$WP_DEV_ROOT/docker-compose.yml" ]; then
+	echo "Seeding course-catalog e2e page (root: $WP_DEV_ROOT)..."
+	SEEDED_CC_URL="$( (cd "$WP_DEV_ROOT" && docker compose exec -T wpcli wp eval-file - < "$SCRIPT_DIR/seed-course-catalog-e2e.php") | tail -1 )" || {
+		echo "Could not seed the course-catalog e2e page — is the stack up? (docker compose up -d)" >&2
+		exit 1
+	}
+	echo "course-catalog e2e page: $SEEDED_CC_URL"
+	UCSC_CC_E2E_URL="$SEEDED_CC_URL"
+fi
+
 echo "Building e2e image ($IMAGE)..."
 docker build -q -t "$IMAGE" "$SCRIPT_DIR" >/dev/null
 
@@ -67,6 +78,7 @@ exec docker run --rm \
 	${UCSC_CS_E2E_URL:+-e UCSC_CS_E2E_URL="$UCSC_CS_E2E_URL"} \
 	${UCSC_CD_E2E_URL:+-e UCSC_CD_E2E_URL="$UCSC_CD_E2E_URL"} \
 	${UCSC_CD_LALS_E2E_URL:+-e UCSC_CD_LALS_E2E_URL="$UCSC_CD_LALS_E2E_URL"} \
+	${UCSC_CC_E2E_URL:+-e UCSC_CC_E2E_URL="$UCSC_CC_E2E_URL"} \
 	-v "$PLUGIN_ROOT:/app" \
 	-v ucsc-gutenberg-blocks-e2e-node-modules:/app/node_modules \
 	-w /app \
