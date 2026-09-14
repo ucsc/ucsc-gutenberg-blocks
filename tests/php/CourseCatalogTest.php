@@ -9,12 +9,13 @@
 
 define( 'WEEK_IN_SECONDS', 604800 );
 
-$actions            = array();
-$current_user_id    = 0;
-$can_manage_options = false;
-$transients         = array();
-$remote_requests    = array();
-$remote_response    = array(
+$actions              = array();
+$current_user_id      = 0;
+$can_manage_options   = false;
+$transients           = array();
+$remote_requests      = array();
+$block_supports_class = '';
+$remote_response      = array(
 	'code' => 200,
 	'body' => '<?xml version="1.0"?><catalog><course><subject>LIT</subject><catalog_nbr>1</catalog_nbr><title>Intro</title><level>Lower Division</level><units>5</units><description>Test</description></course></catalog>',
 );
@@ -73,8 +74,24 @@ function wp_remote_retrieve_body( $response ) {
 function is_wp_error( $value ) {
 	return $value instanceof WP_Error;
 }
+// Simulates WordPress merging block-supports classes (e.g. the "Additional CSS
+// class(es)" field a site editor sets in the block inspector) into the wrapper
+// attributes, so tests can exercise the WPM-23 custom-class support end to end.
+function set_block_custom_class( $class ) {
+	global $block_supports_class;
+	$block_supports_class = $class;
+}
+
 function get_block_wrapper_attributes( $attributes = array() ) {
-	return isset( $attributes['id'] ) ? 'id="' . $attributes['id'] . '"' : '';
+	global $block_supports_class;
+	$output = array();
+	if ( isset( $attributes['id'] ) ) {
+		$output[] = 'id="' . $attributes['id'] . '"';
+	}
+	if ( '' !== $block_supports_class ) {
+		$output[] = 'class="' . $block_supports_class . '"';
+	}
+	return implode( ' ', $output );
 }
 
 class WP_Error {
@@ -131,13 +148,14 @@ require __DIR__ . '/../../classes/CourseCatalog.php';
 require __DIR__ . '/helpers/harness.php';
 
 function reset_test_state() {
-	global $current_user_id, $can_manage_options, $transients, $remote_requests, $remote_response, $wpdb;
+	global $current_user_id, $can_manage_options, $transients, $remote_requests, $remote_response, $wpdb, $block_supports_class;
 
-	$current_user_id    = 0;
-	$can_manage_options = false;
-	$transients         = array();
-	$remote_requests    = array();
-	$remote_response    = array(
+	$current_user_id      = 0;
+	$can_manage_options   = false;
+	$transients           = array();
+	$remote_requests      = array();
+	$block_supports_class = '';
+	$remote_response      = array(
 		'code' => 200,
 		'body' => '<?xml version="1.0"?><catalog><course><subject>LIT</subject><catalog_nbr>1</catalog_nbr><title>Intro</title><level>Lower Division</level><units>5</units><description>Test</description></course></catalog>',
 	);
@@ -336,6 +354,29 @@ $html                    = $catalog->theHTML(
 check( 'course rows render the course title', false !== strpos( $html, '<td class="collapseExpandText">Intro</td>' ) );
 check( 'graduate level maps to sort value 3', false !== strpos( $html, 'Graduate<span class="secret">3</span>' ) );
 check( 'unknown level maps to sort value 0 instead of reusing the previous row', false !== strpos( $html, 'Mystery Level<span class="secret">0</span>' ) );
+
+echo "block wrapper custom class support (WPM-23):\n";
+
+$catalog = make_catalog();
+$html    = $catalog->theHTML(
+	array(
+		'subjectOrDept' => 'dept',
+		'department'    => 'lit',
+		'subject'       => '',
+	)
+);
+check( 'wrapper has no class attribute when the site editor has not set one', 0 === strpos( $html, '<div id="courseCatalog">' ) );
+
+$catalog = make_catalog();
+set_block_custom_class( 'econ-course-catalog-small-text' );
+$html    = $catalog->theHTML(
+	array(
+		'subjectOrDept' => 'dept',
+		'department'    => 'lit',
+		'subject'       => '',
+	)
+);
+check( 'site-editor-supplied custom class renders on the block wrapper alongside the id', 0 === strpos( $html, '<div id="courseCatalog" class="econ-course-catalog-small-text">' ) );
 
 echo "cache clearing:\n";
 
