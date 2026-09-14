@@ -26,6 +26,19 @@ happy-path execution.
   a plausible defect.
 - Document when coverage output (once WPM-116/WPM-117 land) is a discovery signal versus when it is
   mistaken for proof, so this change stays complementary to, not duplicative of, WPM-115.
+- Require a single, easy-to-use, documented command path that produces both a PHP and a JS
+  coverage report covering all three blocks (`campus-directory`, `class-schedule`,
+  `course-catalog`), built on the existing `coverage-report.py` (ADR-114),
+  `tests/php/run-php-coverage.sh` (WPM-117), and `npm run test:coverage` (WPM-116) tooling rather
+  than new instrumentation.
+- Require tests to document, in a comment or docblock, why they exist and any behavior
+  deliberately left unasserted — inspired by the UCSC Laravel/Vue baseapp testing standard, scoped
+  to this plugin's dependency-free PHP harness and Jest suites.
+- Require LDAP and REST/HTTP calls to be faked at the lowest seam in every test, so no test in
+  this plugin reaches a real external service, matching the same baseapp standard.
+- Document where to discover external, community-maintained WordPress block testing-skill
+  resources (e.g. `WordPress/agent-skills`, `jorgerosal/wordpress-skills`), so contributors do not
+  rely on unverified package names.
 
 ## Capabilities
 

@@ -1,12 +1,11 @@
 ## Context
 
 See `proposal.md` for motivation. This plugin's PHP suite is deliberately dependency-free
-(`tests/php/*Test.php` + `helpers/harness.php`, no PHPUnit) and currently has no coverage emitter;
-Jest coverage runs but omits any file no test happens to import, since no `collectCoverageFrom`
-is declared. WPM-116 and WPM-117 (children of the WPM-115 epic) are closing those two enablement
-gaps independently of this change. Structural coverage today is 18/40 units (45%) across the
-plugin per `docs/jira/WPM-115-epic-test-coverage.md`, and that epic already states the core
-principle this change formalizes: "a test is not coverage until it has been seen to fail."
+(`tests/php/*Test.php` + `helpers/harness.php`, no PHPUnit); `tests/php/run-php-coverage.sh`
+(WPM-117) and `npm run test:coverage` (WPM-116) now produce PHP and JS coverage output, and
+`coverage-report.py` (ADR-114) reports on both. Structural coverage today is 18/40 units (45%)
+across the plugin per `docs/jira/WPM-115-epic-test-coverage.md`, and that epic already states the
+core principle this change formalizes: "a test is not coverage until it has been seen to fail."
 
 This change does not touch WPM-115/116/117/118/119/120 scope or ticket structure. It adds review
 criteria and an opt-in probe pattern that those tickets' work can be checked against once written,
@@ -24,6 +23,12 @@ without requiring PHPUnit, Xdebug, or any new dependency.
   value, and maintenance cost.
 - Treat future coverage output (once WPM-116/WPM-117 land) as a discovery signal, not a
   substitute for behavior review.
+- Require one documented, easy-to-use command path for PHP and JS coverage reports across all
+  three blocks.
+- Require tests to document their own intent and require LDAP/REST calls to be faked rather than
+  real, adapting the two parts of the UCSC Laravel/Vue baseapp testing standard
+  (`_laravel/baseapp/doc/TESTING-STANDARDS.md`) that transfer to a dependency-free PHP/Jest
+  harness with no Laravel, PHPUnit, or Vuex.
 
 **Non-Goals:**
 
@@ -105,6 +110,47 @@ without requiring PHPUnit, Xdebug, or any new dependency.
 
    Alternative considered: run every probe in CI immediately. Deferred — start with one or two
    documented probes for genuinely high-risk behavior before considering CI integration.
+
+6. Report PHP and JS coverage through `coverage-report.py` rather than raw tool output.
+
+   `coverage-report.py` (ADR-114) already reads `tests/php/run-php-coverage.sh`'s clover output
+   and Jest's coverage-summary.json and reports both, across all three blocks, without further
+   setup. Document its invocation in `docs/test-effectiveness.md` so a contributor gets a PHP and
+   JS coverage report from one documented command path instead of assembling raw tool flags.
+
+   Alternative considered: document `run-php-coverage.sh` and `npm run test:coverage` as two
+   separate, uncoordinated commands. Rejected — `coverage-report.py` already unifies them and
+   adds the structural/readiness layers that raw tool output lacks.
+
+7. Adapt two ideas from the UCSC Laravel/Vue baseapp testing standard; leave the rest.
+
+   `_laravel/baseapp/doc/TESTING-STANDARDS.md` is written for Laravel/PHPUnit/Vuex apps —
+   `RefreshDatabase`, PHPUnit 11 `<source>` blocks, `beCruzid()` auth helpers, Vue 2 Jest config —
+   none of which apply to this plugin's dependency-free PHP harness or non-Vue Jest suites. Two
+   ideas transfer regardless of stack: (a) "tests document intent" (a comment/docblock stating why
+   a test exists and what it deliberately leaves unasserted) and (b) "fake external calls at the
+   lowest seam, never hit a real network in tests" — this plugin already leans this way for LDAP/
+   REST but did not state it as a requirement.
+
+   Alternative considered: adopt the baseapp standard more broadly (naming conventions, directory
+   layout, coverage config templates). Rejected — those sections assume PHPUnit/Jest/Vuex
+   machinery this plugin does not have and does not plan to adopt; forcing them in would
+   contradict this change's existing non-goal of not requiring PHPUnit or any new dependency.
+
+8. Document only confirmed external testing-skill sources, not requested-but-unverified names.
+
+   Three specific external skill names were requested for use as testing guides
+   (`wordpress-block-unit-testing`, `wordpress-dynamic-block-testing`,
+   `wordpress-block-accessibility-testing`); none resolved to a real npm package, GitHub repo, or
+   Claude skill on search. Two adjacent, confirmed resources exist instead:
+   `WordPress/agent-skills` (installable via `npx openskills install WordPress/agent-skills`, per
+   a WordPress.org news post) and `jorgerosal/wordpress-skills` — both bundled, multi-topic skill
+   collections that include testing among several other WordPress development concerns, not
+   single-purpose unit/dynamic-block/accessibility packages.
+
+   Alternative considered: document the three originally requested names anyway, on the
+   assumption they exist somewhere unindexed. Rejected — asserting an unverified package name in
+   project documentation risks sending a future contributor to a nonexistent install target.
 
 ## Risks / Trade-offs
 
