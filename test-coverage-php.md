@@ -23,11 +23,12 @@ coverage/php/clover.xml
 coverage/php/coverage-raw.json
 ```
 
-> **Note:** PHP coverage reports 100% statement coverage (758/758, up from
-> 713/713 before WPM-134 added `SiteSettingsTest.php`), but this is not a clean
-> passing baseline. 5 of 6 suites pass; `CampusDirectoryShortcodeTest.php`
-> contains four intentionally failing XSS assertions documenting existing escaping
-> vulnerabilities. The PHP percentage should not be treated as a passing baseline.
+> **Note:** PHP coverage reports 100% statement coverage (835/835, up from
+> 758/758 before `CampusDirectoryTemplateTest.php` landed). All 7 suites now
+> pass — the four intentionally failing XSS assertions previously noted in
+> `CampusDirectoryShortcodeTest.php` were resolved by the WPM-132 escaping fix.
+> Statement coverage still measures only which lines execute, not whether their
+> behaviour is asserted, so it should not be read as a quality ceiling.
 
 The structural gap report groups classes, templates, blocks, and components that
 are named by no test (read-only, no mutation):
@@ -53,7 +54,7 @@ Currently used only by `ClassScheduleTest.php`; `CampusDirectoryTest.php` and
 
 ---
 
-## CampusDirectory — 10 tests
+## CampusDirectory — 46 tests
 
 File: `tests/php/CampusDirectoryTest.php`
 
@@ -92,6 +93,31 @@ WordPress query/template functions, `ldap_*` family, `get_transient`/`set_transi
 - Empty results cached with short negative-cache expiration (60 s)
 - Exclude-only automated feeds produce no filter (avoid full-directory query)
 - Exclude retained when a feed filter exists to subtract from
+
+### Profile-route LDAP injection (WPM-152) (10 tests)
+
+The profile route takes its cruzid from the URL (`directoryprofilecruzid` via the
+`/directory/<cruzid>/` rewrite), so it is the one LDAP input an anonymous visitor
+controls directly. WPM-152 found **no escaping gap** — all three profile entry
+points (`directory_profile_title`, `renderDirectoryProfile`, and
+`DirectoryProfileTemplate.php`) call `getCampusDirData($cruzid, true)`, which takes
+the same `buildUidFilter()` branch as the list view. These tests pin that down so a
+future refactor cannot split the profile route onto an unescaped path.
+
+- Wildcard `*` escaped to `\2a`
+- Parentheses `(` `)` escaped to `\28` `\29`
+- Backslash `\` escaped to `\5c`
+- NUL byte escaped to `\00`
+- Injection payload `*)(uid=*` cannot add an LDAP clause (parenthesis balance held)
+- Injection payload fully neutralized to the exact expected filter
+- Profile and list routes build an identical filter for identical input
+- Profile route filter is byte-identical to `buildUidFilter()` output
+- Empty profile-route cruzid issues no LDAP search
+- Whitespace-only profile-route cruzid issues no LDAP search
+
+Regression value: 6 of these 10 fail when `ldap_escape()` is removed from
+`buildUidFilter()`. The other 4 guard filter-construction shape and empty input,
+which that mutation does not affect.
 
 ### getDirDropdowns (2 tests)
 - Can run twice in one request without error
