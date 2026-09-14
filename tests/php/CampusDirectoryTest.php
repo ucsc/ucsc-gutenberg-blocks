@@ -113,8 +113,8 @@ function ldap_error() { return ''; }
 // so tests can prove wildcard/injection input is neutralized.
 function ldap_escape($str, $ignore = '', $flags = 0) {
 	return str_replace(
-		array( '\\', '*', '(', ')' ),
-		array( '\5c', '\2a', '\28', '\29' ),
+		array( '\\', '*', '(', ')', "\0" ),
+		array( '\5c', '\2a', '\28', '\29', '\00' ),
 		$str
 	);
 }
@@ -402,6 +402,60 @@ $api->getDirDropdowns( 'ucscpersonpubdepartmentnumber' );
 $api->getDirDropdowns( 'ucscpersonpubdivision' );
 check( 'getDirDropdowns can run twice in one request without redeclaring its sorter', true );
 check( 'getDirDropdowns requests only the grouping attribute from LDAP', isset( $ldap_searches[0] ) && in_array( 'ucscpersonpubdepartmentnumber', $ldap_searches[0]['attributes'], true ) && ! in_array( '*', $ldap_searches[0]['attributes'], true ) );
+
+echo "CampusDirectoryAPI profile-route hardening tests (WPM-152):\n";
+
+// The profile route takes its cruzid straight from the URL
+// (directoryprofilecruzid), so these assert on the filter getCampusDirData
+// returns in $data[1] -- the string that would reach ldap_search.
+
+reset_test_state();
+$api   = campus_directory_api_fixture();
+$data  = $api->getCampusDirData( '*', true );
+check( 'profile-route wildcard cruzid is escaped', false !== strpos( $data[1], '(uid=\2a)' ) && false === strpos( $data[1], '(uid=*)' ) );
+
+reset_test_state();
+$api  = campus_directory_api_fixture();
+$data = $api->getCampusDirData( 'js(mi)th', true );
+check( 'profile-route parenthesis cruzid is escaped', false !== strpos( $data[1], 'js\28mi\29th' ) && false === strpos( $data[1], 'js(mi)th' ) );
+
+reset_test_state();
+$api  = campus_directory_api_fixture();
+$data = $api->getCampusDirData( 'js\\mith', true );
+check( 'profile-route backslash cruzid is escaped', false !== strpos( $data[1], 'js\5cmith' ) );
+
+reset_test_state();
+$api  = campus_directory_api_fixture();
+$data = $api->getCampusDirData( "jsmith\0admin", true );
+check( 'profile-route NUL byte cruzid is escaped', false !== strpos( $data[1], 'jsmith\00admin' ) && false === strpos( $data[1], "\0" ) );
+
+// The payload that motivated the ticket: unescaped, "*)(uid=*" would close the
+// uid clause and OR in a whole-directory match.
+reset_test_state();
+$api  = campus_directory_api_fixture();
+$data = $api->getCampusDirData( '*)(uid=*', true );
+check( 'profile-route injection payload cannot add an LDAP clause', 1 === substr_count( $data[1], '(' ) && 1 === substr_count( $data[1], ')' ) );
+check( 'profile-route injection payload is fully neutralized', '(uid=\2a\29\28uid=\2a)' === $data[1] );
+
+// Scope item: prove the profile route reuses the list-view escaping helper
+// rather than duplicating (and drifting from) it.
+reset_test_state();
+$api          = campus_directory_api_fixture();
+$profile      = $api->getCampusDirData( '*)(uid=*', true );
+$list         = $api->getCampusDirData( '*)(uid=*' );
+$helperOutput = $api->buildUidFilter( '*)(uid=*' );
+check( 'profile and list routes build the same filter for the same input', $profile[1] === $list[1] );
+check( 'profile route filter comes from buildUidFilter', $profile[1] === $helperOutput );
+
+reset_test_state();
+$api  = campus_directory_api_fixture();
+$data = $api->getCampusDirData( '', true );
+check( 'empty profile-route cruzid issues no LDAP search', 0 === count( $ldap_searches ) && array() === $data[0] );
+
+reset_test_state();
+$api  = campus_directory_api_fixture();
+$data = $api->getCampusDirData( '   ', true );
+check( 'whitespace-only profile-route cruzid issues no LDAP search', 0 === count( $ldap_searches ) && array() === $data[0] );
 
 echo "theHTML attribute decode tests (WPM-113):\n";
 
