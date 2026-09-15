@@ -261,6 +261,56 @@ $catalog->getCachedCourses(
 check( 'successful response is cached under target-aware key', isset( $transients['course-catalog-prod-lit-dept'] ) );
 check( 'successful response uses one remote request', 1 === count( $remote_requests ) );
 
+echo "prod vs QA cache coexistence (WPM-167):\n";
+
+// Spec: prod and QA responses for the same dept/subject MUST use independent
+// transient keys so a QA fetch never poisons the prod cache and vice versa.
+// NOTE: make_catalog() calls reset_test_state() which clears the env and resets
+// $transients/$remote_requests. Set the target AFTER make_catalog().
+
+// Fetch as prod (default target).
+$catalog = make_catalog(); // resets env + state
+$catalog->getCachedCourses(
+	array(
+		'subjectOrDept' => 'dept',
+		'department'    => 'lit',
+		'subject'       => '',
+	)
+);
+$prod_key_exists      = isset( $transients['course-catalog-prod-lit-dept'] );
+$after_prod_requests  = count( $remote_requests );
+
+// Fetch the same dept as qa — keep the prod transient in place, add only the QA fetch.
+putenv( 'UCSC_COURSE_CATALOG_PEOPLESOFT_TARGET=qa' );
+$catalog_qa = new CourseCatalog(); // construct without reset so transients/requests persist
+$catalog_qa->getCachedCourses(
+	array(
+		'subjectOrDept' => 'dept',
+		'department'    => 'lit',
+		'subject'       => '',
+	)
+);
+putenv( 'UCSC_COURSE_CATALOG_PEOPLESOFT_TARGET' ); // restore
+$qa_key_exists = isset( $transients['course-catalog-csqa-lit-dept'] );
+
+check( 'prod dept query is stored under a prod-prefixed transient key',  $prod_key_exists );
+check( 'QA dept query is stored under a csqa-prefixed transient key',    $qa_key_exists );
+check( 'prod and QA use distinct transient keys for the same query',     $prod_key_exists && $qa_key_exists && 2 === count( $transients ) );
+check( 'both prod and QA each issue exactly one remote request',         2 === count( $remote_requests ) );
+
+// Confirm a QA cache hit does not satisfy a prod request.
+$catalog = make_catalog(); // resets env + state
+putenv( 'UCSC_COURSE_CATALOG_PEOPLESOFT_TARGET=qa' );
+$catalog_qa2 = new CourseCatalog();
+$catalog_qa2->getCachedCourses( array( 'subjectOrDept' => 'dept', 'department' => 'lit', 'subject' => '' ) );
+putenv( 'UCSC_COURSE_CATALOG_PEOPLESOFT_TARGET' );
+check( 'a QA cache entry is present after QA fetch', isset( $transients['course-catalog-csqa-lit-dept'] ) );
+
+// Now fetch as prod — should NOT hit the QA transient, should issue a new request.
+$catalog_prod = new CourseCatalog();
+$catalog_prod->getCachedCourses( array( 'subjectOrDept' => 'dept', 'department' => 'lit', 'subject' => '' ) );
+check( 'prod fetch after QA cache is populated still issues a remote request (no cross-target cache hit)', 2 === count( $remote_requests ) );
+
 $catalog = make_catalog();
 putenv( 'UCSC_COURSE_CATALOG_BYPASS_CACHE=true' );
 $catalog->getCachedCourses(
