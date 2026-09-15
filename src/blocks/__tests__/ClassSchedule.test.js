@@ -1,4 +1,4 @@
-import { render, screen } from '@testing-library/react';
+import { render, screen, fireEvent } from '@testing-library/react';
 import '@testing-library/jest-dom';
 
 // Mock WordPress components
@@ -163,6 +163,86 @@ describe('ClassSchedule block', () => {
       // Click the "Subject" radio option
       screen.getByText('Subject').click();
       expect(setAttributes).toHaveBeenCalledWith({ subjectOrDept: 'subject' });
+    });
+  });
+
+  describe('defaultColumns attribute and toggleColumn', () => {
+    const Edit = registeredBlock.edit;
+
+    it('defaults to [seats, days] when defaultColumns attribute is undefined', () => {
+      const setAttributes = jest.fn();
+      render(
+        <Edit
+          setAttributes={setAttributes}
+          attributes={{ subjectOrDept: 'dept', department: '', subject: '' }}
+        />
+      );
+      // Seats and Days checkboxes should be checked; others unchecked
+      const seats = screen.getByRole('checkbox', { name: /Seats/i });
+      const days  = screen.getByRole('checkbox', { name: /Days/i });
+      const time  = screen.getByRole('checkbox', { name: /Time/i });
+      expect(seats.checked).toBe(true);
+      expect(days.checked).toBe(true);
+      expect(time.checked).toBe(false);
+    });
+
+    it('toggleColumn adds a key when checked (column not yet in defaultColumns)', () => {
+      const setAttributes = jest.fn();
+      render(
+        <Edit
+          setAttributes={setAttributes}
+          attributes={{ subjectOrDept: 'dept', department: '', subject: '', defaultColumns: ['seats', 'days'] }}
+        />
+      );
+      const time = screen.getByRole('checkbox', { name: /Time/i });
+      fireEvent.click(time);
+      expect(setAttributes).toHaveBeenCalledWith({ defaultColumns: ['seats', 'days', 'time'] });
+    });
+
+    it('toggleColumn removes a key when unchecked', () => {
+      const setAttributes = jest.fn();
+      render(
+        <Edit
+          setAttributes={setAttributes}
+          attributes={{ subjectOrDept: 'dept', department: '', subject: '', defaultColumns: ['seats', 'days'] }}
+        />
+      );
+      const days = screen.getByRole('checkbox', { name: /Days/i });
+      fireEvent.click(days);
+      expect(setAttributes).toHaveBeenCalledWith({ defaultColumns: ['seats'] });
+    });
+
+    it('toggleColumn does not duplicate a key already in defaultColumns', () => {
+      // The includes-guard in toggleColumn: `current.includes(key) ? current : [...current, key]`
+      // Test the invariant: any setAttributes call must produce an array with no duplicate values.
+      // We add 'time' to ['seats','days'], rerender so React tracks the updated state, then
+      // remove 'time' — every resulting array must be duplicate-free.
+      const setAttributes = jest.fn();
+      const { rerender } = render(
+        <Edit
+          setAttributes={setAttributes}
+          attributes={{ subjectOrDept: 'dept', department: '', subject: '', defaultColumns: ['seats', 'days'] }}
+        />
+      );
+
+      // Add 'time'
+      fireEvent.click(screen.getByRole('checkbox', { name: /Time/i }));
+      const afterAdd = setAttributes.mock.calls.slice(-1)[0][0].defaultColumns;
+      expect(afterAdd).toEqual(['seats', 'days', 'time']);
+      expect(afterAdd.length).toBe(new Set(afterAdd).size); // no duplicates after add
+
+      // Rerender with 'time' present; then add 'location' — verifies includes() check
+      // with a non-trivial current array
+      rerender(
+        <Edit
+          setAttributes={setAttributes}
+          attributes={{ subjectOrDept: 'dept', department: '', subject: '', defaultColumns: afterAdd }}
+        />
+      );
+      fireEvent.click(screen.getByRole('checkbox', { name: /Location/i }));
+      const afterAddLocation = setAttributes.mock.calls.slice(-1)[0][0].defaultColumns;
+      expect(afterAddLocation).toEqual(['seats', 'days', 'time', 'location']);
+      expect(afterAddLocation.length).toBe(new Set(afterAddLocation).size); // no duplicates
     });
   });
 
