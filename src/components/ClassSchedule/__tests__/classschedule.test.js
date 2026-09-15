@@ -360,4 +360,81 @@ describe('classschedule.js frontend', () => {
       expect(URL.revokeObjectURL).toHaveBeenCalledWith('blob:mock');
     });
   });
+
+  // WPM-160: classScheduleCopyUrl()/classScheduleCopyFallback() and the copy
+  // toast had zero test coverage in Jest or e2e.
+  describe('Copy URL', () => {
+    const originalClipboard = navigator.clipboard;
+
+    afterEach(() => {
+      Object.defineProperty(navigator, 'clipboard', {
+        value: originalClipboard,
+        configurable: true,
+      });
+      document.querySelectorAll('.cs-toast').forEach((t) => t.remove());
+      delete document.execCommand;
+    });
+
+    it('copies the current URL verbatim via the Clipboard API and shows the toast', async () => {
+      const writeText = jest.fn().mockResolvedValue(undefined);
+      Object.defineProperty(navigator, 'clipboard', {
+        value: { writeText },
+        configurable: true,
+      });
+
+      window.classScheduleCopyUrl();
+      // classScheduleCopyUrl() resolves the clipboard promise asynchronously.
+      await Promise.resolve();
+      await Promise.resolve();
+
+      expect(writeText).toHaveBeenCalledWith(window.location.href);
+      const toast = document.querySelector('.cs-toast');
+      expect(toast).not.toBeNull();
+      expect(toast.querySelector('strong').textContent).toBe('Copied ');
+      expect(toast.querySelector('em').textContent).toBe(window.location.href);
+    });
+
+    it('falls back to execCommand when the Clipboard API write rejects', async () => {
+      const writeText = jest.fn().mockRejectedValue(new Error('denied'));
+      Object.defineProperty(navigator, 'clipboard', {
+        value: { writeText },
+        configurable: true,
+      });
+      // jsdom does not implement execCommand; stub it before spying.
+      document.execCommand = jest.fn().mockReturnValue(true);
+
+      window.classScheduleCopyUrl();
+      await Promise.resolve();
+      await Promise.resolve();
+
+      expect(document.execCommand).toHaveBeenCalledWith('copy');
+      expect(document.querySelector('.cs-toast')).not.toBeNull();
+    });
+
+    it('falls back to execCommand when the Clipboard API is unavailable', () => {
+      Object.defineProperty(navigator, 'clipboard', {
+        value: undefined,
+        configurable: true,
+      });
+      document.execCommand = jest.fn().mockReturnValue(true);
+
+      window.classScheduleCopyUrl();
+
+      expect(document.execCommand).toHaveBeenCalledWith('copy');
+      expect(document.querySelector('.cs-toast')).not.toBeNull();
+      expect(document.querySelector('.cs-toast em').textContent).toBe(window.location.href);
+    });
+
+    it('removes the temporary textarea used for the execCommand fallback', () => {
+      Object.defineProperty(navigator, 'clipboard', {
+        value: undefined,
+        configurable: true,
+      });
+      document.execCommand = jest.fn().mockReturnValue(true);
+
+      window.classScheduleCopyUrl();
+
+      expect(document.querySelectorAll('textarea')).toHaveLength(0);
+    });
+  });
 });
