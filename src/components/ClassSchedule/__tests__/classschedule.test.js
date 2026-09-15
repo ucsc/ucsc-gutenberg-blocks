@@ -320,6 +320,48 @@ describe('classschedule.js frontend', () => {
     });
   });
 
+  describe('default columns (data-default-columns attribute)', () => {
+    it('when #classScheduleTable has NO data-default-columns attr, resetFilters() resets to [seats, days]', () => {
+      // Fixture has no data-default-columns — getDefaultColumns() falls back to ['seats', 'days']
+      // First check all columns, then reset
+      document.querySelectorAll('.column-toggle').forEach((t) => (t.checked = true));
+
+      window.resetFilters();
+
+      const checked = Array.from(document.querySelectorAll('.column-toggle'))
+        .filter((t) => t.checked)
+        .map((t) => t.dataset.column);
+      expect(checked).toEqual(['seats', 'days']);
+    });
+
+    it('when data-default-columns="seats,time", resetFilters() checks seats+time and unchecks others', () => {
+      document.getElementById('classScheduleTable').setAttribute('data-default-columns', 'seats,time');
+
+      // Make all checked first so we can confirm only the right ones survive
+      document.querySelectorAll('.column-toggle').forEach((t) => (t.checked = true));
+
+      window.resetFilters();
+
+      const checked = Array.from(document.querySelectorAll('.column-toggle'))
+        .filter((t) => t.checked)
+        .map((t) => t.dataset.column);
+      expect(checked).toEqual(['seats', 'time']);
+    });
+
+    it('when data-default-columns="" (empty), resetFilters() unchecks all columns', () => {
+      document.getElementById('classScheduleTable').setAttribute('data-default-columns', '');
+
+      document.querySelectorAll('.column-toggle').forEach((t) => (t.checked = true));
+
+      window.resetFilters();
+
+      const checked = Array.from(document.querySelectorAll('.column-toggle'))
+        .filter((t) => t.checked)
+        .map((t) => t.dataset.column);
+      expect(checked).toEqual([]);
+    });
+  });
+
   describe('CSV export', () => {
     let capturedBlob;
 
