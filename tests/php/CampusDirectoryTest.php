@@ -935,5 +935,29 @@ $api          = campus_directory_api_fixture();
 $data         = $api->getCampusDirData( 'jsmith', true );
 check( 'reads jpegphoto with the binary-safe ldap_get_values_len() and nothing else with it', array( 'jpegphoto' ) === $ldap_len_reads );
 check( 'keeps jpegphoto bytes intact, including NUL', "\xFF\xD8\x00binary" === ( $data[0][0]['jpegphoto'][0] ?? null ) );
+echo "CampusDirectoryAPI LDAP size-limit ceiling tests (WPM-178):\n";
+
+reset_test_state();
+$api = campus_directory_api_fixture();
+$api->deptOrDivSet = false;
+$api->getCampusDirData( 'jsmith' );
+check( 'unscoped automated feed applies the 50-record LDAP ceiling', ldap_size_limit_was_set_to( 50 ) );
+
+reset_test_state();
+$api = campus_directory_api_fixture(
+	array(
+		'automatedFeeds'  => true,
+		'department'      => 'MATH',
+		'objFacultyTypes' => array(
+			'All'      => true,
+			'Senate'   => false,
+			'Lecturer' => false,
+			'Emeritus' => false,
+		),
+	)
+);
+$api->getCampusDirData( '' );
+check( 'scoped automated feed (dept=MATH) applies the 1000-record LDAP ceiling', ldap_size_limit_was_set_to( 1000 ) );
 
 finish_tests();
+
