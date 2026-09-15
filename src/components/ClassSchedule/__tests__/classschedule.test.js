@@ -360,4 +360,112 @@ describe('classschedule.js frontend', () => {
       expect(URL.revokeObjectURL).toHaveBeenCalledWith('blob:mock');
     });
   });
+
+  describe('Copy URL', () => {
+    const TEST_URL = 'http://localhost/test-page';
+
+    beforeEach(() => {
+      // jsdom doesn't define document.execCommand; mock it
+      document.execCommand = jest.fn();
+      // Set a predictable location.href
+      Object.defineProperty(window, 'location', {
+        value: { href: TEST_URL },
+        writable: true,
+        configurable: true,
+      });
+    });
+
+    afterEach(() => {
+      // Remove any toasts left over
+      document.querySelectorAll('.cs-toast').forEach((el) => el.remove());
+      // Restore navigator.clipboard to undefined between tests
+      Object.defineProperty(navigator, 'clipboard', {
+        value: undefined,
+        writable: true,
+        configurable: true,
+      });
+    });
+
+    it('calls clipboard.writeText with the page URL and shows a toast on success', async () => {
+      Object.defineProperty(navigator, 'clipboard', {
+        value: { writeText: jest.fn().mockResolvedValue(undefined) },
+        writable: true,
+        configurable: true,
+      });
+
+      window.classScheduleCopyUrl();
+
+      expect(navigator.clipboard.writeText).toHaveBeenCalledWith(TEST_URL);
+
+      // Flush the resolved promise so the .then() callback runs
+      await Promise.resolve();
+
+      const toast = document.querySelector('.cs-toast');
+      expect(toast).not.toBeNull();
+      expect(toast.querySelector('strong').textContent).toBe('Copied ');
+      expect(toast.querySelector('em').textContent).toBe(TEST_URL);
+    });
+
+    it('falls back to textarea+execCommand and shows a toast when clipboard.writeText rejects', async () => {
+      Object.defineProperty(navigator, 'clipboard', {
+        value: { writeText: jest.fn().mockRejectedValue(new Error('denied')) },
+        writable: true,
+        configurable: true,
+      });
+
+      window.classScheduleCopyUrl();
+
+      // Flush the rejected promise so the error callback runs
+      await Promise.resolve();
+
+      expect(document.execCommand).toHaveBeenCalledWith('copy');
+      const toast = document.querySelector('.cs-toast');
+      expect(toast).not.toBeNull();
+      expect(toast.querySelector('em').textContent).toBe(TEST_URL);
+    });
+
+    it('uses textarea+execCommand and shows a toast when clipboard API is absent', () => {
+      // Ensure clipboard is unavailable (jsdom default)
+      Object.defineProperty(navigator, 'clipboard', {
+        value: undefined,
+        writable: true,
+        configurable: true,
+      });
+
+      window.classScheduleCopyUrl();
+
+      expect(document.execCommand).toHaveBeenCalledWith('copy');
+
+      // textarea should have been removed from body
+      expect(document.querySelector('textarea')).toBeNull();
+
+      const toast = document.querySelector('.cs-toast');
+      expect(toast).not.toBeNull();
+      expect(toast.querySelector('em').textContent).toBe(TEST_URL);
+    });
+
+    it('toast initially lacks cs-toast-visible, gains it after 10 ms, and is removed after 3 s', () => {
+      jest.useFakeTimers();
+
+      window.classScheduleShowCopyToast(TEST_URL);
+
+      const toast = document.querySelector('.cs-toast');
+      expect(toast).not.toBeNull();
+      expect(toast.classList.contains('cs-toast-visible')).toBe(false);
+
+      // After 10 ms the visibility class should be added
+      jest.advanceTimersByTime(10);
+      expect(toast.classList.contains('cs-toast-visible')).toBe(true);
+
+      // At 3 000 ms it should be removed (3000 + 300 = 3300 for full removal)
+      jest.advanceTimersByTime(3000);
+      expect(toast.classList.contains('cs-toast-visible')).toBe(false);
+
+      // After the fade-out delay (300 ms more) the element is gone from the DOM
+      jest.advanceTimersByTime(300);
+      expect(document.querySelector('.cs-toast')).toBeNull();
+
+      jest.useRealTimers();
+    });
+  });
 });

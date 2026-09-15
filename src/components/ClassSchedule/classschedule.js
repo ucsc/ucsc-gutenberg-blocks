@@ -517,6 +517,7 @@ window.closeFilterModal = closeFilterModal;
 window.applyFilters = applyFilters;
 window.resetFilters = resetFilters;
 window.classScheduleCopyUrl = classScheduleCopyUrl;
+window.classScheduleShowCopyToast = classScheduleShowCopyToast;
 window.classScheduleDownloadCSV = classScheduleDownloadCSV;
 
 })();
