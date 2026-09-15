@@ -24,6 +24,7 @@ $profileData = $campusDirectoryAPI->getCampusDirData($cruzid,true)[0];
 $cruzidEmail = $profileData['0']['mail'][0];
 
 
+if ( ! function_exists( 'linkify' ) ) {
 function linkify($key, $str) {
     if ($key == "ucscpersonpubwebsite") {
         $parts = explode(" ", $str, 2);
@@ -53,6 +54,7 @@ function linkify($key, $str) {
     $str = str_replace('<?xml encoding="UTF-8">', '', $str);
     return $str;
 }
+} // end function_exists('linkify')
 if (count($profileData)) {
   $profileData = $profileData[0];
   ?>

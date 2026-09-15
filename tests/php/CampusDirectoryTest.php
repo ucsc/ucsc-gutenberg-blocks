@@ -506,4 +506,45 @@ $result = run_theHTML_capturing_issues( $campus_directory, $attributes );
 check( 'a block with a staff type selected still renders without fataling', ! $result['threw'] );
 check( 'a selected staff type still reaches the LDAP filter (guard does not swallow real config)', isset( $ldap_searches[0] ) && false !== strpos( $ldap_searches[0]['filter'], 'ucscpersonpubaffiliation=Staff' ) );
 
+echo "addVacantPosition/addVacantPositions tests (WPM-172):\n";
+
+reset_test_state();
+$api      = campus_directory_api_fixture();
+$position = $api->addVacantPosition( '%Jane Doe%Banana Slug Wrangler%' );
+check( 'addVacantPosition parses %Name%Title% into a cn/title-shaped entry', array( 'cn' => array( 'Jane Doe' ), 'title' => array( 'Banana Slug Wrangler' ) ) === $position );
+
+reset_test_state();
+$api     = campus_directory_api_fixture( array( 'automatedFeeds' => true, 'addCruzids' => '%Jane Doe%Wrangler%%John Roe%Deputy%' ) );
+$people  = array( array( 'uid' => array( 'jsmith' ), 'cn' => array( 'Jan Smith' ) ) );
+$result  = $api->addVacantPositions( $people, true, array() );
+check( 'automated-feed addVacantPositions appends every %Name%Title% vacancy to the LDAP results', 3 === count( $result ) );
+check( 'automated-feed addVacantPositions preserves the LDAP results first', 'Jan Smith' === $result[0]['cn'][0] );
+check( 'automated-feed addVacantPositions parses the first vacancy', array( 'cn' => array( 'Jane Doe' ), 'title' => array( 'Wrangler' ) ) === $result[1] );
+check( 'automated-feed addVacantPositions parses the second vacancy', array( 'cn' => array( 'John Roe' ), 'title' => array( 'Deputy' ) ) === $result[2] );
+
+reset_test_state();
+$api    = campus_directory_api_fixture( array( 'automatedFeeds' => true, 'addCruzids' => '' ) );
+$people = array( array( 'uid' => array( 'jsmith' ), 'cn' => array( 'Jan Smith' ) ) );
+$result = $api->addVacantPositions( $people, true, array() );
+check( 'automated-feed addVacantPositions with no addCruzids leaves the LDAP results untouched', array( $people[0] ) === $result );
+
+reset_test_state();
+$api    = campus_directory_api_fixture();
+$people = array( array( 'uid' => array( 'jsmith' ), 'cn' => array( 'Jan Smith' ) ) );
+$result = $api->addVacantPositions( $people, false, array( 'jsmith', '%Jane Doe%Wrangler%' ) );
+check( 'manual-list addVacantPositions preserves author order and resolves a real cruzid from the LDAP map', 'Jan Smith' === $result[0]['cn'][0] );
+check( 'manual-list addVacantPositions parses a %Name%Title% entry without a directory lookup', array( 'cn' => array( 'Jane Doe' ), 'title' => array( 'Wrangler' ) ) === $result[1] );
+
+reset_test_state();
+$api    = campus_directory_api_fixture();
+$people = array( array( 'uid' => array( 'jsmith' ), 'cn' => array( 'Jan Smith' ) ) );
+$result = $api->addVacantPositions( $people, false, array( 'nomatch', '' ) );
+check( 'manual-list addVacantPositions skips a cruzid absent from the LDAP result map', array() === $result );
+
+reset_test_state();
+$api    = campus_directory_api_fixture();
+$people = array( array( 'uid' => array( 'jsmith' ), 'cn' => array( 'Jan Smith' ) ) );
+$result = $api->addVacantPositions( $people, false, array( '' ) );
+check( 'manual-list addVacantPositions skips empty cruzid entries', array() === $result );
+
 finish_tests();
