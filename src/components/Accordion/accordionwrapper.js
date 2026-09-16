@@ -1,3 +1,4 @@
+/* istanbul ignore file -- Accordion block is slated for retirement; intentionally untested by decision (WPM-115). */
 const expandCollapses = document.querySelectorAll('.expand-collapse');
 if (expandCollapses) expandCollapses.forEach((expandCollapse) => {
   expandCollapse.addEventListener('click', () => {

@@ -5,8 +5,9 @@
 #   bash tests/php/run-php-coverage.sh
 #
 # Output:
-#   coverage/php/clover.xml      - Clover XML coverage report
-#   coverage/php/coverage-raw.json - Raw merged coverage (intermediate)
+#   coverage/clover.xml          - Clover XML coverage report
+#   coverage/html/index.html     - Human-readable PHP coverage summary
+#   coverage/coverage-raw.json   - Raw merged coverage (intermediate)
 #
 # Without UCSC_COVERAGE set, the tests run normally with no coverage overhead.
 # With it set, the harness captures coverage and merges across all test files.
@@ -17,7 +18,7 @@ PLUGIN_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
 cd "$PLUGIN_ROOT"
 
 IMAGE_NAME="ucsc-gutenberg-blocks-php-test:coverage"
-COVERAGE_DIR="$PLUGIN_ROOT/coverage/php"
+COVERAGE_DIR="$PLUGIN_ROOT/coverage"
 COVERAGE_CLOVER="$COVERAGE_DIR/clover.xml"
 COVERAGE_RAW="$COVERAGE_DIR/coverage-raw.json"
 
@@ -34,13 +35,12 @@ mkdir -p "$COVERAGE_DIR"
 echo "Running PHP tests with coverage..."
 echo
 
-# Find all PHP test files
-TEST_FILES=(tests/php/CampusDirectoryTest.php tests/php/CampusDirectoryShortcodeTest.php tests/php/CampusDirectoryTemplateTest.php tests/php/DirectoryProfileTemplateTest.php tests/php/ClassScheduleTest.php tests/php/ClassScheduleTemplateTest.php tests/php/ClassScheduleQueryTermTest.php tests/php/CourseCatalogTest.php tests/php/CourseScheduleAPITest.php tests/php/SiteSettingsTest.php tests/php/IndexWpCliTest.php)
+source tests/php/test-files.sh
 
 PASSED=0
 FAILED=0
 
-for test_file in "${TEST_FILES[@]}"; do
+for test_file in "${PHP_TEST_FILES[@]}"; do
 	if [ ! -f "$test_file" ]; then
 		echo "⚠️  $test_file not found, skipping"
 		continue
@@ -50,7 +50,7 @@ for test_file in "${TEST_FILES[@]}"; do
 	if docker run --rm \
 		-v "$PLUGIN_ROOT:/plugin" \
 		-w /plugin \
-		-e "UCSC_COVERAGE=/plugin/coverage/php/clover.xml" \
+		-e "UCSC_COVERAGE=/plugin/coverage/clover.xml" \
 		"$IMAGE_NAME" \
 		php "$test_file"; then
 		PASSED=$((PASSED + 1))
@@ -79,6 +79,12 @@ if [ -f "$COVERAGE_CLOVER" ]; then
 		echo
 		echo "PHP Coverage: $PERCENT% ($COVERED_STATEMENTS / $TOTAL_STATEMENTS statements)"
 		echo "Clover report: $COVERAGE_CLOVER"
+		docker run --rm \
+			-v "$PLUGIN_ROOT:/plugin" \
+			-w /plugin \
+			"$IMAGE_NAME" \
+			php tests/php/render-coverage-html.php /plugin/coverage/coverage-raw.json /plugin/coverage/html
+		echo "HTML report: $COVERAGE_DIR/html/index.html"
 	else
 		echo
 		echo "⚠️  Coverage report generated but no statements found"
