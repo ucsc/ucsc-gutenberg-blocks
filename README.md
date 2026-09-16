@@ -103,10 +103,19 @@ coverage/html/index.html
 coverage/coverage-raw.json
 ```
 
-The current coverage baseline is 75.64% JavaScript statement coverage and
+The current coverage baseline is 81.01% JavaScript statement coverage and
 100.00% PHP statement coverage for the source files exercised by the local
 harness. E2E tests are pass/fail only and are not included in coverage
 percentages.
+
+Files that intentionally have no tests are excluded with Istanbul's standard
+pragma on the first line, with a reason:
+
+```js
+/* istanbul ignore file -- <reason> */
+```
+
+The Accordion block is excluded this way because it is slated for retirement.
 
 The plugin's structural gap report is read-only and groups classes, templates,
 blocks, and components that are named by no test:
