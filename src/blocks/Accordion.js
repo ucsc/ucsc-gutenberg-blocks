@@ -1,3 +1,4 @@
+/* istanbul ignore file -- Accordion block is slated for retirement; intentionally untested by decision (WPM-115). */
 import { InnerBlocks, InspectorControls } from '@wordpress/block-editor';
 import { Panel, PanelBody, CheckboxControl } from '@wordpress/components';
 
