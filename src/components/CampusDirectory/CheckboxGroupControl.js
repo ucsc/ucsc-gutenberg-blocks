@@ -47,6 +47,7 @@ const CheckboxGroupControl = ({
     <div className={flexCheckboxes ? 'flex-checkboxes' : ''}>
       {arrRender.map(label => (
         <CheckboxControl
+          key={label.label}
           label={label.label}
           checked={label.arrCheckedState[0]}
           onChange={newValue => {
