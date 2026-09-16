@@ -3,7 +3,8 @@
 Date: 2026-08-26
 
 Scope: `tests/php/CampusDirectoryTest.php`, `tests/php/ClassScheduleTest.php`,
-`tests/php/CourseCatalogTest.php`, `tests/php/helpers/harness.php`
+`tests/php/ClassScheduleTemplateTest.php`, `tests/php/CourseCatalogTest.php`,
+`tests/php/helpers/harness.php`
 
 Runner: plain `php` CLI — no PHPUnit, no framework. Each file is a standalone
 script that defines its own WordPress stubs and calls `check($label, $condition)`.
@@ -23,12 +24,22 @@ coverage/php/clover.xml
 coverage/php/coverage-raw.json
 ```
 
-> **Note:** PHP coverage reports 100% statement coverage (835/835, up from
-> 758/758 before `CampusDirectoryTemplateTest.php` landed). All 7 suites now
-> pass — the four intentionally failing XSS assertions previously noted in
-> `CampusDirectoryShortcodeTest.php` were resolved by the WPM-132 escaping fix.
+> **Note:** PHP coverage reports 100% statement coverage (1030/1030, up from
+> 835/835 before `ClassScheduleTemplateTest.php` landed). All 11 suites pass.
 > Statement coverage still measures only which lines execute, not whether their
 > behaviour is asserted, so it should not be read as a quality ceiling.
+>
+> **WPM-119 baseline (class-schedule block).** With the harness coverage
+> instrumentation (WPM-117) emitting clover, the class-schedule block's real
+> line coverage is now recorded as the baseline for the block:
+> `templates/ClassScheduleTemplate.php` 75/75 lines (100%),
+> `classes/ClassSchedule.php` 98/126 lines (77.8%). Before
+> `ClassScheduleTemplateTest.php`, the template file was reached only as a
+> side effect of `ClassSchedule::theHTML()` in `ClassScheduleTest.php` and had
+> no test asserting the escaping of its interpolated values; the structural
+> coverage matcher credited its 189 source lines to a comment match in a Jest
+> test (`src/components/ClassSchedule/__tests__/classschedule.test.js`) that
+> cannot execute PHP.
 
 The structural gap report groups classes, templates, blocks, and components that
 are named by no test (read-only, no mutation):
@@ -210,6 +221,64 @@ Stubs: `harness.php` shared stubs + `rest_do_request`, `wp_enqueue_script`,
 
 ### Department endpoint (1 test)
 - Returns configured department from `classscheduledept()` REST handler
+
+---
+
+## ClassScheduleTemplate — 49 tests
+
+File: `tests/php/ClassScheduleTemplateTest.php`
+
+Renders: `templates/ClassScheduleTemplate.php` directly via `include` (not through
+`ClassSchedule::theHTML()`), with the exact locals the controller exposes
+(`$courses`, `$current_term`, `$terms_data`, `$attributes`).
+
+Stubs: `harness.php` shared stubs + a local `esc_url` (strips `javascript:` like
+production) and `checked()` (not provided by the harness).
+
+WPM-119: the template file has the deepest structural coverage in the plugin but
+had zero test asserting the escaping of its interpolated values — its 189 lines
+were credited to a comment match in a Jest test. This suite requires and renders
+the template so its lines get real executing coverage (75/75 lines, 100%) and pins
+the escaping and table structure the front-end depends on.
+
+### Table structure (10 tests)
+- Renders the block wrapper, `role="table"` mount node, and header/body rowgroups
+- Renders one `course-row` per course and the Course ID / Title column headers
+- Renders the filter modal dialog and the displayed-class count from the array
+
+### Term dropdown (3 tests)
+- Renders an option per term and the description text
+- Marks the current term selected
+
+### Default columns (9 tests)
+- Emits `data-default-columns="seats,days"` and shows/hides the matching columns
+- Checks default-column toggles; leaves hidden-column toggles unchecked
+- Honors editor-configured `defaultColumns`
+- Falls back to seats+days when `defaultColumns` is not an array
+
+### Cell content and status (11 tests)
+- Renders course id, title link, seats, and instructor directory links
+- Maps Open / Closed / Closed with Wait List to row status and screen-reader label
+- Flags cancelled courses; shows `Cancelled` in the days column
+- Clamps open seats at zero when over-enrolled
+
+### Instructor edge cases (4 tests)
+- Joins multiple instructors with commas; renders no-cruzid instructors as text
+- Does not link `Staff`; skips empty-name instructors
+
+### Empty course list (2 tests)
+- Renders the table shell with no rows; reports a zero class count
+
+### Escaping every interpolated value (10 tests)
+- No raw `<script>` / `<img onerror>` from any course field (title, days, time,
+  location, class #, instructor name, subject/catalog into the course id)
+- Escapes attribute-breaking values and the instructor cruzid inside the `href`
+- Escapes the term option value/description and `current_term` in the course href
+- Never emits an attribute-breaking `data-default-columns` value
+
+Regression value: the escaping assertions fail if any `esc_html`/`esc_attr`/`esc_url`
+guard is removed — verified by dropping the title escape (the raw-script-tag
+assertion then fails).
 
 ---
 
