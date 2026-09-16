@@ -286,8 +286,8 @@ $result = $shortcode->ucsc_cdp_profile_render_shortcode( array(
 	'cruzids' => 'jgarcia',
 	'name' => 'true',
 ) );
-// FAIL EXPECTED: Current code does NOT escape LDAP data
-check( 'XSS in cn field is NOT escaped (KNOWN VULNERABILITY - this test should FAIL)', strpos( $result, '<script>alert("xss")</script>' ) === false );
+// Regression guard for the WPM-132 escaping fix.
+check( 'XSS in cn field is escaped in profile output (WPM-132)', strpos( $result, '<script>alert("xss")</script>' ) === false );
 
 // Test 7: LDAP data escaping - XSS in title field
 reset_ldap_fixture();
@@ -297,8 +297,8 @@ $result = $shortcode->ucsc_cdp_profile_render_shortcode( array(
 	'cruzids' => 'jgarcia',
 	'title' => 'true',
 ) );
-// FAIL EXPECTED: Current code does NOT escape title
-check( 'XSS in title field is NOT escaped (KNOWN VULNERABILITY - this test should FAIL)', strpos( $result, '<script>alert("xss")</script>' ) === false );
+// Regression guard for the WPM-132 escaping fix.
+check( 'XSS in title field is escaped in profile output (WPM-132)', strpos( $result, '<script>alert("xss")</script>' ) === false );
 
 // Test 8: LDAP data escaping - XSS in phone number
 reset_ldap_fixture();

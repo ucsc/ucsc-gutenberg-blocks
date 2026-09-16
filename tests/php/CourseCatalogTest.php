@@ -277,8 +277,7 @@ $catalog->getCachedCourses(
 		'subject'       => '',
 	)
 );
-$prod_key_exists      = isset( $transients['course-catalog-prod-lit-dept'] );
-$after_prod_requests  = count( $remote_requests );
+$prod_key_exists = isset( $transients['course-catalog-prod-lit-dept'] );
 
 // Fetch the same dept as qa — keep the prod transient in place, add only the QA fetch.
 putenv( 'UCSC_COURSE_CATALOG_PEOPLESOFT_TARGET=qa' );
