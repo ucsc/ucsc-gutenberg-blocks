@@ -92,33 +92,21 @@ docker compose -f docker-compose.yml -f docker-compose-start.yml run --rm \
 Run PHP coverage from the plugin directory:
 
 ```bash
-bash tests/php/run-php-coverage.sh
+composer run test:coverage
 ```
 
 The PHP report is written to:
 
 ```text
-coverage/php/clover.xml
-coverage/php/coverage-raw.json
+coverage/clover.xml
+coverage/html/index.html
+coverage/coverage-raw.json
 ```
 
-The latest three-block assessment is:
-
-| Block | JS statements | JS branches | JS functions | JS lines |
-|---|---:|---:|---:|---:|
-| Campus Directory | 100% | 100% | 100% | 100% |
-| Class Schedule | 74.07% | 33.33% | 63.63% | 74.07% |
-| Course Catalog | 100% | 100% | 100% | 100% |
-
-Overall JavaScript coverage is 38.86% statements, 41.15% branches, 35.53%
-functions, and 38.83% lines because untouched components and legacy files are
-included. The JavaScript suite passed 72 tests across 5 suites.
-
-PHP coverage reports 100% statement coverage (758/758, up from 713/713 before
-WPM-134 added `SiteSettingsTest.php`), but the harness is not a clean passing
-baseline: 5 of 6 suites passed. The `CampusDirectoryShortcodeTest.php` suite
-contains four intentionally failing XSS assertions documenting existing
-escaping vulnerabilities.
+The current coverage baseline is 75.64% JavaScript statement coverage and
+100.00% PHP statement coverage for the source files exercised by the local
+harness. E2E tests are pass/fail only and are not included in coverage
+percentages.
 
 The plugin's structural gap report is read-only and groups classes, templates,
 blocks, and components that are named by no test:

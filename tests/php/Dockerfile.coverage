@@ -4,7 +4,7 @@
 # dependency-free. This image adds Xdebug for coverage capture.
 #
 # Build: docker build -f tests/php/Dockerfile.coverage -t ucsc-gutenberg-blocks-php-test:coverage tests/php
-# Run:   docker run --rm -v "$PWD:/plugin" -w /plugin -e UCSC_COVERAGE=/tmp/coverage/php/clover.xml \
+# Run:   docker run --rm -v "$PWD:/plugin" -w /plugin -e UCSC_COVERAGE=/plugin/coverage/clover.xml \
 #          ucsc-gutenberg-blocks-php-test:coverage php tests/php/CampusDirectoryTest.php
 
 FROM php:8.1-cli
