@@ -1,0 +1,15 @@
+{
+    "name": "ucsc/ucsc-gutenberg-blocks",
+    "description": "UCSC WordPress Gutenberg blocks plugin.",
+    "type": "wordpress-plugin",
+    "license": "ISC",
+    "scripts": {
+        "test": [
+            "bash tests/php/run-php-tests.sh"
+        ],
+        "test:coverage": [
+            "Composer\\Config::disableProcessTimeout",
+            "bash tests/php/run-php-coverage.sh"
+        ]
+    }
+}

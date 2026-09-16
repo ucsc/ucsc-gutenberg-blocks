@@ -21,6 +21,6 @@ module.exports = {
 	],
 	// json-summary and lcov are what the coverage report ingests; text-summary
 	// keeps the terminal output short.
-	coverageReporters: [ 'text-summary', 'json-summary', 'lcov' ],
+	coverageReporters: [ 'text-summary', 'json-summary', 'lcov', 'html' ],
 	coverageDirectory: 'coverage',
 };

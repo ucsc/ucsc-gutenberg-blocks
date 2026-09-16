@@ -1,9 +1,8 @@
 # PHP Test Coverage
 
-Date: 2026-08-26
+Date: 2026-09-15
 
-Scope: `tests/php/CampusDirectoryTest.php`, `tests/php/ClassScheduleTest.php`,
-`tests/php/CourseCatalogTest.php`, `tests/php/helpers/harness.php`
+Scope: dependency-free PHP harness suites under `tests/php/*Test.php`.
 
 Runner: plain `php` CLI — no PHPUnit, no framework. Each file is a standalone
 script that defines its own WordPress stubs and calls `check($label, $condition)`.
@@ -13,19 +12,20 @@ script that defines its own WordPress stubs and calls `check($label, $condition)
 From the plugin directory:
 
 ```bash
-bash tests/php/run-php-coverage.sh
+composer run test:coverage
 ```
 
 This writes:
 
 ```text
-coverage/php/clover.xml
-coverage/php/coverage-raw.json
+coverage/clover.xml
+coverage/html/index.html
+coverage/coverage-raw.json
 ```
 
-> **Note:** PHP coverage reports 100% statement coverage (835/835, up from
-> 758/758 before `CampusDirectoryTemplateTest.php` landed). All 7 suites now
-> pass — the four intentionally failing XSS assertions previously noted in
+> **Current baseline:** PHP coverage reports 100.00% statement coverage
+> (1029/1029) across the files instrumented by the local harness. All 10 PHP
+> suites pass — the four intentionally failing XSS assertions previously noted in
 > `CampusDirectoryShortcodeTest.php` were resolved by the WPM-132 escaping fix.
 > Statement coverage still measures only which lines execute, not whether their
 > behaviour is asserted, so it should not be read as a quality ceiling.

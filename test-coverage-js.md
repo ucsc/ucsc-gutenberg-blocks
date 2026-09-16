@@ -1,14 +1,14 @@
 # JS Test Coverage
 
-Date: 2026-08-26
+Date: 2026-09-15
 
-Scope: `src/blocks/__tests__/`, `src/components/ClassSchedule/__tests__/`
+Scope: Jest suites under `src/blocks/__tests__/` and `src/components/**/__tests__/`
 
 Runner: Jest via `@wordpress/scripts` (`npm run test`, `npm run test:coverage`)
 
 Config: `jest-unit.config.js` — extends `@wordpress/scripts` default; no enzyme;
 `collectCoverageFrom: src/**/*.js` (explicit, so untouched files appear at 0%);
-reporters: `text-summary`, `json-summary`, `lcov`; output: `coverage/`
+reporters: `text-summary`, `json-summary`, `lcov`, `html`; output: `coverage/`
 
 ## Running Coverage
 
@@ -24,6 +24,7 @@ This writes:
 coverage/coverage-summary.json
 coverage/lcov.info
 coverage/lcov-report/index.html
+coverage/index.html
 ```
 
 For the Dockerized workflow, run the equivalent command inside the npm container
