@@ -29,10 +29,27 @@ const makeAttrs = (checked = {}) => {
 
 describe('CheckboxGroupControl', () => {
   describe('rendering', () => {
-    it('renders one CheckboxControl per label', () => {
-      // Suppress the React "missing key prop" warning — CheckboxGroupControl's
-      // arrRender.map() does not pass key; pre-existing component issue, not test-introduced.
+    // WPM-130: each CheckboxControl in the mapped list needs a key prop.
+    // React logs each missing-key warning only once per module load, so this
+    // must be the first test in the file to render the component.
+    it('renders the checkbox list without a React missing-key warning', () => {
       const spy = jest.spyOn(console, 'error').mockImplementation(() => {});
+      render(
+        <CheckboxGroupControl
+          setAttributes={jest.fn()}
+          currentAttributes={makeAttrs()}
+          arrOfLabels={arrOfLabels}
+          attributeStr="strFacultyTypes"
+        />
+      );
+      const keyWarnings = spy.mock.calls.filter(args =>
+        args.some(arg => typeof arg === 'string' && arg.includes('unique "key" prop'))
+      );
+      spy.mockRestore();
+      expect(keyWarnings).toEqual([]);
+    });
+
+    it('renders one CheckboxControl per label', () => {
       const currentAttributes = makeAttrs();
       render(
         <CheckboxGroupControl
@@ -45,7 +62,6 @@ describe('CheckboxGroupControl', () => {
       arrOfLabels.forEach(label => {
         expect(screen.getByLabelText(label)).toBeInTheDocument();
       });
-      spy.mockRestore();
     });
 
     it('wraps in a plain div when flexCheckboxes is falsy', () => {
