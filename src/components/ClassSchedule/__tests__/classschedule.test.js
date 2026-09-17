@@ -510,4 +510,58 @@ describe('classschedule.js frontend', () => {
       jest.useRealTimers();
     });
   });
+
+  describe('term dropdown (WPM-159)', () => {
+    // classScheduleChangeTerm() is not exposed on window — it is wired to the
+    // #quarterDropdown 'change' event inside the DOMContentLoaded handler, so we
+    // drive it the way the page does: fire DOMContentLoaded, then change the select.
+    function setLocation(href) {
+      Object.defineProperty(window, 'location', {
+        value: { href },
+        writable: true,
+        configurable: true,
+      });
+    }
+
+    function changeTermTo(value) {
+      const dropdown = document.getElementById('quarterDropdown');
+      dropdown.value = value;
+      dropdown.dispatchEvent(new Event('change'));
+    }
+
+    it('navigates with the chosen term as the class_schedule_term param', () => {
+      setLocation('http://localhost/classes/');
+      document.dispatchEvent(new Event('DOMContentLoaded'));
+
+      changeTermTo('2260');
+
+      expect(new URL(window.location.href).searchParams.get('class_schedule_term')).toBe('2260');
+    });
+
+    it('preserves unrelated query params already on the URL', () => {
+      setLocation('http://localhost/classes/?dept=CSE&open=1');
+      document.dispatchEvent(new Event('DOMContentLoaded'));
+
+      changeTermTo('2260');
+
+      const params = new URL(window.location.href).searchParams;
+      expect(params.get('dept')).toBe('CSE');
+      expect(params.get('open')).toBe('1');
+      expect(params.get('class_schedule_term')).toBe('2260');
+    });
+
+    it('replaces an existing class_schedule_term instead of appending a duplicate', () => {
+      setLocation('http://localhost/classes/?class_schedule_term=2262');
+      document.dispatchEvent(new Event('DOMContentLoaded'));
+
+      changeTermTo('2260');
+
+      expect(new URL(window.location.href).searchParams.getAll('class_schedule_term')).toEqual(['2260']);
+    });
+
+    it('does not throw on DOMContentLoaded when the term dropdown is absent', () => {
+      document.getElementById('quarterDropdown').remove();
+      expect(() => document.dispatchEvent(new Event('DOMContentLoaded'))).not.toThrow();
+    });
+  });
 });
