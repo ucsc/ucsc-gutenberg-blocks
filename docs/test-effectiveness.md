@@ -37,6 +37,70 @@ N documented findings," not as red; check the failure list against this table be
 change introduced a new failure. The escaping fix itself is out of scope here — see
 `openspec/changes/campus-directory-block/tasks.md` §3.1 for the tracked remediation.
 
+## Coverage Reporting
+
+Coverage is a discovery signal, not proof that behavior is protected. Generate it when you need to
+find weakly covered surfaces, then use the review standard below to decide whether those lines are
+covered by useful assertions.
+
+Run JavaScript coverage from the plugin directory:
+
+```bash
+npm run test:coverage
+```
+
+Expected output:
+
+```text
+coverage/coverage-summary.json
+coverage/lcov.info
+coverage/lcov-report/index.html
+```
+
+Run PHP coverage from the plugin directory:
+
+```bash
+composer run test:coverage
+```
+
+Expected output:
+
+```text
+coverage/clover.xml
+coverage/html/index.html
+coverage/coverage-raw.json
+```
+
+Then run the unified coverage report with Python 3.11 or newer:
+
+```bash
+/Users/henryh/.local/bin/python3.11 \
+  /Users/henryh/_code/_opensource/ucsc-wp-block-dev/skills/validate/scripts/coverage-report.py .
+```
+
+Use `--gaps` when you want a prompt-ready list of untested units:
+
+```bash
+/Users/henryh/.local/bin/python3.11 \
+  /Users/henryh/_code/_opensource/ucsc-wp-block-dev/skills/validate/scripts/coverage-report.py . --gaps
+```
+
+Verification on 2026-09-17:
+
+- `npm run test:coverage -- --runInBand` passed: 11 suites, 160 tests, 81.01% statements,
+  80.64% lines.
+- `composer run test:coverage` passed: 10 PHP suites, 344 PHP checks, 100.00% harness-covered
+  statements, with Clover and HTML reports emitted.
+- `coverage-report.py .` passed with Python 3.11 and read `coverage/clover.xml`,
+  `coverage/coverage-summary.json`, and `coverage/lcov.info`.
+- `coverage-report.py . --gaps` passed and reported 15 structurally untested units.
+
+Known reporting caveat: the unified report's readiness layer still prints historical WPM-117
+"BLOCKED" advice about missing PHP coverage drivers even when Layer 1 successfully reads the newly
+generated `coverage/clover.xml`. Treat the existing Clover/HTML artifacts as the authoritative
+coverage-run result and the readiness warning as stale reporting guidance until
+`coverage-report.py` is updated.
+
 ## Review Standard
 
 For each new or changed test, ask: **what plausible defect would make this test fail?**
@@ -48,6 +112,9 @@ until it has been seen to fail") plus two established testing ideas:
   below for how to run this by hand against this plugin's tests.
 - Brittle tests are a maintenance smell: tests should fail for important behavior changes, not
   incidental implementation details.
+- The UCSC Laravel/Vue baseapp testing standard requires tests to document their intent and fake
+  external services at the lowest available seam. Those two ideas transfer to this plugin even
+  though its PHP harness is dependency-free and does not use Laravel, PHPUnit, or Vue.
 
 An effective test should:
 
@@ -61,6 +128,12 @@ An effective test should:
   LDAP filter string, a redirect, an enqueued asset.
 - Include negative or boundary cases when the behavior can fail unsafely: LDAP filter
   metacharacters, an empty or malformed upstream response, a missing attribute key.
+- Explain why a non-trivial test exists, either in the test name plus surrounding group label or in
+  a short comment/docblock when the behavior, ticket context, or deliberate gap is not obvious.
+- Fake LDAP and REST/HTTP at the lowest available seam. The PHP harness should shadow functions
+  such as `ldap_search()`, `wp_remote_get()`, or `wp_remote_post()` with deterministic in-memory
+  fixtures; Jest tests should mock browser fetch/WordPress package seams. No test should require a
+  live LDAP server, PeopleSoft endpoint, or campus directory service.
 
 A weak test should be revised, rejected, or explicitly labeled smoke coverage when it:
 
@@ -147,10 +220,31 @@ simple enough (one `ldap_escape()` call) that re-running the probe is only worth
 `buildUidFilter()` or its two hardening tests change; it is not fast or automatic enough today to
 justify wiring into CI per this change's non-goals.
 
+## External Skill Sources
+
+Use external WordPress testing-skill resources as optional guidance, not as authoritative project
+policy. Only cite sources that have been confirmed to exist.
+
+Confirmed sources:
+
+- `WordPress/agent-skills`: public repository confirmed with `git ls-remote`; WordPress.org's
+  announcement documents project-local installation via `npx openskills install
+  WordPress/agent-skills` followed by `npx openskills sync`. This is a multi-topic WordPress skill
+  collection, not a single-purpose testing package.
+- `jorgerosal/wordpress-skills`: public repository confirmed with `git ls-remote`; its README
+  documents Codex installation by copying `codex-skills/*` into `~/.codex/skills/` and shared
+  references into `~/.codex/claude-skills`. This is also a multi-topic WordPress skill collection.
+
+Do not document unverified package names such as `wordpress-block-unit-testing`,
+`wordpress-dynamic-block-testing`, or `wordpress-block-accessibility-testing` unless a real
+repository or install target has been confirmed.
+
 ## References
 
 - WPM-115 epic ground rules: `docs/jira/WPM-115-epic-test-coverage.md`
 - `openspec/changes/evaluate-test-effectiveness/` — the OpenSpec change this document implements
+- UCSC Laravel/Vue baseapp testing standard:
+  `/Users/henryh/_code/_laravel/baseapp/doc/TESTING-STANDARDS.md`
 - ADR-113-VALIDATE-REGRESSION-PROOF (`ucsc-wp-block-dev` skill) — the `prove-regression.sh` tool
 - ADR-114-VALIDATE-COVERAGE-MODE (`ucsc-wp-block-dev` skill) — the three-layer coverage report this
   document's "structural coverage number" refers to

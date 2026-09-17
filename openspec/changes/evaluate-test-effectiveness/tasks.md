@@ -56,35 +56,57 @@
 
 ## 5. Document and Verify Coverage Reporting
 
-- [ ] 5.1 Verify `coverage-report.py`, `run-php-coverage.sh`, and `npm run test:coverage` together
+- [x] 5.1 Verify `coverage-report.py`, `run-php-coverage.sh`, and `npm run test:coverage` together
       produce a PHP and JS coverage report for all three blocks with no bespoke setup, and record
-      any gap
-- [ ] 5.2 Document the easy-to-use invocation syntax for both reports in
+      any gap — `npm run test:coverage -- --runInBand` passed 11 suites / 160 tests and emitted
+      `coverage/coverage-summary.json`, `coverage/lcov.info`, and `coverage/lcov-report/`;
+      `composer run test:coverage` passed 10 PHP suites / 344 checks and emitted
+      `coverage/clover.xml`, `coverage/html/index.html`, and `coverage/coverage-raw.json`;
+      Python 3.11 `coverage-report.py .` read all three machine-readable artifacts. Gap recorded:
+      the report's readiness layer still prints stale WPM-117 blocked guidance even while Layer 1
+      consumes the generated Clover artifact.
+- [x] 5.2 Document the easy-to-use invocation syntax for both reports in
       `docs/test-effectiveness.md`, and verify a new contributor could run either report from the
-      documented command alone
-- [ ] 5.3 Re-run `openspec validate evaluate-test-effectiveness --strict` and verify the change
-      still passes
+      documented command alone — added a "Coverage Reporting" section with `npm run
+      test:coverage`, `composer run test:coverage`, and Python 3.11 `coverage-report.py`
+      invocations plus expected artifact paths.
+- [x] 5.3 Re-run `openspec validate evaluate-test-effectiveness --strict` and verify the change
+      still passes — validation passed on 2026-09-17 after the coverage-reporting updates.
 
 ## 6. Adapt Baseapp-Inspired Standards
 
-- [ ] 6.1 Review existing `tests/php/*Test.php` and Jest tests for missing intent documentation,
+- [x] 6.1 Review existing `tests/php/*Test.php` and Jest tests for missing intent documentation,
       and verify a representative sample of new/changed test classes carries a comment or
-      docblock stating why the test exists
-- [ ] 6.2 Verify every LDAP and REST/HTTP call reachable from `tests/php/*Test.php`,
+      docblock stating why the test exists — reviewed the PHP harness files and Jest suites by
+      grep for test headers, comments, and behavior labels. Representative current examples carry
+      intent via docblocks/group labels such as WPM-103/WPM-152 LDAP hardening,
+      WPM-169 profile rendering, and WPM-117 coverage harness comments; the review standard now
+      requires a comment/docblock when names/group labels are not enough.
+- [x] 6.2 Verify every LDAP and REST/HTTP call reachable from `tests/php/*Test.php`,
       `helpers/harness.php`, and Jest suites is faked or stubbed rather than real, and record any
-      gap found
-- [ ] 6.3 Add both requirements to `docs/test-effectiveness.md` review guidance, and verify the
-      guidance names the baseapp standard as the source of the adapted ideas
-- [ ] 6.4 Re-run `openspec validate evaluate-test-effectiveness --strict` and verify the change
-      still passes
+      gap found — LDAP functions are shadowed in the Campus Directory PHP tests, `wp_remote_get()`
+      and `wp_remote_post()` are shadowed in REST/CourseCatalog/SiteSettings PHP tests, and Jest
+      tests mock browser/WordPress seams. No live LDAP, PeopleSoft, or REST dependency was found
+      in the searched test paths.
+- [x] 6.3 Add both requirements to `docs/test-effectiveness.md` review guidance, and verify the
+      guidance names the baseapp standard as the source of the adapted ideas — added intent
+      documentation and lowest-seam fake requirements, explicitly scoped from the UCSC
+      Laravel/Vue baseapp standard to this dependency-free PHP/Jest plugin.
+- [x] 6.4 Re-run `openspec validate evaluate-test-effectiveness --strict` and verify the change
+      still passes — validation passed on 2026-09-17 after the baseapp-inspired guidance updates.
 
 ## 7. Document External Testing-Skill Sources
 
-- [ ] 7.1 Pin the exact confirmed package name(s) for external WordPress block testing-skill
+- [x] 7.1 Pin the exact confirmed package name(s) for external WordPress block testing-skill
       resources (candidates so far: `WordPress/agent-skills` via
       `npx openskills install WordPress/agent-skills`, `jorgerosal/wordpress-skills`) and verify
-      each named source actually exists and installs before citing it
-- [ ] 7.2 Add the confirmed source(s) to `docs/test-effectiveness.md`, and verify the doc does not
-      assert any package name that was searched for but not found
-- [ ] 7.3 Re-run `openspec validate evaluate-test-effectiveness --strict` and verify the change
-      still passes
+      each named source actually exists and installs before citing it — confirmed both public Git
+      repositories with `git ls-remote`; WordPress.org documents `npx openskills install
+      WordPress/agent-skills` / `npx openskills sync`, and `jorgerosal/wordpress-skills` documents
+      Codex install by copying `codex-skills/*` plus shared references.
+- [x] 7.2 Add the confirmed source(s) to `docs/test-effectiveness.md`, and verify the doc does not
+      assert any package name that was searched for but not found — added only the two confirmed
+      multi-topic skill collections and explicitly warned against unverified single-purpose package
+      names.
+- [x] 7.3 Re-run `openspec validate evaluate-test-effectiveness --strict` and verify the change
+      still passes — validation passed on 2026-09-17 after external-skill-source documentation.
