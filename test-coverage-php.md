@@ -379,7 +379,7 @@ stub `Test_WPDB` for cache-clear queries
 
 ---
 
-## SiteSettings (cddepartmentcode) — 11 tests
+## SiteSettings (cddepartmentcode / departmentcode / subjectcode) — 35 tests
 
 File: `tests/php/SiteSettingsTest.php`
 
@@ -415,6 +415,44 @@ regression coverage: 7 of these 11 tests fail against the pre-fix code.
 ### Caching (2 tests)
 - Successful fetch is cached under `ucsc_cddepartmentcode` for `WEEK_IN_SECONDS`
 - Cache hit makes no remote call
+
+### WPM-154: departmentcode() and subjectcode() — 24 tests
+
+`departmentcode()` and `subjectcode()` feed the Class Schedule and Course Catalog
+editor dropdowns (via `DepartmentDropdown.js` / `SubjectDropdown.js`). Both fetched
+PeopleSoft's `SCX_CLASS_DEPTS_V2` feed with a raw `curl_init()` and
+`CURLOPT_TIMEOUT => 0` (unbounded) — no `curl_errno()`, no HTTP-status check, and a
+`count($arrResponse['depts'])` that fataled with a PHP 8 `TypeError` when the body
+was null. Both also declared a nested `function cmp()`, so calling the two in one
+request fataled with "Cannot redeclare cmp()".
+
+Fix: extracted a shared private `fetchClassDepts()` that uses `wp_remote_get()`
+(30 s timeout) with `is_wp_error` + non-2xx guards and a null/shape guard on
+`depts`, and replaced the nested `cmp()` with a `usort` closure. Mirrors the
+WPM-134 `cddepartmentcode()` conversion. Confirmed regression coverage: dropping
+the non-2xx guard fails 6 of these tests.
+
+Each method (12 tests apiece):
+- `WP_Error` from the remote fetch returns a controlled `WP_Error`, not a fatal; not cached
+- Non-2xx response returns a controlled `WP_Error`; does not leak the upstream body; not cached
+- Unparseable / unexpected-shape JSON returns only the placeholder option — no `count(null)` fatal
+- Happy path returns the `{label, value}` list, sorted, cached (`ucsc_depts` / `ucsc_subjects`) for a week
+- Cache hit makes no remote call
+- (departmentcode) passes a bounded timeout to `wp_remote_get`
+- Regression: both methods coexist in one request without a redeclare fatal
+
+Coverage movement: `classes/SiteSettings.php` 94/195 lines. `departmentcode()`,
+`subjectcode()`, and the new `fetchClassDepts()` helper are now fully exercised;
+before WPM-154 both curl methods had zero executing coverage. The remaining
+uncovered lines are admin-only UI (`settingsPageHTML`, `networkSettingsPage`,
+`divisioncode`'s static list, the ldap field partials), which are out of scope here.
+
+> **Coverage summary caveat:** `run-php-coverage.sh`'s printed total
+> ("PHP Coverage: 100.00% …") over-reports — its `grep -o 'statements="[0-9]*"'`
+> also matches the `statements="…"` substring inside `coveredstatements="…"`, so
+> `tail -1` can grab a covered-count. Parsing `clover.xml` per file gives the real
+> figure: **1084/1504 statements (72.1%)** project-wide. Worth fixing the summary
+> regex separately.
 
 ---
 
