@@ -162,11 +162,21 @@ function campus_directory_api_fixture( $overrides = array() ) {
 		'objGradTypes'                  => array(
 			'Grad Students' => false,
 		),
+		// WPM-171: these are the faculty types the block actually offers, from
+		// src/components/CampusDirectory/AutomatedFeeds.js. The fixture previously
+		// declared 'Senate'/'Emeritus', which no UI control ever sets; that went
+		// unnoticed while tests only exercised the 'All' branch.
 		'objFacultyTypes'               => array(
-			'All'       => false,
-			'Senate'    => false,
-			'Lecturer'  => false,
-			'Emeritus'  => false,
+			'All'                         => false,
+			'Regular Faculty'             => false,
+			'Lecturer'                    => false,
+			'Emeriti'                     => false,
+			'Research Professor'          => false,
+			'Researcher'                  => false,
+			'Adjunct Faculty'             => false,
+			'Visiting Scholar'            => false,
+			'Graduate Student Instructor' => false,
+			'Retired'                     => false,
 		),
 		'objStaffTypes'                 => array(
 			'Regular Staff'          => false,
@@ -600,5 +610,156 @@ $api    = campus_directory_api_fixture();
 $people = array( array( 'uid' => array( 'jsmith' ), 'cn' => array( 'Jan Smith' ) ) );
 $result = $api->addVacantPositions( $people, false, array( '' ) );
 check( 'manual-list addVacantPositions skips empty cruzid entries', array() === $result );
+
+echo "affiliation narrowing filter tests (WPM-171):\n";
+
+// The four branches below are exercised by existing tests but never asserted:
+// WPM-113's staff-type test runs the Regular Staff NOT-clause and then only
+// checks that "ucscpersonpubaffiliation=Staff" appears, so statement coverage
+// reads 100% while the narrowing behaviour itself is unpinned. These assert the
+// normative behaviour in openspec/specs/campus-directory/audience-selection/spec.md.
+
+// --- processStaffFilterString(): NOT-clause exclusion for partial selections ---
+
+reset_test_state();
+$api = campus_directory_api_fixture( array(
+	'automatedFeeds' => true,
+	'objStaffTypes'  => array(
+		'Regular Staff'        => true,
+		'Researcher'           => false,
+		'Postdoctoral Scholar' => false,
+	),
+) );
+$filter = $api->buildFilterString();
+check( 'Regular Staff alone excludes the unselected specialized types with a NOT clause', '(&(ucscpersonpubaffiliation=Staff)(!(|(ucscpersonpubstafftype=Researcher)(ucscPersonIsPostDoc=TRUE))))' === $filter );
+check( 'Regular Staff alone does not silently include postdoctoral scholars', false !== strpos( $filter, '(!' ) && false !== strpos( $filter, 'ucscPersonIsPostDoc=TRUE' ) );
+check( 'two excluded staff types are OR-combined inside the NOT clause', false !== strpos( $filter, '(!(|' ) );
+
+reset_test_state();
+$api = campus_directory_api_fixture( array(
+	'automatedFeeds' => true,
+	'objStaffTypes'  => array(
+		'Regular Staff'        => true,
+		'Researcher'           => true,
+		'Postdoctoral Scholar' => false,
+	),
+) );
+$filter = $api->buildFilterString();
+check( 'a single excluded staff type is negated without an OR wrapper', '(&(ucscpersonpubaffiliation=Staff)(!(ucscPersonIsPostDoc=TRUE)))' === $filter );
+check( 'a selected specialized staff type is not negated', false === strpos( $filter, 'ucscpersonpubstafftype=Researcher' ) );
+
+reset_test_state();
+$api = campus_directory_api_fixture( array(
+	'automatedFeeds' => true,
+	'objStaffTypes'  => array(
+		'Regular Staff'        => false,
+		'Researcher'           => false,
+		'Postdoctoral Scholar' => true,
+	),
+) );
+$filter = $api->buildFilterString();
+check( 'specialized staff types without Regular Staff select positively rather than by exclusion', '(&(ucscpersonpubaffiliation=Staff)(ucscPersonIsPostDoc=TRUE))' === $filter );
+check( 'Postdoctoral Scholar maps to ucscPersonIsPostDoc, not a stafftype attribute', false === strpos( $filter, 'ucscpersonpubstafftype=Postdoctoral Scholar' ) );
+
+reset_test_state();
+$api = campus_directory_api_fixture( array(
+	'automatedFeeds' => true,
+	'objStaffTypes'  => array(
+		'Regular Staff'        => true,
+		'Researcher'           => true,
+		'Postdoctoral Scholar' => true,
+	),
+) );
+$filter = $api->buildFilterString();
+check( 'selecting all three staff types collapses to every staff affiliation', '(ucscpersonpubaffiliation=Staff)' === $filter );
+
+// --- processFacultyFilterString(): specific-multi-type branch ---
+
+reset_test_state();
+$api = campus_directory_api_fixture( array(
+	'automatedFeeds'  => true,
+	'objFacultyTypes' => array(
+		'Lecturer' => true,
+		'Emeriti'  => true,
+	),
+) );
+$filter = $api->buildFilterString();
+check( 'two specific faculty types are OR-combined under the Faculty affiliation', '(&(ucscpersonpubaffiliation=Faculty)(|(ucscpersonpubfacultytype=Lecturer)(ucscpersonpubfacultytype=Emeriti)))' === $filter );
+check( 'a specific faculty selection lists exactly the selected types', 2 === substr_count( $filter, 'ucscpersonpubfacultytype=' ) );
+check( 'unselected faculty types stay out of the filter', false === strpos( $filter, 'Visiting Scholar' ) && false === strpos( $filter, 'Retired' ) );
+
+reset_test_state();
+$api = campus_directory_api_fixture( array(
+	'automatedFeeds'  => true,
+	'objFacultyTypes' => array( 'Lecturer' => true ),
+) );
+$filter = $api->buildFilterString();
+check( 'a single specific faculty type is not OR-wrapped', '(&(ucscpersonpubaffiliation=Faculty)(ucscpersonpubfacultytype=Lecturer))' === $filter );
+
+reset_test_state();
+$api = campus_directory_api_fixture( array(
+	'automatedFeeds'  => true,
+	'objFacultyTypes' => array(
+		'All'      => true,
+		'Lecturer' => true,
+		'Emeriti'  => true,
+	),
+) );
+$filter = $api->buildFilterString();
+check( 'All takes precedence over individually selected faculty types', '(ucscpersonpubaffiliation=Faculty)' === $filter );
+
+// --- no affiliation selected renders empty ---
+
+reset_test_state();
+$api = campus_directory_api_fixture( array(
+	'automatedFeeds' => true,
+	'department'     => 'MATH',
+	'deptOrDiv'      => 'dept',
+) );
+$filter = $api->buildFilterString();
+check( 'an automated feed with no affiliation selected builds no filter', '' === $filter );
+check( 'an automated feed with no affiliation selected does not fall back to the department alone', false === strpos( $filter, 'ucscpersonpubdepartmentnumber' ) );
+$api->getCampusDirData( '' );
+check( 'an automated feed with no affiliation selected issues no LDAP search', 0 === count( $ldap_searches ) );
+
+// --- union of groups ---
+
+reset_test_state();
+$api = campus_directory_api_fixture( array(
+	'automatedFeeds'  => true,
+	'department'      => 'MATH',
+	'deptOrDiv'       => 'dept',
+	'objGradTypes'    => array( 'Grad Students' => true ),
+	'objFacultyTypes' => array( 'All' => true ),
+	'objStaffTypes'   => array(
+		'Regular Staff'        => true,
+		'Researcher'           => true,
+		'Postdoctoral Scholar' => true,
+	),
+) );
+$filter = $api->buildFilterString();
+check( 'faculty, staff and graduate students OR-combine under the department scope', '(&(ucscpersonpubdepartmentnumber=MATH)(|(ucscpersonpubaffiliation=Graduate)(ucscpersonpubaffiliation=Faculty)(ucscpersonpubaffiliation=Staff)))' === $filter );
+check( 'each selected group contributes one affiliation clause to the union', 3 === substr_count( $filter, 'ucscpersonpubaffiliation=' ) );
+
+reset_test_state();
+$api = campus_directory_api_fixture( array(
+	'automatedFeeds'  => true,
+	'department'      => 'MATH',
+	'deptOrDiv'       => 'dept',
+	'objGradTypes'    => array( 'Grad Students' => true ),
+	'objFacultyTypes' => array( 'All' => true ),
+) );
+$filter = $api->buildFilterString();
+check( 'two selected groups OR-combine and exclude the unselected one', '(&(ucscpersonpubdepartmentnumber=MATH)(|(ucscpersonpubaffiliation=Graduate)(ucscpersonpubaffiliation=Faculty)))' === $filter );
+
+reset_test_state();
+$api = campus_directory_api_fixture( array(
+	'automatedFeeds'  => true,
+	'department'      => 'MATH',
+	'deptOrDiv'       => 'dept',
+	'objGradTypes'    => array( 'Grad Students' => true ),
+) );
+$filter = $api->buildFilterString();
+check( 'a single selected group is ANDed to the department without an OR wrapper', '(&(ucscpersonpubdepartmentnumber=MATH)(ucscpersonpubaffiliation=Graduate))' === $filter );
 
 finish_tests();

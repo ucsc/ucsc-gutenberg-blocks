@@ -1,6 +1,6 @@
 # PHP Test Coverage
 
-Date: 2026-09-15
+Date: 2026-09-16
 
 Scope: dependency-free PHP harness suites under `tests/php/*Test.php`.
 
@@ -24,11 +24,14 @@ coverage/coverage-raw.json
 ```
 
 > **Current baseline:** PHP coverage reports 100.00% statement coverage
-> (1030/1030) across the files instrumented by the local harness. All 11 PHP
+> (1048/1048) across the files instrumented by the local harness. All 11 PHP
 > suites pass — the four intentionally failing XSS assertions previously noted in
 > `CampusDirectoryShortcodeTest.php` were resolved by the WPM-132 escaping fix.
 > Statement coverage still measures only which lines execute, not whether their
-> behaviour is asserted, so it should not be read as a quality ceiling.
+> behaviour is asserted, so it should not be read as a quality ceiling —
+> WPM-171 is the worked example: every affiliation-narrowing branch in
+> `CampusDirectoryAPI.php` already counted as covered because WPM-113's test
+> *ran* them, yet none of their output was asserted until WPM-171.
 >
 > **WPM-119 baseline (class-schedule block).** With the harness coverage
 > instrumentation (WPM-117) emitting clover, the class-schedule block's real
@@ -66,7 +69,7 @@ Currently used only by `ClassScheduleTest.php`; `CampusDirectoryTest.php` and
 
 ---
 
-## CampusDirectory — 46 tests
+## CampusDirectory — 76 tests
 
 File: `tests/php/CampusDirectoryTest.php`
 
@@ -130,6 +133,56 @@ future refactor cannot split the profile route onto an unescaped path.
 Regression value: 6 of these 10 fail when `ldap_escape()` is removed from
 `buildUidFilter()`. The other 4 guard filter-construction shape and empty input,
 which that mutation does not affect.
+
+### Affiliation narrowing (WPM-171) (20 tests)
+
+`buildFilterString()` composes the LDAP filter from three affiliation groups —
+faculty types, staff types, and graduate students. WPM-171 found **no defect**:
+every branch already matches the normative behaviour in
+`openspec/specs/campus-directory/audience-selection/spec.md`. These tests pin it
+down. The branches were reached by WPM-113's staff-type test, which asserts only
+that `ucscpersonpubaffiliation=Staff` appears and never inspects the narrowing
+clause — which is how they read as covered while staying unasserted.
+
+`processStaffFilterString()` — NOT-clause exclusion for partial selections:
+- Regular Staff alone excludes the unselected specialized types with a NOT clause
+- Regular Staff alone does not silently include postdoctoral scholars
+- Two excluded staff types are OR-combined inside the NOT clause
+- A single excluded staff type is negated without an OR wrapper
+- A selected specialized staff type is not negated
+- Specialized types without Regular Staff select positively, not by exclusion
+- `Postdoctoral Scholar` maps to `ucscPersonIsPostDoc`, not `ucscpersonpubstafftype`
+- Selecting all three staff types collapses to every staff affiliation
+
+`processFacultyFilterString()` — specific-multi-type branch:
+- Two specific faculty types are OR-combined under the Faculty affiliation
+- A specific faculty selection lists exactly the selected types
+- Unselected faculty types stay out of the filter
+- A single specific faculty type is not OR-wrapped
+- `All` takes precedence over individually selected faculty types
+
+No affiliation selected:
+- An automated feed with no affiliation builds no filter
+- ...and does not fall back to the department alone
+- ...and issues no LDAP search
+
+Union of groups:
+- Faculty, staff and graduate students OR-combine under the department scope
+- Each selected group contributes one affiliation clause to the union
+- Two selected groups OR-combine and exclude the unselected one
+- A single selected group is ANDed to the department without an OR wrapper
+
+Regression value: 15 of these 20 fail under at least one of seven targeted
+mutations (removing the staff NOT wrapper, the faculty OR wrapper, the
+`count > 0` guard, the union OR wrapper, the postdoc attribute mapping, the
+`All` precedence check, and the all-three-staff collapse). The other 5 guard
+filter shape and negative invariants — that unselected types stay absent and
+that single selections are not OR-wrapped — which no single mutation flips.
+
+Harness note: `campus_directory_api_fixture()` previously declared faculty types
+`Senate` and `Emeritus`, which no UI control sets. WPM-171 replaced them with the
+ten types `src/components/CampusDirectory/AutomatedFeeds.js` actually offers; the
+mismatch was invisible while tests only exercised the `All` branch.
 
 ### getDirDropdowns (2 tests)
 - Can run twice in one request without error
