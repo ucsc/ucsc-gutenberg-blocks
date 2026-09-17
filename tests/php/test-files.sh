@@ -6,6 +6,7 @@ PHP_TEST_FILES=(
 	tests/php/CampusDirectoryTemplateTest.php
 	tests/php/DirectoryProfileTemplateTest.php
 	tests/php/ClassScheduleTest.php
+	tests/php/ClassScheduleTemplateTest.php
 	tests/php/ClassScheduleQueryTermTest.php
 	tests/php/CourseCatalogTest.php
 	tests/php/CourseScheduleAPITest.php
