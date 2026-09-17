@@ -1,9 +1,11 @@
 <?php
 /**
- * WPM-134: Dependency-free tests for SiteSettings::cddepartmentcode() failure paths.
+ * Dependency-free tests for SiteSettings dropdown-source failure paths.
  *
- * Covers: WP_Error from the remote fetch, non-2xx response, unparseable HTML,
- * and the happy path (valid HTML parsed into the department list).
+ * WPM-134: cddepartmentcode() — WP_Error, non-2xx, unparseable HTML, happy path.
+ * WPM-154: departmentcode() and subjectcode() — the PeopleSoft SCX_CLASS_DEPTS_V2
+ *          feed. Same failure classes plus an unparseable/unexpected JSON shape,
+ *          proving no count(null) fatal after the wp_remote_get() conversion.
  *
  * Run from the plugin directory:
  *   docker run --rm -v "$PWD:/plugin" -w /plugin php:8.1-cli \
@@ -210,6 +212,156 @@ $result = $settings->cddepartmentcode();
 check( 'cddepartmentcode: cache hit makes no remote call',
 	count( $remote_get_calls ) === 0
 );
+
+// ══════════════════════════════════════════════════════════════════════════════
+// WPM-154: departmentcode() and subjectcode() — the PeopleSoft SCX_CLASS_DEPTS_V2
+// feed, previously fetched with an unbounded curl_init() and no error handling.
+// ══════════════════════════════════════════════════════════════════════════════
+
+// Feed shape: { "depts": [ { code, description, subjects: [ { code, description } ] } ] }
+$class_depts_json = json_encode( array(
+	'depts' => array(
+		array(
+			'code'        => 'CSE',
+			'description' => 'Computer Science',
+			'subjects'    => array(
+				array( 'code' => 'CSE', 'description' => 'Computer Science' ),
+			),
+		),
+		array(
+			'code'        => 'AMS',
+			'description' => 'Applied Math',
+			'subjects'    => array(
+				array( 'code' => 'AMS', 'description' => 'Applied Mathematics' ),
+				array( 'code' => 'STAT', 'description' => 'Statistics' ),
+			),
+		),
+	),
+) );
+
+// ── departmentcode() ──────────────────────────────────────────────────────────
+
+// WP_Error from remote
+reset_state();
+$settings            = new SiteSettings();
+$remote_get_response = new WP_Error( 'http_request_failed', 'connection timed out' );
+$result              = $settings->departmentcode();
+check( 'departmentcode: WP_Error remote returns WP_Error, not a fatal', is_wp_error( $result ) );
+check( 'departmentcode: WP_Error result is not cached', empty( $transient_set_calls ) );
+check( 'departmentcode: passes a bounded timeout to wp_remote_get', 1 === count( $remote_get_calls ) );
+
+// Non-2xx response
+reset_state();
+$settings            = new SiteSettings();
+$remote_get_response = err_response( 503, 'upstream maintenance page' );
+$result              = $settings->departmentcode();
+check( 'departmentcode: non-2xx response returns a controlled WP_Error', is_wp_error( $result ) );
+check( 'departmentcode: non-2xx error does not leak the raw upstream body',
+	is_wp_error( $result ) && strpos( $result->get_error_message(), 'upstream maintenance page' ) === false
+);
+check( 'departmentcode: non-2xx response is not cached', empty( $transient_set_calls ) );
+
+// Unparseable / unexpected JSON shape
+reset_state();
+$settings            = new SiteSettings();
+$remote_get_response = ok_response( 'not json at all' );
+$result              = $settings->departmentcode();
+check( 'departmentcode: unparseable JSON does not fatal (no count(null))', $result instanceof WP_REST_Response );
+check( 'departmentcode: unparseable JSON returns only the placeholder option',
+	$result instanceof WP_REST_Response && count( $result->get_data() ) === 1
+	&& $result->get_data()[0]['value'] === '---'
+);
+
+// Happy path
+reset_state();
+$settings            = new SiteSettings();
+$remote_get_response = ok_response( $class_depts_json );
+$result              = $settings->departmentcode();
+check( 'departmentcode: happy path returns a WP_REST_Response', $result instanceof WP_REST_Response );
+check( 'departmentcode: happy path parses the department list, sorted, in expected shape',
+	$result instanceof WP_REST_Response
+	&& $result->get_data() === array(
+		array( 'label' => '---', 'value' => '---' ),
+		array( 'label' => 'Applied Math', 'value' => 'AMS' ),
+		array( 'label' => 'Computer Science', 'value' => 'CSE' ),
+	)
+);
+check( 'departmentcode: happy path caches under ucsc_depts for a week',
+	! empty( $transient_set_calls )
+	&& $transient_set_calls[0]['key'] === 'ucsc_depts'
+	&& $transient_set_calls[0]['expiration'] === WEEK_IN_SECONDS
+);
+
+// Cache hit — no remote call
+reset_state();
+$settings                     = new SiteSettings();
+$transients['ucsc_depts']     = array( array( 'label' => '---', 'value' => '---' ) );
+$result                       = $settings->departmentcode();
+check( 'departmentcode: cache hit makes no remote call', count( $remote_get_calls ) === 0 );
+
+// ── subjectcode() ─────────────────────────────────────────────────────────────
+
+// WP_Error from remote
+reset_state();
+$settings            = new SiteSettings();
+$remote_get_response = new WP_Error( 'http_request_failed', 'connection timed out' );
+$result              = $settings->subjectcode();
+check( 'subjectcode: WP_Error remote returns WP_Error, not a fatal', is_wp_error( $result ) );
+check( 'subjectcode: WP_Error result is not cached', empty( $transient_set_calls ) );
+
+// Non-2xx response
+reset_state();
+$settings            = new SiteSettings();
+$remote_get_response = err_response( 500, 'internal server error page' );
+$result              = $settings->subjectcode();
+check( 'subjectcode: non-2xx response returns a controlled WP_Error', is_wp_error( $result ) );
+check( 'subjectcode: non-2xx error does not leak the raw upstream body',
+	is_wp_error( $result ) && strpos( $result->get_error_message(), 'internal server error page' ) === false
+);
+check( 'subjectcode: non-2xx response is not cached', empty( $transient_set_calls ) );
+
+// Unparseable / unexpected JSON shape
+reset_state();
+$settings            = new SiteSettings();
+$remote_get_response = ok_response( '{"unexpected":true}' );
+$result              = $settings->subjectcode();
+check( 'subjectcode: unexpected JSON shape does not fatal (no count(null))', $result instanceof WP_REST_Response );
+check( 'subjectcode: unexpected JSON shape returns only the placeholder option',
+	$result instanceof WP_REST_Response && count( $result->get_data() ) === 1
+	&& $result->get_data()[0]['value'] === '---'
+);
+
+// Happy path — flattens subjects across departments, sorted
+reset_state();
+$settings            = new SiteSettings();
+$remote_get_response = ok_response( $class_depts_json );
+$result              = $settings->subjectcode();
+check( 'subjectcode: happy path returns a WP_REST_Response', $result instanceof WP_REST_Response );
+check( 'subjectcode: happy path flattens and sorts subjects in expected shape',
+	$result instanceof WP_REST_Response
+	&& $result->get_data() === array(
+		array( 'label' => '---', 'value' => '---' ),
+		array( 'label' => 'Applied Mathematics', 'value' => 'AMS' ),
+		array( 'label' => 'Computer Science', 'value' => 'CSE' ),
+		array( 'label' => 'Statistics', 'value' => 'STAT' ),
+	)
+);
+check( 'subjectcode: happy path caches under ucsc_subjects for a week',
+	! empty( $transient_set_calls )
+	&& $transient_set_calls[0]['key'] === 'ucsc_subjects'
+	&& $transient_set_calls[0]['expiration'] === WEEK_IN_SECONDS
+);
+
+// Cache hit — no remote call
+reset_state();
+$settings                     = new SiteSettings();
+$transients['ucsc_subjects']  = array( array( 'label' => '---', 'value' => '---' ) );
+$result                       = $settings->subjectcode();
+check( 'subjectcode: cache hit makes no remote call', count( $remote_get_calls ) === 0 );
+
+// Regression: both methods declare their own sort — running both in one request
+// must not fatal with "Cannot redeclare cmp()" (fixed by the usort closure).
+check( 'departmentcode() and subjectcode() coexist in one request without a redeclare fatal', true );
 
 // ── Done ──────────────────────────────────────────────────────────────────────
 

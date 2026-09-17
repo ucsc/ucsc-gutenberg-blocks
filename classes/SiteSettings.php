@@ -197,42 +197,62 @@ class SiteSettings
 
   }
 
+  // WPM-154: PeopleSoft feed shared by departmentcode()/subjectcode(). Fetch it
+  // with wp_remote_get() (bounded timeout + explicit guards) instead of an
+  // unbounded curl_init(), and return the decoded `depts` array or a WP_Error.
+  private function fetchClassDepts($errorCode)
+  {
+    $response = wp_remote_get(
+      'https://my.ucsc.edu/PSIGW/RESTListeningConnector/PSFT_CSPRD/SCX_CLASS_DEPTS_V2.v2/' . date("Y", strtotime("-7 months")) . '/Fall',
+      array( 'timeout' => 30 )
+    );
+
+    if (is_wp_error($response)) {
+      return new WP_Error(
+        $errorCode,
+        'Failed to fetch the department feed from PeopleSoft',
+        array( 'status' => 500 )
+      );
+    }
+
+    $status_code = wp_remote_retrieve_response_code($response);
+    if ($status_code < 200 || $status_code >= 300) {
+      return new WP_Error(
+        $errorCode,
+        'PeopleSoft returned HTTP ' . $status_code,
+        array( 'status' => $status_code >= 400 ? $status_code : 502 )
+      );
+    }
+
+    $arrResponse = json_decode(wp_remote_retrieve_body($response), true);
+
+    // Guard an unparseable or unexpected JSON shape so callers never hit
+    // count(null)/foreach(null) — return an empty list, not a fatal.
+    return ( is_array($arrResponse) && isset($arrResponse['depts']) && is_array($arrResponse['depts']) )
+      ? $arrResponse['depts']
+      : array();
+  }
+
   function departmentcode()
   {
-
     $retDepts = get_transient('ucsc_depts');
     if (!$retDepts) {
-      $curl = curl_init();
+      $depts = $this->fetchClassDepts('departmentcode_fetch_error');
+      if (is_wp_error($depts)) {
+        return $depts;
+      }
 
-      curl_setopt_array($curl, array(
-        CURLOPT_URL => 'https://my.ucsc.edu/PSIGW/RESTListeningConnector/PSFT_CSPRD/SCX_CLASS_DEPTS_V2.v2/'. date("Y", strtotime("-7 months")) .'/Fall',
-        CURLOPT_RETURNTRANSFER => true,
-        CURLOPT_ENCODING => '',
-        CURLOPT_MAXREDIRS => 10,
-        CURLOPT_TIMEOUT => 0,
-        CURLOPT_FOLLOWLOCATION => true,
-        CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
-        CURLOPT_CUSTOMREQUEST => 'GET',
-      ));
-
-      $response = curl_exec($curl);
-
-      curl_close($curl);
-      $arrResponse = json_decode($response, true);
-      $depts = $arrResponse['depts'];
       $retDepts = [];
-      for($i=0; $i<count($depts); $i++) {
+      foreach ($depts as $dept) {
         $retDepts[] = [
-          'label' => $depts[$i]['description'],
-          'value' => $depts[$i]['code']
+          'label' => $dept['description'] ?? '',
+          'value' => $dept['code'] ?? ''
         ];
       }
 
-      function cmp($a, $b) {
+      usort($retDepts, function ($a, $b) {
         return strcmp($a['label'], $b['label']);
-      }
-
-      usort($retDepts, "cmp");
+      });
 
       array_unshift($retDepts, [
         'label' => '---',
@@ -242,49 +262,32 @@ class SiteSettings
       set_transient('ucsc_depts', $retDepts, WEEK_IN_SECONDS);
     }
     return new WP_REST_Response($retDepts);
-
   }
 
   function subjectcode()
   {
-
     $retDepts = get_transient('ucsc_subjects');
     if (!$retDepts) {
-      $curl = curl_init();
+      $depts = $this->fetchClassDepts('subjectcode_fetch_error');
+      if (is_wp_error($depts)) {
+        return $depts;
+      }
 
-      curl_setopt_array($curl, array(
-        CURLOPT_URL => 'https://my.ucsc.edu/PSIGW/RESTListeningConnector/PSFT_CSPRD/SCX_CLASS_DEPTS_V2.v2/'. date("Y", strtotime("-7 months")) .'/Fall',
-        CURLOPT_RETURNTRANSFER => true,
-        CURLOPT_ENCODING => '',
-        CURLOPT_MAXREDIRS => 10,
-        CURLOPT_TIMEOUT => 0,
-        CURLOPT_FOLLOWLOCATION => true,
-        CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
-        CURLOPT_CUSTOMREQUEST => 'GET',
-      ));
-
-      $response = curl_exec($curl);
-
-      curl_close($curl);
-      $arrResponse = json_decode($response, true);
-      $depts = $arrResponse['depts'];
       $retDepts = [];
-      for($i=0; $i<count($depts); $i++) {
-        if (array_key_exists('subjects', $depts[$i])) {
-          for($j=0; $j<count($depts[$i]['subjects']); $j++) {
+      foreach ($depts as $dept) {
+        if (!empty($dept['subjects']) && is_array($dept['subjects'])) {
+          foreach ($dept['subjects'] as $subject) {
             $retDepts[] = [
-              'label' => $depts[$i]['subjects'][$j]['description'],
-              'value' => $depts[$i]['subjects'][$j]['code']
+              'label' => $subject['description'] ?? '',
+              'value' => $subject['code'] ?? ''
             ];
           }
         }
       }
 
-      function cmp($a, $b) {
+      usort($retDepts, function ($a, $b) {
         return strcmp($a['label'], $b['label']);
-      }
-
-      usort($retDepts, "cmp");
+      });
 
       array_unshift($retDepts, [
         'label' => '---',
@@ -294,7 +297,6 @@ class SiteSettings
       set_transient('ucsc_subjects', $retDepts, WEEK_IN_SECONDS);
     }
     return new WP_REST_Response($retDepts);
-
   }
 
   function networkSettingsNotifications()
