@@ -857,4 +857,29 @@ check( 'getDirDropdowns caches the list for 24 hours (86400s)', isset( $transien
 $again = $api->getDirDropdowns( $attr );
 check( 'getDirDropdowns serves a repeat call from the cache without an LDAP search', 1 === count( $ldap_searches ) && $result === $again );
 
+echo "CampusDirectoryAPI LDAP size-limit ceiling tests (WPM-178):\n";
+
+reset_test_state();
+$api = campus_directory_api_fixture();
+$api->deptOrDivSet = false;
+$api->getCampusDirData( 'jsmith' );
+check( 'unscoped automated feed applies the 50-record LDAP ceiling', ldap_size_limit_was_set_to( 50 ) );
+
+reset_test_state();
+$api = campus_directory_api_fixture(
+	array(
+		'automatedFeeds'  => true,
+		'department'      => 'MATH',
+		'objFacultyTypes' => array(
+			'All'      => true,
+			'Senate'   => false,
+			'Lecturer' => false,
+			'Emeritus' => false,
+		),
+	)
+);
+$api->getCampusDirData( '' );
+check( 'scoped automated feed (dept=MATH) applies the 1000-record LDAP ceiling', ldap_size_limit_was_set_to( 1000 ) );
+
 finish_tests();
+
