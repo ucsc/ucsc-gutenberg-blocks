@@ -512,9 +512,9 @@ describe('classschedule.js frontend', () => {
   });
 
   describe('term dropdown (WPM-159)', () => {
-    // classScheduleChangeTerm() is not exposed on window — it is wired to the
-    // #quarterDropdown 'change' event inside the DOMContentLoaded handler, so we
-    // drive it the way the page does: fire DOMContentLoaded, then change the select.
+    // classScheduleChangeTerm() is exposed on window so it can be called directly;
+    // the 'change event' tests below also drive it the way the page does (fire
+    // DOMContentLoaded, then change #quarterDropdown) to cover the listener wiring.
     function setLocation(href) {
       Object.defineProperty(window, 'location', {
         value: { href },
@@ -528,6 +528,27 @@ describe('classschedule.js frontend', () => {
       dropdown.value = value;
       dropdown.dispatchEvent(new Event('change'));
     }
+
+    describe('classScheduleChangeTerm (direct)', () => {
+      it('sets class_schedule_term to the select value', () => {
+        setLocation('http://localhost/classes/');
+
+        window.classScheduleChangeTerm({ value: '2260' });
+
+        expect(window.location.href).toBe('http://localhost/classes/?class_schedule_term=2260');
+      });
+
+      it('keeps the path and other params and replaces an existing term', () => {
+        setLocation('http://localhost/classes/?dept=CSE&class_schedule_term=2262');
+
+        window.classScheduleChangeTerm({ value: '2260' });
+
+        const url = new URL(window.location.href);
+        expect(url.pathname).toBe('/classes/');
+        expect(url.searchParams.get('dept')).toBe('CSE');
+        expect(url.searchParams.getAll('class_schedule_term')).toEqual(['2260']);
+      });
+    });
 
     it('navigates with the chosen term as the class_schedule_term param', () => {
       setLocation('http://localhost/classes/');
