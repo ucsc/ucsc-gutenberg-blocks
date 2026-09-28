@@ -65,15 +65,18 @@ const FIXTURE_ROWS = [
   },
 ];
 
-function buildFixture() {
-  document.body.innerHTML = `
-    <div id="classSchedule">
-      <select id="quarterDropdown">
+// One block's markup. Instance 1 keeps the bare IDs; later instances get a -N
+// suffix, as templates/ClassScheduleTemplate.php renders them (WPM-180).
+function scheduleHTML(instance = 1, rows = FIXTURE_ROWS, termLabel = 'Fall 2026') {
+  const sfx = instance > 1 ? `-${instance}` : '';
+  return `
+    <div id="classSchedule${sfx}" class="class-schedule" data-cs-instance="${instance}">
+      <select id="quarterDropdown${sfx}" class="quarter-dropdown">
         <option value="2260">Summer 2026</option>
-        <option value="2262" selected>Fall 2026</option>
+        <option value="2262" selected>${termLabel}</option>
       </select>
-      <input type="text" id="courseSearch">
-      <div id="filterModal" class="filter-modal">
+      <input type="text" id="courseSearch${sfx}" class="course-search">
+      <div id="filterModal${sfx}" class="filter-modal">
         <label><input type="checkbox" class="column-toggle" data-column="seats" checked> Seats</label>
         <label><input type="checkbox" class="column-toggle" data-column="days" checked> Days</label>
         <label><input type="checkbox" class="column-toggle" data-column="time"> Time</label>
@@ -86,8 +89,8 @@ function buildFixture() {
         <label><input type="checkbox" class="status-filter" data-status="waitlist" checked> Wait List</label>
         <button class="apply-button">Apply</button>
       </div>
-      <div id="classCount" aria-live="polite">Displaying <strong>3</strong> classes</div>
-      <div class="el-table" id="classScheduleTable" role="table">
+      <div id="classCount${sfx}" class="class-count" aria-live="polite">Displaying <strong>${rows.length}</strong> classes</div>
+      <div class="el-table" id="classScheduleTable${sfx}" role="table">
         <div class="el-table__header" role="rowgroup">
           <div class="el-table__header-row" role="row">
             <div class="col-status" role="columnheader"><div class="cell">Status</div></div>
@@ -103,10 +106,14 @@ function buildFixture() {
           </div>
         </div>
         <div class="el-table__body" role="rowgroup">
-          ${FIXTURE_ROWS.map(rowHTML).join('')}
+          ${rows.map(rowHTML).join('')}
         </div>
       </div>
     </div>`;
+}
+
+function buildFixture() {
+  document.body.innerHTML = scheduleHTML();
 }
 
 function visibleCourseIds() {
@@ -584,5 +591,144 @@ describe('classschedule.js frontend', () => {
       document.getElementById('quarterDropdown').remove();
       expect(() => document.dispatchEvent(new Event('DOMContentLoaded'))).not.toThrow();
     });
+  });
+});
+
+// WPM-180: every lookup used to be a document-global ID, so a second Class
+// Schedule block on the page drove the first block's table, count and modal.
+describe('classschedule.js with two blocks on one page (WPM-180)', () => {
+  const SECOND_ROWS = [
+    { ...FIXTURE_ROWS[0], status: 'open', courseId: 'MATH-19A', title: 'Calculus', classNum: '70001', seats: '9 open / 10 total' },
+    { ...FIXTURE_ROWS[1], status: 'closed', courseId: 'MATH-100', title: 'Proofs', classNum: '70002', seats: '0 open / 10 total' },
+  ];
+
+  let first;
+  let second;
+
+  const within = (root, sel) => root.querySelector(sel);
+  const idsIn = (root) =>
+    Array.from(root.querySelectorAll('.course-row'))
+      .filter((row) => row.style.display !== 'none')
+      .map((row) => row.querySelector('.col-course-id').textContent.trim());
+  const orderIn = (root) =>
+    Array.from(root.querySelectorAll('.el-table__body .course-row')).map((row) =>
+      row.querySelector('.col-course-id').textContent.trim()
+    );
+  const countIn = (root) => within(root, '.class-count').textContent;
+
+  beforeEach(() => {
+    jest.resetModules();
+    sessionStorage.clear();
+    document.body.innerHTML = scheduleHTML(1) + scheduleHTML(2, SECOND_ROWS, 'Winter 2027');
+    require('../classschedule');
+    [first, second] = document.querySelectorAll('.class-schedule');
+  });
+
+  it('searching in the second block filters only its own rows and count', () => {
+    const input = within(second, '.course-search');
+    input.value = 'proofs';
+    window.classScheduleSearch({ target: input });
+
+    expect(idsIn(second)).toEqual(['MATH-100']);
+    expect(countIn(second)).toContain('1');
+    expect(idsIn(first)).toEqual(['CSE-20', 'CSE-101', 'CSE-150']);
+    expect(countIn(first)).toContain('3');
+  });
+
+  it('sorting one block leaves the other block and its sort state alone', () => {
+    const firstHeader = within(first, '.col-course-id button');
+    const secondHeader = within(second, '.col-course-id button');
+
+    window.sortClassSchedule(1, secondHeader);
+    expect(orderIn(second)).toEqual(['MATH-100', 'MATH-19A']);
+    expect(orderIn(first)).toEqual(['CSE-20', 'CSE-101', 'CSE-150']);
+    expect(first.querySelector('[aria-sort]')).toBeNull();
+
+    // A fresh sort on the first block starts ascending rather than toggling
+    // the second block's direction.
+    window.sortClassSchedule(1, firstHeader);
+    expect(orderIn(first)).toEqual(['CSE-101', 'CSE-150', 'CSE-20']);
+    expect(orderIn(second)).toEqual(['MATH-100', 'MATH-19A']);
+  });
+
+  it('applying filters in the second block changes only that block and saves under its own key', () => {
+    within(second, '.status-filter[data-status="closed"]').checked = false;
+    within(second, '.column-toggle[data-column="days"]').checked = false;
+    window.applyFilters(within(second, '.apply-button'));
+
+    expect(idsIn(second)).toEqual(['MATH-19A']);
+    second.querySelectorAll('.col-days').forEach((cell) => expect(cell.classList.contains('hidden')).toBe(true));
+
+    expect(idsIn(first)).toEqual(['CSE-20', 'CSE-101', 'CSE-150']);
+    first.querySelectorAll('.col-days').forEach((cell) => expect(cell.classList.contains('hidden')).toBe(false));
+
+    expect(JSON.parse(sessionStorage.getItem('cs_columns_2')).days).toBe(false);
+    expect(sessionStorage.getItem('cs_columns')).toBeNull();
+  });
+
+  it('opens and cancels the second block\'s modal without touching the first', () => {
+    window.openFilterModal(within(second, '.apply-button'));
+    expect(within(second, '.filter-modal').classList.contains('active')).toBe(true);
+    expect(within(first, '.filter-modal').classList.contains('active')).toBe(false);
+
+    const days = within(second, '.column-toggle[data-column="days"]');
+    days.checked = false;
+    document.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape' }));
+
+    expect(days.checked).toBe(true);
+    expect(within(second, '.filter-modal').classList.contains('active')).toBe(false);
+  });
+
+  it('closes the second block\'s modal on a backdrop click', () => {
+    window.openFilterModal(within(second, '.apply-button'));
+    expect(within(second, '.filter-modal').classList.contains('active')).toBe(true);
+    within(second, '.filter-modal').dispatchEvent(new MouseEvent('click', { bubbles: true }));
+    expect(within(second, '.filter-modal').classList.contains('active')).toBe(false);
+  });
+
+  it('resetting the second block keeps the first block\'s search', () => {
+    const firstInput = within(first, '.course-search');
+    firstInput.value = 'compilers';
+    window.classScheduleSearch({ target: firstInput });
+
+    window.resetFilters(within(second, '.apply-button'));
+
+    expect(firstInput.value).toBe('compilers');
+    expect(idsIn(first)).toEqual(['CSE-150']);
+  });
+
+  it('exports the second block\'s rows under its own term name', async () => {
+    let capturedBlob = null;
+    URL.createObjectURL = jest.fn((blob) => {
+      capturedBlob = blob;
+      return 'blob:mock';
+    });
+    URL.revokeObjectURL = jest.fn();
+    let downloadName = null;
+    jest.spyOn(HTMLAnchorElement.prototype, 'click').mockImplementation(function () {
+      downloadName = this.download;
+    });
+
+    window.classScheduleDownloadCSV(within(second, '.apply-button'));
+
+    const csv = await new Promise((resolve) => {
+      const reader = new FileReader();
+      reader.onload = () => resolve(reader.result);
+      reader.readAsText(capturedBlob);
+    });
+    expect(csv).toContain('MATH-19A');
+    expect(csv).not.toContain('CSE-20');
+    expect(downloadName).toBe('Winter_2027.csv');
+  });
+
+  it('restores each block\'s saved columns from its own key on DOMContentLoaded', () => {
+    sessionStorage.setItem('cs_columns', JSON.stringify({ time: true }));
+    sessionStorage.setItem('cs_columns_2', JSON.stringify({ seats: false }));
+    document.dispatchEvent(new Event('DOMContentLoaded'));
+
+    expect(within(first, '.column-toggle[data-column="time"]').checked).toBe(true);
+    expect(within(first, '.column-toggle[data-column="seats"]').checked).toBe(true);
+    expect(within(second, '.column-toggle[data-column="time"]').checked).toBe(false);
+    expect(within(second, '.column-toggle[data-column="seats"]').checked).toBe(false);
   });
 });

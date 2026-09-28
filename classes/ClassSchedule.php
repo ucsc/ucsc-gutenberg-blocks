@@ -216,6 +216,10 @@ class ClassSchedule
     wp_enqueue_script('classschedule-js');
     wp_enqueue_style('classschedule');
 
+    // Number each rendered block so the template can keep element IDs unique (WPM-180)
+    static $rendered = 0;
+    $cs_instance = ++$rendered;
+
     ob_start();
     include(plugin_dir_path(__FILE__) . '../templates/ClassScheduleTemplate.php');
     return ob_get_clean();

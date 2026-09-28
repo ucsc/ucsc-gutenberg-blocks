@@ -14,32 +14,58 @@
  *   9  col-enrollment (toggleable)
  *
  * Which toggleable columns are shown by default is configured by the site editor
- * per-block and emitted as data-default-columns on #classScheduleTable.
+ * per-block and emitted as data-default-columns on .el-table.
+ *
+ * Every lookup is scoped to one block's .class-schedule root so two Class
+ * Schedule blocks on the same page work independently (WPM-180). Handlers
+ * called without a DOM reference fall back to the first block on the page.
  */
 
 // Wrap classschedule.js in IIFE to avoid global scope pollution
 (function() {
 'use strict';
 
+// ── Block instances ───────────────────────────────────────────────────────────
+
+// Resolve the block root from an element, an event, or nothing (first block).
+function rootFor(ref) {
+    var el = ref && ref.nodeType === 1 ? ref : (ref && ref.target);
+    var root = el && el.closest ? el.closest('.class-schedule') : null;
+    return root || document.querySelector('.class-schedule');
+}
+
+// Per-block sort order and the checkbox snapshot Cancel restores.
+var instanceState = new WeakMap();
+
+function stateFor(root) {
+    var state = instanceState.get(root);
+    if (!state) {
+        state = { sortColumn: -1, sortAscending: true, savedColumns: {}, savedStatuses: {} };
+        instanceState.set(root, state);
+    }
+    return state;
+}
+
 // ── A11Y: Live count update (aria-live region) ───────────────────────────────
 
-function updateClassCount() {
-    var rows = document.querySelectorAll('#classScheduleTable .course-row');
+function updateClassCount(root) {
+    var rows = root.querySelectorAll('.el-table .course-row');
     var visible = 0;
     rows.forEach(function(row) {
         if (row.style.display !== 'none') visible++;
     });
-    var el = document.getElementById('classCount');
+    var el = root.querySelector('.class-count');
     if (el) el.innerHTML = 'Displaying <strong>' + visible + '</strong> classes';
 }
 
 // ── Search ────────────────────────────────────────────────────────────────────
 
 function classScheduleSearch(event) {
+    const root = rootFor(event);
     const searchTerm = event.target.value.toLowerCase();
-    const rows = document.querySelectorAll('#classScheduleTable .course-row');
+    const rows = root.querySelectorAll('.el-table .course-row');
 
-    const activeStatuses = getActiveStatuses();
+    const activeStatuses = getActiveStatuses(root);
 
     rows.forEach(row => {
         const matchesSearch = rowMatchesSearch(row, searchTerm);
@@ -50,12 +76,12 @@ function classScheduleSearch(event) {
         row.style.display = (matchesSearch && matchesStatus) ? '' : 'none';
     });
 
-    updateClassCount();
+    updateClassCount(root);
 }
 
-function getActiveStatuses() {
+function getActiveStatuses(root) {
     const activeStatuses = [];
-    document.querySelectorAll('.status-filter').forEach(filter => {
+    root.querySelectorAll('.status-filter').forEach(filter => {
         if (filter.checked) activeStatuses.push(filter.dataset.status);
     });
     return activeStatuses;
@@ -83,20 +109,19 @@ function rowMatchesSearch(row, searchTerm) {
 
 // ── Sort ──────────────────────────────────────────────────────────────────────
 
-let currentSortColumn = -1;
-let sortAscending = true;
-
-function sortClassSchedule(columnIndex) {
-    if (currentSortColumn === columnIndex) {
-        sortAscending = !sortAscending;
+function sortClassSchedule(columnIndex, ref) {
+    const root  = rootFor(ref);
+    const state = stateFor(root);
+    if (state.sortColumn === columnIndex) {
+        state.sortAscending = !state.sortAscending;
     } else {
-        sortAscending = true;
-        currentSortColumn = columnIndex;
+        state.sortAscending = true;
+        state.sortColumn = columnIndex;
     }
 
-    const tbody = document.querySelector('#classScheduleTable .el-table__body');
+    const tbody = root.querySelector('.el-table .el-table__body');
     const rows  = Array.from(tbody.querySelectorAll('.course-row'));
-    const dir   = sortAscending ? 1 : -1;
+    const dir   = state.sortAscending ? 1 : -1;
 
     rows.sort((a, b) => {
         const aCells = a.querySelectorAll('[role="cell"]');
@@ -116,12 +141,12 @@ function sortClassSchedule(columnIndex) {
 
     rows.forEach(row => tbody.appendChild(row));
 
-    updateSortIndicators(columnIndex, sortAscending);
+    updateSortIndicators(root, columnIndex, state.sortAscending);
 }
 
-function updateSortIndicators(columnIndex, ascending) {
+function updateSortIndicators(root, columnIndex, ascending) {
     // columnIndex matches the column position (0 = status, 1 = course-id, etc.)
-    document.querySelectorAll('#classScheduleTable .el-table__header-row > [role="columnheader"]').forEach((col, i) => {
+    root.querySelectorAll('.el-table .el-table__header-row > [role="columnheader"]').forEach((col, i) => {
         col.classList.remove('ascending', 'descending');
         if (i === columnIndex) {
             col.classList.add(ascending ? 'ascending' : 'descending');
@@ -134,25 +159,29 @@ function updateSortIndicators(columnIndex, ascending) {
 
 // ── Filter Modal ──────────────────────────────────────────────────────────────
 
-// Saved checkbox states so Cancel can restore them
-let savedColumnStates = {};
-let savedStatusStates = {};
+// Snapshot this block's checkbox states so Cancel can restore them
+function snapshotFilterState(root) {
+    var state = stateFor(root);
+    state.savedColumns = {};
+    root.querySelectorAll('.column-toggle').forEach(t => {
+        state.savedColumns[t.dataset.column] = t.checked;
+    });
+    state.savedStatuses = {};
+    root.querySelectorAll('.status-filter').forEach(f => {
+        state.savedStatuses[f.dataset.status] = f.checked;
+    });
+}
 
-function openFilterModal() {
+function openFilterModal(ref) {
+    var root = rootFor(ref);
+
     // Snapshot current checkbox states before the user makes changes
-    savedColumnStates = {};
-    document.querySelectorAll('.column-toggle').forEach(t => {
-        savedColumnStates[t.dataset.column] = t.checked;
-    });
-    savedStatusStates = {};
-    document.querySelectorAll('.status-filter').forEach(f => {
-        savedStatusStates[f.dataset.status] = f.checked;
-    });
+    snapshotFilterState(root);
 
     // A11Y: remember which element opened the modal so we can restore focus
     filterModalOpener = document.activeElement;
 
-    var modal = document.getElementById('filterModal');
+    var modal = root.querySelector('.filter-modal');
     modal.classList.add('active');
 
     // A11Y: move focus into the modal
@@ -168,12 +197,13 @@ var filterModalOpener = null;
 
 // A11Y: keyboard handler for focus trapping and Escape
 function filterModalKeyHandler(event) {
-    var modal = document.getElementById('filterModal');
-    if (!modal.classList.contains('active')) return;
+    // Only one filter modal can be open at a time
+    var modal = document.querySelector('.class-schedule .filter-modal.active');
+    if (!modal) return;
 
     if (event.key === 'Escape') {
         event.preventDefault();
-        closeFilterModal();
+        closeFilterModal(modal);
         return;
     }
 
@@ -197,20 +227,23 @@ function filterModalKeyHandler(event) {
     }
 }
 
-function closeFilterModal() {
+function closeFilterModal(ref) {
+    var root  = rootFor(ref);
+    var state = stateFor(root);
+
     // Restore checkbox states to what they were when the modal opened
-    document.querySelectorAll('.column-toggle').forEach(t => {
-        if (savedColumnStates.hasOwnProperty(t.dataset.column)) {
-            t.checked = savedColumnStates[t.dataset.column];
+    root.querySelectorAll('.column-toggle').forEach(t => {
+        if (state.savedColumns.hasOwnProperty(t.dataset.column)) {
+            t.checked = state.savedColumns[t.dataset.column];
         }
     });
-    document.querySelectorAll('.status-filter').forEach(f => {
-        if (savedStatusStates.hasOwnProperty(f.dataset.status)) {
-            f.checked = savedStatusStates[f.dataset.status];
+    root.querySelectorAll('.status-filter').forEach(f => {
+        if (state.savedStatuses.hasOwnProperty(f.dataset.status)) {
+            f.checked = state.savedStatuses[f.dataset.status];
         }
     });
 
-    document.getElementById('filterModal').classList.remove('active');
+    root.querySelector('.filter-modal').classList.remove('active');
 
     // A11Y: remove focus trap handler and restore focus to opener
     document.removeEventListener('keydown', filterModalKeyHandler);
@@ -220,21 +253,17 @@ function closeFilterModal() {
     }
 }
 
-function applyFilters() {
-    applyColumnVisibility();
-    applyStatusFilters();
+function applyFilters(ref) {
+    var root = rootFor(ref);
+    applyColumnVisibility(root);
+    applyStatusFilters(root);
 
     // Update saved states so Cancel reflects the newly applied state
-    document.querySelectorAll('.column-toggle').forEach(t => {
-        savedColumnStates[t.dataset.column] = t.checked;
-    });
-    document.querySelectorAll('.status-filter').forEach(f => {
-        savedStatusStates[f.dataset.status] = f.checked;
-    });
+    snapshotFilterState(root);
 
-    saveColumnState();
+    saveColumnState(root);
 
-    document.getElementById('filterModal').classList.remove('active');
+    root.querySelector('.filter-modal').classList.remove('active');
 
     // A11Y: remove focus trap handler and restore focus to opener
     document.removeEventListener('keydown', filterModalKeyHandler);
@@ -245,10 +274,10 @@ function applyFilters() {
 }
 
 // Default checked columns. The site editor configures these per-block; the chosen
-// set is emitted on #classScheduleTable as data-default-columns. Falls back to the
+// set is emitted on .el-table as data-default-columns. Falls back to the
 // original Vue app defaults (Seats + Days) when the attribute is absent.
-function getDefaultColumns() {
-    var table = document.getElementById('classScheduleTable');
+function getDefaultColumns(root) {
+    var table = root.querySelector('.el-table');
     var attr = table ? table.getAttribute('data-default-columns') : null;
     if (attr === null) return ['seats', 'days'];
     if (attr.trim() === '') return [];
@@ -257,20 +286,26 @@ function getDefaultColumns() {
 
 // Persist column visibility choices in sessionStorage so they survive
 // navigation (e.g. clicking an instructor link and pressing Back).
-function saveColumnState() {
-    var state = {};
-    document.querySelectorAll('.column-toggle').forEach(function(t) {
-        state[t.dataset.column] = t.checked;
-    });
-    try { sessionStorage.setItem('cs_columns', JSON.stringify(state)); } catch(e) { /* ignore */ }
+// Each block on the page keeps its own key; the first keeps the original one.
+function columnStateKey(root) {
+    var instance = root.getAttribute('data-cs-instance');
+    return (instance && instance !== '1') ? 'cs_columns_' + instance : 'cs_columns';
 }
 
-function restoreColumnState() {
+function saveColumnState(root) {
+    var state = {};
+    root.querySelectorAll('.column-toggle').forEach(function(t) {
+        state[t.dataset.column] = t.checked;
+    });
+    try { sessionStorage.setItem(columnStateKey(root), JSON.stringify(state)); } catch(e) { /* ignore */ }
+}
+
+function restoreColumnState(root) {
     try {
-        var saved = sessionStorage.getItem('cs_columns');
+        var saved = sessionStorage.getItem(columnStateKey(root));
         if (!saved) return;
         var state = JSON.parse(saved);
-        document.querySelectorAll('.column-toggle').forEach(function(t) {
+        root.querySelectorAll('.column-toggle').forEach(function(t) {
             if (state.hasOwnProperty(t.dataset.column)) {
                 t.checked = state[t.dataset.column];
             }
@@ -278,10 +313,10 @@ function restoreColumnState() {
     } catch(e) { /* ignore */ }
 }
 
-function applyColumnVisibility() {
-    const table = document.getElementById('classScheduleTable');
+function applyColumnVisibility(root) {
+    const table = root.querySelector('.el-table');
 
-    document.querySelectorAll('.column-toggle').forEach(toggle => {
+    root.querySelectorAll('.column-toggle').forEach(toggle => {
         const colClass = 'col-' + toggle.dataset.column;
         const isVisible = toggle.checked;
 
@@ -300,7 +335,7 @@ function applyColumnVisibility() {
         });
     });
 
-    updateGridTemplate();
+    updateGridTemplate(root);
 }
 
 // Rebuild CSS Grid column tracks based on which columns are visible.
@@ -320,8 +355,8 @@ var gridColumnDefs = [
     { cls: 'col-enrollment', width: 'minmax(120px, 1.50fr)' }
 ];
 
-function updateGridTemplate() {
-    var table = document.getElementById('classScheduleTable');
+function updateGridTemplate(root) {
+    var table = root.querySelector('.el-table');
     var gridCols = gridColumnDefs.map(function(col) {
         var sample = table.querySelector('.' + col.cls);
         return (sample && sample.classList.contains('hidden')) ? '0px' : col.width;
@@ -332,11 +367,11 @@ function updateGridTemplate() {
     });
 }
 
-function applyStatusFilters() {
-    const activeStatuses = getActiveStatuses();
-    const searchTerm = (document.getElementById('courseSearch')?.value || '').toLowerCase();
+function applyStatusFilters(root) {
+    const activeStatuses = getActiveStatuses(root);
+    const searchTerm = (root.querySelector('.course-search')?.value || '').toLowerCase();
 
-    document.querySelectorAll('#classScheduleTable .course-row').forEach(row => {
+    root.querySelectorAll('.el-table .course-row').forEach(row => {
         const matchesStatus = activeStatuses.length === 0 || activeStatuses.includes(row.dataset.status);
 
         // Re-check search too so both filters stay in sync
@@ -345,30 +380,34 @@ function applyStatusFilters() {
         row.style.display = (matchesStatus && matchesSearch) ? '' : 'none';
     });
 
-    updateClassCount();
+    updateClassCount(root);
 }
 
-function resetFilters() {
+function resetFilters(ref) {
+    const root = rootFor(ref);
+
     // Reset columns to the site-editor-configured defaults for this block
-    const defaultColumns = getDefaultColumns();
-    document.querySelectorAll('.column-toggle').forEach(t => {
+    const defaultColumns = getDefaultColumns(root);
+    root.querySelectorAll('.column-toggle').forEach(t => {
         t.checked = defaultColumns.includes(t.dataset.column);
     });
-    document.querySelectorAll('.status-filter').forEach(f => f.checked = true);
+    root.querySelectorAll('.status-filter').forEach(f => f.checked = true);
 
-    const searchInput = document.getElementById('courseSearch');
+    const searchInput = root.querySelector('.course-search');
     if (searchInput) searchInput.value = '';
 
     // The search box lives outside the modal and isn't gated by Apply/Cancel,
     // so clearing it here must immediately re-filter the table and refresh
     // the aria-live count (WPM-112) instead of leaving stale rows hidden.
-    applyStatusFilters();
+    applyStatusFilters(root);
 }
 
 // Close modal when clicking the backdrop
 window.addEventListener('click', function(event) {
-    const modal = document.getElementById('filterModal');
-    if (event.target === modal) closeFilterModal();
+    const target = event.target;
+    if (target && target.classList && target.classList.contains('filter-modal')) {
+        closeFilterModal(target);
+    }
 });
 
 // ── Copy URL ──────────────────────────────────────────────────────────────────
@@ -421,8 +460,9 @@ function classScheduleShowCopyToast(url) {
 
 // ── Download CSV ──────────────────────────────────────────────────────────────
 
-function classScheduleDownloadCSV() {
-    var table = document.getElementById('classScheduleTable');
+function classScheduleDownloadCSV(ref) {
+    var root = rootFor(ref);
+    var table = root.querySelector('.el-table');
     var headerCells = table.querySelectorAll('.el-table__header-row > [role="columnheader"]');
     var rows = table.querySelectorAll('.el-table__body .course-row');
 
@@ -462,7 +502,7 @@ function classScheduleDownloadCSV() {
     var url = URL.createObjectURL(blob);
 
     // Build filename from term dropdown
-    var termSelect = document.getElementById('quarterDropdown');
+    var termSelect = root.querySelector('.quarter-dropdown');
     var termName = termSelect ? termSelect.options[termSelect.selectedIndex].text : 'ClassSchedule';
     var filename = termName.replace(/\s+/g, '_') + '.csv';
 
@@ -488,16 +528,18 @@ function classScheduleChangeTerm(select) {
 
 // Apply column visibility — restore any saved choices, then apply
 document.addEventListener('DOMContentLoaded', function() {
-    restoreColumnState();
-    applyColumnVisibility();
+    document.querySelectorAll('.class-schedule').forEach(function(root) {
+        restoreColumnState(root);
+        applyColumnVisibility(root);
 
-    // a11y: attach change listener here instead of inline onchange to avoid jump menu a11y warning
-    var quarterDropdown = document.getElementById('quarterDropdown');
-    if (quarterDropdown) {
-        quarterDropdown.addEventListener('change', function() {
-            classScheduleChangeTerm(this);
-        });
-    }
+        // a11y: attach change listener here instead of inline onchange to avoid jump menu a11y warning
+        var quarterDropdown = root.querySelector('.quarter-dropdown');
+        if (quarterDropdown) {
+            quarterDropdown.addEventListener('change', function() {
+                classScheduleChangeTerm(this);
+            });
+        }
+    });
 });
 
 // Re-apply column visibility on back/forward navigation.
@@ -505,7 +547,7 @@ document.addEventListener('DOMContentLoaded', function() {
 // get out of sync with the checkboxes when the user navigates back.
 window.addEventListener('pageshow', function(event) {
     if (event.persisted) {
-        applyColumnVisibility();
+        document.querySelectorAll('.class-schedule').forEach(applyColumnVisibility);
     }
 });
 

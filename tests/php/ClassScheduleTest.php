@@ -460,4 +460,18 @@ $options['class_schedule_department'] = 'CSE';
 $response = $class_schedule->classscheduledept();
 check( 'returns the configured department from the REST endpoint', array( 'dept' => 'CSE' ) === $response->get_data() );
 
+echo "\nper-render instance numbering (WPM-180):\n";
+// theHTML() numbers each block it renders so two blocks on one page get
+// distinct element IDs. The counter is per PHP request, so compare two
+// consecutive renders rather than absolute numbers.
+$cs_terms   = array( 'terms' => array( array( 'code' => '2262', 'description' => 'Fall 2026', 'default' => 'Y' ) ) );
+$cs_courses = array( 'classes' => array( course_fixture() ) );
+$cs_attrs   = array( 'subjectOrDept' => 'dept', 'department' => 'CSE' );
+$cs_first   = render_schedule( $cs_attrs, $cs_terms, $cs_courses );
+$cs_second  = render_schedule( $cs_attrs, $cs_terms, $cs_courses );
+preg_match( '/data-cs-instance="(\d+)"/', $cs_first, $cs_m1 );
+preg_match( '/data-cs-instance="(\d+)"/', $cs_second, $cs_m2 );
+check( 'numbers consecutive renders with increasing instance numbers', isset( $cs_m1[1], $cs_m2[1] ) && (int) $cs_m2[1] === (int) $cs_m1[1] + 1 );
+check( 'gives a later render suffixed element IDs', isset( $cs_m2[1] ) && false !== strpos( $cs_second, 'id="classScheduleTable-' . $cs_m2[1] . '"' ) );
+
 finish_tests();
