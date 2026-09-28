@@ -2,6 +2,11 @@
    Class Schedule — styles ported from old WCSI Vue/Element UI app
    Adapted selectors: #wcsi → #classSchedule,
                       .el-table_1_column_* → .col-*
+
+   IDs after the first Class Schedule block on a page get a -N suffix
+   (WPM-180), so id-based rules are written as :is(#id, .class). :is()
+   takes its most specific argument, so every instance keeps the original
+   ID-level specificity against theme styles.
    ============================================================ */
 
 /* ============================================================
@@ -43,7 +48,7 @@ a.cancelled {
 /* ============================================================
    Main container
    ============================================================ */
-#classSchedule {
+:is(#classSchedule, .class-schedule) {
   margin: 20px 0;
 }
 
@@ -91,7 +96,7 @@ a.cancelled {
   height: 40px;
 }
 
-#courseSearch {
+:is(#courseSearch, .course-search) {
   flex: 1;
   padding: 10px 10px 10px 30px;
   font-size: 14px;
@@ -103,7 +108,7 @@ a.cancelled {
   background-size: 14px 14px;
 }
 
-#courseSearch::placeholder {
+:is(#courseSearch, .course-search)::placeholder {
   color: #bbb;
 }
 
@@ -136,7 +141,7 @@ a.cancelled {
   box-sizing: border-box;
 }
 
-#filterButton {
+:is(#filterButton, .filter-button--filter) {
   color: #2272D6;
 }
 
@@ -586,8 +591,8 @@ div.print-only {
     display: block;
   }
 
-  #classSchedule .el-table [role="cell"],
-  #classSchedule .el-table [role="columnheader"],
+  :is(#classSchedule, .class-schedule) .el-table [role="cell"],
+  :is(#classSchedule, .class-schedule) .el-table [role="columnheader"],
   div.cell {
     padding: 0;
   }
@@ -596,25 +601,25 @@ div.print-only {
     display: none;
   }
 
-  #classSchedule .el-table [role="cell"] .closed {
+  :is(#classSchedule, .class-schedule) .el-table [role="cell"] .closed {
     width: 10px !important;
     height: 10px !important;
     background: red !important;
     display: inline-block !important;
   }
 
-  #classSchedule .el-table [role="cell"] div.cell span.open {
+  :is(#classSchedule, .class-schedule) .el-table [role="cell"] div.cell span.open {
     height: 10px !important;
     background: green !important;
     border-radius: 50% !important;
     display: inline-block !important;
   }
 
-  #classSchedule div.el-table {
+  :is(#classSchedule, .class-schedule) div.el-table {
     zoom: 92%;
   }
 
-  #classSchedule div.el-table__body {
+  :is(#classSchedule, .class-schedule) div.el-table__body {
     overflow: hidden;
   }
 }

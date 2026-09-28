@@ -35,7 +35,7 @@ require __DIR__ . '/helpers/harness.php';
  * Render ClassScheduleTemplate.php with the given variables in scope.
  * These are the exact locals ClassSchedule::theHTML() exposes to the template.
  */
-function render_class_schedule_template( array $courses, $current_term, array $terms_data, array $attributes = array() ) {
+function render_class_schedule_template( array $courses, $current_term, array $terms_data, array $attributes = array(), $cs_instance = null ) {
 	ob_start();
 	include __DIR__ . '/../../templates/ClassScheduleTemplate.php';
 	return ob_get_clean();
@@ -258,5 +258,34 @@ $html_attr_xss = render_class_schedule_template(
 // The unknown column is filtered out by array_intersect, so the attribute is safe
 // by construction; assert no attribute-breaking payload survives regardless.
 check( 'never emits an attribute-breaking default-columns value', false === strpos( $html_attr_xss, 'data-default-columns="seats,"><img' ) );
+
+// ---------------------------------------------------------------------------
+// Unique element IDs per block instance (WPM-180)
+// ---------------------------------------------------------------------------
+echo "\nper-instance element IDs (WPM-180):\n";
+$args = array( array( course_fixture() ), '2262', terms_fixture(), array( 'subjectOrDept' => 'dept', 'department' => 'CSE' ) );
+
+$html_one = render_class_schedule_template( ...$args );
+check( 'defaults to instance 1 when no instance number is passed', false !== strpos( $html_one, 'id="classSchedule" class="class-schedule" data-cs-instance="1"' ) );
+check( 'keeps the original unsuffixed IDs on the first block', false !== strpos( $html_one, 'id="courseSearch"' ) && false !== strpos( $html_one, 'id="filterModal"' ) && false !== strpos( $html_one, 'id="classCount"' ) );
+
+$html_two = render_class_schedule_template( ...array_merge( $args, array( 2 ) ) );
+preg_match_all( '/\bid="([^"]+)"/', $html_two, $id_matches );
+$unsuffixed = array_filter(
+	$id_matches[1],
+	function ( $id ) {
+		return '-2' !== substr( $id, -2 );
+	}
+);
+check( 'suffixes every element ID with -2 on the second block', count( $id_matches[1] ) >= 8 && array() === array_values( $unsuffixed ) );
+check( 'shares no element ID between the first and second block', array() === array_intersect( $id_matches[1], ( preg_match_all( '/\bid="([^"]+)"/', $html_one, $one_matches ) ? $one_matches[1] : array() ) ) );
+check( 'marks the second block root with its instance number', false !== strpos( $html_two, 'class="class-schedule" data-cs-instance="2"' ) );
+check( 'points the second block labels at its own controls', false !== strpos( $html_two, 'for="quarterDropdown-2"' ) && false !== strpos( $html_two, 'for="courseSearch-2"' ) );
+check( 'labels the second block modal by its own title', false !== strpos( $html_two, 'aria-labelledby="filterModalTitle-2"' ) && false !== strpos( $html_two, '<h2 id="filterModalTitle-2">' ) );
+check( 'gives the script class hooks for the dropdown, search, and count', false !== strpos( $html_two, 'class="quarter-dropdown"' ) && false !== strpos( $html_two, 'class="course-search"' ) && false !== strpos( $html_two, 'class="class-count"' ) );
+check( 'passes the clicked element to every block-scoped handler', 1 === substr_count( $html_two, 'openFilterModal(this)' ) && 2 === substr_count( $html_two, 'closeFilterModal(this)' ) && 1 === substr_count( $html_two, 'applyFilters(this)' ) && 1 === substr_count( $html_two, 'resetFilters(this)' ) && 1 === substr_count( $html_two, 'classScheduleDownloadCSV(this)' ) && 9 === substr_count( $html_two, ', this)"' ) );
+
+$html_bad = render_class_schedule_template( ...array_merge( $args, array( '2" onclick="alert(1)' ) ) );
+check( 'casts the instance number to an integer before it reaches the markup', false === strpos( $html_bad, 'alert(1)' ) && false !== strpos( $html_bad, 'data-cs-instance="2"' ) );
 
 finish_tests();

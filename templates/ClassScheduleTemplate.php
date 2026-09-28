@@ -7,8 +7,14 @@
  *   $current_term  string  Active term code
  *   $terms_data    array   Full terms response (terms_data['terms'])
  *   $attributes    array   Block attributes (department, subject, subjectOrDept)
+ *   $cs_instance   int     1-based position of this block on the page (WPM-180)
  */
 $terms = $terms_data['terms'] ?? [];
+
+// Element IDs must be unique per page, so every block after the first gets a
+// -N suffix. The script finds its elements by class inside .class-schedule.
+$cs_instance = max(1, (int) ($cs_instance ?? 1));
+$cs_suffix   = $cs_instance > 1 ? '-' . $cs_instance : '';
 
 // Toggleable columns and the site-editor-configured defaults. Status, Course ID,
 // and Title are always shown and are not configurable here. When the block has no
@@ -31,16 +37,16 @@ $cs_header_tabindex = function ($col) use ($default_columns) {
   return in_array($col, $default_columns, true) ? '' : ' tabindex="-1"';
 };
 ?>
-<div id="classSchedule">
+<div id="classSchedule<?php echo $cs_suffix; ?>" class="class-schedule" data-cs-instance="<?php echo $cs_instance; ?>">
 
   <div class="introText no-print">
-    <label for="quarterDropdown" class="screen-reader-text">Select Quarter</label>
-    <label for="courseSearch" class="screen-reader-text">Search Schedule</label>
+    <label for="quarterDropdown<?php echo $cs_suffix; ?>" class="screen-reader-text">Select Quarter</label>
+    <label for="courseSearch<?php echo $cs_suffix; ?>" class="screen-reader-text">Search Schedule</label>
 
     <div class="input-with-select">
       <div class="term-select-wrap">
         <!-- a11y: no inline onchange to avoid jump menu warning; change handled via addEventListener in classschedule.js -->
-        <select id="quarterDropdown">
+        <select id="quarterDropdown<?php echo $cs_suffix; ?>" class="quarter-dropdown">
           <?php foreach ($terms as $term) : ?>
             <option value="<?php echo esc_attr($term['code']); ?>"
               <?php selected($term['code'], $current_term); ?>>
@@ -49,28 +55,28 @@ $cs_header_tabindex = function ($col) use ($default_columns) {
           <?php endforeach; ?>
         </select>
       </div>
-      <input type="text" id="courseSearch" placeholder="Search Schedule" onkeyup="classScheduleSearch(event)">
+      <input type="text" id="courseSearch<?php echo $cs_suffix; ?>" class="course-search" placeholder="Search Schedule" onkeyup="classScheduleSearch(event)">
     </div>
 
     <div class="button-group">
-      <button id="filterButton" class="filter-button" onclick="openFilterModal()" title="Filter Options">
+      <button id="filterButton<?php echo $cs_suffix; ?>" class="filter-button filter-button--filter" onclick="openFilterModal(this)" title="Filter Options">
         <svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" class="icon-filter"><path fill="currentColor" d="M487.976 0H24.028C2.71 0-8.047 25.866 7.058 40.971L192 225.941V432c0 7.831 3.821 15.17 10.237 19.662l80 55.98C298.02 518.69 320 507.493 320 487.98V225.941l184.947-184.97C520.021 25.896 509.338 0 487.976 0z"/></svg>
         <span>Filter</span>
       </button>
       <button class="filter-button" onclick="classScheduleCopyUrl()" title="Copy URL" aria-label="Copy URL">
         <svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 384 512" class="icon-filter"><path fill="currentColor" d="M336 64h-80c0-35.3-28.7-64-64-64s-64 28.7-64 64H48C21.5 64 0 85.5 0 112v352c0 26.5 21.5 48 48 48h288c26.5 0 48-21.5 48-48V112c0-26.5-21.5-48-48-48zM192 40c13.3 0 24 10.7 24 24s-10.7 24-24 24-24-10.7-24-24 10.7-24 24-24zm144 418c0 3.3-2.7 6-6 6H54c-3.3 0-6-2.7-6-6V118c0-3.3 2.7-6 6-6h42v36c0 6.6 5.4 12 12 12h168c6.6 0 12-5.4 12-12v-36h42c3.3 0 6 2.7 6 6z"/></svg>
       </button>
-      <button class="filter-button" onclick="classScheduleDownloadCSV()" title="Download CSV" aria-label="Download CSV">
+      <button class="filter-button" onclick="classScheduleDownloadCSV(this)" title="Download CSV" aria-label="Download CSV">
         <svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 384 512" class="icon-filter"><path fill="currentColor" d="M224 136V0H24C10.7 0 0 10.7 0 24v464c0 13.3 10.7 24 24 24h336c13.3 0 24-10.7 24-24V160H248c-13.2 0-24-10.8-24-24zm76.45 211.36l-96.42 95.7c-6.65 6.61-17.39 6.61-24.04 0l-96.42-95.7C73.42 337.29 80.54 320 94.82 320H160v-80c0-8.84 7.16-16 16-16h32c8.84 0 16 7.16 16 16v80h65.18c14.28 0 21.4 17.29 11.27 27.36zM377 105L279.1 7c-4.5-4.5-10.6-7-17-7H256v128h128v-6.1c0-6.3-2.5-12.4-7-16.9z"/></svg>
       </button>
     </div>
   </div>
 
-  <div id="filterModal" class="filter-modal" role="dialog" aria-modal="true" aria-labelledby="filterModalTitle">
+  <div id="filterModal<?php echo $cs_suffix; ?>" class="filter-modal" role="dialog" aria-modal="true" aria-labelledby="filterModalTitle<?php echo $cs_suffix; ?>">
     <div class="filter-modal-content">
       <div class="filter-modal-header">
-        <h2 id="filterModalTitle">Filter Options</h2>
-        <button type="button" class="filter-modal-close" onclick="closeFilterModal()" aria-label="Close">&times;</button>
+        <h2 id="filterModalTitle<?php echo $cs_suffix; ?>">Filter Options</h2>
+        <button type="button" class="filter-modal-close" onclick="closeFilterModal(this)" aria-label="Close">&times;</button>
       </div>
       <div class="divider">
         <strong>Display Columns</strong>
@@ -95,17 +101,17 @@ $cs_header_tabindex = function ($col) use ($default_columns) {
       </div>
 
       <div class="advButtons">
-        <button class="reset-filters" onclick="resetFilters()">Reset all filters</button>
+        <button class="reset-filters" onclick="resetFilters(this)">Reset all filters</button>
         <div>
-          <button class="apply-button" onclick="applyFilters()">Apply</button>
-          <button class="cancel-button" onclick="closeFilterModal()">Cancel</button>
+          <button class="apply-button" onclick="applyFilters(this)">Apply</button>
+          <button class="cancel-button" onclick="closeFilterModal(this)">Cancel</button>
         </div>
       </div>
     </div>
   </div>
 
   <div class="display-key no-print">
-    <div id="classCount" aria-live="polite">Displaying <strong><?php echo count($courses); ?></strong> classes</div>
+    <div id="classCount<?php echo $cs_suffix; ?>" class="class-count" aria-live="polite">Displaying <strong><?php echo count($courses); ?></strong> classes</div>
     <div class="right">
       <span class="open" aria-hidden="true"></span>Open
       <span class="closed" aria-hidden="true"></span>Closed
@@ -114,20 +120,20 @@ $cs_header_tabindex = function ($col) use ($default_columns) {
   </div>
 
   <!-- a11y: uses divs with ARIA table roles instead of <table> elements to avoid "layout table" scanner warnings -->
-  <div class="el-table" id="classScheduleTable" role="table" aria-label="Class Schedule" data-default-columns="<?php echo esc_attr(implode(',', $default_columns)); ?>">
+  <div class="el-table" id="classScheduleTable<?php echo $cs_suffix; ?>" role="table" aria-label="Class Schedule" data-default-columns="<?php echo esc_attr(implode(',', $default_columns)); ?>">
     <div class="el-table__header" role="rowgroup">
       <div class="el-table__header-row" role="row">
         <div class="col-status" role="columnheader"><div class="cell"><span class="screen-reader-text">Status</span></div></div>
         <!-- a11y: inner button elements handle both mouse and keyboard activation natively -->
-        <div class="col-course-id is-sortable" role="columnheader"><button type="button" class="cell" onclick="sortClassSchedule(1)">Course ID<span class="caret-wrapper"><i class="sort-caret ascending"></i><i class="sort-caret descending"></i></span></button></div>
-        <div class="col-title is-sortable" role="columnheader"><button type="button" class="cell" onclick="sortClassSchedule(2)">Title<span class="caret-wrapper"><i class="sort-caret ascending"></i><i class="sort-caret descending"></i></span></button></div>
-        <div class="col-seats is-sortable<?php echo $cs_hidden_class('seats'); ?>" role="columnheader"><button type="button" class="cell"<?php echo $cs_header_tabindex('seats'); ?> onclick="sortClassSchedule(3)">Seats<span class="caret-wrapper"><i class="sort-caret ascending"></i><i class="sort-caret descending"></i></span></button></div>
-        <div class="col-days is-sortable<?php echo $cs_hidden_class('days'); ?>" role="columnheader"><button type="button" class="cell"<?php echo $cs_header_tabindex('days'); ?> onclick="sortClassSchedule(4)">Days<span class="caret-wrapper"><i class="sort-caret ascending"></i><i class="sort-caret descending"></i></span></button></div>
-        <div class="col-time is-sortable<?php echo $cs_hidden_class('time'); ?>" role="columnheader"><button type="button" class="cell"<?php echo $cs_header_tabindex('time'); ?> onclick="sortClassSchedule(5)">Time<span class="caret-wrapper"><i class="sort-caret ascending"></i><i class="sort-caret descending"></i></span></button></div>
-        <div class="col-location is-sortable<?php echo $cs_hidden_class('location'); ?>" role="columnheader"><button type="button" class="cell"<?php echo $cs_header_tabindex('location'); ?> onclick="sortClassSchedule(6)">Location<span class="caret-wrapper"><i class="sort-caret ascending"></i><i class="sort-caret descending"></i></span></button></div>
-        <div class="col-instructor is-sortable<?php echo $cs_hidden_class('instructor'); ?>" role="columnheader"><button type="button" class="cell"<?php echo $cs_header_tabindex('instructor'); ?> onclick="sortClassSchedule(7)">Instructor<span class="caret-wrapper"><i class="sort-caret ascending"></i><i class="sort-caret descending"></i></span></button></div>
-        <div class="col-class-num is-sortable<?php echo $cs_hidden_class('class-num'); ?>" role="columnheader"><button type="button" class="cell"<?php echo $cs_header_tabindex('class-num'); ?> onclick="sortClassSchedule(8)">Class #<span class="caret-wrapper"><i class="sort-caret ascending"></i><i class="sort-caret descending"></i></span></button></div>
-        <div class="col-enrollment is-sortable<?php echo $cs_hidden_class('enrollment'); ?>" role="columnheader"><button type="button" class="cell"<?php echo $cs_header_tabindex('enrollment'); ?> onclick="sortClassSchedule(9)">Enrollment<span class="caret-wrapper"><i class="sort-caret ascending"></i><i class="sort-caret descending"></i></span></button></div>
+        <div class="col-course-id is-sortable" role="columnheader"><button type="button" class="cell" onclick="sortClassSchedule(1, this)">Course ID<span class="caret-wrapper"><i class="sort-caret ascending"></i><i class="sort-caret descending"></i></span></button></div>
+        <div class="col-title is-sortable" role="columnheader"><button type="button" class="cell" onclick="sortClassSchedule(2, this)">Title<span class="caret-wrapper"><i class="sort-caret ascending"></i><i class="sort-caret descending"></i></span></button></div>
+        <div class="col-seats is-sortable<?php echo $cs_hidden_class('seats'); ?>" role="columnheader"><button type="button" class="cell"<?php echo $cs_header_tabindex('seats'); ?> onclick="sortClassSchedule(3, this)">Seats<span class="caret-wrapper"><i class="sort-caret ascending"></i><i class="sort-caret descending"></i></span></button></div>
+        <div class="col-days is-sortable<?php echo $cs_hidden_class('days'); ?>" role="columnheader"><button type="button" class="cell"<?php echo $cs_header_tabindex('days'); ?> onclick="sortClassSchedule(4, this)">Days<span class="caret-wrapper"><i class="sort-caret ascending"></i><i class="sort-caret descending"></i></span></button></div>
+        <div class="col-time is-sortable<?php echo $cs_hidden_class('time'); ?>" role="columnheader"><button type="button" class="cell"<?php echo $cs_header_tabindex('time'); ?> onclick="sortClassSchedule(5, this)">Time<span class="caret-wrapper"><i class="sort-caret ascending"></i><i class="sort-caret descending"></i></span></button></div>
+        <div class="col-location is-sortable<?php echo $cs_hidden_class('location'); ?>" role="columnheader"><button type="button" class="cell"<?php echo $cs_header_tabindex('location'); ?> onclick="sortClassSchedule(6, this)">Location<span class="caret-wrapper"><i class="sort-caret ascending"></i><i class="sort-caret descending"></i></span></button></div>
+        <div class="col-instructor is-sortable<?php echo $cs_hidden_class('instructor'); ?>" role="columnheader"><button type="button" class="cell"<?php echo $cs_header_tabindex('instructor'); ?> onclick="sortClassSchedule(7, this)">Instructor<span class="caret-wrapper"><i class="sort-caret ascending"></i><i class="sort-caret descending"></i></span></button></div>
+        <div class="col-class-num is-sortable<?php echo $cs_hidden_class('class-num'); ?>" role="columnheader"><button type="button" class="cell"<?php echo $cs_header_tabindex('class-num'); ?> onclick="sortClassSchedule(8, this)">Class #<span class="caret-wrapper"><i class="sort-caret ascending"></i><i class="sort-caret descending"></i></span></button></div>
+        <div class="col-enrollment is-sortable<?php echo $cs_hidden_class('enrollment'); ?>" role="columnheader"><button type="button" class="cell"<?php echo $cs_header_tabindex('enrollment'); ?> onclick="sortClassSchedule(9, this)">Enrollment<span class="caret-wrapper"><i class="sort-caret ascending"></i><i class="sort-caret descending"></i></span></button></div>
       </div>
     </div>
 
