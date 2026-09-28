@@ -181,6 +181,30 @@ $terms = array(
 	),
 );
 
+// WPM-190: theHTML() reads ?class_schedule_term= with filter_input(INPUT_GET),
+// which the CLI never populates. Under the PHP built-in server this file acts
+// as its own router: render one schedule for the real query string and report
+// which term's courses were requested.
+if ( 'cli-server' === PHP_SAPI ) {
+	register_shutdown_function(
+		function () {
+			global $ucsc_coverage;
+			if ( $ucsc_coverage && function_exists( 'xdebug_get_code_coverage' ) ) {
+				ucsc_emit_coverage( xdebug_get_code_coverage(), $ucsc_coverage );
+			}
+		}
+	);
+	render_schedule( array( 'subjectOrDept' => 'dept', 'department' => 'CSE' ), $terms, array( 'classes' => array( course_fixture() ) ) );
+	$course_routes = array_values( array_filter( array_map( function ( $request ) {
+		return $request->route;
+	}, $rest_requests ), function ( $route ) {
+		return 0 === strpos( $route, '/ucsc/v1/courses/' );
+	} ) );
+	header( 'Content-Type: application/json' );
+	echo json_encode( array( 'course_routes' => $course_routes ) );
+	return;
+}
+
 echo "error and empty states:\n";
 $html = render_schedule( array( 'subjectOrDept' => 'dept', 'department' => 'CSE' ), new WP_Error() );
 check( 'returns a terms error message when the terms request fails', false !== strpos( $html, 'Error loading terms' ) );
@@ -473,5 +497,35 @@ preg_match( '/data-cs-instance="(\d+)"/', $cs_first, $cs_m1 );
 preg_match( '/data-cs-instance="(\d+)"/', $cs_second, $cs_m2 );
 check( 'numbers consecutive renders with increasing instance numbers', isset( $cs_m1[1], $cs_m2[1] ) && (int) $cs_m2[1] === (int) $cs_m1[1] + 1 );
 check( 'gives a later render suffixed element IDs', isset( $cs_m2[1] ) && false !== strpos( $cs_second, 'id="classScheduleTable-' . $cs_m2[1] . '"' ) );
+
+echo "\nsubject-mode empty guard (WPM-190):\n";
+render_schedule( array( 'subjectOrDept' => 'subject', 'subject' => '---' ), $terms );
+check( 'subject mode with the --- placeholder requests no courses', 1 === count( $rest_requests ) && '/ucsc/v1/terms' === $rest_requests[0]->route );
+render_schedule( array( 'subjectOrDept' => 'subject' ), $terms );
+check( 'subject mode with no subject requests no courses', 1 === count( $rest_requests ) );
+
+echo "\nrequested term via ?class_schedule_term= (WPM-190):\n";
+// Serve this file through the PHP built-in server so filter_input(INPUT_GET)
+// sees a real query string (see the cli-server block above).
+$cs_port   = 18000 + ( getmypid() % 1000 );
+$cs_server = proc_open(
+	array( PHP_BINARY, '-S', '127.0.0.1:' . $cs_port, __FILE__ ),
+	array( 1 => array( 'file', '/dev/null', 'w' ), 2 => array( 'file', '/dev/null', 'w' ) ),
+	$cs_pipes
+);
+for ( $i = 0; $i < 50 && ! @fsockopen( '127.0.0.1', $cs_port ); $i++ ) {
+	usleep( 100000 );
+}
+$cs_fetch = function ( $query ) use ( $cs_port ) {
+	$body = @file_get_contents( 'http://127.0.0.1:' . $cs_port . '/' . $query );
+	$data = json_decode( (string) $body, true );
+	return $data['course_routes'] ?? null;
+};
+check( 'a valid requested term selects that term', array( '/ucsc/v1/courses/2260' ) === $cs_fetch( '?class_schedule_term=2260' ) );
+check( 'an unknown requested term falls back to the default term', array( '/ucsc/v1/courses/2262' ) === $cs_fetch( '?class_schedule_term=9999' ) );
+check( 'no requested term uses the default term', array( '/ucsc/v1/courses/2262' ) === $cs_fetch( '' ) );
+check( 'a requested term is sanitized before matching', array( '/ucsc/v1/courses/2260' ) === $cs_fetch( '?class_schedule_term=%3Cb%3E2260%3C%2Fb%3E' ) );
+proc_terminate( $cs_server );
+proc_close( $cs_server );
 
 finish_tests();

@@ -363,6 +363,25 @@ check( 'subjectcode: cache hit makes no remote call', count( $remote_get_calls )
 // must not fatal with "Cannot redeclare cmp()" (fixed by the usort closure).
 check( 'departmentcode() and subjectcode() coexist in one request without a redeclare fatal', true );
 
+// ── divisioncode() (WPM-185) ────────────────────────────────────────────────
+// Static list behind the Campus Directory division dropdown.
+
+reset_state();
+$settings  = new SiteSettings();
+$result    = $settings->divisioncode();
+$divisions = $result instanceof WP_REST_Response ? $result->get_data() : array();
+$values    = array_column( $divisions, 'value' );
+check( 'divisioncode: returns a WP_REST_Response', $result instanceof WP_REST_Response );
+check( 'divisioncode: puts the --- placeholder first', array( 'label' => '---', 'value' => '---' ) === ( $divisions[0] ?? null ) );
+check( 'divisioncode: every option is a {label, value} pair whose label matches its value',
+	count( $divisions ) > 1 && array() === array_filter( $divisions, function ( $option ) {
+		return array( 'label', 'value' ) !== array_keys( $option ) || $option['label'] !== $option['value'] || '' === $option['value'];
+	} )
+);
+check( 'divisioncode: lists each division once', count( $values ) === count( array_unique( $values ) ) );
+check( 'divisioncode: includes known divisions', in_array( 'Academic Affairs', $values, true ) && in_array( 'Visiting Faculty/Staff', $values, true ) );
+check( 'divisioncode: makes no remote call and caches nothing', array() === $remote_get_calls && array() === $transient_set_calls );
+
 // ── Done ──────────────────────────────────────────────────────────────────────
 
 finish_tests();

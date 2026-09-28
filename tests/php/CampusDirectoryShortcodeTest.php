@@ -19,8 +19,15 @@ define( 'ABSPATH', sys_get_temp_dir() . '/wp-mock/' );
 // Stub WordPress functions before loading the class
 function add_shortcode() {}
 function add_action() {}
-function wp_register_style() {}
-function wp_enqueue_style() {}
+$registered_styles = array();
+function wp_register_style( $handle, $src = '', $deps = array(), $ver = false ) {
+	global $registered_styles;
+	$registered_styles[ $handle ] = array( 'src' => $src, 'ver' => $ver, 'enqueued' => false );
+}
+function wp_enqueue_style( $handle ) {
+	global $registered_styles;
+	$registered_styles[ $handle ]['enqueued'] = true;
+}
 function plugins_url( $path ) {
 	return 'https://example.ucsc.edu/wp-content/plugins/ucsc-gutenberg-blocks/' . $path;
 }
@@ -36,8 +43,14 @@ function wp_kses_post( $data ) {
 	// For testing, we'll just return the data to verify escaping happens elsewhere
 	return $data;
 }
-function get_transient() {
-	return false; // Always miss cache
+// WPM-184: serve the fixture people through CampusDirectoryAPI's own cache
+// lookup, so the real shortcode entry point and the real API run without LDAP.
+// Each lookup key is recorded to assert which LDAP filter was built.
+$transient_keys = array();
+function get_transient( $key ) {
+	global $ldap_fixture_data, $transient_keys;
+	$transient_keys[] = $key;
+	return $ldap_fixture_data[0] ?? false;
 }
 function set_transient() {
 	return true;
@@ -112,90 +125,6 @@ function ldap_escape( $value, $ignore = null, $flags = 0 ) {
 
 require __DIR__ . '/../../classes/CampusDirectoryShortcode.php';
 
-// Override getCampusDirData to return fixture data instead of calling LDAP
-class CampusDirectoryAPI_Test extends CampusDirectoryAPI {
-	public function getCampusDirData( $cruzids, $is_shortcode = false ) {
-		global $ldap_fixture_data;
-		return $ldap_fixture_data;
-	}
-}
-
-// Override the shortcode to use our test API
-class CampusDirectoryShortcode_Test extends CampusDirectoryShortcode {
-	public function ucsc_cdp_profile_render_shortcode( $attributes ) {
-		$sa = shortcode_atts(
-			array(
-				'cruzids'            => 'cosmo',
-				'photo'              => true,
-				'name'               => true,
-				'title'              => false,
-				'phone'              => false,
-				'email'              => false,
-				'websites'           => false,
-				'officelocation'     => false,
-				'officehours'        => false,
-				'expertise'          => false,
-				'profilelinks'       => true,
-				'biography'          => false,
-				'areas_of_expertise' => false,
-				'research_interests' => false,
-				'teaching_interests' => false,
-				'awards'             => false,
-				'publications'       => false,
-				'displaystyle'       => 'grid',
-			),
-			$attributes
-		);
-		foreach ( $sa as $key => $value ) {
-			if ( $key === 'cruzids' || $key === 'displaystyle' ) {
-				continue;
-			}
-			if ( $value === 'true' ) {
-				$sa[ $key ] = true;
-			}
-			if ( $value === 'false' ) {
-				$sa[ $key ] = false;
-			}
-		}
-		$attrs = array(
-			'uids'                                  => $sa['cruzids'],
-			'jpegPhoto'                             => $sa['photo'],
-			'cn'                                    => $sa['name'],
-			'title'                                 => $sa['title'],
-			'telephoneNumber'                       => $sa['phone'],
-			'mail'                                  => $sa['email'],
-			'labeledURI'                            => $sa['websites'],
-			'ucscPersonPubOfficeLocationDetail'     => $sa['officelocation'],
-			'ucscPersonPubOfficeHours'              => $sa['officehours'],
-			'ucscPersonPubAreaOfExpertise'          => $sa['expertise'],
-			'profLinks'                             => $sa['profilelinks'],
-			'ucscPersonPubDescription'              => $sa['biography'],
-			'ucscPersonPubExpertiseReference'       => $sa['areas_of_expertise'],
-			'ucscPersonPubResearchInterest'         => $sa['research_interests'],
-			'ucscPersonPubTeachingInterest'         => $sa['teaching_interests'],
-			'ucscPersonPubAwardsHonorsGrants'       => $sa['awards'],
-			'ucscPersonPubSelectedPublication'      => $sa['publications'],
-			'displayStyle'                          => $sa['displaystyle'],
-		);
-
-		$strCruzids = $attrs['uids'];
-
-		// Use test API instead of real one
-		$campusDirectoryAPI = new CampusDirectoryAPI_Test();
-		$itemsShortcode     = $campusDirectoryAPI->getCampusDirData( $strCruzids, true );
-		$uids               = preg_split( '/[\s,]+/', $attrs['uids'] );
-
-		$result  = '';
-		$options = array(); // Not used in tests
-		if ( $attrs['displayStyle'] === 'list' ) {
-			$result .= $this->render_profiles_list( $uids, $attrs, $options, $itemsShortcode );
-		} else {
-			$result .= $this->render_profiles_grid( $uids, $attrs, $options, $itemsShortcode );
-		}
-		return $result;
-	}
-}
-
 require __DIR__ . '/helpers/harness.php';
 
 // Reset LDAP fixture data before each test
@@ -224,7 +153,7 @@ echo "CampusDirectoryShortcode tests:\n\n";
 
 // Test 1: Shortcode registration
 echo "Shortcode registration:\n";
-$shortcode = new CampusDirectoryShortcode_Test();
+$shortcode = new CampusDirectoryShortcode();
 check( 'CampusDirectoryShortcode class instantiates without error', $shortcode instanceof CampusDirectoryShortcode );
 
 // Test 2: Attribute defaults
@@ -397,6 +326,20 @@ check( 'List mode uses h4 for name', strpos( $result, '<h4>' ) !== false );
 check( 'List mode has cdp-list-profile class', strpos( $result, 'cdp-list-profile' ) !== false );
 check( 'Title renders in list mode', strpos( $result, 'Lead Guitarist' ) !== false );
 
+// WPM-184: the list layout's own field rows
+$result = $shortcode->ucsc_cdp_profile_render_shortcode( array(
+	'cruzids'        => 'jgarcia',
+	'displaystyle'   => 'list',
+	'phone'          => 'true',
+	'email'          => 'true',
+	'websites'       => 'true',
+	'officelocation' => 'true',
+) );
+check( 'List mode renders a Phone row', false !== strpos( $result, '<span class="cdp-li-header">Phone</span>' ) && false !== strpos( $result, '831-555-DEAD' ) );
+check( 'List mode renders an Email row with a mailto link', false !== strpos( $result, '<span class="cdp-li-header">Email</span>' ) && false !== strpos( $result, 'href="mailto:jgarcia@ucsc.edu"' ) );
+check( 'List mode renders a Website row with labeled links', false !== strpos( $result, '<span class="cdp-li-header">Website</span>' ) && false !== strpos( $result, '<a href="https://www.dead.net">Personal</a>' ) );
+check( 'List mode renders an Office Location row with building and room', false !== strpos( $result, '<span class="cdp-li-header">Office Location</span>' ) && false !== strpos( $result, 'Terrapin Station' ) && false !== strpos( $result, 'Room 1970, Building A' ) );
+
 // Test 16: Grid display mode rendering
 echo "\nGrid display mode:\n";
 reset_ldap_fixture();
@@ -439,5 +382,46 @@ echo "\nRead-more uid escaping:\n";
 $long_text = str_repeat( 'x', 200 );
 $result    = $shortcode->ucsc_cdp_read_more( $long_text, array(), '"><script>alert("xss")</script>' );
 check( 'XSS in read-more uid href is escaped', strpos( $result, '<script>alert' ) === false );
+
+// WPM-184: the real entry point, block classes and helpers
+echo "\nReal entry point lookup (WPM-184):\n";
+reset_ldap_fixture();
+$transient_keys = array();
+$shortcode->ucsc_cdp_profile_render_shortcode( array( 'cruzids' => 'jgarcia' ) );
+check( 'looks up a single cruzid as a profile-view (uid=...) query', array( md5( '(uid=jgarcia)' ) . '_p' ) === $transient_keys );
+
+$transient_keys = array();
+$shortcode->ucsc_cdp_profile_render_shortcode( array( 'cruzids' => 'jgarcia, bweir' ) );
+check( 'ORs several comma-separated cruzids into one lookup', array( md5( '(|(uid=jgarcia)(uid=bweir))' ) . '_p' ) === $transient_keys );
+
+$transient_keys = array();
+$shortcode->ucsc_cdp_profile_render_shortcode( array( 'cruzids' => '*)(uid=*' ) );
+check( 'escapes LDAP filter characters in shortcode cruzids', array( md5( '(uid=\\2a\\29\\28uid=\\2a)' ) . '_p' ) === $transient_keys );
+
+$transient_keys = array();
+$shortcode->ucsc_cdp_profile_render_shortcode( array() );
+check( 'defaults to the cosmo cruzid', array( md5( '(uid=cosmo)' ) . '_p' ) === $transient_keys );
+
+echo "\nReal entry point attribute coercion (WPM-184):\n";
+reset_ldap_fixture();
+$result = $shortcode->ucsc_cdp_profile_render_shortcode( array( 'cruzids' => 'jgarcia', 'name' => 'false', 'title' => 'true' ) );
+check( 'name="false" hides the name', false === strpos( $result, 'Jerry Garcia' ) );
+check( 'title="true" shows the title', false !== strpos( $result, 'Lead Guitarist' ) );
+$result = $shortcode->ucsc_cdp_profile_render_shortcode( array( 'cruzids' => 'jgarcia', 'displaystyle' => 'list' ) );
+check( 'displaystyle="list" renders the list layout', false !== strpos( $result, 'cdp-display-list' ) && false === strpos( $result, 'cdp-display-grid' ) );
+$result = $shortcode->ucsc_cdp_profile_render_shortcode( array( 'cruzids' => 'jgarcia', 'displaystyle' => 'false' ) );
+check( 'displaystyle is not coerced to a boolean (falls back to grid)', false !== strpos( $result, 'cdp-display-grid' ) );
+
+echo "\nBlock classes and helpers (WPM-184):\n";
+check( 'block classes combine alignment and custom class', 'alignwide my-class' === $shortcode->ucsc_cdp_block_classes( array( 'align' => 'wide', 'className' => 'my-class' ) ) );
+check( 'block classes with alignment only keep a trailing space', 'alignfull ' === $shortcode->ucsc_cdp_block_classes( array( 'align' => 'full' ) ) );
+check( 'block classes with a custom class only', 'my-class' === $shortcode->ucsc_cdp_block_classes( array( 'className' => 'my-class' ) ) );
+check( 'block classes are empty with neither', '' === $shortcode->ucsc_cdp_block_classes( array() ) );
+check( 'marshal_or_filter_from_uids ORs trimmed uids', '(|(uid=a)(uid=b))' === $shortcode->marshal_or_filter_from_uids( array( 'a', ' b ' ) ) );
+check( 'a labeled URI renders an escaped link', '<a href="https://x.example/?a=1&amp;b=2">Lab &lt;b&gt;</a>' === $shortcode->render_attr_labeled_uri_map( 'https://x.example/?a=1&b=2 Lab <b>' ) );
+
+$registered_styles = array();
+$shortcode->register_plugin_styles();
+check( 'registers and enqueues the shortcode stylesheet', ( $registered_styles['directoryprofileshortcode']['enqueued'] ?? false ) && false !== strpos( $registered_styles['directoryprofileshortcode']['src'], 'directoryprofileshortcode.css' ) );
 
 finish_tests();

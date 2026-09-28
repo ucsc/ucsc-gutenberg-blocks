@@ -392,6 +392,7 @@ $catalog                 = make_catalog();
 $remote_response['body'] = '<?xml version="1.0"?><catalog>'
 	. '<course><subject>LIT</subject><catalog_nbr>80A</catalog_nbr><title>Intro</title><level>Graduate</level><units>5</units><description>Test</description></course>'
 	. '<course><subject>LIT</subject><catalog_nbr>80B</catalog_nbr><title>Mystery</title><level>Mystery Level</level><units>5</units><description>Test</description></course>'
+	. '<course><subject>LIT</subject><catalog_nbr>101</catalog_nbr><title>Theory</title><level>Upper Division</level><units>5</units><description>Test</description></course>'
 	. '</catalog>';
 $html                    = $catalog->theHTML(
 	array(
@@ -402,6 +403,7 @@ $html                    = $catalog->theHTML(
 );
 check( 'course rows render the course title', false !== strpos( $html, '<td class="collapseExpandText">Intro</td>' ) );
 check( 'graduate level maps to sort value 3', false !== strpos( $html, 'Graduate<span class="secret">3</span>' ) );
+check( 'upper division level maps to sort value 2', false !== strpos( $html, 'Upper Division<span class="secret">2</span>' ) );
 check( 'unknown level maps to sort value 0 instead of reusing the previous row', false !== strpos( $html, 'Mystery Level<span class="secret">0</span>' ) );
 
 echo "block wrapper custom class support (WPM-23):\n";
