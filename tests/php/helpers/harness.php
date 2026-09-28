@@ -69,9 +69,11 @@ function ucsc_emit_coverage( $data, $clover_path ) {
 		? json_decode( file_get_contents( $raw_path ), true )
 		: array();
 
+	$plugin_root = dirname( __DIR__, 3 ) . '/';
 	foreach ( $data as $file => $lines ) {
-		// Only plugin source; skip the tests and stubs.
-		if ( false !== strpos( $file, '/tests/' ) ) {
+		// Only plugin source; skip the tests, their stubs, and files outside
+		// the plugin (e.g. the /tmp/wp-mock WP_Filesystem shims).
+		if ( 0 !== strpos( $file, $plugin_root ) || false !== strpos( $file, '/tests/' ) ) {
 			continue;
 		}
 		foreach ( $lines as $line => $state ) {

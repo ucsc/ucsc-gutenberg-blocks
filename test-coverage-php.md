@@ -23,10 +23,20 @@ coverage/html/index.html
 coverage/coverage-raw.json
 ```
 
-> **Current baseline:** PHP coverage reports 100.00% statement coverage
-> (1048/1048) across the files instrumented by the local harness. All 11 PHP
-> suites pass — the four intentionally failing XSS assertions previously noted in
-> `CampusDirectoryShortcodeTest.php` were resolved by the WPM-132 escaping fix.
+> **Current baseline (2026-09-23):** PHP coverage is **60.21%** statement
+> coverage (1132/1880) across every file in `classes/`, `templates/`,
+> `src/API/` and `index.php`. All 11 PHP suites pass.
+>
+> The 100.00% (1048/1048) figure previously recorded here was a reporting bug,
+> not a measurement. `run-php-coverage.sh` read the project total with
+> `grep 'statements="…"'`, which also matches inside `coveredstatements=`, so
+> the total always equalled the covered count. Separately, files no suite
+> loads were missing from `clover.xml` entirely. The runner now finishes with
+> `tests/php/coverage-unloaded-sources.php`, which adds those files at 0%
+> (currently `ContentSharer.php`, `FeedbackForm.php`, both demo blocks, and
+> `CourseDetailTemplate.php`), and the harness no longer counts the
+> `/tmp/wp-mock` WP_Filesystem shims. `coverage/html/index.html` always summed
+> correctly; only the shell summary was wrong.
 > Statement coverage still measures only which lines execute, not whether their
 > behaviour is asserted, so it should not be read as a quality ceiling —
 > WPM-171 is the worked example: every affiliation-narrowing branch in
