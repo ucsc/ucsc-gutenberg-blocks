@@ -60,6 +60,17 @@ for test_file in "${PHP_TEST_FILES[@]}"; do
 	echo
 done
 
+# Add source files no suite loaded, at 0%, so the percentage covers the whole
+# plugin rather than only the files some test happened to require.
+echo "▸ Counting source files no suite loads..."
+docker run --rm \
+	-v "$PLUGIN_ROOT:/plugin" \
+	-w /plugin \
+	-e "UCSC_COVERAGE=/plugin/coverage/clover.xml" \
+	"$IMAGE_NAME" \
+	php tests/php/coverage-unloaded-sources.php
+echo
+
 echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
 echo
 
@@ -70,9 +81,13 @@ else
 fi
 
 if [ -f "$COVERAGE_CLOVER" ]; then
-	# Extract coverage summary from clover.xml
-	TOTAL_STATEMENTS=$(grep -o 'statements="[0-9]*"' "$COVERAGE_CLOVER" | tail -1 | grep -o '[0-9]*')
-	COVERED_STATEMENTS=$(grep -o 'coveredstatements="[0-9]*"' "$COVERAGE_CLOVER" | tail -1 | grep -o '[0-9]*')
+	# Extract the project totals from the last <metrics> line of clover.xml.
+	# Match " statements=" with its leading space: a bare 'statements="'
+	# pattern also matches inside coveredstatements=, which made the total
+	# equal the covered count and always reported 100%.
+	PROJECT_METRICS=$(grep '<metrics ' "$COVERAGE_CLOVER" | tail -1)
+	TOTAL_STATEMENTS=$(echo "$PROJECT_METRICS" | sed -n 's/.* statements="\([0-9]*\)".*/\1/p')
+	COVERED_STATEMENTS=$(echo "$PROJECT_METRICS" | sed -n 's/.*coveredstatements="\([0-9]*\)".*/\1/p')
 	
 	if [ "$TOTAL_STATEMENTS" -gt 0 ]; then
 		PERCENT=$(awk "BEGIN {printf \"%.2f\", ($COVERED_STATEMENTS / $TOTAL_STATEMENTS) * 100}")
