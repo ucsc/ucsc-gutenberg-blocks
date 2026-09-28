@@ -33,9 +33,18 @@ function get_query_var( $var ) {
 
 // Template checks and calls get_theme_file_path / get_header / get_footer in the
 // non-inline path; suppress them so they don't touch the filesystem.
-function get_theme_file_path() { return false; }
-function get_header() {}
-function get_footer() {}
+// WPM-189: a test can point get_theme_file_path() at a real file to take the
+// theme's header-plugin.php / footer-plugin.php branch; the chrome calls are
+// recorded.
+function get_theme_file_path( $file = '' ) {
+	return $GLOBALS['_test_theme_file'] ?? false;
+}
+function get_header( $name = null ) {
+	$GLOBALS['_test_chrome'][] = 'header:' . ( $name ?? 'default' );
+}
+function get_footer( $name = null ) {
+	$GLOBALS['_test_chrome'][] = 'footer:' . ( $name ?? 'default' );
+}
 
 // CampusDirectoryAPI is instantiated inside the template. We stub it so tests
 // control the returned $profileData without an LDAP connection.
@@ -311,5 +320,46 @@ $html_xss = render_profile_template( $attack );
 check( 'does not render a raw script tag from the name field',         false === strpos( $html_xss, '<script>alert(1)</script>' ) );
 check( 'does not render a raw img event handler from the title field', false === strpos( $html_xss, '<img src=x onerror=alert(1)>' ) );
 check( 'blocks a javascript: website href',                            false === strpos( $html_xss, 'href="javascript:' ) );
+
+// -- linkify() and standalone chrome (WPM-189) -------------------------------
+echo "\nlinkify() (WPM-189):\n";
+// The template defines linkify() globally; it is loaded by the renders above.
+// Its website branch is unreachable from the template itself (websites render
+// separately and ucscpersonpubwebsite is not an expertise field), so it is
+// exercised directly here.
+check( 'turns "URL label" into an escaped new-tab website link', '<a target="_blank" rel="noopener" href="https://example.ucsc.edu/~jdoe">Jane &amp; &lt;b&gt;Site&lt;/b&gt;</a>' === trim( linkify( 'ucscpersonpubwebsite', 'https://example.ucsc.edu/~jdoe Jane & <b>Site</b>' ) ) );
+check( 'uses the URL as the label when none is given', '<a target="_blank" rel="noopener" href="https://example.ucsc.edu/">https://example.ucsc.edu/</a>' === trim( linkify( 'ucscpersonpubwebsite', 'https://example.ucsc.edu/' ) ) );
+check( 'drops a javascript: website URL', false === strpos( linkify( 'ucscpersonpubwebsite', 'javascript:alert(1) x' ), 'javascript:' ) );
+check( 'removes a link title that duplicates the link text', false === strpos( linkify( 'ucscpersonpubdescription', '<a href="https://a.example" title="Lab page">Lab page</a>' ), 'title=' ) );
+check( 'removes a link title that starts with the link text', false === strpos( linkify( 'ucscpersonpubdescription', '<a href="https://a.example" title="Lab page (opens in new window)">Lab page</a>' ), 'title=' ) );
+check( 'keeps a link title that adds different information', false !== strpos( linkify( 'ucscpersonpubdescription', '<a href="https://a.example" title="Marine Lab homepage">Lab page</a>' ), 'title="Marine Lab homepage"' ) );
+
+$html = render_profile_template( profile_fixture( [ 'ucscpersonpubdescription' => [ 'count' => 1, 0 => 'See <a href="https://lab.example" title="My Lab">My Lab</a>' ] ] ) );
+check( 'profile expertise fields render through linkify()', false !== strpos( $html, '<a href="https://lab.example">My Lab</a>' ) );
+
+echo "\nstandalone page chrome (WPM-189):\n";
+$GLOBALS['_test_chrome'] = [];
+render_profile_template( profile_fixture(), 'jdoe', false );
+check( 'standalone profile uses the default theme header and footer', [ 'header:default', 'footer:default' ] === $GLOBALS['_test_chrome'] );
+
+$GLOBALS['_test_chrome']     = [];
+$GLOBALS['_test_theme_file'] = __FILE__; // any file that exists
+render_profile_template( profile_fixture(), 'jdoe', false );
+check( 'standalone profile uses the theme header-plugin/footer-plugin when present', [ 'header:plugin', 'footer:plugin' ] === $GLOBALS['_test_chrome'] );
+unset( $GLOBALS['_test_theme_file'] );
+
+$GLOBALS['_test_chrome'] = [];
+render_profile_template( profile_fixture(), 'jdoe', true );
+check( 'inline profile renders no header or footer', [] === $GLOBALS['_test_chrome'] );
+
+$GLOBALS['_test_chrome'] = [];
+$GLOBALS['_test_profile_data'] = [];
+$GLOBALS['_test_query_vars']   = [ 'directoryprofilecruzid' => 'ghost<b>' ];
+$directory_profile_inline      = false;
+ob_start();
+include __DIR__ . '/../../templates/DirectoryProfileTemplate.php';
+$html_standalone_nf = ob_get_clean();
+unset( $GLOBALS['_test_profile_data'], $GLOBALS['_test_query_vars'] );
+check( 'standalone not-found page shows the escaped CruzID inside the page chrome', false !== strpos( $html_standalone_nf, 'CruzID: ghost&lt;b&gt; not found.' ) && [ 'header:default', 'footer:default' ] === $GLOBALS['_test_chrome'] );
 
 finish_tests();

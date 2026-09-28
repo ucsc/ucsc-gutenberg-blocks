@@ -84,7 +84,13 @@ if (!defined('LDAP_OPT_NETWORK_TIMEOUT')) define('LDAP_OPT_NETWORK_TIMEOUT', 0);
 if (!defined('LDAP_OPT_SIZELIMIT')) define('LDAP_OPT_SIZELIMIT', 0);
 if (!defined('LDAP_ESCAPE_FILTER')) define('LDAP_ESCAPE_FILTER', 0);
 
-function ldap_connect() { return true; }
+$ldap_connect_uris  = array();
+$ldap_len_reads     = array();
+function ldap_connect( $uri = '' ) {
+	global $ldap_connect_uris;
+	$ldap_connect_uris[] = $uri;
+	return true;
+}
 function ldap_set_option($link, $option, $value) {
 	global $ldap_options;
 	$ldap_options[] = array(
@@ -127,6 +133,8 @@ function ldap_get_values( $link, $entry, $attr ) {
 	return $ldap_entries[ $entry - 1 ][ $attr ];
 }
 function ldap_get_values_len( $link, $entry, $attr ) {
+	global $ldap_len_reads;
+	$ldap_len_reads[] = $attr;
 	return ldap_get_values( $link, $entry, $attr );
 }
 function ldap_first_attribute( $link, $entry ) {
@@ -241,7 +249,9 @@ function transient_keys() {
 }
 
 function reset_test_state() {
-	global $query_vars, $is_admin, $is_singular, $is_main_query, $queried_object_id, $current_post_id, $ldap_searches, $ldap_options, $ldap_search_result, $ldap_bind_result, $ldap_entries, $ldap_attr_cursor, $transients;
+	global $query_vars, $is_admin, $is_singular, $is_main_query, $queried_object_id, $current_post_id, $ldap_searches, $ldap_options, $ldap_search_result, $ldap_bind_result, $ldap_entries, $ldap_attr_cursor, $transients, $ldap_connect_uris, $ldap_len_reads;
+	$ldap_connect_uris  = array();
+	$ldap_len_reads     = array();
 	$query_vars         = array();
 	$is_admin           = false;
 	$is_singular        = false;
@@ -856,5 +866,74 @@ check( 'getDirDropdowns caches the list for 24 hours (86400s)', isset( $transien
 
 $again = $api->getDirDropdowns( $attr );
 check( 'getDirDropdowns serves a repeat call from the cache without an LDAP search', 1 === count( $ldap_searches ) && $result === $again );
+
+echo "directory_profile_title tests (WPM-177):\n";
+
+$host_title_parts = array( 'title' => 'People', 'site' => 'Example Dept' );
+
+reset_test_state();
+$query_vars['directoryprofilecruzid'] = 'jsmith';
+$ldap_entries = array( ldap_entry_fixture( array( 'uid' => array( 'jsmith' ), 'cn' => array( 'Jan Smith' ) ) ) );
+$parts = $campus_directory->directory_profile_title( $host_title_parts );
+check( 'profile document title is the person\'s directory name', 'Jan Smith' === $parts['title'] );
+check( 'profile document title leaves the other title parts alone', 'Example Dept' === $parts['site'] );
+
+reset_test_state();
+$query_vars['directoryprofilecruzid'] = 'nobody';
+$parts = $campus_directory->directory_profile_title( $host_title_parts );
+check( 'unresolved cruzid falls back to the host page title unchanged', $host_title_parts === $parts );
+
+reset_test_state();
+$parts = $campus_directory->directory_profile_title( $host_title_parts );
+check( 'non-profile pages keep their title without an LDAP search', $host_title_parts === $parts && 0 === count( $ldap_searches ) );
+
+echo "CampusDirectoryAPI untested branches (WPM-188):\n";
+
+reset_test_state();
+$api = campus_directory_api_fixture();
+$api->getCampusDirData( 'jsmith' );
+check( 'connects over ldaps:// outside the Docker dev stack', array( 'ldaps://ldap-blue.ucsc.edu' ) === $ldap_connect_uris );
+
+reset_test_state();
+putenv( 'DOCKER_DEV=docker_dev' );
+$api = campus_directory_api_fixture();
+$api->getCampusDirData( 'jsmith' );
+putenv( 'DOCKER_DEV' );
+check( 'connects over plain ldap:// only when DOCKER_DEV=docker_dev', array( 'ldap://ldap-blue.ucsc.edu' ) === $ldap_connect_uris );
+
+reset_test_state();
+$api    = campus_directory_api_fixture( array(
+	'automatedFeeds' => true,
+	'objStaffTypes'  => array( 'Researcher' => true ),
+	'department'     => 'MATH',
+) );
+$filter = $api->buildFilterString();
+check( 'a Researcher-only staff feed filters on ucscpersonpubstafftype=Researcher', false !== strpos( $filter, '(ucscpersonpubstafftype=Researcher)' ) && false === strpos( $filter, 'ucscPersonIsPostDoc' ) );
+
+reset_test_state();
+$api    = campus_directory_api_fixture( array(
+	'automatedFeeds'               => true,
+	'objFacultyTypes'              => array( 'All' => true ),
+	'department'                   => 'MATH',
+	'displayDeptartmentAffiliates' => true,
+) );
+$filter = $api->buildFilterString();
+check( 'department affiliates filter on ucscpersonpubaffiliateddepartment', false !== strpos( $filter, '(ucscpersonpubaffiliateddepartment=MATH)' ) && false === strpos( $filter, 'ucscpersonpubdepartmentnumber=' ) );
+
+reset_test_state();
+$api    = campus_directory_api_fixture( array(
+	'automatedFeeds'  => true,
+	'objFacultyTypes' => array( 'All' => true ),
+	'department'      => 'MATH',
+) );
+$filter = $api->buildFilterString();
+check( 'without affiliates the department filters on ucscpersonpubdepartmentnumber', false !== strpos( $filter, '(ucscpersonpubdepartmentnumber=MATH)' ) && false === strpos( $filter, 'ucscpersonpubaffiliateddepartment' ) );
+
+reset_test_state();
+$ldap_entries = array( ldap_entry_fixture( array( 'uid' => array( 'jsmith' ), 'cn' => array( 'Jan Smith' ), 'jpegphoto' => array( "\xFF\xD8\x00binary" ) ) ) );
+$api          = campus_directory_api_fixture();
+$data         = $api->getCampusDirData( 'jsmith', true );
+check( 'reads jpegphoto with the binary-safe ldap_get_values_len() and nothing else with it', array( 'jpegphoto' ) === $ldap_len_reads );
+check( 'keeps jpegphoto bytes intact, including NUL', "\xFF\xD8\x00binary" === ( $data[0][0]['jpegphoto'][0] ?? null ) );
 
 finish_tests();

@@ -8,8 +8,11 @@ PHP_TEST_FILES=(
 	tests/php/ClassScheduleTest.php
 	tests/php/ClassScheduleTemplateTest.php
 	tests/php/ClassScheduleQueryTermTest.php
+	tests/php/CourseDetailTemplateTest.php
 	tests/php/CourseCatalogTest.php
 	tests/php/CourseScheduleAPITest.php
 	tests/php/SiteSettingsTest.php
+	tests/php/SiteSettingsAdminTest.php
+	tests/php/PluginWiringTest.php
 	tests/php/IndexWpCliTest.php
 )

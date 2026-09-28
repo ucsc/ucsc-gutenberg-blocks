@@ -146,6 +146,17 @@ describe('tablesorter.js course catalog frontend', () => {
     expect(rows.map((row) => row.style.display)).toEqual(['none', 'none', '', '', 'none', 'none']);
   });
 
+  it('matches a search term present only in a course description (WPM-164)', () => {
+    const input = document.getElementById('search');
+
+    input.value = 'introductory';
+    window.tableSearch({ currentTarget: input });
+
+    const rows = Array.from(document.querySelectorAll('#tableSorter tbody tr'));
+    expect(rows[0].textContent).not.toMatch(/introductory/i);
+    expect(rows.map((row) => row.style.display)).toEqual(['', '', 'none', 'none', 'none', 'none']);
+  });
+
   it('handles empty tables without throwing', () => {
     buildFixture([]);
     loadScript();
