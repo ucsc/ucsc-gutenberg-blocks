@@ -1,5 +1,3 @@
-# Class Schedule / Rest Api Specification
-
 ## Purpose
 
 Proxies PeopleSoft's course-schedule feed through a WordPress REST namespace
@@ -7,7 +5,7 @@ so every consumer — the block render, the course-detail page, and the
 document title — shares one cache and one error contract instead of each
 calling PeopleSoft directly.
 
-## Requirements
+## ADDED Requirements
 
 ### Requirement: Public REST routes for terms, courses, and course detail
 

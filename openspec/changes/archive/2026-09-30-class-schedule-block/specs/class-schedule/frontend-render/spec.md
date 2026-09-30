@@ -1,5 +1,3 @@
-# Class Schedule / Frontend Render Specification
-
 ## Purpose
 
 Renders a searchable, sortable, filterable class schedule table for
@@ -7,7 +5,7 @@ visitors, with column visibility, status filtering, CSV export, and a
 shareable URL — entirely client-side against server-rendered markup, since the
 underlying seat and section data changes continuously.
 
-## Requirements
+## ADDED Requirements
 
 ### Requirement: Term resolution and selection
 

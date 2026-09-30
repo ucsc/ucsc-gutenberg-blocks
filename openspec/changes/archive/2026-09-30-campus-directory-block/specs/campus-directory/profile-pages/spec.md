@@ -1,5 +1,3 @@
-# Campus Directory / Profile Pages Specification
-
 ## Purpose
 
 Covers the individual-person surfaces that a listing links to: the pretty
@@ -7,7 +5,7 @@ Covers the individual-person surfaces that a listing links to: the pretty
 `ucsc_profiles` shortcode that embeds the same profile data into arbitrary
 content.
 
-## Requirements
+## ADDED Requirements
 
 ### Requirement: Profile route
 

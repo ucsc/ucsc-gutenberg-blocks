@@ -1,12 +1,10 @@
-# Course Catalog / Block Registration Specification
-
 ## Purpose
 
 Lets a site editor pin a Course Catalog block to one department or one
 subject, so a browsable course catalog table can be embedded on a department
 page without further configuration by anyone else.
 
-## Requirements
+## ADDED Requirements
 
 ### Requirement: Block registration and attributes
 

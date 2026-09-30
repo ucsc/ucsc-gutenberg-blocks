@@ -1,12 +1,10 @@
-# Campus Directory / Audience Selection Specification
-
 ## Purpose
 
 Determines which people a Campus Directory listing contains — either everyone
 matching an organizational feed, or a hand-curated list — so a unit's page stays
 current without anyone maintaining it by hand.
 
-## Requirements
+## ADDED Requirements
 
 ### Requirement: Two audience modes
 
