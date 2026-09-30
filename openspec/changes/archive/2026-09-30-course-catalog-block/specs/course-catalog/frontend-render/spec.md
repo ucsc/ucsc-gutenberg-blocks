@@ -1,12 +1,10 @@
-# Course Catalog / Frontend Render Specification
-
 ## Purpose
 
 Renders a searchable, sortable, expandable catalog table for visitors, so a
 visitor can scan course titles and levels, then reveal a full description
 in-place without leaving the page.
 
-## Requirements
+## ADDED Requirements
 
 ### Requirement: Upstream errors render a plain-language message
 

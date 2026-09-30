@@ -1,5 +1,3 @@
-# Class Schedule / Course Detail Pages Specification
-
 ## Purpose
 
 Gives every course section a canonical, linkable detail page rendered outside
@@ -7,7 +5,7 @@ the block, so a visitor can follow a course link from the schedule table (or
 an old bookmarked URL) to a full description, meeting information, and
 associated sections.
 
-## Requirements
+## ADDED Requirements
 
 ### Requirement: Canonical course detail URL
 

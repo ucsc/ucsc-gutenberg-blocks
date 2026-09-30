@@ -1,12 +1,10 @@
-# Campus Directory / Ldap Data Access Specification
-
 ## Purpose
 
 Governs how the block reaches the campus LDAP directory — how queries are built
 from author configuration, what the site is allowed to pull, how results are
 cached, and how a page behaves when the directory is unreachable.
 
-## Requirements
+## ADDED Requirements
 
 ### Requirement: Directory credentials and precedence
 

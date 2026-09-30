@@ -1,12 +1,10 @@
-# Campus Directory / Information Display Specification
-
 ## Purpose
 
 Lets a site editor decide which directory fields are published for each person
 in a listing, so one unit can show office hours and expertise while another
 shows only a name and title, without either unit maintaining its own list.
 
-## Requirements
+## ADDED Requirements
 
 ### Requirement: Per-field visibility selection
 

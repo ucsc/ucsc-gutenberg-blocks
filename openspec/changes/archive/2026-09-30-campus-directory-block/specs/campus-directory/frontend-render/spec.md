@@ -1,12 +1,10 @@
-# Campus Directory / Frontend Render Specification
-
 ## Purpose
 
 Defines the public output of a Campus Directory listing — the three layouts, how
 selected fields are presented within each, and the escaping and accessibility
 guarantees that apply to directory data the site does not control.
 
-## Requirements
+## ADDED Requirements
 
 ### Requirement: Three listing layouts
 

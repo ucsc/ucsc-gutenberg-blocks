@@ -1,12 +1,10 @@
-# Course Catalog / Data Fetch Specification
-
 ## Purpose
 
 Fetches course catalog data from PeopleSoft for a selected department or
 subject, isolating prod and QA environments and caching aggressively since
 catalog content changes far less often than schedule/enrollment data.
 
-## Requirements
+## ADDED Requirements
 
 ### Requirement: XML query built from the block's dept/subject attribute
 

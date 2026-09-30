@@ -1,5 +1,3 @@
-# Class Schedule / Block Registration Specification
-
 ## Purpose
 
 Lets a site editor pin a Class Schedule block to one department or one
@@ -7,7 +5,7 @@ subject, and choose which optional columns visitors see by default, so a
 single block instance can be embedded per department page without further
 configuration by anyone else.
 
-## Requirements
+## ADDED Requirements
 
 ### Requirement: Block registration and attributes
 

@@ -1,5 +1,3 @@
-# Campus Directory / Block Registration Specification
-
 ## Purpose
 
 Defines how the Campus Directory block presents itself in the WordPress editor:
@@ -7,7 +5,7 @@ the attributes it persists, the panels an author sees, the layout choice that
 drives every other decision, and the guards that stop an author publishing a
 listing that cannot resolve to anyone.
 
-## Requirements
+## ADDED Requirements
 
 ### Requirement: Block identity and render model
 
