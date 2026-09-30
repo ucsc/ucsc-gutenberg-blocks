@@ -92,6 +92,11 @@ function wp_enqueue_script( $handle, $src = '', $deps = array(), $ver = false ) 
 	}
 	$scripts[ $handle ]['enqueued'] = true;
 }
+function wp_localize_script( $handle, $object_name, $l10n ) {
+	global $scripts;
+	$scripts[ $handle ]['l10n'][ $object_name ] = $l10n;
+	return true;
+}
 function wp_register_style( $handle, $src, $deps = array(), $ver = false ) {
 	global $styles;
 	$styles[ $handle ] = array( 'src' => $src, 'deps' => $deps, 'ver' => $ver, 'enqueued' => false );
@@ -297,11 +302,13 @@ reset_wiring_state();
 do_hook( 'admin_enqueue_scripts' );
 check( 'enqueues build/index.js as the ucscblocks editor script with block-editor deps', ( $scripts['ucscblocks']['enqueued'] ?? false ) && 'https://example.ucsc.edu/wp-content/plugins/ucsc-gutenberg-blocks/build/index.js' === $scripts['ucscblocks']['src'] && in_array( 'wp-blocks', $scripts['ucscblocks']['deps'], true ) && in_array( 'wp-block-editor', $scripts['ucscblocks']['deps'], true ) );
 check( 'production versions the editor script with the plugin Version header', '1.2.1' === $scripts['ucscblocks']['ver'] );
+check( 'localizes ucscBlocksConfig.version as the plugin Version header (WPM-89)', '1.2.1' === ( $scripts['ucscblocks']['l10n']['ucscBlocksConfig']['version'] ?? null ) );
 
 reset_wiring_state();
 $environment_type = 'local';
 do_hook( 'admin_enqueue_scripts' );
 $build = __DIR__ . '/../../build/index.js';
 check( 'local environments version the editor script by build file mtime', file_exists( $build ) ? filemtime( $build ) === $scripts['ucscblocks']['ver'] : '1.2.1' === $scripts['ucscblocks']['ver'] );
+check( 'local environments still localize the plugin Version header, not the build mtime (WPM-89)', '1.2.1' === ( $scripts['ucscblocks']['l10n']['ucscBlocksConfig']['version'] ?? null ) );
 
 finish_tests();

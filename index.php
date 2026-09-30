@@ -71,6 +71,7 @@ function registerJSBuild() {
 
   $script_version = ($is_dev_environment && file_exists($script_path)) ? filemtime($script_path) : $plugin_version;
   wp_enqueue_script('ucscblocks', plugin_dir_url(__FILE__) . 'build/index.js', array('wp-blocks','wp-element', 'wp-components', 'wp-block-editor'), $script_version);
+  wp_localize_script('ucscblocks', 'ucscBlocksConfig', array('version' => $plugin_version));
 }
 
 if (defined('WP_CLI') && WP_CLI) {

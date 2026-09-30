@@ -117,6 +117,38 @@ describe('ClassSchedule block', () => {
       expect(screen.getByTestId('panel')).toHaveAttribute('data-header', 'Class Schedule Block');
     });
 
+    describe('version label (WPM-89)', () => {
+      const renderEdit = () =>
+        render(
+          <Edit
+            setAttributes={jest.fn()}
+            attributes={{ subjectOrDept: 'dept', department: '', subject: '' }}
+          />
+        );
+
+      afterEach(() => {
+        delete window.ucscBlocksConfig;
+      });
+
+      it('shows the plugin version localized by PHP', () => {
+        window.ucscBlocksConfig = { version: '9.9.9' };
+        renderEdit();
+        expect(screen.getByText('version 9.9.9')).toBeInTheDocument();
+        expect(screen.queryByText(/1\.1\.38/)).not.toBeInTheDocument();
+      });
+
+      it('omits the label when no config is localized', () => {
+        renderEdit();
+        expect(screen.queryByText(/^version/)).not.toBeInTheDocument();
+      });
+
+      it('omits the label when the version is empty', () => {
+        window.ucscBlocksConfig = { version: '' };
+        renderEdit();
+        expect(screen.queryByText(/^version/)).not.toBeInTheDocument();
+      });
+    });
+
     it('defaults subjectOrDept to "dept" when undefined', () => {
       const setAttributes = jest.fn();
       render(

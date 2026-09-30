@@ -108,7 +108,9 @@ const ClassSchedule = () => {
                 setAttributes={setAttributes}
                 disabled={subjectOrDept !== "subject"}
               />
-              <small style={{ display: 'block', marginTop: '3em', fontSize: '0.7em', color: '#666' }}>version 1.1.38</small>
+              {window.ucscBlocksConfig?.version && (
+                <small style={{ display: 'block', marginTop: '3em', fontSize: '0.7em', color: '#666' }}>version {window.ucscBlocksConfig.version}</small>
+              )}
             </PanelBody>
             <PanelBody title="Default Visible Columns" initialOpen={false}>
               <p style={{ fontSize: '0.85em', color: '#555' }}>
