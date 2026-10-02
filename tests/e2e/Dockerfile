@@ -1,6 +1,6 @@
 # e2e runner: Node + headless Chromium, so the e2e suite needs no local
 # Node, Chrome, PHP, or Python on the host. Built and driven by run-e2e.sh.
-FROM node:20-bookworm-slim
+FROM node:22-bookworm-slim
 
 RUN apt-get update \
  && apt-get install -y --no-install-recommends \
