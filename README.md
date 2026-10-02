@@ -10,6 +10,7 @@ A WordPress plugin providing UCSC custom Gutenberg blocks: class schedule, cours
 ### Development Setup Instructions
 
 - Follow the setup instructions in the [wp-dev.ucsc README](https://github.com/ucsc/wp-dev.ucsc)
+- Node 22 is used everywhere: the wp-dev.ucsc dev containers, CI (`test.yml`), e2e (`tests/e2e/Dockerfile`) and releases (`release.yml`). Node installed on your own machine is not used.
 
 ### How To Contribute Code / Develop
 

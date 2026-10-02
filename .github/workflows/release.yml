@@ -22,7 +22,7 @@ jobs:
     with:
       zip-name: ${{ github.event.repository.name }}.zip
       # Uncomment / adjust any of these to override defaults:
-      # node-version: '24'
+      node-version: '22'
       # build-command: 'build'
       use-composer: false
       # composer-args: '--no-dev --no-progress --optimize-autoloader'
