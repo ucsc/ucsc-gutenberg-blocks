@@ -29,6 +29,7 @@ without requiring PHPUnit, Xdebug, or any new dependency.
   real, adapting the two parts of the UCSC Laravel/Vue baseapp testing standard
   (`_laravel/baseapp/doc/TESTING-STANDARDS.md`) that transfer to a dependency-free PHP/Jest
   harness with no Laravel, PHPUnit, or Vuex.
+- Record dated, checked-in coverage and gap snapshots so progress is visible over time.
 
 **Non-Goals:**
 
@@ -152,6 +153,25 @@ without requiring PHPUnit, Xdebug, or any new dependency.
    assumption they exist somewhere unindexed. Rejected — asserting an unverified package name in
    project documentation risks sending a future contributor to a nonexistent install target.
 
+9. Record coverage progress as dated Markdown snapshots in `docs/coverage/`.
+
+   Each recorded run produces `docs/coverage/YYYY-MM-DD.md`: a header (date, commit SHA, generating
+   command) followed by `coverage-report.py`'s normal report and its `--gaps` ranked list for all
+   three blocks. `docs/coverage/README.md` keeps one index row per snapshot (date, SHA, PHP %,
+   JS %, structural units, open-gap count) so the trend reads without opening each file. The
+   snapshot is assembled from existing `coverage-report.py` output; no new script is added,
+   consistent with decision 5.
+
+   Alternative considered: `coverage-report.py --baseline-write`. Rejected as the progress record —
+   it overwrites a single undated JSON file (`.ucsc-coverage-baseline.json`) that is not checked
+   in, so history is lost. It remains useful as a local diff baseline.
+
+   Alternative considered: keep history under `coverage/`. Rejected — that directory is gitignored
+   (WPM-116) and holds raw clover/lcov artifacts, which stay ignored.
+
+   Alternative considered: `.claude/coverage/`. Rejected — team convention places AI-generated
+   coverage and gap reports under `docs/` (see the `ai-docs-location-convention` change).
+
 ## Risks / Trade-offs
 
 - [Risk] Reviewers treat the checklist as paperwork instead of technical scrutiny. → Mitigation:
@@ -169,6 +189,9 @@ without requiring PHPUnit, Xdebug, or any new dependency.
   Mitigation: probe scripts must restore the file in a cleanup path (trap/finally) and check for a
   clean git tree before starting.
 
+- [Risk] Snapshots accumulate as git noise. → Mitigation: record a snapshot at meaningful
+  milestones (a WPM ticket closing, a release), not on every test run.
+
 ## Migration Plan
 
 1. Baseline the plugin's current PHP-harness and Jest tests against the review standard and
@@ -179,6 +202,7 @@ without requiring PHPUnit, Xdebug, or any new dependency.
    tasks.md) and confirm it catches an intentional defect.
 4. Apply the review standard to WPM-118/119/120 test work as those tickets land, without altering
    their scope.
+5. Record the first dated coverage snapshot in `docs/coverage/` as the progress starting point.
 
 Rollback is straightforward because this change is documentation- and tooling-only: remove the
 added guidance and any probe script if they create unacceptable friction.

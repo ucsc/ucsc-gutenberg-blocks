@@ -62,7 +62,16 @@
 - [ ] 5.2 Document the easy-to-use invocation syntax for both reports in
       `docs/test-effectiveness.md`, and verify a new contributor could run either report from the
       documented command alone
-- [ ] 5.3 Re-run `openspec validate evaluate-test-effectiveness --strict` and verify the change
+- [ ] 5.3 Record the first dated snapshot at `docs/coverage/<YYYY-MM-DD>.md` (date, commit SHA,
+      command, PHP/JS coverage and ranked gap list for all three blocks) and create
+      `docs/coverage/README.md` with its index row, and verify both are tracked by git (not
+      gitignored)
+- [ ] 5.4 Document the snapshot procedure in `docs/test-effectiveness.md`, and verify following it
+      produces a correctly named file that does not overwrite an earlier snapshot
+- [ ] 5.5 Confirm the root `test-coverage-js.md` / `test-coverage-php.md` files are handled by the
+      `ai-docs-location-convention` change rather than duplicated here, and verify no new root
+      coverage Markdown is added
+- [ ] 5.6 Re-run `openspec validate evaluate-test-effectiveness --strict` and verify the change
       still passes
 
 ## 6. Adapt Baseapp-Inspired Standards

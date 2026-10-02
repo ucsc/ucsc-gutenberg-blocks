@@ -39,6 +39,10 @@ happy-path execution.
 - Document where to discover external, community-maintained WordPress block testing-skill
   resources (e.g. `WordPress/agent-skills`, `jorgerosal/wordpress-skills`), so contributors do not
   rely on unverified package names.
+- Record a dated, checked-in coverage and gap snapshot under `docs/coverage/` (`YYYY-MM-DD.md`, one
+  per recorded run, never overwritten) holding PHP and JS numbers plus the ranked gap list for all
+  three blocks, with an index table in `docs/coverage/README.md`, so progress is visible in git
+  history.
 
 ## Capabilities
 
@@ -63,4 +67,6 @@ happy-path execution.
 - Complements rather than duplicates the WPM-115 epic and its children (WPM-116 Jest coverage
   wiring, WPM-117 PHP harness instrumentation, WPM-118/119/120 per-block gap closure); this change
   does not alter that epic's scope or ticket structure.
+- Adds `docs/coverage/` (checked-in Markdown snapshots and index); raw coverage artifacts under
+  `coverage/` remain gitignored.
 - Does not change block registration, rendered markup, REST endpoints, or any production behavior.

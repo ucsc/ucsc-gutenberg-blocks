@@ -87,6 +87,25 @@ without bespoke setup.
   as written
 - **THEN** it produces a working report for all three blocks on a clean checkout
 
+### Requirement: Coverage and gap snapshots are recorded over time
+The project SHALL record each coverage run it intends to keep as a dated Markdown snapshot under
+`docs/coverage/`, checked into git, so PHP/JS coverage and open gaps can be compared across dates.
+
+#### Scenario: Snapshot is dated and preserved
+- **WHEN** a coverage snapshot is recorded
+- **THEN** it is written to `docs/coverage/YYYY-MM-DD.md` without overwriting any earlier snapshot,
+  and a second snapshot on the same date receives a distinguishing suffix
+
+#### Scenario: Snapshot is self-describing
+- **WHEN** a snapshot is read at a later date
+- **THEN** it states its date, the commit SHA measured, the command that produced it, PHP and JS
+  coverage for `campus-directory`, `class-schedule`, and `course-catalog`, and the ranked gap list
+
+#### Scenario: Progress is visible at a glance
+- **WHEN** a snapshot is added
+- **THEN** `docs/coverage/README.md` gains one row (date, SHA, PHP %, JS %, structural units,
+  open-gap count) linking to that snapshot
+
 ### Requirement: Test effectiveness is reviewed with test changes
 The project SHALL review new and changed tests for behavioral value before relying on them as
 regression proof for any of the three blocks.
