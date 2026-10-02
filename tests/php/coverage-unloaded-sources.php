@@ -37,9 +37,10 @@ $sources = array_merge(
 	array( $plugin_root . '/index.php' )
 );
 
+$excluded = ucsc_coverage_excluded_files();
 $unloaded = array();
 foreach ( $sources as $file ) {
-	if ( isset( $seen[ $file ] ) ) {
+	if ( isset( $seen[ $file ] ) || in_array( substr( $file, strlen( $plugin_root ) + 1 ), $excluded, true ) ) {
 		continue;
 	}
 	$unloaded[] = $file;

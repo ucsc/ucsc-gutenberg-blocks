@@ -54,6 +54,24 @@ function finish_tests() {
 }
 
 /**
+ * Plugin-relative paths listed in tests/coverage-exclude.txt, which are left
+ * out of coverage because their blocks are outside the tracked test scope.
+ *
+ * @return string[]
+ */
+function ucsc_coverage_excluded_files() {
+	$list  = dirname( __DIR__, 2 ) . '/coverage-exclude.txt';
+	$files = array();
+	foreach ( file( $list, FILE_IGNORE_NEW_LINES ) as $line ) {
+		$line = trim( $line );
+		if ( '' !== $line && '#' !== $line[0] ) {
+			$files[] = $line;
+		}
+	}
+	return $files;
+}
+
+/**
  * WPM-117: Merge coverage data into JSON accumulator and emit clover.xml.
  *
  * Each test file runs in its own PHP process, so we accumulate raw coverage
@@ -70,10 +88,15 @@ function ucsc_emit_coverage( $data, $clover_path ) {
 		: array();
 
 	$plugin_root = dirname( __DIR__, 3 ) . '/';
+	$excluded    = ucsc_coverage_excluded_files();
 	foreach ( $data as $file => $lines ) {
 		// Only plugin source; skip the tests, their stubs, and files outside
 		// the plugin (e.g. the /tmp/wp-mock WP_Filesystem shims).
 		if ( 0 !== strpos( $file, $plugin_root ) || false !== strpos( $file, '/tests/' ) ) {
+			continue;
+		}
+		// Out-of-scope blocks listed in tests/coverage-exclude.txt.
+		if ( in_array( substr( $file, strlen( $plugin_root ) ), $excluded, true ) ) {
 			continue;
 		}
 		foreach ( $lines as $line => $state ) {

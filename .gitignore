@@ -57,4 +57,4 @@ artifacts/
 .serena/
 
 # Test coverage artifacts (WPM-116)
-coverage/
+/coverage/

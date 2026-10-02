@@ -1,4 +1,14 @@
+const fs = require( 'fs' );
+const path = require( 'path' );
 const defaultConfig = require( '@wordpress/scripts/config/jest-unit.config' );
+
+// Out-of-scope blocks, shared with the PHP harness.
+const coverageExcludes = fs
+	.readFileSync( path.join( __dirname, 'tests/coverage-exclude.txt' ), 'utf8' )
+	.split( '\n' )
+	.map( ( line ) => line.trim() )
+	.filter( ( line ) => line.endsWith( '.js' ) && ! line.startsWith( '#' ) )
+	.map( ( line ) => '!' + line );
 
 module.exports = {
 	...defaultConfig,
@@ -18,6 +28,7 @@ module.exports = {
 		'!src/**/__tests__/**',
 		'!src/**/*.test.js',
 		'!**/node_modules/**',
+		...coverageExcludes,
 	],
 	// json-summary and lcov are what the coverage report ingests; text-summary
 	// keeps the terminal output short.

@@ -1,8 +1,12 @@
 #!/usr/bin/env bash
 # WPM-117: Run the PHP test suite with coverage instrumentation.
 #
+# Runs inside a PHP container with Xdebug (composer test:coverage). From the
+# Mac, use scripts/test-tiers.sh all, which builds and starts that container
+# from tests/php/Dockerfile.coverage.
+#
 # Usage:
-#   bash tests/php/run-php-coverage.sh
+#   bash tests/php/run-php-coverage.sh [tests/php/<X>Test.php ...]
 #
 # Output:
 #   coverage/clover.xml          - Clover XML coverage report
@@ -17,16 +21,9 @@ set -euo pipefail
 PLUGIN_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
 cd "$PLUGIN_ROOT"
 
-IMAGE_NAME="ucsc-gutenberg-blocks-php-test:coverage"
 COVERAGE_DIR="$PLUGIN_ROOT/coverage"
 COVERAGE_CLOVER="$COVERAGE_DIR/clover.xml"
 COVERAGE_RAW="$COVERAGE_DIR/coverage-raw.json"
-
-# Build the coverage-enabled image if it doesn't exist
-if ! docker images "$IMAGE_NAME" --format '{{.Repository}}:{{.Tag}}' | grep -q "$IMAGE_NAME"; then
-	echo "Building coverage test image..."
-	docker build -f tests/php/Dockerfile.coverage -t "$IMAGE_NAME" tests/php
-fi
 
 # Clear the accumulator so we start fresh (otherwise stale hits from previous runs persist)
 rm -f "$COVERAGE_RAW"
@@ -36,6 +33,10 @@ echo "Running PHP tests with coverage..."
 echo
 
 source tests/php/test-files.sh
+if [ $# -gt 0 ]; then
+	PHP_TEST_FILES=("$@")
+fi
+export UCSC_COVERAGE="$COVERAGE_CLOVER"
 
 PASSED=0
 FAILED=0
@@ -47,12 +48,7 @@ for test_file in "${PHP_TEST_FILES[@]}"; do
 	fi
 
 	echo "▸ Running $(basename "$test_file")..."
-	if docker run --rm \
-		-v "$PLUGIN_ROOT:/plugin" \
-		-w /plugin \
-		-e "UCSC_COVERAGE=/plugin/coverage/clover.xml" \
-		"$IMAGE_NAME" \
-		php "$test_file"; then
+	if php "$test_file"; then
 		PASSED=$((PASSED + 1))
 	else
 		FAILED=$((FAILED + 1))
@@ -63,12 +59,7 @@ done
 # Add source files no suite loaded, at 0%, so the percentage covers the whole
 # plugin rather than only the files some test happened to require.
 echo "▸ Counting source files no suite loads..."
-docker run --rm \
-	-v "$PLUGIN_ROOT:/plugin" \
-	-w /plugin \
-	-e "UCSC_COVERAGE=/plugin/coverage/clover.xml" \
-	"$IMAGE_NAME" \
-	php tests/php/coverage-unloaded-sources.php
+php tests/php/coverage-unloaded-sources.php
 echo
 
 echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
@@ -94,11 +85,7 @@ if [ -f "$COVERAGE_CLOVER" ]; then
 		echo
 		echo "PHP Coverage: $PERCENT% ($COVERED_STATEMENTS / $TOTAL_STATEMENTS statements)"
 		echo "Clover report: $COVERAGE_CLOVER"
-		docker run --rm \
-			-v "$PLUGIN_ROOT:/plugin" \
-			-w /plugin \
-			"$IMAGE_NAME" \
-			php tests/php/render-coverage-html.php /plugin/coverage/coverage-raw.json /plugin/coverage/html
+		php tests/php/render-coverage-html.php "$COVERAGE_RAW" "$COVERAGE_DIR/html"
 		echo "HTML report: $COVERAGE_DIR/html/index.html"
 	else
 		echo

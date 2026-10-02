@@ -5,11 +5,20 @@
     "license": "ISC",
     "scripts": {
         "test": [
+            "Composer\\Config::disableProcessTimeout",
             "bash tests/php/run-php-tests.sh"
         ],
         "test:coverage": [
             "Composer\\Config::disableProcessTimeout",
             "bash tests/php/run-php-coverage.sh"
+        ],
+        "coverage:snapshot": [
+            "php tests/coverage-snapshot.php"
         ]
+    },
+    "scripts-descriptions": {
+        "test": "Run the PHP test suite (inside the PHP test container; from the Mac use scripts/test-tiers.sh).",
+        "test:coverage": "Run the PHP test suite with Xdebug coverage into coverage/clover.xml and coverage/html/.",
+        "coverage:snapshot": "Write docs/coverage/<date>.md from the PHP and JS coverage reports. Args: <YYYY-MM-DD> <commit-sha>."
     }
 }

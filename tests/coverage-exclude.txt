@@ -1,0 +1,25 @@
+# Source files left out of PHP and JS coverage. Test coverage work tracks only
+# campus-directory, class-schedule and course-catalog, plus the shared code they
+# use (SiteSettings, index.php, src/API, the shared dropdowns). The files below
+# are out of scope, so they are not coverage gaps. src/index.js only imports the
+# blocks and has nothing to test.
+#
+# One path per line, relative to the plugin root. Read by
+# tests/php/helpers/harness.php and jest-unit.config.js.
+
+classes/Accordion.php
+classes/AccordionWrapper.php
+classes/ContentSharer.php
+classes/FeedbackForm.php
+classes/UCSCGutenbergDemoBlock1.php
+classes/UCSCGutenbergDemoBlock2.php
+src/index.js
+src/blocks/Accordion.js
+src/blocks/AccordionWrapper.js
+src/blocks/ContentSharer.js
+src/blocks/FeedbackForm.js
+src/blocks/TestDemoUCSC.js
+src/blocks/TestDemoUCSC2.js
+src/components/Hello.js
+src/components/Accordion/accordionwrapper.js
+src/components/FeedbackForm/feedbackform.js

@@ -49,84 +49,53 @@ Unit tests use [Jest](https://jestjs.io/) via `@wordpress/scripts` and [@testing
 
 ### Running Tests
 
-From the `wp-dev.ucsc` project root, run tests inside Docker:
+From the plugin directory, the host wrapper runs everything in one-off Docker
+containers. It needs only Docker, not the WordPress stack or host PHP/Node:
 
 ```bash
-docker compose -f docker-compose.yml -f docker-compose-start.yml run --rm \
-  -w /var/www/html/wp-content/plugins/ucsc-gutenberg-blocks \
-  plugin_npm_start npm test
+scripts/test-tiers.sh
+scripts/test-tiers.sh all
+scripts/test-tiers.sh gate --js -- --testPathPattern=ClassSchedule
+scripts/test-tiers.sh gate --php -- tests/php/CourseCatalogTest.php
 ```
 
-Or to run a single test file:
+`gate` (the default) runs the PHP suite and Jest. `all` runs both with coverage.
+`--php` or `--js` limits the run to one side, and arguments after `--` go to that
+side's runner. The wrapper follows the UCSC testing standard (baseapp
+`doc/TESTING-STANDARDS.md`, "Tiers and entry points"): it only starts containers
+and calls the standard entry points, which CI can call directly:
 
-```bash
-docker compose -f docker-compose.yml -f docker-compose-start.yml run --rm \
-  -w /var/www/html/wp-content/plugins/ucsc-gutenberg-blocks \
-  plugin_npm_start npx wp-scripts test-unit-js --testPathPattern=ClassSchedule
-```
+| Entry point | Runs in | Does |
+| --- | --- | --- |
+| `npm test` | Node container | Jest |
+| `npm run test:coverage` | Node container | Jest with coverage |
+| `composer test` | PHP test container | PHP harness (`tests/php/*Test.php`) |
+| `composer test:coverage` | PHP test container (Xdebug) | PHP harness with coverage |
+| `composer coverage:snapshot` | PHP test container | Dated coverage snapshot, see below |
+
+The PHP test container is built from `tests/php/Dockerfile.coverage`.
 
 ### Coverage
 
-Run JavaScript coverage from the plugin directory:
-
-```bash
-npm run test:coverage
-```
-
-The report is written to:
+`scripts/test-tiers.sh all` writes the reports to `coverage/` (gitignored):
 
 ```text
-coverage/coverage-summary.json
-coverage/lcov.info
-coverage/lcov-report/index.html
+coverage/clover.xml           PHP, machine-readable
+coverage/html/index.html      PHP, per-file report
+coverage/lcov.info            JS, machine-readable
+coverage/lcov-report/index.html  JS, per-file report
 ```
 
-The equivalent Docker command, from the `wp-dev.ucsc` project root, is:
+When both suites pass, it also writes a dated snapshot to
+`docs/coverage/<date>.md` (checked in) with the totals and every file that still
+has uncovered lines, and adds a row to `docs/coverage/README.md`, so progress
+shows over time. Commit the snapshot when you want to record a milestone.
 
-```bash
-docker compose -f docker-compose.yml -f docker-compose-start.yml run --rm \
-  -w /var/www/html/wp-content/plugins/ucsc-gutenberg-blocks \
-  plugin_npm_start npm run test:coverage
-```
-
-Run PHP coverage from the plugin directory:
-
-```bash
-composer run test:coverage
-```
-
-The PHP report is written to:
-
-```text
-coverage/clover.xml
-coverage/html/index.html
-coverage/coverage-raw.json
-```
-
-The current coverage baseline is 81.01% JavaScript statement coverage and
-100.00% PHP statement coverage for the source files exercised by the local
-harness. E2E tests are pass/fail only and are not included in coverage
-percentages.
-
-Files that intentionally have no tests are excluded with Istanbul's standard
-pragma on the first line, with a reason:
-
-```js
-/* istanbul ignore file -- <reason> */
-```
-
-The Accordion block is excluded this way because it is slated for retirement.
-
-The plugin's structural gap report is read-only and groups classes, templates,
-blocks, and components that are named by no test:
-
-```bash
-python3 /path/to/ucsc-wp-block-dev/skills/validate/scripts/coverage-report.py . --gaps
-```
-
-This structural report is a gap floor, not line or branch coverage. On systems
-where the script requires Python 3.10 or newer, use that interpreter; Python
-3.9 cannot parse its union type syntax.
+Coverage counts only the tracked blocks (campus-directory, class-schedule,
+course-catalog) and the shared code they use. Out-of-scope blocks are listed in
+`tests/coverage-exclude.txt`, which both the PHP harness and `jest-unit.config.js`
+read; they are not coverage gaps. E2E tests are pass/fail only and are not
+included in coverage percentages.
 
 ### Writing Tests
 
