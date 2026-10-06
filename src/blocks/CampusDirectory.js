@@ -1,6 +1,7 @@
 import { useEffect, useState } from '@wordpress/element';
 import { dispatch } from '@wordpress/data';
 import { Panel, PanelBody, PanelRow, Notice } from '@wordpress/components';
+import { useBlockProps } from '@wordpress/block-editor';
 
 import CampusDirectoryDepartmentDropdown from '../components//CampusDirectory/CampusDirectoryDepartmentDropdown';
 import DivisionDropdown from '../components/DivisionDropdown';
@@ -9,6 +10,7 @@ import PeopleAndInformation from '../components/CampusDirectory/PeopleAndInforma
 
 const CampusDirectory = () => {
   wp.blocks.registerBlockType("ucscblocks/campusdirectory", {
+    apiVersion: 3,
     title: "Campus Directory",
     icon: "welcome-learn-more",
     category: "common",
@@ -51,6 +53,7 @@ const CampusDirectory = () => {
         division,
         deptOrDiv,
       } = attributes;
+      const blockProps = useBlockProps();
 
       const [configuredCorrectly, setConfiguredCorrectly] = useState(true);
       const [resp, setResp] = useState({});
@@ -82,7 +85,7 @@ const CampusDirectory = () => {
       }, []);
 
       return (
-        <>
+        <div {...blockProps}>
           {isInvalidState && (
             <Notice
               status="error"
@@ -159,7 +162,7 @@ const CampusDirectory = () => {
               )}
             </>
           )}
-        </>
+        </div>
       );
     },
     save: () => {

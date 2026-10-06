@@ -233,6 +233,7 @@ reset_wiring_state();
 do_hook( 'init' );
 check( 'registers ucscblocks/campusdirectory rendered by CampusDirectory::theHTML', isset( $block_types['ucscblocks/campusdirectory'] ) && 'CampusDirectory::theHTML' === callback_method( $block_types['ucscblocks/campusdirectory']['render_callback'] ) );
 check( 'campus-directory block uses the shared editor script and its editor style', 'ucscblocks' === ( $block_types['ucscblocks/campusdirectory']['editor_script'] ?? '' ) && 'ucscblocks-editor' === ( $block_types['ucscblocks/campusdirectory']['editor_style'] ?? '' ) && isset( $styles['ucscblocks-editor'] ) );
+check( 'registers ucscblocks/campusdirectory with block API version 3 (WPM-205)', 3 === ( $block_types['ucscblocks/campusdirectory']['api_version'] ?? null ) );
 check( 'registers the directoryprofile style', isset( $styles['directoryprofile'] ) && false !== strpos( $styles['directoryprofile']['src'], 'CampusDirectory/directoryprofile.css' ) );
 check( 'adds the /directory/{cruzid}/ rewrite rule', in_array( array( '^directory/([^/]+)/?$', 'index.php?directoryprofilecruzid=$matches[1]', 'top' ), $rewrite_rules, true ) );
 
@@ -244,6 +245,7 @@ check( 'adds directoryprofilecruzid to the public query vars and keeps existing 
 echo "\nclass-schedule registration (WPM-190):\n";
 
 check( 'registers ucscblocks/classschedule rendered by ClassSchedule::theHTML', isset( $block_types['ucscblocks/classschedule'] ) && 'ClassSchedule::theHTML' === callback_method( $block_types['ucscblocks/classschedule']['render_callback'] ) && 'ucscblocks' === $block_types['ucscblocks/classschedule']['editor_script'] );
+check( 'registers ucscblocks/classschedule with block API version 3 (WPM-205)', 3 === ( $block_types['ucscblocks/classschedule']['api_version'] ?? null ) );
 check( 'adds the /course/{term}/{id}/ rewrite rule', in_array( array( '^course/([0-9]+)/([0-9]+)/?$', 'index.php?course_term=$matches[1]&course_id=$matches[2]', 'top' ), $rewrite_rules, true ) );
 
 reset_wiring_state();
@@ -261,6 +263,7 @@ check( 'versions tablesorter assets by file mtime', filemtime( __DIR__ . '/../..
 reset_wiring_state();
 do_hook( 'init' );
 check( 'registers ucscblocks/coursecatalog rendered by CourseCatalog::theHTML', isset( $block_types['ucscblocks/coursecatalog'] ) && 'CourseCatalog::theHTML' === callback_method( $block_types['ucscblocks/coursecatalog']['render_callback'] ) && 'ucscblocks' === $block_types['ucscblocks/coursecatalog']['editor_script'] );
+check( 'registers ucscblocks/coursecatalog with block API version 3 (WPM-205)', 3 === ( $block_types['ucscblocks/coursecatalog']['api_version'] ?? null ) );
 
 echo "\nactivation and deactivation (WPM-192):\n";
 

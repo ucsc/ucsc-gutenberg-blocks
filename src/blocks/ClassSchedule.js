@@ -1,4 +1,5 @@
 import { Panel, PanelBody, RadioControl, CheckboxControl } from '@wordpress/components';
+import { useBlockProps } from '@wordpress/block-editor';
 
 import DepartmentDropdown from '../components/DepartmentDropdown';
 import SubjectDropdown from '../components/SubjectDropdown';
@@ -10,6 +11,7 @@ import { useState } from '@wordpress/element';
 
 const ClassSchedule = () => {
   wp.blocks.registerBlockType("ucscblocks/classschedule", {
+    apiVersion: 3,
     title: "Class Schedule",
     icon: "schedule",
     category: "common",
@@ -33,6 +35,7 @@ const ClassSchedule = () => {
         subject,
         subjectOrDept,
       } = attributes;
+      const blockProps = useBlockProps();
 
       // Toggleable columns the visitor sees in the front-end Filter modal. Status,
       // Course ID, and Title are always shown and are intentionally not listed here.
@@ -80,7 +83,7 @@ const ClassSchedule = () => {
       ];
 
       return (
-        <>
+        <div {...blockProps}>
           <Panel header="Class Schedule Block">
             <PanelBody title="Set Department or Subject" initialOpen>
               <div className="vertical_radio">
@@ -127,7 +130,7 @@ const ClassSchedule = () => {
               ))}
             </PanelBody>
           </Panel>
-        </>
+        </div>
       );
     },
     save: (props) => {

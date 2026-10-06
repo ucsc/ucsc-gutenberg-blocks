@@ -23,6 +23,9 @@ jest.mock('@wordpress/components', () => ({
     </select>
   ),
 }), { virtual: true });
+jest.mock('@wordpress/block-editor', () => ({
+  useBlockProps: () => ({}),
+}), { virtual: true });
 
 let registeredBlock = null;
 global.wp = {

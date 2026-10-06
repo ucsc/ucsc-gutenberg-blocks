@@ -103,6 +103,7 @@ class CampusDirectory
       filemtime(plugin_dir_path(__FILE__) . '../src/components/CampusDirectory/editor.css')
     );
     register_block_type('ucscblocks/campusdirectory', array(
+      'api_version' => 3,
       'editor_script' => 'ucscblocks',
       'editor_style' => 'ucscblocks-editor',
       'render_callback' => array($this, 'theHTML'),
