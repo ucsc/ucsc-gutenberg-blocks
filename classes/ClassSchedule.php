@@ -113,6 +113,7 @@ class ClassSchedule
   function adminAssets()
   {
     register_block_type('ucscblocks/classschedule', array(
+      'api_version' => 3,
       'editor_script' => 'ucscblocks',
       'render_callback' => array($this, 'theHTML')
     ));

@@ -50,6 +50,7 @@ class CourseCatalog
 
     function renderFrontend() {
         register_block_type('ucscblocks/coursecatalog', array(
+            'api_version' => 3,
             'editor_script' => 'ucscblocks',
             'render_callback' => array($this, 'theHTML')
         ));

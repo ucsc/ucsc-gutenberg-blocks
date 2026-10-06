@@ -15,6 +15,11 @@ jest.mock('@wordpress/components', () => ({
   ),
 }), { virtual: true });
 
+// Mock the block editor: useBlockProps marks the wrapper so tests can find it
+jest.mock('@wordpress/block-editor', () => ({
+  useBlockProps: () => ({ 'data-block-props': 'true', className: 'wp-block' }),
+}), { virtual: true });
+
 // Mock @wordpress/data
 const mockLockPostSaving = jest.fn();
 const mockUnlockPostSaving = jest.fn();
@@ -77,6 +82,10 @@ describe('CampusDirectory block', () => {
   });
 
   describe('registration', () => {
+    it('registers with block API version 3 (WPM-205)', () => {
+      expect(registeredBlock.apiVersion).toBe(3);
+    });
+
     it('registers with the correct block name', () => {
       expect(registeredBlock.name).toBe('ucscblocks/campusdirectory');
     });
@@ -147,6 +156,15 @@ describe('CampusDirectory block', () => {
       division: '---',
       deptOrDiv: 'dept',
     };
+
+    it('wraps the editor UI in the useBlockProps wrapper (WPM-205)', async () => {
+      let container;
+      await act(async () => {
+        ({ container } = render(<Edit setAttributes={jest.fn()} attributes={defaultAttributes} />));
+      });
+      expect(container.firstChild).toHaveAttribute('data-block-props', 'true');
+      expect(container.firstChild).toContainElement(screen.getByTestId('panel'));
+    });
 
     it('renders without crashing', async () => {
       const setAttributes = jest.fn();
