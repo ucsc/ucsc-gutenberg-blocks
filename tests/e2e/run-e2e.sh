@@ -8,6 +8,7 @@
 # Usage (from anywhere):
 #   bash tests/e2e/run-e2e.sh
 #   UCSC_CS_E2E_URL=https://wp-dev.ucsc/some-page/ bash tests/e2e/run-e2e.sh
+#   bash tests/e2e/run-e2e.sh keyboard.spec.js   (extra args go to jest)
 #
 # Prerequisites: the wp-dev.ucsc stack is up (docker compose up -d). The e2e
 # page is seeded automatically via seed-e2e-page.php when the wpcli container
@@ -83,4 +84,4 @@ exec docker run --rm \
 	-v ucsc-gutenberg-blocks-e2e-node-modules:/app/node_modules \
 	-w /app \
 	"$IMAGE" \
-	bash -lc 'if [ ! -x node_modules/.bin/wp-scripts ]; then npm ci; fi && mkdir -p node_modules/puppeteer-core && touch node_modules/puppeteer-core/install node_modules/puppeteer-core/install.js && sed -i "s/\.removeListener(/\.off(/g; s/\.addListener(/\.on(/g" node_modules/@wordpress/scripts/config/jest-environment-puppeteer/index.js && npm run test:e2e'
+	bash -lc 'if [ ! -x node_modules/.bin/wp-scripts ]; then npm ci; fi && mkdir -p node_modules/puppeteer-core && touch node_modules/puppeteer-core/install node_modules/puppeteer-core/install.js && sed -i "s/\.removeListener(/\.off(/g; s/\.addListener(/\.on(/g" node_modules/@wordpress/scripts/config/jest-environment-puppeteer/index.js && npm run test:e2e -- "$@"' run-e2e "$@"
