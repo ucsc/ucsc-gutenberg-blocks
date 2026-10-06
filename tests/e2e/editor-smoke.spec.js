@@ -104,7 +104,8 @@ describe.each( BLOCKS )( 'Editor: %s', ( blockName, { saves } ) => {
 	// honours DOCKER_DEV the way the API does.
 	it( 'shows its settings rather than a "not Configured Correctly" notice', async () => {
 		await new Promise( ( r ) => setTimeout( r, 3000 ) );
-		expect( await p.evaluate( () => document.body.innerText ) ).not.toMatch(
+		const { handle } = await editorBlock( p, clientId );
+		expect( await handle.evaluate( ( el ) => el.innerText ) ).not.toMatch(
 			/not Configured Correctly/
 		);
 	} );
@@ -112,8 +113,11 @@ describe.each( BLOCKS )( 'Editor: %s', ( blockName, { saves } ) => {
 	// Absence of "Loading..." alone passes when no dropdown mounted at all, so
 	// also require a <select> filled from the REST endpoint (the departments,
 	// subjects and divisions lists all run to dozens of options).
+	// The dropdowns render in the block body, which is inside the canvas
+	// iframe when WordPress iframes the editor (apiVersion 3, WPM-205).
 	it( 'loads its REST-fed dropdowns', async () => {
-		await p.waitForFunction(
+		const { frame } = await editorBlock( p, clientId );
+		await frame.waitForFunction(
 			( re ) =>
 				! new RegExp( re ).test( document.body.innerText ) &&
 				Array.from( document.querySelectorAll( 'select' ) ).some(
@@ -161,7 +165,8 @@ describe.each( BLOCKS )( 'Editor: %s', ( blockName, { saves } ) => {
 					wp.data.select( 'core/editor' ).isPostSavingLocked()
 				)
 			).toBe( true );
-			expect( await p.evaluate( () => document.body.innerText ) ).toContain(
+			const { handle } = await editorBlock( p, clientId );
+			expect( await handle.evaluate( ( el ) => el.innerText ) ).toContain(
 				'Unable to publish'
 			);
 		} );

@@ -22,6 +22,7 @@ const {
 	adminPage,
 	openNewPageInEditor,
 	insertBlock,
+	editorBlock,
 } = require( './utils/e2e-helpers' );
 
 jest.setTimeout( 120000 );
@@ -91,6 +92,7 @@ describe.each( [
 	let p;
 	let errors;
 	let postId;
+	let clientId;
 
 	beforeAll( async () => {
 		( { context, page: p } = await adminPage() );
@@ -104,7 +106,7 @@ describe.each( [
 		p.on( 'request', ( req ) =>
 			endpoint.test( req.url() ) ? req.respond( RATE_LIMITED ) : req.continue()
 		);
-		await insertBlock( p, blockName );
+		clientId = await insertBlock( p, blockName );
 		// Long enough for the intercepted fetch to settle either way.
 		await new Promise( ( r ) => setTimeout( r, 5000 ) );
 	} );
@@ -134,7 +136,8 @@ describe.each( [
 	// ...and the dropdown never leaves its loading state, so the editor shows
 	// "Dropdown Loading..." forever with no hint that anything failed.
 	it( '[RED until dropdowns handle HTTP errors] does not stay on "Loading..." forever', async () => {
-		expect( await p.evaluate( () => document.body.innerText ) ).not.toMatch(
+		const { handle } = await editorBlock( p, clientId );
+		expect( await handle.evaluate( ( el ) => el.innerText ) ).not.toMatch(
 			/Dropdown Loading\.\.\./
 		);
 	} );
