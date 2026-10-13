@@ -18,6 +18,10 @@ for($i=0; $i<count($items['informationToDisplay']); $i++) {
   }
 }
 
+// CPM-12: a query with no matches must say so instead of rendering bare headers
+// (table) or an empty container (list/tiled).
+$noRecordsMessage = 'No records found.';
+
 $individualPageUrl = $items['nodeContent']['linkOutToCampusDirectory'] ?
                         'https://campusdirectory.ucsc.edu/cd_detail?uid=' :
                         '?directoryprofilecruzid=';
@@ -42,6 +46,15 @@ $individualPageUrl = $items['nodeContent']['linkOutToCampusDirectory'] ?
               </tr>
               <?php
                 $people = $items['items'];
+                if (empty($people)) {
+                  $columnCount = 1;
+                  foreach($items['informationToDisplay'] as $disItem) {
+                    foreach($disItem as $headerInfo) {
+                      if ($headerInfo != "Email") $columnCount++;
+                    }
+                  }
+                  echo '<tr class="item-body no-records"><td class="item-info" colspan="' . esc_attr($columnCount) . '">' . esc_html($noRecordsMessage) . '</td></tr>';
+                }
                 for($i = 0; $i < count($people); $i++) {
                   echo '<tr class="item-body">';
                     echo '<td class="item-name">';
@@ -83,6 +96,9 @@ $individualPageUrl = $items['nodeContent']['linkOutToCampusDirectory'] ?
         <div class="section-body">
           <?php
             $people = $items['items'];
+            if (empty($people)) {
+              echo '<p class="no-records">' . esc_html($noRecordsMessage) . '</p>';
+            }
             for($i = 0; $i < count($people); $i++){
               ?>
               <div class="section-item h-card wrap">

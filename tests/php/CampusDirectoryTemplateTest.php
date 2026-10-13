@@ -104,6 +104,29 @@ check( 'renders non-email table headers', false !== strpos( $html, '<th scope="c
 check( 'renders the Campus Email table header', false !== strpos( $html, '<th scope="col" class="titles">Campus Email</th>' ) );
 check( 'renders table email as a mailto link', false !== strpos( $html, 'mailto:jdoe@ucsc.edu' ) );
 
+echo "\nempty result (CPM-12):\n";
+$html = render_campus_directory_template(
+	directory_items_fixture(
+		array(
+			'dirLayout'            => 'table',
+			'items'                => array(),
+			'informationToDisplay' => array(
+				array( 'title' => 'Title' ),
+				array( 'mail' => 'Campus Email' ),
+			),
+		)
+	)
+);
+check( 'table still renders its headers', false !== strpos( $html, '<th scope="col" class="titles">Title</th>' ) );
+check( 'table renders a no-records row', false !== strpos( $html, 'No records found.' ) );
+check( 'no-records cell spans every column', false !== strpos( $html, 'colspan="3"' ) );
+foreach ( array( 'list', 'tiled' ) as $layout ) {
+	$html = render_campus_directory_template( directory_items_fixture( array( 'dirLayout' => $layout, 'items' => array() ) ) );
+	check( "$layout layout renders the no-records message", false !== strpos( $html, '<p class="no-records">No records found.</p>' ) );
+}
+$html = render_campus_directory_template( directory_items_fixture( array( 'dirLayout' => 'table' ) ) );
+check( 'no message when there are results', false === strpos( $html, 'No records found.' ) );
+
 echo "\nexternal profile links and image fallback:\n";
 $html = render_campus_directory_template(
 	directory_items_fixture(
