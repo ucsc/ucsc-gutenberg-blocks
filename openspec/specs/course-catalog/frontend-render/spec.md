@@ -39,7 +39,7 @@ being displayed as text.
 HTML escaping. SimpleXML decodes entities, so `&lt;script&gt;` in the feed
 becomes live markup, and it stays cached for the transient's lifetime.
 
-**Known defect (CC-D7, no Jira yet):** the element IDs `courseCatalog`,
+**Known defect (CC-D7, WPM-217):** the element IDs `courseCatalog`,
 `search`, `tableSorter`, `expandAll` and `collapseAll` are fixed, so two
 Course Catalog blocks on one page emit duplicate IDs. The script itself scopes
 its work per block through `closest()`.
@@ -100,7 +100,7 @@ remaining non-numeric text when two numeric keys are equal. Clicking a header
 sorts ascending unless that header is currently ascending, in which case it
 sorts descending.
 
-**Known defect (CC-D5, no Jira yet):** a column without sort-key spans
+**Known defect (CC-D5, WPM-216):** a column without sort-key spans
 compares its full cell text as strings, so Units sorts lexically
 (`"10 Units"` before `"5 Units"`).
 
@@ -131,7 +131,7 @@ case-insensitively, on every keyup; a course pair SHALL remain visible if
 either its header row or its description row contains the search term, so a
 match found only in the long-form description still surfaces the course.
 
-**Known defect (CC-D3, no Jira yet):** matching runs against each cell's
+**Known defect (CC-D3, WPM-215):** matching runs against each cell's
 `innerHTML`, not its visible text, so markup and the hidden level rank are
 also searchable: `span`, `secret`, and the digits 0-3 match unrelated rows
 (e.g. searching `2` matches every Upper Division course).

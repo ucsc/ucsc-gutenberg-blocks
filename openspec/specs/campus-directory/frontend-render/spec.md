@@ -18,7 +18,7 @@ and the selected fields as labeled entries (the tiled layout hides the labels
 visually). The table layout MUST render a header row naming each selected
 field, followed by one row per person.
 
-**Known defect (CD-D4, no Jira yet):** the table layout renders a
+**Known defect (CD-D4, WPM-220):** the table layout renders a
 simplified cell per field: only the first directory value, the raw value text
 (no website label split, no combined office location), a duplicate copy of the
 value in a CSS-hidden `<strong>`, and a PHP warning for each selected field a
@@ -191,7 +191,7 @@ their name marked as the card's name and, where rendered, their profile link,
 email addresses, and websites marked with the corresponding microformat
 properties.
 
-**Known defect (CD-D4, no Jira yet):** the table layout carries only
+**Known defect (CD-D4, WPM-220):** the table layout carries only
 `p-name` and `u-url` on the name, with no `h-card` container.
 
 #### Scenario: Person is an h-card

@@ -59,7 +59,7 @@ not cache a transport failure or non-2xx response.
 error page instead of JSON, the editor throws an unhandled JSON parse error
 and the dropdown shows "Dropdown Loading..." indefinitely, with no message.
 
-**Known defect (CS-D3, no Jira yet):** a 2xx response whose body cannot be
+**Known defect (CS-D3, WPM-212):** a 2xx response whose body cannot be
 parsed into options is cached as a list containing only `---` for one week,
 so the dropdown offers no real choices until the transient expires.
 

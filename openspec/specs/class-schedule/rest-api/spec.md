@@ -75,7 +75,7 @@ malformed or partial payload as if it were valid data.
 
 An error response MUST NOT be cached.
 
-**Known defect (CS-D1, no Jira yet):** internal callers
+**Known defect (CS-D1, WPM-210):** internal callers
 (`ClassSchedule::theHTML()`, `getCachedCourses()`, `course_detail_title()`,
 `CourseDetailTemplate.php`) reach these routes via `rest_do_request()`, which
 returns the error as a `WP_REST_Response` with the error's status and a

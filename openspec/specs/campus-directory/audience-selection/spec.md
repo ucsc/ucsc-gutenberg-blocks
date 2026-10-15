@@ -192,7 +192,7 @@ A vacant entry MUST render with only the supplied name and title, without a
 directory record. (In a manual list the entry is still included verbatim as a
 `uid` clause in the query, where it matches nothing.)
 
-**Known defect (CD-D6, no Jira yet):** because a vacant entry has no CruzID, a
+**Known defect (CD-D6, WPM-222):** because a vacant entry has no CruzID, a
 listing with name linking enabled links its name to an empty local profile
 (`?directoryprofilecruzid=`) and emits PHP warnings.
 

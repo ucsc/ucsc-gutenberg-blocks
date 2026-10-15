@@ -46,7 +46,7 @@ A value containing LDAP filter metacharacters MUST NOT be able to alter the
 structure of the resulting query, broaden its scope, or make it match records
 the configuration did not select.
 
-**Known defect (CD-D1, no Jira yet):** the faculty-type keys from the saved
+**Known defect (CD-D1, WPM-218):** the faculty-type keys from the saved
 `strFacultyTypes` attribute are interpolated unescaped into
 `(ucscpersonpubfacultytype=...)` clauses. Exploiting it needs an
 author-crafted block attribute, and the injected clauses stay inside the

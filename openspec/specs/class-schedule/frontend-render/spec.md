@@ -54,7 +54,7 @@ the system SHALL render "No terms available." instead of a table.
 An upstream PeopleSoft failure SHALL render one of these plain-language
 messages rather than a partial table or a fatal error.
 
-**Known defect (CS-D1, no Jira yet):** because the internal
+**Known defect (CS-D1, WPM-210):** because the internal
 `rest_do_request()` call returns the route's error as a `WP_REST_Response`
 (never a `WP_Error`), a failed terms request renders "No terms available." and
 a failed courses request renders "No courses found for the selected
@@ -132,7 +132,7 @@ number (JavaScript `parseFloat`), they SHALL be compared by that leading
 number; otherwise they SHALL be compared with `localeCompare`. Seats
 (`"N open / M total"`) therefore sorts by open seats.
 
-**Known defect (CS-D2, no Jira yet):** Time (`"10:00 AM - ..."`) sorts by its
+**Known defect (CS-D2, WPM-211):** Time (`"10:00 AM - ..."`) sorts by its
 leading hour without regard to minutes or AM/PM, so "1:30 PM" sorts before
 "10:00 AM".
 

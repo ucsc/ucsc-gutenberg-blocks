@@ -20,7 +20,7 @@ subject mode.
 
 The value is interpolated into the XML without escaping.
 
-**Known defect (CC-D2, no Jira yet):** there is no guard for an unconfigured
+**Known defect (CC-D2, WPM-214):** there is no guard for an unconfigured
 block. A block with no `subjectOrDept` raises "Undefined array key" warnings
 and POSTs an empty `<subject></subject>` element to production; a block with
 `"---"` selected POSTs `<acad_org>---</acad_org>`. Class Schedule
@@ -119,7 +119,7 @@ each produce a distinct `WP_Error` (the transport error itself,
 render callback surfaces as a plain-language unavailability message, rather
 than attempting to iterate over incomplete data.
 
-**Known defect (CC-D1, no Jira yet):** the XML check is a truthiness test on
+**Known defect (CC-D1, WPM-213):** the XML check is a truthiness test on
 the parsed `SimpleXMLElement` (`if (!$xmlBody)`), so a well-formed but empty
 root element (e.g. `<catalog/>`, no courses) is also treated as invalid XML.
 It renders the unavailability message and is not cached, so a department with

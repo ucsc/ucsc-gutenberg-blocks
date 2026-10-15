@@ -43,7 +43,7 @@ rather than a partially-rendered page or a fatal error.
 An empty response SHALL render "Course not found." A response with no
 `primary_section` SHALL render "Course information unavailable."
 
-**Known defect (CS-D1, no Jira yet):** because the internal
+**Known defect (CS-D1, WPM-210):** because the internal
 `rest_do_request()` call returns an upstream failure as a `WP_REST_Response`
 carrying error data (never a `WP_Error`), an unreachable PeopleSoft API
 renders "Course information unavailable." instead of an error message; the

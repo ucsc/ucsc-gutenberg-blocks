@@ -40,7 +40,7 @@ The selectable fields SHALL be:
 
 A person's name is always rendered and is not a selectable field.
 
-**Known defect (CD-D5, no Jira yet):** Mailing Address maps to the placeholder
+**Known defect (CD-D5, WPM-221):** Mailing Address maps to the placeholder
 key `combineaddressfields`, which no directory record carries, so selecting it
 renders nothing in any listing layout.
 

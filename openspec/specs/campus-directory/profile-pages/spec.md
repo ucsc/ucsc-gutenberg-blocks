@@ -232,7 +232,7 @@ global functions.
 `areas_of_expertise`, `research_interests`, `teaching_interests`, `awards`,
 and `publications` are commented out and render nothing.
 
-**Known defect (CD-D2, no Jira yet):** setting `profilelinks` to `false`
+**Known defect (CD-D2, WPM-219):** setting `profilelinks` to `false`
 renders the name as empty rather than as plain text.
 
 **Known defect (WPM-193):** `websites="true"` fatals with a `TypeError` when a
