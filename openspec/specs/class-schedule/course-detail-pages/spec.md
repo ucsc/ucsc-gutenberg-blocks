@@ -41,11 +41,14 @@ the system SHALL render a plain-language message inside the page chrome
 rather than a partially-rendered page or a fatal error.
 
 An empty response SHALL render "Course not found." A response with no
-`primary_section` SHALL render "Course information unavailable." Because the
-internal `rest_do_request()` call returns an upstream failure as a
-`WP_REST_Response` carrying error data (never a `WP_Error`), an unreachable
-PeopleSoft API currently also renders "Course information unavailable."; the
-"Error loading course details" branch is unreachable.
+`primary_section` SHALL render "Course information unavailable."
+
+**Known defect (CS-D1, no Jira yet):** because the internal
+`rest_do_request()` call returns an upstream failure as a `WP_REST_Response`
+carrying error data (never a `WP_Error`), an unreachable PeopleSoft API
+renders "Course information unavailable." instead of an error message; the
+"Error loading course details" branch is unreachable. The scenario
+"Unreachable API shows a message without course fields" pins this behavior.
 
 #### Scenario: Unreachable API shows a message without course fields
 

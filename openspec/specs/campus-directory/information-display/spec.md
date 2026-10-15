@@ -34,11 +34,15 @@ The selectable fields SHALL be:
 | Office Location | `ucscpersonpubofficelocationdetail` |
 | Office Hours | `ucscpersonpubofficehours` |
 | Mailstop | `ucscpersonpubmailstop` |
-| Mailing Address | mapped to the placeholder key `combineaddressfields`, which no directory record carries — currently renders nothing in any listing layout |
+| Mailing Address | placeholder key `combineaddressfields` (see known defect CD-D5) |
 | Faculty Areas of Expertise | `ucscpersonpubexpertisereference` |
 | Summary of Expertise | `ucscpersonpubareaofexpertise` |
 
 A person's name is always rendered and is not a selectable field.
+
+**Known defect (CD-D5, no Jira yet):** Mailing Address maps to the placeholder
+key `combineaddressfields`, which no directory record carries, so selecting it
+renders nothing in any listing layout.
 
 #### Scenario: Deselected field disappears from every person
 
@@ -56,6 +60,11 @@ A person's name is always rendered and is not a selectable field.
 - **WHEN** a selected field has no value for a given person
 - **THEN** that person renders without that field
 - **AND** the rest of the listing is unaffected
+
+#### Scenario: Mailing Address renders nothing (known defect CD-D5)
+
+- **WHEN** the author selects Mailing Address for a list layout
+- **THEN** no person renders a mailing address
 
 ### Requirement: Field selection is scoped per layout family
 

@@ -71,6 +71,11 @@ A profile page SHALL set its document title to the person's name, so browser
 tabs, bookmarks, and assistive technology identify the profile rather than
 repeating the host page's title.
 
+**Known defect (WPM-183):** the title lookup constructs `CampusDirectoryAPI`
+with no node content, so every profile page load emits
+`Undefined array key "automatedFeeds"` PHP warnings. The title itself is
+correct.
+
 #### Scenario: Title names the person
 
 - **WHEN** a profile for a person with a directory name is rendered
@@ -169,12 +174,15 @@ The shortcode MUST accept a comma-separated `cruzids` attribute and a
 grid. Profiles are fetched as a profile view (full record) and rendered in
 the order given.
 
-Profiles are paired with the `cruzids` list by position, so a CruzID that
-matches no displayable record currently shifts later cards and leaves an
-empty trailing card (with PHP warnings) rather than being skipped.
 Name and "...more" links always point to `campusdirectory.ucsc.edu`. The
 photo is the directory record's `jpegphoto` rendered as a CSS background
 image, with the campus placeholder when absent and no text alternative.
+
+**Known defect (WPM-194, CD-D3):** every render emits an
+`Undefined variable $options` warning. Profiles are paired with the `cruzids`
+list by position, so a CruzID that matches no displayable record shifts later
+cards and leaves an empty trailing card (with PHP warnings) rather than being
+skipped.
 
 #### Scenario: Multiple people
 
@@ -190,6 +198,11 @@ image, with the campus placeholder when absent and no text alternative.
 
 - **WHEN** `displaystyle` is not supplied
 - **THEN** the profiles render in the grid presentation
+
+#### Scenario: Unknown CruzID leaves an empty card (known defect WPM-194)
+
+- **WHEN** the shortcode's `cruzids` include one with no directory record
+- **THEN** an empty trailing card renders and PHP warnings are emitted
 
 ### Requirement: Shortcode field selection
 
@@ -208,12 +221,22 @@ shortcode attributes are always text.
 
 Only `photo`, `name`, `title`, `phone`, `email`, `websites` (read from the
 `labeleduri` attribute), `officelocation`, and `profilelinks` currently have
-an effect. `officehours` reads a mixed-case key that never exists after
-attributes are lowercased, and `expertise`, `biography`,
+an effect.
+
+**Known defect (WPM-195, CD-D3):** `officehours` reads a mixed-case key that
+never exists after attributes are lowercased, so it renders nothing; the
+branch it guards would also fatal, because it calls the render helpers as
+global functions.
+
+**Known defect (CD-D3, no Jira yet):** `expertise`, `biography`,
 `areas_of_expertise`, `research_interests`, `teaching_interests`, `awards`,
-and `publications` are commented out; those eight render nothing. Setting
-`profilelinks` to `false` currently renders the name as empty rather than as
-plain text.
+and `publications` are commented out and render nothing.
+
+**Known defect (CD-D2, no Jira yet):** setting `profilelinks` to `false`
+renders the name as empty rather than as plain text.
+
+**Known defect (WPM-193):** `websites="true"` fatals with a `TypeError` when a
+person's website has no label.
 
 #### Scenario: Bare shortcode renders a compact card
 
@@ -230,3 +253,14 @@ plain text.
 
 - **WHEN** the shortcode sets `photo` to `false`
 - **THEN** no portrait renders
+
+#### Scenario: Disabling profile links blanks the name (known defect CD-D2)
+
+- **WHEN** the shortcode sets `profilelinks` to `false`
+- **THEN** each profile renders an empty name
+
+#### Scenario: Office hours never render (known defect WPM-195)
+
+- **WHEN** the shortcode sets `officehours` to `true` for a person whose
+  directory record has office hours
+- **THEN** no office hours render

@@ -46,9 +46,11 @@ A value containing LDAP filter metacharacters MUST NOT be able to alter the
 structure of the resulting query, broaden its scope, or make it match records
 the configuration did not select.
 
-Known deviation: the faculty-type keys from the saved `strFacultyTypes`
-attribute are interpolated unescaped into `(ucscpersonpubfacultytype=...)`
-clauses; CruzIDs, department, division, and `deptOrDiv` are escaped.
+**Known defect (CD-D1, no Jira yet):** the faculty-type keys from the saved
+`strFacultyTypes` attribute are interpolated unescaped into
+`(ucscpersonpubfacultytype=...)` clauses. Exploiting it needs an
+author-crafted block attribute, and the injected clauses stay inside the
+scoped AND. CruzIDs, department, division, and `deptOrDiv` are escaped.
 
 #### Scenario: Metacharacters in a CruzID
 
@@ -61,6 +63,11 @@ clauses; CruzIDs, department, division, and `deptOrDiv` are escaped.
 
 - **WHEN** a saved department value contains LDAP filter metacharacters
 - **THEN** the resulting query treats it as a literal value
+
+#### Scenario: Metacharacters in a faculty-type key (known defect CD-D1)
+
+- **WHEN** a saved `strFacultyTypes` key contains LDAP filter metacharacters
+- **THEN** the key is inserted into the filter unescaped
 
 ### Requirement: Empty filters never query
 

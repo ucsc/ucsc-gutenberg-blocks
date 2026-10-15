@@ -15,6 +15,12 @@ The system SHALL register a dynamic block named `ucscblocks/campusdirectory`
 whose editor `save` output is empty and whose front-end markup is produced
 entirely on the server at render time.
 
+The block SHALL be registered with block API version 3 in both the PHP
+registration (`'api_version' => 3`) and the editor registration
+(`apiVersion: 3`), and the editor's `edit` output SHALL be wrapped in a single
+element carrying `useBlockProps()`, so the block renders inside the iframed
+editor canvas (WPM-205).
+
 Because the block saves no markup, changes to directory data or to rendering
 MUST take effect on already-published posts without re-saving them, and a post
 containing the block MUST NOT produce a block-validation error when the
@@ -32,6 +38,14 @@ rendering changes.
 - **WHEN** an author saves a post containing the block
 - **THEN** the stored block content contains only the block's configuration
   attributes and no person data
+
+#### Scenario: Block registers at API version 3
+
+- **WHEN** the editor script registers `ucscblocks/campusdirectory` and PHP
+  registers its block type
+- **THEN** both registrations report block API version 3
+- **AND** the block's editor controls render inside a wrapper carrying the
+  block props
 
 ### Requirement: Persisted configuration attributes
 
@@ -91,6 +105,12 @@ credential is set. On a multisite install the guidance MUST also offer the
 network-level settings screen, because a network-level credential takes
 precedence over a site-level one.
 
+**Known defect (WPM-206):** the gate ignores `DOCKER_DEV`. In the local
+wp-dev.ucsc stack the directory API binds anonymously and needs no credential,
+but the editor still reports the block as not configured and hides every
+control, so the block cannot be configured locally. Production behavior is
+unaffected.
+
 #### Scenario: Credential missing on a single site
 
 - **WHEN** an author inserts the block on a site with no directory credential
@@ -109,6 +129,13 @@ precedence over a site-level one.
 - **WHEN** an author inserts the block on a site with a directory credential
   configured
 - **THEN** the configuration panels are shown
+
+#### Scenario: Local stack without a credential (known defect WPM-206)
+
+- **WHEN** an author inserts the block on wp-dev.ucsc with `DOCKER_DEV=docker_dev`
+  and no `ldap_api_key` set
+- **THEN** the configuration panels are hidden, although the front end renders
+  directory listings
 
 ### Requirement: Publish guard for unresolvable feeds
 

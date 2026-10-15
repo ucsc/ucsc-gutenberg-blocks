@@ -15,6 +15,12 @@ The system SHALL register a server-rendered WordPress block
 markup is produced by the PHP render callback (`CourseCatalog::theHTML()`) on
 every request.
 
+The block SHALL be registered with block API version 3 in both the PHP
+registration (`'api_version' => 3`) and the editor registration
+(`apiVersion: 3`), and the editor's `edit` output SHALL be wrapped in a single
+element carrying `useBlockProps()`, so the block renders inside the iframed
+editor canvas (WPM-205).
+
 The block SHALL declare these attributes: `subjectOrDept` (string, `"dept"`
 or `"subject"`), `department` (string), `subject` (string).
 
@@ -23,6 +29,14 @@ or `"subject"`), `department` (string), `subject` (string).
 - **WHEN** the block is saved in the editor
 - **THEN** the post content for this block contains no rendered HTML, only
   the block comment and its attributes
+
+#### Scenario: Block registers at API version 3
+
+- **WHEN** the editor script registers `ucscblocks/coursecatalog` and PHP
+  registers its block type
+- **THEN** both registrations report block API version 3
+- **AND** the block's editor controls render inside a wrapper carrying the
+  block props
 
 ### Requirement: Department vs. subject selection
 
@@ -36,6 +50,18 @@ block.
 no value has been set; the editor writes this default into the attributes on
 first render. The server render does not apply its own default (see
 `data-fetch`).
+
+The dropdown option lists come from `ucscgutenbergblocks/v1/departmentcode`
+and `/subjectcode`, which cache the parsed PeopleSoft list for one week and do
+not cache a transport failure or non-2xx response.
+
+**Known defect (WPM-207):** when a dropdown endpoint answers with an HTTP
+error page instead of JSON, the editor throws an unhandled JSON parse error
+and the dropdown shows "Dropdown Loading..." indefinitely, with no message.
+
+**Known defect (CS-D3, no Jira yet):** a 2xx response whose body cannot be
+parsed into options is cached as a list containing only `---` for one week,
+so the dropdown offers no real choices until the transient expires.
 
 #### Scenario: Default mode on insert
 
@@ -54,6 +80,13 @@ first render. The server render does not apply its own default (see
 - **WHEN** the department dropdown loads its options
 - **THEN** it fetches from the same `ucscgutenbergblocks/v1/departmentcode`
   endpoint the Class Schedule block's editor uses
+
+#### Scenario: Dropdown endpoint returns an HTTP error page (known defect WPM-207)
+
+- **WHEN** the `departmentcode` or `subjectcode` endpoint answers with an
+  HTML error response such as a 429
+- **THEN** the dropdown remains on "Dropdown Loading..." and the editor
+  console records an unhandled JSON parse error
 
 ### Requirement: Front-end assets load on every page
 

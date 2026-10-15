@@ -34,7 +34,15 @@ numeric rank (unrecognized = 0 < Lower Division = 1 < Upper Division = 2 <
 Graduate = 3) alongside its visible label, so both sort correctly despite
 being displayed as text.
 
-Upstream course fields are echoed without HTML escaping.
+**Known defect (WPM-209, CC-D6):** upstream course fields (`subject`,
+`catalog_nbr`, `title`, `level`, `units`, `description`) are echoed without
+HTML escaping. SimpleXML decodes entities, so `&lt;script&gt;` in the feed
+becomes live markup, and it stays cached for the transient's lifetime.
+
+**Known defect (CC-D7, no Jira yet):** the element IDs `courseCatalog`,
+`search`, `tableSorter`, `expandAll` and `collapseAll` are fixed, so two
+Course Catalog blocks on one page emit duplicate IDs. The script itself scopes
+its work per block through `closest()`.
 
 #### Scenario: Description is present but hidden by default
 
@@ -42,18 +50,34 @@ Upstream course fields are echoed without HTML escaping.
 - **THEN** its description row exists in the DOM with a class that hides it
   from view until expanded
 
+#### Scenario: Markup in a course field is emitted unescaped (known defect WPM-209)
+
+- **WHEN** a PeopleSoft course title contains `&lt;b&gt;x&lt;/b&gt;`
+- **THEN** the rendered row contains a live `<b>` element rather than literal
+  text
+
 ### Requirement: Clicking a course row toggles its description
 
 Clicking anywhere on a course's header row (other than the expand/collapse-all
 controls) SHALL toggle visibility of that course's own description row only,
-without affecting any other row's expanded state. The toggle is bound to
-mouse clicks on table cells only; rows are not keyboard-focusable.
+without affecting any other row's expanded state.
+
+**Known defect (WPM-109, CC-D4):** the toggle is bound to mouse clicks on
+table cells only. Rows are not keyboard-focusable, the Expand all / Collapse
+all controls are `<a>` elements with no `href`, and no control exposes
+`aria-expanded`. WPM-109 also carries WPM-58 (course title cells styled as
+underlined text that is not a link).
 
 #### Scenario: Toggling one row does not affect others
 
 - **WHEN** a visitor clicks one course row to expand its description
 - **THEN** only that course's description becomes visible; all others remain
   collapsed
+
+#### Scenario: Description cannot be reached by keyboard (known defect WPM-109)
+
+- **WHEN** a keyboard-only visitor tabs through the block
+- **THEN** focus never lands on a course row or on Expand all / Collapse all
 
 ### Requirement: Expand all / Collapse all controls
 
@@ -72,11 +96,16 @@ Clicking a sortable column header SHALL sort courses by that column while
 keeping each course's header row and its immediately following description
 row together as a unit; a numeric hidden sort key SHALL take precedence over
 the visible text when present, falling back to alphabetic comparison of the
-remaining non-numeric text when two numeric keys are equal. A column
-without sort-key spans SHALL compare its full cell text as strings, so Units
-sorts lexically (`"10 Units"` before `"5 Units"`). Clicking a header sorts
-ascending unless that header is currently ascending, in which case it sorts
-descending.
+remaining non-numeric text when two numeric keys are equal. Clicking a header
+sorts ascending unless that header is currently ascending, in which case it
+sorts descending.
+
+**Known defect (CC-D5, no Jira yet):** a column without sort-key spans
+compares its full cell text as strings, so Units sorts lexically
+(`"10 Units"` before `"5 Units"`).
+
+**Known defect (WPM-108):** sortable headers respond to clicks only; they are
+not focusable, have no keyboard handler, and expose no `aria-sort`.
 
 #### Scenario: Sorting keeps descriptions attached to their course
 
@@ -90,6 +119,11 @@ descending.
 - **THEN** rows order by the hidden numeric catalog number, not by the
   visible subject-code text
 
+#### Scenario: Units sorts as text (known defect CC-D5)
+
+- **WHEN** the Units column is sorted ascending with courses of 5 and 10 units
+- **THEN** the 10-unit course sorts before the 5-unit course
+
 ### Requirement: Search filters by visible and hidden row text
 
 The search box SHALL filter course pairs (header + description),
@@ -97,12 +131,19 @@ case-insensitively, on every keyup; a course pair SHALL remain visible if
 either its header row or its description row contains the search term, so a
 match found only in the long-form description still surfaces the course.
 
-Matching runs against each cell's `innerHTML`, not its visible text, so
-markup and the hidden level rank are also searchable (e.g. searching `2`
-matches every Upper Division course).
+**Known defect (CC-D3, no Jira yet):** matching runs against each cell's
+`innerHTML`, not its visible text, so markup and the hidden level rank are
+also searchable: `span`, `secret`, and the digits 0-3 match unrelated rows
+(e.g. searching `2` matches every Upper Division course).
 
 #### Scenario: Search matches text only present in the description
 
 - **WHEN** a visitor searches for a term that appears only in a course's
   description, not its title
 - **THEN** that course's header and description rows both remain visible
+
+#### Scenario: Search matches hidden markup (known defect CC-D3)
+
+- **WHEN** a visitor searches for `secret`
+- **THEN** every course row remains visible, because every level cell
+  contains a `span.secret`

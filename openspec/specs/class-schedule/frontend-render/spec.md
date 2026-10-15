@@ -20,6 +20,11 @@ the current URL, so the selected term is reflected in and restorable from the
 page URL. The parameter is page-wide: every Class Schedule block on the page
 resolves its term from the same `class_schedule_term` value.
 
+**Open policy question (WPM-111):** navigating immediately on selection is a
+change of context on input (WCAG 3.2.2). Whether to add an explicit submit
+control or an advance warning has not been decided; until it is, the
+navigate-on-change behavior above is what ships.
+
 #### Scenario: Query param selects a specific term
 
 - **WHEN** the page is requested with `?class_schedule_term=2262` and `2262`
@@ -47,12 +52,14 @@ render a distinct "no courses found" message. When the terms list is empty,
 the system SHALL render "No terms available." instead of a table.
 
 An upstream PeopleSoft failure SHALL render one of these plain-language
-messages rather than a partial table or a fatal error. Because the internal
+messages rather than a partial table or a fatal error.
+
+**Known defect (CS-D1, no Jira yet):** because the internal
 `rest_do_request()` call returns the route's error as a `WP_REST_Response`
-(never a `WP_Error`), a failed terms request currently renders
-"No terms available." and a failed courses request renders "No courses found
-for the selected criteria." — the dedicated "Error loading terms" branch in
-`theHTML()` is unreachable.
+(never a `WP_Error`), a failed terms request renders "No terms available." and
+a failed courses request renders "No courses found for the selected
+criteria.", so an outage is reported to visitors as missing data. The
+dedicated "Error loading terms" branch in `theHTML()` is unreachable.
 
 #### Scenario: Unconfigured block prompts for configuration
 
@@ -73,6 +80,12 @@ for the selected criteria." — the dedicated "Error loading terms" branch in
 - **WHEN** the PeopleSoft terms or course-list request fails
 - **THEN** the block renders a single plain-language paragraph and no table
 - **AND** the failed response is not cached
+
+#### Scenario: Outage is worded as missing data (known defect CS-D1)
+
+- **WHEN** the PeopleSoft course-list request fails for a configured block
+- **THEN** the paragraph reads "No courses found for the selected criteria."
+  rather than reporting an error
 
 ### Requirement: Course rows are sorted by catalog number
 
@@ -117,8 +130,11 @@ carry `aria-sort` for the current direction.
 Values are compared by the cell's rendered text: when both texts begin with a
 number (JavaScript `parseFloat`), they SHALL be compared by that leading
 number; otherwise they SHALL be compared with `localeCompare`. Seats
-(`"N open / M total"`) therefore sorts by open seats, and Time
-(`"10:00 AM - ..."`) sorts by its leading hour without regard to AM/PM.
+(`"N open / M total"`) therefore sorts by open seats.
+
+**Known defect (CS-D2, no Jira yet):** Time (`"10:00 AM - ..."`) sorts by its
+leading hour without regard to minutes or AM/PM, so "1:30 PM" sorts before
+"10:00 AM".
 
 #### Scenario: Repeated click reverses sort order
 
@@ -131,6 +147,12 @@ number; otherwise they SHALL be compared with `localeCompare`. Seats
 - **WHEN** a visitor sorts by Seats with rows showing "5 open", "40 open",
   and "12 open"
 - **THEN** the ascending order is 5, 12, 40
+
+#### Scenario: Time sorts by leading hour (known defect CS-D2)
+
+- **WHEN** a visitor sorts by Time ascending with rows starting "10:00 AM"
+  and "1:30 PM"
+- **THEN** the "1:30 PM" row sorts first
 
 ### Requirement: Column visibility is configurable by the visitor within a session
 
@@ -145,7 +167,12 @@ search box, immediately re-filtering the table. Status choices are not
 persisted.
 
 While the modal is open, focus SHALL be trapped inside it; closing it SHALL
-return focus to the element that opened it.
+return focus to the element that opened it. The modal itself is a
+`role="dialog"` with `aria-modal="true"` labelled by its title.
+
+**Known defect (WPM-197):** the Filter button that opens the modal carries no
+`aria-haspopup`, `aria-controls` or `aria-expanded`, so screen-reader users
+get no cue that it opens a dialog.
 
 #### Scenario: Cancel discards unapplied changes
 

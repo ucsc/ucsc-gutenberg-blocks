@@ -18,10 +18,14 @@ attribute, and SHALL POST it to the resolved PeopleSoft target's
 30-second timeout. Any `subjectOrDept` value other than `"dept"` selects
 subject mode.
 
-The value is interpolated into the XML without escaping, and there is no
-guard for an unconfigured block: a block with no `subjectOrDept` (or with
-`"---"` selected) still issues an upstream request, e.g. with an empty
-`<subject></subject>` element.
+The value is interpolated into the XML without escaping.
+
+**Known defect (CC-D2, no Jira yet):** there is no guard for an unconfigured
+block. A block with no `subjectOrDept` raises "Undefined array key" warnings
+and POSTs an empty `<subject></subject>` element to production; a block with
+`"---"` selected POSTs `<acad_org>---</acad_org>`. Class Schedule
+short-circuits both cases with a configuration message. The scenario
+"Unconfigured block still queries upstream" pins this behavior.
 
 #### Scenario: Unconfigured block still queries upstream
 
@@ -54,6 +58,9 @@ unrecognized value. An empty environment variable is ignored.
 A request-parameter target override (`ucsc_course_catalog_target`) is
 implemented but disabled; request parameters SHALL NOT change the target.
 
+**Open policy question (WPM-156):** whether the dormant request-parameter
+override is still needed for QA testing or should be removed.
+
 #### Scenario: Unrecognized target value defaults to production
 
 - **WHEN** `UCSC_COURSE_CATALOG_PEOPLESOFT_TARGET` is set to an unrecognized
@@ -65,6 +72,12 @@ implemented but disabled; request parameters SHALL NOT change the target.
 - **WHEN** the target configuration value is `"qa"` or `"test"`
 - **THEN** the QA PeopleSoft instance (`PSFT_CSQA`) is used
 
+#### Scenario: Request parameter does not change the target
+
+- **WHEN** a page with the block is requested with
+  `?ucsc_course_catalog_target=qa`
+- **THEN** the configured target (production by default) is still used
+
 ### Requirement: Response caching is per-target and per-query, for one week
 
 The system SHALL cache a successfully-parsed catalog response body in a
@@ -75,6 +88,10 @@ to parse as valid, non-empty XML.
 
 When `UCSC_COURSE_CATALOG_BYPASS_CACHE` (constant, else environment variable)
 is truthy, the system SHALL neither read nor write the transient.
+
+**Open policy question (WPM-96):** whether one week is too long for catalog
+data. The issue was raised against Campus Directory (INC2818233) and retitled
+to Course Catalog on 2026-10-09; no shorter lifetime has been decided.
 
 #### Scenario: Prod and QA responses do not share a cache entry
 
@@ -102,10 +119,13 @@ each produce a distinct `WP_Error` (the transport error itself,
 render callback surfaces as a plain-language unavailability message, rather
 than attempting to iterate over incomplete data.
 
-The XML check is a truthiness test on the parsed `SimpleXMLElement`, so a
-well-formed but empty root element (e.g. `<catalog/>`, no courses) is also
-treated as invalid XML: it renders the unavailability message and is not
-cached.
+**Known defect (CC-D1, no Jira yet):** the XML check is a truthiness test on
+the parsed `SimpleXMLElement` (`if (!$xmlBody)`), so a well-formed but empty
+root element (e.g. `<catalog/>`, no courses) is also treated as invalid XML.
+It renders the unavailability message and is not cached, so a department with
+no catalog courses queries PeopleSoft on every page view. The exact shape of a
+PeopleSoft empty result has not been confirmed. The scenario "Empty catalog
+response is treated as unavailable" pins this behavior.
 
 #### Scenario: Empty catalog response is treated as unavailable
 
