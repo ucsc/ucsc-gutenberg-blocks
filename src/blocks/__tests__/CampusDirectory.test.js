@@ -239,6 +239,26 @@ describe('CampusDirectory block', () => {
       expect(mockLockPostSaving).toHaveBeenCalledWith('campusDirectoryInvalidState');
     });
 
+    it('locks post saving when the division source has no division chosen', async () => {
+      const setAttributes = jest.fn();
+      await act(async () => {
+        render(
+          <Edit
+            setAttributes={setAttributes}
+            attributes={{
+              ...defaultAttributes,
+              automatedFeeds: true,
+              deptOrDiv: 'div',
+              department: 'MATH',
+              division: '---',
+            }}
+          />
+        );
+      });
+      expect(mockLockPostSaving).toHaveBeenCalledWith('campusDirectoryInvalidState');
+      expect(mockUnlockPostSaving).not.toHaveBeenCalledWith('campusDirectoryInvalidState');
+    });
+
     it('unlocks post saving when state is valid', async () => {
       const setAttributes = jest.fn();
       await act(async () => {

@@ -86,6 +86,11 @@ check( 'links names to the in-site profile route by default', false !== strpos( 
 check( 'renders campus email as a mailto link', false !== strpos( $html, 'mailto:jdoe@ucsc.edu' ) );
 check( 'renders the office location and detail', false !== strpos( $html, 'McHenry Library, Room 404' ) );
 
+$html = render_campus_directory_template(
+	directory_items_fixture( array( 'items' => array( person_fixture( array( 'uid' => array( 'j doe/x' ) ) ) ) ) )
+);
+check( 'URL-encodes the cruzid in the profile link', false !== strpos( $html, '?directoryprofilecruzid=j%20doe%2Fx' ) );
+
 echo "\ntable layout rendering:\n";
 $html = render_campus_directory_template(
 	directory_items_fixture(

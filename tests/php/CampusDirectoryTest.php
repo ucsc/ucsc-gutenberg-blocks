@@ -643,6 +643,15 @@ $result = run_theHTML_capturing_issues( $campus_directory, $attributes );
 check( 'a block with a staff type selected still renders without fataling', ! $result['threw'] );
 check( 'a selected staff type still reaches the LDAP filter (guard does not swallow real config)', isset( $ldap_searches[0] ) && false !== strpos( $ldap_searches[0]['filter'], 'ucscpersonpubaffiliation=Staff' ) );
 
+reset_test_state();
+$attributes = campus_directory_theHTML_attributes_fixture( array(
+	'pageLayout' => 'table',
+	'department' => 'MATH',
+) );
+unset( $attributes['strInformationTypesTable'] );
+$result = run_theHTML_capturing_issues( $campus_directory, $attributes );
+check( 'a table-layout block with strInformationTypesTable absent renders with no warnings', ! $result['threw'] && array() === $result['warnings'] );
+
 echo "addVacantPosition/addVacantPositions tests (WPM-172):\n";
 
 reset_test_state();
