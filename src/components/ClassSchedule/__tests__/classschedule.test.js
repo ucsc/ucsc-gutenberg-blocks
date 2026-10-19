@@ -314,6 +314,21 @@ describe('classschedule.js frontend', () => {
       expect(classCountText()).toContain('3');
     });
 
+    // WPM-224: reset re-filters immediately (WPM-112), so Cancel must re-filter
+    // too, or the table keeps the reset rows while the checkboxes are restored.
+    it('re-hides status-filtered rows when reset is cancelled', () => {
+      document.querySelector('.status-filter[data-status="closed"]').checked = false;
+      window.applyFilters();
+      window.openFilterModal();
+
+      window.resetFilters();
+      window.closeFilterModal();
+
+      expect(document.querySelector('.status-filter[data-status="closed"]').checked).toBe(false);
+      expect(visibleCourseIds()).toEqual(['CSE-20', 'CSE-150']);
+      expect(classCountText()).toContain('2');
+    });
+
     it('restores saved column choices on DOMContentLoaded', () => {
       sessionStorage.setItem('cs_columns', JSON.stringify({ time: true, seats: false }));
       document.dispatchEvent(new Event('DOMContentLoaded'));
