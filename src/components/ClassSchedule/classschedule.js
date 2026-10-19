@@ -243,6 +243,9 @@ function closeFilterModal(ref) {
         }
     });
 
+    // Reset re-filters immediately (WPM-112), so re-filter with the restored statuses (WPM-224)
+    applyStatusFilters(root);
+
     root.querySelector('.filter-modal').classList.remove('active');
 
     // A11Y: remove focus trap handler and restore focus to opener
