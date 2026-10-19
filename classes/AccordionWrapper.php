@@ -13,6 +13,7 @@ class AccordionWrapper
   function adminAssets()
   {
     register_block_type('ucscblocks/accordion-wrapper', array(
+      'api_version' => 3,
       'editor_script' => 'ucscblocks',
       'render_callback' => array($this, 'theHTML')
     ));

@@ -1,9 +1,10 @@
 /* istanbul ignore file -- Accordion block is slated for retirement; intentionally untested by decision (WPM-115). */
-import { InnerBlocks, InspectorControls } from '@wordpress/block-editor';
+import { InnerBlocks, InspectorControls, useBlockProps } from '@wordpress/block-editor';
 import { Panel, PanelBody, CheckboxControl } from '@wordpress/components';
 
 const Accordion = () => {
   wp.blocks.registerBlockType("ucscblocks/accordion", {
+    apiVersion: 3,
     title: "Accordion (deprecated)",
     icon: "menu",
     category: "common",
@@ -16,8 +17,10 @@ const Accordion = () => {
       },
     },
     edit: ({ setAttributes, attributes }) => {
+      const blockProps = useBlockProps();
+
       return (
-        <>
+        <div {...blockProps}>
           <InspectorControls key="setting">
             <Panel>
               <PanelBody>
@@ -45,7 +48,7 @@ const Accordion = () => {
             </summary>
             <InnerBlocks />
           </details>
-        </>
+        </div>
       );
     },
     save: () => {
