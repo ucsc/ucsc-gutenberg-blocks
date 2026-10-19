@@ -419,6 +419,8 @@ check( 'block classes with a custom class only', 'my-class' === $shortcode->ucsc
 check( 'block classes are empty with neither', '' === $shortcode->ucsc_cdp_block_classes( array() ) );
 check( 'marshal_or_filter_from_uids ORs trimmed uids', '(|(uid=a)(uid=b))' === $shortcode->marshal_or_filter_from_uids( array( 'a', ' b ' ) ) );
 check( 'a labeled URI renders an escaped link', '<a href="https://x.example/?a=1&amp;b=2">Lab &lt;b&gt;</a>' === $shortcode->render_attr_labeled_uri_map( 'https://x.example/?a=1&b=2 Lab <b>' ) );
+check( 'a URI with no label links with the URL as its text (WPM-225)', '<a href="https://x.example/?a=1&amp;b=2">https://x.example/?a=1&amp;b=2</a>' === $shortcode->render_attr_labeled_uri_map( 'https://x.example/?a=1&b=2' ) );
+check( 'a website with no label renders in the shortcode without a fatal (WPM-225)', false !== strpos( $shortcode->render_attr_labeled_uri( array( 'labeleduri' => array( 'count' => 1, 'https://lab.example' ) ), 'labeleduri' ), '<a href="https://lab.example">https://lab.example</a>' ) );
 
 $registered_styles = array();
 $shortcode->register_plugin_styles();

@@ -376,7 +376,8 @@ public function render_attr_mail_map($email) {
 public function render_attr_labeled_uri_map($labeled_uri) {
 	$split = explode(' ', $labeled_uri, 2);
 	if(sizeof($split) < 2) {
-		return join('<br/>', $labeled_uri);
+		// WPM-225: no label, so link the URL itself (matches the profile page)
+		return '<a href="' . esc_url( $split[0] ) . '">' . esc_html( $split[0] ) . '</a>';
 	}
 	return '<a href="' . esc_url( $split[0] ) . '">' . esc_html( $split[1] ) . '</a>';
 }
