@@ -174,7 +174,80 @@ describe('tablesorter.js course catalog frontend', () => {
     loadScript();
 
     expect(() => document.querySelector('#tableSorter th').click()).not.toThrow();
-    expect(document.querySelector('#tableSorter tbody').textContent).not.toContain('undefined');
+    expect(document.querySelector('#tableSorter tbody').textContent).not.toMatch(/undefined|null/);
     expect(visibleCourseNumbers()).toEqual(['101']);
+  });
+
+  // jsdom reports exceptions thrown inside event listeners as window "error"
+  // events instead of rethrowing from click(), so collect those.
+  function listenerErrors(fn) {
+    const errors = [];
+    const onError = (event) => {
+      errors.push(event.error);
+      event.preventDefault();
+    };
+    window.addEventListener('error', onError);
+    try {
+      fn();
+    } finally {
+      window.removeEventListener('error', onError);
+    }
+    return errors;
+  }
+
+  it('ignores a header click on a table with no tbody', () => {
+    document.body.innerHTML = `
+      <table class="table-sortable" id="tableSorter">
+        <thead><tr><th>Course #</th><th>Course Title</th></tr></thead>
+      </table>`;
+    loadScript();
+
+    expect(listenerErrors(() => document.querySelector('#tableSorter th').click())).toEqual([]);
+  });
+
+  it('ignores a click on the last row when it has no description row', () => {
+    document.body.innerHTML = `
+      <table class="table-sortable" id="tableSorter">
+        <tbody><tr class="pointer"><td>CSE <span class="intsort">101</span></td></tr></tbody>
+      </table>`;
+    loadScript();
+
+    expect(listenerErrors(() => document.querySelector('#tableSorter td').click())).toEqual([]);
+  });
+
+  describe('two course catalog blocks on one page', () => {
+    beforeEach(() => {
+      const one = FIXTURE_ROWS.slice(0, 2);
+      const two = FIXTURE_ROWS.slice(1);
+      buildFixture(one);
+      const first = document.querySelector('#courseCatalog').outerHTML;
+      buildFixture(two);
+      document.body.innerHTML = first + document.body.innerHTML;
+      loadScript();
+    });
+
+    const blocks = () => document.querySelectorAll('#courseCatalog');
+    const rowDisplays = (block) =>
+      Array.from(block.querySelectorAll('tbody tr')).map((row) => row.style.display);
+
+    it('search filters only the table in its own block', () => {
+      const [first, second] = blocks();
+      const input = second.querySelector('#search');
+
+      input.value = 'seminar';
+      window.tableSearch({ currentTarget: input });
+
+      expect(rowDisplays(first)).toEqual(['', '', '', '']);
+      expect(rowDisplays(second)).toEqual(['none', 'none', '', '']);
+    });
+
+    it('expand all opens only the description rows in its own block', () => {
+      const [first, second] = blocks();
+
+      second.querySelector('.expandAll').click();
+
+      expect(Array.from(first.querySelectorAll('tr.hide')).some((row) => row.classList.contains('active'))).toBe(false);
+      expect(Array.from(second.querySelectorAll('tr.hide')).every((row) => row.classList.contains('active'))).toBe(true);
+    });
   });
 });

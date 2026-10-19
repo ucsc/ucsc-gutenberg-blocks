@@ -129,6 +129,24 @@ function err_response( $code, $body = '' ) {
 	return array( 'code' => $code, 'body' => $body );
 }
 
+/**
+ * Run $fn and return [result, warnings]. The unparseable-input guards only
+ * prevent PHP warnings (foreach/offset on null), so assert none are raised.
+ */
+function capture_warnings( $fn ) {
+	$warnings = array();
+	set_error_handler( function ( $errno, $errstr ) use ( &$warnings ) {
+		$warnings[] = $errstr;
+		return true;
+	} );
+	try {
+		$result = $fn();
+	} finally {
+		restore_error_handler();
+	}
+	return array( $result, $warnings );
+}
+
 $department_options_html = '<html><body><select id="ucscpersonpubdepartmentnumber">'
 	. '<option>Biology</option><option>Chemistry</option><option></option>'
 	. '</select></body></html>';
@@ -169,7 +187,9 @@ check( 'cddepartmentcode: non-2xx response is not cached',
 reset_state();
 $settings             = new SiteSettings();
 $remote_get_response  = ok_response( '<html><body>no department select here</body></html>' );
-$result = $settings->cddepartmentcode();
+list( $result, $warnings ) = capture_warnings( function () use ( $settings ) {
+	return $settings->cddepartmentcode();
+} );
 
 check( 'cddepartmentcode: unparseable HTML does not fatal',
 	$result instanceof WP_REST_Response
@@ -178,6 +198,7 @@ check( 'cddepartmentcode: unparseable HTML returns only the placeholder option (
 	$result instanceof WP_REST_Response && count( $result->get_data() ) === 1
 	&& $result->get_data()[0]['value'] === '---'
 );
+check( 'cddepartmentcode: unparseable HTML raises no PHP warnings', array() === $warnings );
 
 // ── Happy path ────────────────────────────────────────────────────────────────
 
@@ -265,8 +286,11 @@ check( 'departmentcode: non-2xx response is not cached', empty( $transient_set_c
 reset_state();
 $settings            = new SiteSettings();
 $remote_get_response = ok_response( 'not json at all' );
-$result              = $settings->departmentcode();
+list( $result, $warnings ) = capture_warnings( function () use ( $settings ) {
+	return $settings->departmentcode();
+} );
 check( 'departmentcode: unparseable JSON does not fatal (no count(null))', $result instanceof WP_REST_Response );
+check( 'departmentcode: unparseable JSON raises no PHP warnings', array() === $warnings );
 check( 'departmentcode: unparseable JSON returns only the placeholder option',
 	$result instanceof WP_REST_Response && count( $result->get_data() ) === 1
 	&& $result->get_data()[0]['value'] === '---'
@@ -324,8 +348,11 @@ check( 'subjectcode: non-2xx response is not cached', empty( $transient_set_call
 reset_state();
 $settings            = new SiteSettings();
 $remote_get_response = ok_response( '{"unexpected":true}' );
-$result              = $settings->subjectcode();
+list( $result, $warnings ) = capture_warnings( function () use ( $settings ) {
+	return $settings->subjectcode();
+} );
 check( 'subjectcode: unexpected JSON shape does not fatal (no count(null))', $result instanceof WP_REST_Response );
+check( 'subjectcode: unexpected JSON shape raises no PHP warnings', array() === $warnings );
 check( 'subjectcode: unexpected JSON shape returns only the placeholder option',
 	$result instanceof WP_REST_Response && count( $result->get_data() ) === 1
 	&& $result->get_data()[0]['value'] === '---'
