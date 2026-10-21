@@ -20,6 +20,7 @@
 $transients           = array();
 $transient_set_calls  = array();
 $remote_get_calls     = array();
+$remote_get_args      = array();
 $remote_get_response  = null; // set per test
 
 // ── WordPress stubs ───────────────────────────────────────────────────────────
@@ -32,6 +33,9 @@ define( 'ABSPATH', sys_get_temp_dir() . '/wp-mock/' );
 
 if ( ! defined( 'WEEK_IN_SECONDS' ) ) {
 	define( 'WEEK_IN_SECONDS', 604800 );
+}
+if ( ! defined( 'MINUTE_IN_SECONDS' ) ) {
+	define( 'MINUTE_IN_SECONDS', 60 );
 }
 
 function get_transient( $key ) {
@@ -47,8 +51,9 @@ function set_transient( $key, $value, $expiration ) {
 }
 
 function wp_remote_get( $url, $args = array() ) {
-	global $remote_get_calls, $remote_get_response;
+	global $remote_get_calls, $remote_get_args, $remote_get_response;
 	$remote_get_calls[] = $url;
+	$remote_get_args[]  = $args;
 	return $remote_get_response;
 }
 
@@ -108,11 +113,20 @@ require_once __DIR__ . '/../../classes/SiteSettings.php';
  * Reset all global state between tests.
  */
 function reset_state() {
-	global $transients, $transient_set_calls, $remote_get_calls, $remote_get_response;
+	global $transients, $transient_set_calls, $remote_get_calls, $remote_get_args, $remote_get_response;
 	$transients          = array();
 	$transient_set_calls = array();
 	$remote_get_calls    = array();
+	$remote_get_args     = array();
 	$remote_get_response = null;
+}
+
+/**
+ * Keys passed to set_transient() since the last reset.
+ */
+function transient_set_keys() {
+	global $transient_set_calls;
+	return array_column( $transient_set_calls, 'key' );
 }
 
 /**
@@ -162,7 +176,33 @@ check( 'cddepartmentcode: WP_Error remote returns WP_Error, not a fatal',
 	is_wp_error( $result )
 );
 check( 'cddepartmentcode: WP_Error result is not cached',
-	empty( $transient_set_calls )
+	! in_array( 'ucsc_cddepartmentcode', transient_set_keys(), true )
+);
+check( 'cddepartmentcode: WP_Error records a 5-minute failure backoff',
+	$transient_set_calls === array( array( 'key' => 'ucsc_cddepartmentcode_failed', 'expiration' => 300 ) )
+);
+check( 'cddepartmentcode: fetch timeout stays well under the 30s edge timeout',
+	isset( $remote_get_args[0]['timeout'] ) && $remote_get_args[0]['timeout'] <= 10
+);
+
+// within the backoff window: fail fast, no remote call
+$remote_get_calls = array();
+$result = $settings->cddepartmentcode();
+
+check( 'cddepartmentcode: during backoff returns a 503 WP_Error',
+	is_wp_error( $result ) && $result->get_error_data() === array( 'status' => 503 )
+);
+check( 'cddepartmentcode: during backoff makes no remote call',
+	count( $remote_get_calls ) === 0
+);
+
+// backoff expired: tries the remote again and recovers
+unset( $transients['ucsc_cddepartmentcode_failed'] );
+$remote_get_response = ok_response( $department_options_html );
+$result = $settings->cddepartmentcode();
+
+check( 'cddepartmentcode: after backoff expires the remote is retried and the list returned',
+	count( $remote_get_calls ) === 1 && $result instanceof WP_REST_Response
 );
 
 // ── Non-2xx response ─────────────────────────────────────────────────────────
@@ -179,7 +219,10 @@ check( 'cddepartmentcode: non-2xx error does not leak the raw upstream body',
 	is_wp_error( $result ) && strpos( $result->get_error_message(), 'upstream maintenance page' ) === false
 );
 check( 'cddepartmentcode: non-2xx response is not cached',
-	empty( $transient_set_calls )
+	! in_array( 'ucsc_cddepartmentcode', transient_set_keys(), true )
+);
+check( 'cddepartmentcode: non-2xx response records the failure backoff',
+	transient_set_keys() === array( 'ucsc_cddepartmentcode_failed' )
 );
 
 // ── Unparseable HTML ─────────────────────────────────────────────────────────

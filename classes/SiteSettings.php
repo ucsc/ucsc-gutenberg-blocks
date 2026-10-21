@@ -39,17 +39,30 @@ class SiteSettings
   {
     $retDepts = get_transient('ucsc_cddepartmentcode');
     if (!$retDepts) {
+      // Campus Directory failed moments ago: fail fast instead of stalling
+      // every editor load (and a PHP worker) on another timeout.
+      if (get_transient('ucsc_cddepartmentcode_failed')) {
+        return new WP_Error(
+          'cddepartmentcode_fetch_error',
+          'Campus Directory is temporarily unavailable',
+          ['status' => 503]
+        );
+      }
+
       $retDepts = [];
       $retDepts[] = [
         "label" => "---",
         "value" => "---"
       ];
 
+      // Keep well under the CampusPress edge's 30s proxy timeout so an
+      // unreachable Campus Directory returns an error instead of a 504.
       $response = wp_remote_get('https://campusdirectory.ucsc.edu/', [
-        'timeout' => 30,
+        'timeout' => 5,
       ]);
 
       if (is_wp_error($response)) {
+        set_transient('ucsc_cddepartmentcode_failed', 1, 5 * MINUTE_IN_SECONDS);
         return new WP_Error(
           'cddepartmentcode_fetch_error',
           'Failed to fetch department list from Campus Directory',
@@ -59,6 +72,7 @@ class SiteSettings
 
       $status_code = wp_remote_retrieve_response_code($response);
       if ($status_code < 200 || $status_code >= 300) {
+        set_transient('ucsc_cddepartmentcode_failed', 1, 5 * MINUTE_IN_SECONDS);
         return new WP_Error(
           'cddepartmentcode_fetch_error',
           'Campus Directory returned HTTP ' . $status_code,

@@ -159,7 +159,7 @@ $individualPageUrl = $items['nodeContent']['linkOutToCampusDirectory'] ?
                   if ($displayPhoto) {
                     $profileUid = !empty($people[$i]['uid'][0]) ? $people[$i]['uid'][0] : '';
                     if (!empty($profileUid)) {
-                      $imgSrc = 'https://campusdirectory.ucsc.edu/photo.php?type=people&uid=' . rawurlencode($profileUid);
+                      $imgSrc = rest_url('ucscgutenbergblocks/v1/directoryphoto/' . rawurlencode($profileUid));
                     } else {
                       $imgSrc = '//static.ucsc.edu/images/icon-slug.jpg';
                     }

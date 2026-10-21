@@ -173,6 +173,23 @@ function set_transient($key, $value, $expiration) {
 }
 function get_option() { return ''; }
 
+// campusdirectory.ucsc.edu photo.php scrape. Default response mirrors photo.php
+// for a uid with no photo: HTTP 500, empty body.
+if (!defined('MINUTE_IN_SECONDS')) define('MINUTE_IN_SECONDS', 60);
+$remote_get_calls    = array();
+$remote_get_response = array( 'code' => 500, 'body' => '' );
+function wp_remote_get( $url, $args = array() ) {
+	global $remote_get_calls, $remote_get_response;
+	$remote_get_calls[] = array( 'url' => $url, 'args' => $args );
+	return $remote_get_response;
+}
+function wp_remote_retrieve_body( $response ) {
+	return isset( $response['body'] ) ? $response['body'] : '';
+}
+function wp_remote_retrieve_response_code( $response ) {
+	return isset( $response['code'] ) ? $response['code'] : '';
+}
+
 // We also need to mock a few template functions that DirectoryProfileTemplate calls
 function get_theme_file_path() { return false; }
 function get_header() {}
@@ -249,7 +266,9 @@ function transient_keys() {
 }
 
 function reset_test_state() {
-	global $query_vars, $is_admin, $is_singular, $is_main_query, $queried_object_id, $current_post_id, $ldap_searches, $ldap_options, $ldap_search_result, $ldap_bind_result, $ldap_entries, $ldap_attr_cursor, $transients, $ldap_connect_uris, $ldap_len_reads;
+	global $query_vars, $is_admin, $is_singular, $is_main_query, $queried_object_id, $current_post_id, $ldap_searches, $ldap_options, $ldap_search_result, $ldap_bind_result, $ldap_entries, $ldap_attr_cursor, $transients, $ldap_connect_uris, $ldap_len_reads, $remote_get_calls, $remote_get_response;
+	$remote_get_calls    = array();
+	$remote_get_response = array( 'code' => 500, 'body' => '' );
 	$ldap_connect_uris  = array();
 	$ldap_len_reads     = array();
 	$query_vars         = array();
@@ -967,6 +986,100 @@ $api = campus_directory_api_fixture(
 );
 $api->getCampusDirData( '' );
 check( 'scoped automated feed (dept=MATH) applies the 1000-record LDAP ceiling', ldap_size_limit_was_set_to( 1000 ) );
+
+echo "directory photo tests (getDirectoryPhoto):\n";
+
+if ( ! defined( 'DAY_IN_SECONDS' ) ) define( 'DAY_IN_SECONDS', 86400 );
+$photo_bytes = "\xFF\xD8\xFF\xE0jpeg\x00bytes";
+$photo_key   = 'ucsc_cd_photo_' . md5( 'jdoe' );
+
+reset_test_state();
+$ldap_entries = array( ldap_entry_fixture( array( 'uid' => array( 'jdoe' ), 'jpegphoto' => array( $photo_bytes ) ) ) );
+$photo = $campus_directory->getDirectoryPhoto( 'jdoe' );
+check( 'returns the raw jpegPhoto bytes from LDAP', $photo_bytes === $photo );
+check( 'looks the photo up by uid', isset( $ldap_searches[0] ) && false !== strpos( $ldap_searches[0]['filter'], '(uid=jdoe)' ) );
+check( 'caches the photo base64-encoded for a day',
+	isset( $transients[ $photo_key ] )
+	&& base64_encode( $photo_bytes ) === $transients[ $photo_key ]['value']
+	&& DAY_IN_SECONDS === $transients[ $photo_key ]['expiration']
+);
+
+// Cached photo: drop every other cache entry so only the photo cache can
+// answer, then confirm LDAP is not queried again.
+$transients    = array( $photo_key => $transients[ $photo_key ] );
+$ldap_searches = array();
+$photo = $campus_directory->getDirectoryPhoto( 'jdoe' );
+check( 'serves a cached photo without querying LDAP', $photo_bytes === $photo && 0 === count( $ldap_searches ) );
+
+reset_test_state();
+$ldap_entries = array( ldap_entry_fixture( array( 'uid' => array( 'jdoe' ) ) ) );
+$photo = $campus_directory->getDirectoryPhoto( 'jdoe' );
+check( 'returns empty when the person has no jpegPhoto', '' === $photo );
+check( 'does not cache a missing photo', ! isset( $transients[ $photo_key ] ) );
+
+reset_test_state();
+$hidden = ldap_entry_fixture( array( 'uid' => array( 'jdoe' ), 'jpegphoto' => array( $photo_bytes ) ) );
+$hidden['ucscpersonpubdisplay'] = array( 'FALSE', 'count' => 1 );
+$ldap_entries = array( $hidden );
+$photo = $campus_directory->getDirectoryPhoto( 'jdoe' );
+check( 'does not serve the photo of a person who is not publicly listed', '' === $photo );
+
+reset_test_state();
+$ldap_bind_result = false;
+$photo = $campus_directory->getDirectoryPhoto( 'jdoe' );
+check( 'returns empty when the LDAP bind fails', '' === $photo );
+
+echo "directory photo scrape fallback tests (scrapeDirectoryPhoto):\n";
+
+reset_test_state();
+$ldap_entries = array( ldap_entry_fixture( array( 'uid' => array( 'jdoe' ), 'jpegphoto' => array( $photo_bytes ) ) ) );
+$campus_directory->getDirectoryPhoto( 'jdoe' );
+check( 'does not scrape when LDAP has the photo', 0 === count( $remote_get_calls ) );
+
+reset_test_state();
+$ldap_bind_result    = false;
+$remote_get_response = array( 'code' => 200, 'body' => $photo_bytes );
+$photo = $campus_directory->getDirectoryPhoto( 'jdoe' );
+check( 'falls back to campusdirectory photo.php when LDAP has no photo', $photo_bytes === $photo );
+check( 'scrapes photo.php for the requested uid',
+	isset( $remote_get_calls[0] ) && 'https://campusdirectory.ucsc.edu/photo.php?type=people&uid=jdoe' === $remote_get_calls[0]['url']
+);
+check( 'scrape uses a short timeout', isset( $remote_get_calls[0] ) && $remote_get_calls[0]['args']['timeout'] <= 2 );
+check( 'caches a scraped photo for a day',
+	isset( $transients[ $photo_key ] ) && base64_encode( $photo_bytes ) === $transients[ $photo_key ]['value']
+);
+
+reset_test_state();
+$ldap_bind_result = false;
+$photo = $campus_directory->getDirectoryPhoto( 'jdoe' );
+check( 'treats photo.php 500 (no photo) as no photo', '' === $photo );
+check( 'a no-photo 500 does not trigger the scrape backoff', ! isset( $transients['ucsc_cd_photo_scrape_failed'] ) );
+
+reset_test_state();
+$ldap_bind_result    = false;
+$remote_get_response = array( 'code' => 200, 'body' => '<html>not an image</html>' );
+$photo = $campus_directory->getDirectoryPhoto( 'jdoe' );
+check( 'rejects a 200 response that is not a JPEG', '' === $photo && ! isset( $transients[ $photo_key ] ) );
+
+reset_test_state();
+$ldap_bind_result    = false;
+$remote_get_response = array( 'code' => 404, 'body' => $photo_bytes );
+$photo = $campus_directory->getDirectoryPhoto( 'jdoe' );
+check( 'rejects a non-200 response even when the body looks like a JPEG', '' === $photo );
+
+reset_test_state();
+$ldap_bind_result    = false;
+$remote_get_response = new WP_Error( 'http_request_failed', 'connection timed out' );
+$photo = $campus_directory->getDirectoryPhoto( 'jdoe' );
+check( 'returns empty when campusdirectory is unreachable', '' === $photo );
+check( 'unreachable campusdirectory sets a 5-minute scrape backoff',
+	isset( $transients['ucsc_cd_photo_scrape_failed'] ) && 300 === $transients['ucsc_cd_photo_scrape_failed']['expiration']
+);
+
+$remote_get_calls    = array();
+$remote_get_response = array( 'code' => 200, 'body' => $photo_bytes );
+$photo = $campus_directory->getDirectoryPhoto( 'jdoe' );
+check( 'during the backoff, does not scrape again', '' === $photo && 0 === count( $remote_get_calls ) );
 
 finish_tests();
 
