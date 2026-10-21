@@ -58,3 +58,4 @@ artifacts/
 
 # Test coverage artifacts (WPM-116)
 coverage/
+__pycache__/
