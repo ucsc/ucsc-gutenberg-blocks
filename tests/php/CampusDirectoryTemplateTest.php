@@ -15,6 +15,10 @@ function esc_url( $value ) {
 	return preg_match( '/^javascript:/i', $value ) ? '' : $value;
 }
 
+function rest_url( $path = '' ) {
+	return 'https://example.test/wp-json/' . ltrim( $path, '/' );
+}
+
 require __DIR__ . '/helpers/harness.php';
 
 function render_campus_directory_template( $items ) {
@@ -148,6 +152,8 @@ $html = render_campus_directory_template(
 check( 'links names to campusdirectory.ucsc.edu when configured', false !== strpos( $html, 'https://campusdirectory.ucsc.edu/cd_detail?uid=jdoe' ) );
 check( 'renders profile photo with escaped alt text', false !== strpos( $html, 'alt="Profile picture of Jane Doe"' ) );
 check( 'renders the escaped static fallback image URL', false !== strpos( $html, '//static.ucsc.edu/images/icon-slug.jpg' ) );
+check( 'renders the photo from the local LDAP photo endpoint', false !== strpos( $html, 'src="https://example.test/wp-json/ucscgutenbergblocks/v1/directoryphoto/jdoe"' ) );
+check( 'photo no longer depends on campusdirectory.ucsc.edu', false === strpos( $html, 'photo.php' ) );
 
 echo "\nescaping LDAP data and block settings:\n";
 $attack_uid     = 'jdoe"><script>alert("uid")</script>';

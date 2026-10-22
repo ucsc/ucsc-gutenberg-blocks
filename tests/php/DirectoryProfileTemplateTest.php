@@ -24,6 +24,10 @@ function esc_url( $value ) {
 	return preg_match( '/^javascript:/i', $value ) ? '' : $value;
 }
 
+function rest_url( $path = '' ) {
+	return 'https://example.test/wp-json/' . ltrim( $path, '/' );
+}
+
 // Template reads $cruzid from get_query_var; we override it per test via $GLOBALS.
 function get_query_var( $var ) {
 	return isset( $GLOBALS['_test_query_vars'][ $var ] )
@@ -269,7 +273,8 @@ check( 'omits all expertise headings when all expertise fields are absent', fals
 // -- photo and fallback ------------------------------------------------------
 echo "\nphoto and fallback:\n";
 $html = render_profile_template( profile_fixture() );
-check( 'renders a profile photo with the uid in the src URL', false !== strpos( $html, 'photo.php?type=people&uid=jdoe' ) );
+check( 'renders a profile photo from the local LDAP photo endpoint', false !== strpos( $html, 'src="https://example.test/wp-json/ucscgutenbergblocks/v1/directoryphoto/jdoe"' ) );
+check( 'profile photo no longer depends on campusdirectory.ucsc.edu', false === strpos( $html, 'photo.php' ) );
 check( 'photo carries an onerror fallback to the slug image', false !== strpos( $html, 'icon-slug.jpg' ) );
 check( 'photo alt text identifies the person', false !== strpos( $html, 'alt="Portrait of Jane Doe"' ) );
 

@@ -31,7 +31,64 @@ class CampusDirectory
         'callback' => array($this, 'requirements'),
         'permission_callback' => function() {return true;}
       ));
+      register_rest_route('ucscgutenbergblocks/v1', '/directoryphoto/(?P<uid>[A-Za-z0-9._-]+)', array(
+        'methods' => 'GET',
+        'callback' => array($this, 'directoryPhoto'),
+        'permission_callback' => function() {return true;}
+      ));
     });
+  }
+
+  // Serve a person's photo from LDAP (jpegPhoto) instead of linking to
+  // campusdirectory.ucsc.edu/photo.php, which only answers on campus/VPN.
+  function directoryPhoto($request) {
+    $photo = $this->getDirectoryPhoto($request['uid']);
+    if ($photo === '') {
+      wp_redirect('https://static.ucsc.edu/images/icon-slug.jpg', 302);
+      exit;
+    }
+    header('Content-Type: image/jpeg');
+    header('Content-Length: ' . strlen($photo));
+    header('Cache-Control: public, max-age=86400');
+    echo $photo;
+    exit;
+  }
+
+  // Raw JPEG bytes for $uid, or '' when the person has no public photo (or is
+  // not publicly listed, or LDAP failed). Photos are cached for a day; misses
+  // are not, so getCampusDirData()'s own short empty-result cache applies.
+  function getDirectoryPhoto($uid) {
+    $key = 'ucsc_cd_photo_' . md5($uid);
+    $cached = get_transient($key);
+    if ($cached !== false) return base64_decode($cached);
+
+    $campusDirectoryAPI = new CampusDirectoryAPI(['automatedFeeds' => false]);
+    $people = $campusDirectoryAPI->getCampusDirData($uid, true)[0];
+    $photo = !empty($people[0]['jpegphoto'][0]) ? $people[0]['jpegphoto'][0] : '';
+    if ($photo === '') $photo = $this->scrapeDirectoryPhoto($uid);
+    if ($photo !== '') set_transient($key, base64_encode($photo), DAY_IN_SECONDS);
+    return $photo;
+  }
+
+  // Fallback when LDAP gives no photo: ask campusdirectory.ucsc.edu/photo.php.
+  // It is often unreachable (on-campus/VPN only), so fail fast and back off for
+  // 5 minutes after a connection failure rather than stalling every photo.
+  // photo.php answers 500 with an empty body when there is no photo, so only a
+  // 200 JPEG counts.
+  function scrapeDirectoryPhoto($uid) {
+    if (get_transient('ucsc_cd_photo_scrape_failed')) return '';
+
+    $response = wp_remote_get('https://campusdirectory.ucsc.edu/photo.php?type=people&uid=' . rawurlencode($uid), [
+      'timeout' => 2,
+    ]);
+    if (is_wp_error($response)) {
+      set_transient('ucsc_cd_photo_scrape_failed', 1, 5 * MINUTE_IN_SECONDS);
+      return '';
+    }
+
+    $body = wp_remote_retrieve_body($response);
+    if (wp_remote_retrieve_response_code($response) !== 200 || strncmp($body, "\xFF\xD8", 2) !== 0) return '';
+    return $body;
   }
 
   function add_directory_profile_rewrite() {
@@ -79,6 +136,16 @@ class CampusDirectory
             filemtime(plugin_dir_path(__FILE__) .$file)
     );
     wp_enqueue_style('campusdirectory');
+
+    $file = '../src/components/CampusDirectory/photofallback.js';
+    wp_register_script(
+            'campusdirectoryphotofallback',
+            plugins_url($file, __FILE__),
+            array(),
+            filemtime(plugin_dir_path(__FILE__) . $file),
+            true
+    );
+    wp_enqueue_script('campusdirectoryphotofallback');
 
     wp_enqueue_style( 'ucsc-shared-templates',
         plugins_url('../src/components/shared/templates.css', __FILE__),

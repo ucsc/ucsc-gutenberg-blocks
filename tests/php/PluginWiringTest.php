@@ -191,7 +191,8 @@ $expected_routes = array(
 	'ucscgutenbergblocks/v1/cddepartmentcode/'            => 'SiteSettings::cddepartmentcode',
 	'ucscgutenbergblocks/v1/divisioncode/'                => 'SiteSettings::divisioncode',
 	'ucscgutenbergblocks/v1/campusdirectoryrequirements/' => 'CampusDirectory::requirements',
-	'ucscgutenbergblocks/v1/classscheduledept/'           => 'ClassSchedule::classscheduledept',
+	'ucscgutenbergblocks/v1/directoryphoto/(?P<uid>[A-Za-z0-9._-]+)' => 'CampusDirectory::directoryPhoto',
+	'ucscgutenbergblocks/v1/classscheduledept/'         => 'ClassSchedule::classscheduledept',
 );
 foreach ( $expected_routes as $route => $method ) {
 	$args = $rest_routes[ $route ] ?? null;

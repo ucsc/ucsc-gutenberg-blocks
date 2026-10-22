@@ -84,7 +84,7 @@ if (count($profileData)) {
                         <?php
                             $profileUid = !empty($profileData['uid'][0]) ? $profileData['uid'][0] : $cruzid;
                             if (!empty($profileUid)) {
-                                $imgSrc = 'https://campusdirectory.ucsc.edu/photo.php?type=people&uid=' . rawurlencode($profileUid);
+                                $imgSrc = rest_url('ucscgutenbergblocks/v1/directoryphoto/' . rawurlencode($profileUid));
                             } else {
                                 $imgSrc = '//static.ucsc.edu/images/icon-slug.jpg';
                             }
