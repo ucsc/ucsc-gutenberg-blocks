@@ -2,6 +2,18 @@
 
 All notable changes to this project will be documented in this file. See [commit-and-tag-version](https://github.com/absolute-version/commit-and-tag-version) for commit guidelines.
 
+## [1.2.2](https://github.com/ucsc/ucsc-gutenberg-blocks/compare/v1.2.1...v1.2.2) (2026-10-22)
+
+
+### Bug Fixes
+
+* **campus-directory:** lock saving for active invalid source [WPM-153] ([719f548](https://github.com/ucsc/ucsc-gutenberg-blocks/commit/719f548487c99acb674c594ba0fa67d066cc42a2))
+* **campus-directory:** WPM-113 guard against null/empty automated-feed type attributes to prevent array_sum(null) fatal on PHP 8.1 ([38dc34e](https://github.com/ucsc/ucsc-gutenberg-blocks/commit/38dc34e9b80e9f888b7415a23d1b17bb3ab75100))
+* **class-schedule:** isolate multiple blocks on the same page ([a213d2c](https://github.com/ucsc/ucsc-gutenberg-blocks/commit/a213d2cccb5d53c1ba551576008d00ddd3da58c0))
+* **class-schedule:** WPM-89 show plugin header version instead of hard-coded version ([cc330a9](https://github.com/ucsc/ucsc-gutenberg-blocks/commit/cc330a9ef6d298faa5e816d1c57e4ec3ab3f3a68))
+* **tests:** report PHP coverage across all plugin sources ([3e4bea3](https://github.com/ucsc/ucsc-gutenberg-blocks/commit/3e4bea370120b401ffcea1d1941bb737f672a082))
+* WPM-154 harden PeopleSoft dept/subject feed fetch ([f33118a](https://github.com/ucsc/ucsc-gutenberg-blocks/commit/f33118ae07c2a3398824ab0a82af7aba196b4eb9))
+
 ## [1.2.1](https://github.com/ucsc/ucsc-gutenberg-blocks/compare/v1.2.0...v1.2.1) (2026-08-25)
 
 
