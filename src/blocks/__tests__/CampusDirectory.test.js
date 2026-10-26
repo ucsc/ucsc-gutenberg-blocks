@@ -215,6 +215,8 @@ describe('CampusDirectory block', () => {
       const notice = screen.getByTestId('notice');
       expect(notice).toHaveAttribute('data-status', 'error');
       expect(notice).toHaveTextContent('Unable to publish');
+      // WPM-228: point authors who cannot pick one department at the manual list
+      expect(notice).toHaveTextContent("select 'Create My Own List of People to Display' to enable publishing");
     });
 
     it('does not show error notice when a department is selected', async () => {

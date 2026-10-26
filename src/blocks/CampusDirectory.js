@@ -91,7 +91,7 @@ const CampusDirectory = () => {
               status="error"
               isDismissible={false}
             >
-              <strong>Unable to publish:</strong> Please select a valid department or division when using automated feeds to enable publishing.
+              <strong>Unable to publish:</strong> Please select a valid department or division when using automated feeds, or select 'Create My Own List of People to Display' to enable publishing.
             </Notice>
           )}
           {configuredCorrectly && (
