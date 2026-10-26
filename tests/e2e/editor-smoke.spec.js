@@ -97,11 +97,9 @@ describe.each( BLOCKS )( 'Editor: %s', ( blockName, { saves } ) => {
 	} );
 
 	// campus-directory hides all of its controls behind this notice when
-	// requirements() (classes/CampusDirectory.php) finds no ldap_api_key. On
-	// wp-dev.ucsc the frontend binds LDAP anonymously under DOCKER_DEV
-	// (CampusDirectoryAPI.php), so the notice there is wrong: the block renders
-	// people but cannot be configured. RED on wp-dev.ucsc until requirements()
-	// honours DOCKER_DEV the way the API does.
+	// requirements() (classes/CampusDirectory.php) finds no ldap_api_key. Local
+	// dev binds LDAP as production does (WPM-234), so the rig must set
+	// LDAP_API_KEY; RED here means the rig is missing it.
 	it( 'shows its settings rather than a "not Configured Correctly" notice', async () => {
 		await new Promise( ( r ) => setTimeout( r, 3000 ) );
 		const { handle } = await editorBlock( p, clientId );

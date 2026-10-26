@@ -85,6 +85,7 @@ if (!defined('LDAP_OPT_SIZELIMIT')) define('LDAP_OPT_SIZELIMIT', 0);
 if (!defined('LDAP_ESCAPE_FILTER')) define('LDAP_ESCAPE_FILTER', 0);
 
 $ldap_connect_uris  = array();
+$ldap_bind_args     = array();
 $ldap_len_reads     = array();
 function ldap_connect( $uri = '' ) {
 	global $ldap_connect_uris;
@@ -100,7 +101,8 @@ function ldap_set_option($link, $option, $value) {
 	return true;
 }
 function ldap_bind() {
-	global $ldap_bind_result;
+	global $ldap_bind_result, $ldap_bind_args;
+	$ldap_bind_args[] = array_slice( func_get_args(), 1 );
 	return isset( $ldap_bind_result ) ? $ldap_bind_result : true;
 }
 function ldap_search($link, $base_dn, $filter, $attributes = array()) {
@@ -266,10 +268,11 @@ function transient_keys() {
 }
 
 function reset_test_state() {
-	global $query_vars, $is_admin, $is_singular, $is_main_query, $queried_object_id, $current_post_id, $ldap_searches, $ldap_options, $ldap_search_result, $ldap_bind_result, $ldap_entries, $ldap_attr_cursor, $transients, $ldap_connect_uris, $ldap_len_reads, $remote_get_calls, $remote_get_response;
+	global $query_vars, $is_admin, $is_singular, $is_main_query, $queried_object_id, $current_post_id, $ldap_searches, $ldap_options, $ldap_search_result, $ldap_bind_result, $ldap_entries, $ldap_attr_cursor, $transients, $ldap_connect_uris, $ldap_bind_args, $ldap_len_reads, $remote_get_calls, $remote_get_response;
 	$remote_get_calls    = array();
 	$remote_get_response = array( 'code' => 500, 'body' => '' );
 	$ldap_connect_uris  = array();
+	$ldap_bind_args     = array();
 	$ldap_len_reads     = array();
 	$query_vars         = array();
 	$is_admin           = false;
@@ -922,12 +925,14 @@ $api = campus_directory_api_fixture();
 $api->getCampusDirData( 'jsmith' );
 check( 'connects over ldaps:// outside the Docker dev stack', array( 'ldaps://ldap-blue.ucsc.edu' ) === $ldap_connect_uris );
 
+// WPM-234: the old Docker dev switch to anonymous ldap:// is gone, so local
+// dev sees exactly what the production bind sees.
 reset_test_state();
 putenv( 'DOCKER_DEV=docker_dev' );
 $api = campus_directory_api_fixture();
 $api->getCampusDirData( 'jsmith' );
 putenv( 'DOCKER_DEV' );
-check( 'connects over plain ldap:// only when DOCKER_DEV=docker_dev', array( 'ldap://ldap-blue.ucsc.edu' ) === $ldap_connect_uris );
+check( 'DOCKER_DEV=docker_dev still connects over ldaps:// with the app bind', array( 'ldaps://ldap-blue.ucsc.edu' ) === $ldap_connect_uris && 1 === count( $ldap_bind_args ) && 0 === strpos( (string) $ldap_bind_args[0][0], 'cn=' ) );
 
 reset_test_state();
 $api    = campus_directory_api_fixture( array(

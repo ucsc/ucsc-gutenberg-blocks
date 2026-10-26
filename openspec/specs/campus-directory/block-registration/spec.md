@@ -105,12 +105,6 @@ credential is set. On a multisite install the guidance MUST also offer the
 network-level settings screen, because a network-level credential takes
 precedence over a site-level one.
 
-**Known defect (WPM-206):** the gate ignores `DOCKER_DEV`. In the local
-wp-dev.ucsc stack the directory API binds anonymously and needs no credential,
-but the editor still reports the block as not configured and hides every
-control, so the block cannot be configured locally. Production behavior is
-unaffected.
-
 #### Scenario: Credential missing on a single site
 
 - **WHEN** an author inserts the block on a site with no directory credential
@@ -129,13 +123,6 @@ unaffected.
 - **WHEN** an author inserts the block on a site with a directory credential
   configured
 - **THEN** the configuration panels are shown
-
-#### Scenario: Local stack without a credential (known defect WPM-206)
-
-- **WHEN** an author inserts the block on wp-dev.ucsc with `DOCKER_DEV=docker_dev`
-  and no `ldap_api_key` set
-- **THEN** the configuration panels are hidden, although the front end renders
-  directory listings
 
 ### Requirement: Publish guard for unresolvable feeds
 

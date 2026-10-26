@@ -16,9 +16,8 @@ multisite network can configure the directory once.
 
 When no host or bind account is configured, the system MUST fall back to the
 documented campus defaults (`ldap-blue.ucsc.edu`, bind CN `pantheon-webapps`)
-rather than failing. Production connects over `ldaps://` with an
-authenticated bind; when `DOCKER_DEV=docker_dev` the system connects over
-`ldap://` with an anonymous bind.
+rather than failing. The system always connects over `ldaps://` with an
+authenticated bind, in the local wp-dev.ucsc stack as in production (WPM-234).
 
 #### Scenario: Network value wins
 

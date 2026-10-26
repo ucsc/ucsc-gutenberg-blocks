@@ -143,12 +143,9 @@ class CampusDirectoryAPI {
     // "(|)" — bail here so every caller is protected, not just getCampusDirData.
     if (!strlen($q)) return [];
 
-    $dev_env = getenv("DOCKER_DEV") == "docker_dev";
-    if ($dev_env) {
-      $rli = ldap_connect("ldap://" . $this->ldap_url);
-    } else {
-      $rli = ldap_connect("ldaps://" . $this->ldap_url);
-    }
+    // Same connection everywhere (WPM-234): local dev binds as production does,
+    // so LDAP behavior (e.g. which attributes the bind can see) matches.
+    $rli = ldap_connect("ldaps://" . $this->ldap_url);
 
     if ($rli) {
       // Keep well under the CampusPress edge's 30s proxy timeout so a slow
@@ -164,8 +161,7 @@ class CampusDirectoryAPI {
         ldap_set_option($rli, LDAP_OPT_SIZELIMIT, 1000);
       }
 
-      if ($dev_env) @$ldapbind = ldap_bind($rli);
-      else @$ldapbind = ldap_bind($rli, "cn=" . $this->ldap_cn . ",ou=apps,dc=ucsc,dc=edu", $this->ldap_password);
+      @$ldapbind = ldap_bind($rli,"cn=" . $this->ldap_cn . ",ou=apps,dc=ucsc,dc=edu", $this->ldap_password);
       if ($ldapbind) {
         if (!count($attributes)) $attributes = ['*'];
         $sr = ldap_search($rli, "ou=people,dc=ucsc,dc=edu", "(|{$q})", $attributes);
