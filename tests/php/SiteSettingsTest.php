@@ -311,7 +311,7 @@ $settings            = new SiteSettings();
 $remote_get_response = new WP_Error( 'http_request_failed', 'connection timed out' );
 $result              = $settings->departmentcode();
 check( 'departmentcode: WP_Error remote returns WP_Error, not a fatal', is_wp_error( $result ) );
-check( 'departmentcode: WP_Error result is not cached', empty( $transient_set_calls ) );
+check( 'departmentcode: WP_Error result is not cached', ! in_array( 'ucsc_depts', transient_set_keys(), true ) );
 check( 'departmentcode: passes a bounded timeout to wp_remote_get', 1 === count( $remote_get_calls ) );
 
 // Non-2xx response
@@ -323,7 +323,7 @@ check( 'departmentcode: non-2xx response returns a controlled WP_Error', is_wp_e
 check( 'departmentcode: non-2xx error does not leak the raw upstream body',
 	is_wp_error( $result ) && strpos( $result->get_error_message(), 'upstream maintenance page' ) === false
 );
-check( 'departmentcode: non-2xx response is not cached', empty( $transient_set_calls ) );
+check( 'departmentcode: non-2xx response is not cached', ! in_array( 'ucsc_depts', transient_set_keys(), true ) );
 
 // Unparseable / unexpected JSON shape
 reset_state();
@@ -332,12 +332,10 @@ $remote_get_response = ok_response( 'not json at all' );
 list( $result, $warnings ) = capture_warnings( function () use ( $settings ) {
 	return $settings->departmentcode();
 } );
-check( 'departmentcode: unparseable JSON does not fatal (no count(null))', $result instanceof WP_REST_Response );
+check( 'departmentcode: unparseable JSON returns a WP_Error, not a fatal (no count(null))', is_wp_error( $result ) );
 check( 'departmentcode: unparseable JSON raises no PHP warnings', array() === $warnings );
-check( 'departmentcode: unparseable JSON returns only the placeholder option',
-	$result instanceof WP_REST_Response && count( $result->get_data() ) === 1
-	&& $result->get_data()[0]['value'] === '---'
-);
+// WPM-236: an unusable feed must not be cached as a '---'-only list for a week
+check( 'departmentcode: unparseable JSON is not cached', ! in_array( 'ucsc_depts', transient_set_keys(), true ) );
 
 // Happy path
 reset_state();
@@ -374,7 +372,7 @@ $settings            = new SiteSettings();
 $remote_get_response = new WP_Error( 'http_request_failed', 'connection timed out' );
 $result              = $settings->subjectcode();
 check( 'subjectcode: WP_Error remote returns WP_Error, not a fatal', is_wp_error( $result ) );
-check( 'subjectcode: WP_Error result is not cached', empty( $transient_set_calls ) );
+check( 'subjectcode: WP_Error result is not cached', ! in_array( 'ucsc_subjects', transient_set_keys(), true ) );
 
 // Non-2xx response
 reset_state();
@@ -385,7 +383,7 @@ check( 'subjectcode: non-2xx response returns a controlled WP_Error', is_wp_erro
 check( 'subjectcode: non-2xx error does not leak the raw upstream body',
 	is_wp_error( $result ) && strpos( $result->get_error_message(), 'internal server error page' ) === false
 );
-check( 'subjectcode: non-2xx response is not cached', empty( $transient_set_calls ) );
+check( 'subjectcode: non-2xx response is not cached', ! in_array( 'ucsc_subjects', transient_set_keys(), true ) );
 
 // Unparseable / unexpected JSON shape
 reset_state();
@@ -394,12 +392,10 @@ $remote_get_response = ok_response( '{"unexpected":true}' );
 list( $result, $warnings ) = capture_warnings( function () use ( $settings ) {
 	return $settings->subjectcode();
 } );
-check( 'subjectcode: unexpected JSON shape does not fatal (no count(null))', $result instanceof WP_REST_Response );
+check( 'subjectcode: unexpected JSON shape returns a WP_Error, not a fatal (no count(null))', is_wp_error( $result ) );
 check( 'subjectcode: unexpected JSON shape raises no PHP warnings', array() === $warnings );
-check( 'subjectcode: unexpected JSON shape returns only the placeholder option',
-	$result instanceof WP_REST_Response && count( $result->get_data() ) === 1
-	&& $result->get_data()[0]['value'] === '---'
-);
+// WPM-236: an unusable feed must not be cached as a '---'-only list for a week
+check( 'subjectcode: unexpected JSON shape is not cached', ! in_array( 'ucsc_subjects', transient_set_keys(), true ) );
 
 // Happy path — flattens subjects across departments, sorted
 reset_state();
@@ -432,6 +428,72 @@ check( 'subjectcode: cache hit makes no remote call', count( $remote_get_calls )
 // Regression: both methods declare their own sort — running both in one request
 // must not fatal with "Cannot redeclare cmp()" (fixed by the usort closure).
 check( 'departmentcode() and subjectcode() coexist in one request without a redeclare fatal', true );
+
+// ── PeopleSoft feed failures (WPM-236) ─────────────────────────────────────────
+// An unusable answer must not be cached for a week, and any failure backs off
+// both endpoints for 5 minutes so repeated editor loads fail fast.
+
+// A 200 with no departments (e.g. an empty feed) is not cached
+reset_state();
+$settings            = new SiteSettings();
+$remote_get_response = ok_response( '{"depts":[]}' );
+$result              = $settings->departmentcode();
+check( 'WPM-236: departmentcode with an empty depts list returns a WP_Error', is_wp_error( $result ) );
+check( 'WPM-236: departmentcode with an empty depts list is not cached for a week', ! in_array( 'ucsc_depts', transient_set_keys(), true ) );
+
+reset_state();
+$settings            = new SiteSettings();
+$remote_get_response = ok_response( '<html>maintenance</html>' );
+$result              = $settings->subjectcode();
+check( 'WPM-236: subjectcode with an HTML 200 is not cached for a week', ! in_array( 'ucsc_subjects', transient_set_keys(), true ) );
+
+// Every failure kind records a 5-minute backoff
+$failures = array(
+	'WP_Error'       => new WP_Error( 'http_request_failed', 'connection timed out' ),
+	'non-2xx'        => err_response( 503, 'maintenance' ),
+	'unparseable'    => ok_response( 'not json at all' ),
+	'empty depts'    => ok_response( '{"depts":[]}' ),
+);
+foreach ( $failures as $kind => $response ) {
+	reset_state();
+	$settings            = new SiteSettings();
+	$remote_get_response = $response;
+	$settings->departmentcode();
+	check( "WPM-236: records a 5-minute backoff after: {$kind}",
+		$transient_set_calls === array( array( 'key' => 'ucsc_class_depts_failed', 'expiration' => 300 ) )
+	);
+}
+
+// During the backoff both endpoints return a 503 without calling PeopleSoft
+reset_state();
+$settings                                = new SiteSettings();
+$transients['ucsc_class_depts_failed']   = 1;
+$remote_get_response                     = ok_response( $class_depts_json );
+$dept_result                             = $settings->departmentcode();
+$subject_result                          = $settings->subjectcode();
+check( 'WPM-236: during the backoff departmentcode returns a 503 WP_Error',
+	is_wp_error( $dept_result ) && 503 === $dept_result->get_error_data()['status']
+);
+check( 'WPM-236: during the backoff subjectcode returns a 503 WP_Error',
+	is_wp_error( $subject_result ) && 503 === $subject_result->get_error_data()['status']
+);
+check( 'WPM-236: during the backoff PeopleSoft is not called', 0 === count( $remote_get_calls ) );
+
+// A good answer does not set the backoff
+reset_state();
+$settings            = new SiteSettings();
+$remote_get_response = ok_response( $class_depts_json );
+$settings->departmentcode();
+check( 'WPM-236: a good answer does not set the backoff', ! in_array( 'ucsc_class_depts_failed', transient_set_keys(), true ) );
+
+// Timeout well under the CampusPress edge's 30s
+reset_state();
+$settings            = new SiteSettings();
+$remote_get_response = ok_response( $class_depts_json );
+$settings->departmentcode();
+check( 'WPM-236: PeopleSoft fetch timeout stays well under the 30s edge timeout',
+	isset( $remote_get_args[0]['timeout'] ) && $remote_get_args[0]['timeout'] <= 10
+);
 
 // ── divisioncode() (WPM-185) ────────────────────────────────────────────────
 // Static list behind the Campus Directory division dropdown.

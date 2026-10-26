@@ -214,14 +214,28 @@ class SiteSettings
   // WPM-154: PeopleSoft feed shared by departmentcode()/subjectcode(). Fetch it
   // with wp_remote_get() (bounded timeout + explicit guards) instead of an
   // unbounded curl_init(), and return the decoded `depts` array or a WP_Error.
+  // WPM-236: an unusable answer (not JSON, no departments) is an error too, so
+  // callers never cache an empty list for a week. Any failure backs off both
+  // endpoints for 5 minutes so repeated editor loads fail fast.
   private function fetchClassDepts($errorCode)
   {
+    if (get_transient('ucsc_class_depts_failed')) {
+      return new WP_Error(
+        $errorCode,
+        'PeopleSoft is temporarily unavailable',
+        array( 'status' => 503 )
+      );
+    }
+
+    // Keep well under the CampusPress edge's 30s proxy timeout so a hung
+    // PeopleSoft returns an error instead of a 504.
     $response = wp_remote_get(
       'https://my.ucsc.edu/PSIGW/RESTListeningConnector/PSFT_CSPRD/SCX_CLASS_DEPTS_V2.v2/' . date("Y", strtotime("-7 months")) . '/Fall',
-      array( 'timeout' => 30 )
+      array( 'timeout' => 10 )
     );
 
     if (is_wp_error($response)) {
+      set_transient('ucsc_class_depts_failed', 1, 5 * MINUTE_IN_SECONDS);
       return new WP_Error(
         $errorCode,
         'Failed to fetch the department feed from PeopleSoft',
@@ -231,6 +245,7 @@ class SiteSettings
 
     $status_code = wp_remote_retrieve_response_code($response);
     if ($status_code < 200 || $status_code >= 300) {
+      set_transient('ucsc_class_depts_failed', 1, 5 * MINUTE_IN_SECONDS);
       return new WP_Error(
         $errorCode,
         'PeopleSoft returned HTTP ' . $status_code,
@@ -241,10 +256,17 @@ class SiteSettings
     $arrResponse = json_decode(wp_remote_retrieve_body($response), true);
 
     // Guard an unparseable or unexpected JSON shape so callers never hit
-    // count(null)/foreach(null) — return an empty list, not a fatal.
-    return ( is_array($arrResponse) && isset($arrResponse['depts']) && is_array($arrResponse['depts']) )
-      ? $arrResponse['depts']
-      : array();
+    // count(null)/foreach(null), and treat it as a failure, not an empty list.
+    if (!is_array($arrResponse) || empty($arrResponse['depts']) || !is_array($arrResponse['depts'])) {
+      set_transient('ucsc_class_depts_failed', 1, 5 * MINUTE_IN_SECONDS);
+      return new WP_Error(
+        $errorCode,
+        'PeopleSoft returned no departments',
+        array( 'status' => 502 )
+      );
+    }
+
+    return $arrResponse['depts'];
   }
 
   function departmentcode()
