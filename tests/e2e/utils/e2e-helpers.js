@@ -4,19 +4,37 @@
  * Not a spec: jest's e2e testMatch only picks up `*.spec.js` and `specs/`.
  */
 
-const PAGES = {
-	classSchedule:
-		process.env.UCSC_CS_E2E_URL || 'https://wp-dev.ucsc/class-schedule-e2e/',
-	courseCatalog:
-		process.env.UCSC_CC_E2E_URL || 'https://wp-dev.ucsc/course-catalog-e2e/',
-	campusDirectory:
-		process.env.UCSC_CD_E2E_URL || 'https://wp-dev.ucsc/eeb/people/',
-	campusDirectoryLals:
-		process.env.UCSC_CD_LALS_E2E_URL ||
-		'https://wp-dev.ucsc/lals/people/faculty/',
-};
+const { resolveTarget } = require( './e2e-target' );
 
-const SITE_ORIGIN = new URL( PAGES.classSchedule ).origin;
+const TARGET = resolveTarget();
+const PAGES = TARGET.pages;
+
+// Local only: hosted targets may span several subsites, so specs there derive
+// the origin from the page they are on.
+const SITE_ORIGIN = TARGET.hosted
+	? undefined
+	: new URL( PAGES.classSchedule ).origin;
+
+// Specs that log in, write content, or assert local seed data run only on the
+// local target; hosted runs report them as skipped (WPM-235).
+const describeLocal = TARGET.hosted ? describe.skip : describe;
+const itLocal = TARGET.hosted ? it.skip : it;
+
+/**
+ * URL of a named page, or a clear error naming the variable to set when a
+ * hosted target was not given one.
+ *
+ * @param {string} name Key of PAGES.
+ * @return {string} Page URL.
+ */
+function pageUrl( name ) {
+	if ( PAGES[ name ] ) {
+		return PAGES[ name ];
+	}
+	throw new Error(
+		`${ TARGET.missing[ name ] } is not set; ${ TARGET.target } has no default page URLs`
+	);
+}
 
 // puppeteer-core 13 + jest-environment-puppeteer expects removeListener.
 function shimPage( p ) {
@@ -27,6 +45,11 @@ function shimPage( p ) {
 }
 
 async function gotoPage( p, url ) {
+	if ( ! url ) {
+		throw new Error(
+			`No page URL; on ${ TARGET.target } set ${ Object.values( TARGET.missing ).join( ', ' ) }`
+		);
+	}
 	await p.goto( url, { waitUntil: 'networkidle0', timeout: 60000 } );
 }
 
@@ -105,6 +128,9 @@ async function tabStopsWithin( p, rootSelector, max = 200 ) {
  * leaks into the frontend specs that share this browser.
  */
 async function adminPage() {
+	if ( TARGET.hosted ) {
+		throw new Error( `adminPage() logs in and writes; not allowed on ${ TARGET.target }` );
+	}
 	const context = await browser.createIncognitoBrowserContext();
 	const p = shimPage( await context.newPage() );
 	await p.goto( SITE_ORIGIN + '/wp-login.php', {
@@ -182,8 +208,12 @@ async function editorBlock( p, clientId, timeout = 15000 ) {
 }
 
 module.exports = {
+	TARGET,
 	PAGES,
 	SITE_ORIGIN,
+	describeLocal,
+	itLocal,
+	pageUrl,
 	shimPage,
 	gotoPage,
 	captureErrors,

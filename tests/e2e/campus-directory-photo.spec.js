@@ -9,10 +9,11 @@
  * Needs LDAP reachable (UCSC VPN) so the seeded EEB page renders people.
  */
 
-const { PAGES, SITE_ORIGIN, shimPage, gotoPage } = require( './utils/e2e-helpers' );
+const { PAGES, shimPage, gotoPage } = require( './utils/e2e-helpers' );
 
 const PHOTO_SELECTOR = '.ucsc-block-directory img.item-image';
-const ENDPOINT = `${ SITE_ORIGIN }/wp-json/ucscgutenbergblocks/v1/directoryphoto/`;
+const ENDPOINT_PATH = '/wp-json/ucscgutenbergblocks/v1/directoryphoto/';
+let ENDPOINT = '';
 
 let photos = [];
 
@@ -20,6 +21,7 @@ describe( 'Campus Directory photos served from LDAP', () => {
 	beforeAll( async () => {
 		shimPage( page );
 		await gotoPage( page, PAGES.campusDirectory );
+		ENDPOINT = new URL( page.url() ).origin + ENDPOINT_PATH;
 		photos = await page.$$eval( PHOTO_SELECTOR, ( imgs ) =>
 			imgs.map( ( img ) => ( {
 				src: img.getAttribute( 'src' ),

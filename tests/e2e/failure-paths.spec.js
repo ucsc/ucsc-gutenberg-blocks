@@ -16,6 +16,7 @@
 
 const {
 	PAGES,
+	describeLocal,
 	shimPage,
 	gotoPage,
 	captureErrors,
@@ -89,7 +90,7 @@ const RATE_LIMITED = {
 	body: '<html><body><h1>429 Too Many Requests</h1></body></html>',
 };
 
-describe.each( [
+describeLocal.each( [
 	[ 'ucscblocks/coursecatalog', /\/ucscgutenbergblocks\/v1\/(subjectcode|departmentcode)/ ],
 	[ 'ucscblocks/classschedule', /\/ucscgutenbergblocks\/v1\/(subjectcode|departmentcode)/ ],
 ] )( 'Editor: %s when its dropdown endpoints are rate limited', ( blockName, endpoint ) => {

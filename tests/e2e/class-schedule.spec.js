@@ -10,8 +10,7 @@
  * outage reads as one clear failure, not five.
  */
 
-const PAGE_URL =
-	process.env.UCSC_CS_E2E_URL || 'https://wp-dev.ucsc/class-schedule-e2e/';
+const { pageUrl } = require( './utils/e2e-helpers' );
 
 let hasRows = false;
 
@@ -20,7 +19,7 @@ describe( 'Class Schedule block (frontend)', () => {
 		if ( typeof page !== 'undefined' && page && ! page.removeListener ) {
 			page.removeListener = page.off || page.removeEventListener;
 		}
-		await page.goto( PAGE_URL, { waitUntil: 'networkidle0', timeout: 60000 } );
+		await page.goto( pageUrl( 'classSchedule' ), { waitUntil: 'networkidle0', timeout: 60000 } );
 		hasRows = ( await page.$( '#classScheduleTable .course-row' ) ) !== null;
 		if ( ! hasRows ) {
 			// eslint-disable-next-line no-console

@@ -29,11 +29,7 @@
  * must hold at once, so both are asserted here.
  */
 
-const LISTING_URL =
-	process.env.UCSC_CD_E2E_URL || 'https://wp-dev.ucsc/eeb/people/';
-const LALS_LISTING_URL =
-	process.env.UCSC_CD_LALS_E2E_URL ||
-	'https://wp-dev.ucsc/lals/people/faculty/';
+const { itLocal, pageUrl } = require( './utils/e2e-helpers' );
 
 const LISTING_SELECTOR = '.ucsc-block-directory';
 const PROFILE_LINK_SELECTOR = 'a.u-url[href*="directoryprofilecruzid="]';
@@ -49,7 +45,7 @@ describe( 'Campus Directory in-site profile route (frontend)', () => {
 			page.removeListener = page.off || page.removeEventListener;
 		}
 
-		await page.goto( LISTING_URL, {
+		await page.goto( pageUrl( 'campusDirectory' ), {
 			waitUntil: 'networkidle0',
 			timeout: 60000,
 		} );
@@ -64,7 +60,7 @@ describe( 'Campus Directory in-site profile route (frontend)', () => {
 			.catch( () => null );
 
 		if ( href ) {
-			profileUrl = new URL( href, LISTING_URL ).toString();
+			profileUrl = new URL( href, pageUrl( 'campusDirectory' ) ).toString();
 		} else {
 			// eslint-disable-next-line no-console
 			console.warn(
@@ -89,7 +85,7 @@ describe( 'Campus Directory in-site profile route (frontend)', () => {
 		let inSiteLinkCount = 0;
 
 		beforeAll( async () => {
-			await page.goto( LALS_LISTING_URL, {
+			await page.goto( pageUrl( 'campusDirectoryLals' ), {
 				waitUntil: 'networkidle0',
 				timeout: 60000,
 			} );
@@ -103,8 +99,8 @@ describe( 'Campus Directory in-site profile route (frontend)', () => {
 			);
 		} );
 
-		it( 'uses the nested People / Faculty page shape', async () => {
-			expect( new URL( LALS_LISTING_URL ).pathname ).toBe(
+		itLocal( 'uses the nested People / Faculty page shape', async () => {
+			expect( new URL( pageUrl( 'campusDirectoryLals' ) ).pathname ).toBe(
 				'/lals/people/faculty/'
 			);
 		} );

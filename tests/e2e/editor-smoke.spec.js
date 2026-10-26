@@ -18,6 +18,7 @@
  */
 
 const {
+	describeLocal,
 	shimPage,
 	captureErrors,
 	adminPage,
@@ -39,7 +40,7 @@ const BLOCKS = [
 	[ 'ucscblocks/campusdirectory', { saves: false } ],
 ];
 
-describe.each( BLOCKS )( 'Editor: %s', ( blockName, { saves } ) => {
+describeLocal.each( BLOCKS )( 'Editor: %s', ( blockName, { saves } ) => {
 	let context;
 	let p;
 	let errors;

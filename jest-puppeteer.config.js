@@ -13,7 +13,16 @@
  * is kept for ad-hoc local runs.
  *
  * Overrides: PUPPETEER_EXECUTABLE_PATH (browser binary), PUPPETEER_HEADED=1.
+ *
+ * Hosted targets (UCSC_E2E_TARGET, WPM-235) use real certificates, so the
+ * self-signed-cert exceptions and the wp-dev.ucsc host mapping are local only.
+ * Resolving the target here also rejects a bad target before any page opens.
  */
+
+const { resolveTarget } = require( './tests/e2e/utils/e2e-target' );
+
+const { hosted } = resolveTarget();
+
 const inContainer = !! process.env.UCSC_E2E_IN_CONTAINER;
 
 const executablePath =
@@ -22,16 +31,16 @@ const executablePath =
 		? '/usr/bin/chromium'
 		: '/Applications/Google Chrome.app/Contents/MacOS/Google Chrome' );
 
-const args = [
-	'--ignore-certificate-errors', // self-signed cert on the vanity host
-	'--no-sandbox',
-	'--disable-setuid-sandbox',
-];
+const args = [ '--no-sandbox', '--disable-setuid-sandbox' ];
+
+if ( ! hosted ) {
+	args.push( '--ignore-certificate-errors' ); // self-signed cert on the vanity host
+}
 
 if ( inContainer ) {
 	// DNS for wp-dev.ucsc comes from the container's /etc/hosts (--add-host).
 	args.push( '--disable-dev-shm-usage' );
-} else {
+} else if ( ! hosted ) {
 	// Host run: map the vanity host to the local stack, no /etc/hosts edit.
 	args.push( '--host-resolver-rules=MAP wp-dev.ucsc 127.0.0.1' );
 }
@@ -40,8 +49,8 @@ module.exports = {
 	launch: {
 		executablePath,
 		headless: process.env.PUPPETEER_HEADED ? false : 'new',
-		acceptInsecureCerts: true,
-		ignoreHTTPSErrors: true,
+		acceptInsecureCerts: ! hosted,
+		ignoreHTTPSErrors: ! hosted,
 		args,
 	},
 	browserContext: 'default',

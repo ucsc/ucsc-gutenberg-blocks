@@ -10,6 +10,12 @@
 #   UCSC_CS_E2E_URL=https://wp-dev.ucsc/some-page/ bash tests/e2e/run-e2e.sh
 #   bash tests/e2e/run-e2e.sh keyboard.spec.js   (extra args go to jest)
 #
+# Hosted CampusPress sites (WPM-235): set UCSC_E2E_TARGET=hosted-nonprod (or
+# hosted-prod plus UCSC_E2E_ALLOW_PROD=1) and the page URL variables for the
+# specs you pass. Nothing is seeded; specs that log in or write are skipped.
+#   UCSC_E2E_TARGET=hosted-nonprod UCSC_CD_E2E_URL=https://test-henryh.wordpress-dev.ucsc.edu/campus-directory-test/ \
+#     bash tests/e2e/run-e2e.sh campus-directory-photo.spec.js
+#
 # Prerequisites: the wp-dev.ucsc stack is up (docker compose up -d). The e2e
 # page is seeded automatically via seed-e2e-page.php when the wpcli container
 # is reachable; otherwise set UCSC_CS_E2E_URL to a page containing the block.
@@ -27,7 +33,11 @@ fi
 # Seed the e2e page when this plugin lives inside a wp-dev.ucsc checkout
 # (plugin dir → plugins → wp-content → public → repo root).
 WP_DEV_ROOT="${WP_DEV_ROOT:-$(cd "$PLUGIN_ROOT/../../../.." 2>/dev/null && pwd)}"
-if [ -z "${UCSC_CS_E2E_URL:-}" ] && [ -f "$WP_DEV_ROOT/docker-compose.yml" ]; then
+SEED_LOCAL=0
+if [ "${UCSC_E2E_TARGET:-local}" = local ] && [ -f "$WP_DEV_ROOT/docker-compose.yml" ]; then
+	SEED_LOCAL=1
+fi
+if [ -z "${UCSC_CS_E2E_URL:-}" ] && [ "$SEED_LOCAL" = 1 ]; then
 	echo "Seeding class-schedule e2e page (root: $WP_DEV_ROOT)..."
 	SEEDED_URL="$( (cd "$WP_DEV_ROOT" && docker compose exec -T wpcli wp eval-file - < "$SCRIPT_DIR/seed-e2e-page.php") | tail -1 )" || {
 		echo "Could not seed the e2e page — is the stack up? (docker compose up -d)" >&2
@@ -40,7 +50,7 @@ fi
 # Seed the campus-directory profile page (WPM-114). It reproduces the department
 # -site configuration: in-site profile links rather than links out to
 # campusdirectory.ucsc.edu. Needs LDAP reachable (UCSC VPN) to render people.
-if [ -z "${UCSC_CD_E2E_URL:-}" ] && [ -f "$WP_DEV_ROOT/docker-compose.yml" ]; then
+if [ -z "${UCSC_CD_E2E_URL:-}" ] && [ "$SEED_LOCAL" = 1 ]; then
 	echo "Seeding campus-directory e2e pages (root: $WP_DEV_ROOT)..."
 	CD_SEED_OUTPUT="$(cd "$WP_DEV_ROOT" && docker compose exec -T wpcli wp eval-file - < "$SCRIPT_DIR/seed-campus-directory-e2e.php")" || {
 		echo "Could not seed the campus-directory e2e page — is the stack up? (docker compose up -d)" >&2
@@ -56,7 +66,7 @@ if [ -z "${UCSC_CD_E2E_URL:-}" ] && [ -f "$WP_DEV_ROOT/docker-compose.yml" ]; th
 fi
 
 # Seed the course-catalog page (WPM-168).
-if [ -z "${UCSC_CC_E2E_URL:-}" ] && [ -f "$WP_DEV_ROOT/docker-compose.yml" ]; then
+if [ -z "${UCSC_CC_E2E_URL:-}" ] && [ "$SEED_LOCAL" = 1 ]; then
 	echo "Seeding course-catalog e2e page (root: $WP_DEV_ROOT)..."
 	SEEDED_CC_URL="$( (cd "$WP_DEV_ROOT" && docker compose exec -T wpcli wp eval-file - < "$SCRIPT_DIR/seed-course-catalog-e2e.php") | tail -1 )" || {
 		echo "Could not seed the course-catalog e2e page — is the stack up? (docker compose up -d)" >&2
@@ -76,6 +86,8 @@ exec docker run --rm \
 	--add-host=wp-dev.ucsc:host-gateway \
 	-e UCSC_E2E_IN_CONTAINER=1 \
 	-e CI=true \
+	${UCSC_E2E_TARGET:+-e UCSC_E2E_TARGET="$UCSC_E2E_TARGET"} \
+	${UCSC_E2E_ALLOW_PROD:+-e UCSC_E2E_ALLOW_PROD="$UCSC_E2E_ALLOW_PROD"} \
 	${UCSC_CS_E2E_URL:+-e UCSC_CS_E2E_URL="$UCSC_CS_E2E_URL"} \
 	${UCSC_CD_E2E_URL:+-e UCSC_CD_E2E_URL="$UCSC_CD_E2E_URL"} \
 	${UCSC_CD_LALS_E2E_URL:+-e UCSC_CD_LALS_E2E_URL="$UCSC_CD_LALS_E2E_URL"} \

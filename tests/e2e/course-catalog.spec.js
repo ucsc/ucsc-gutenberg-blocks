@@ -21,8 +21,7 @@
  * failure, not two.
  */
 
-const PAGE_URL =
-	process.env.UCSC_CC_E2E_URL || 'https://wp-dev.ucsc/course-catalog-e2e/';
+const { pageUrl } = require( './utils/e2e-helpers' );
 
 let hasRows = false;
 
@@ -31,7 +30,7 @@ describe( 'Course Catalog block (frontend)', () => {
 		if ( typeof page !== 'undefined' && page && ! page.removeListener ) {
 			page.removeListener = page.off || page.removeEventListener;
 		}
-		await page.goto( PAGE_URL, { waitUntil: 'networkidle0', timeout: 60000 } );
+		await page.goto( pageUrl( 'courseCatalog' ), { waitUntil: 'networkidle0', timeout: 60000 } );
 		hasRows = ( await page.$( '#tableSorter tbody tr.pointer' ) ) !== null;
 		if ( ! hasRows ) {
 			// eslint-disable-next-line no-console
