@@ -42,6 +42,7 @@ const divisionOptions = [
 
 function mockFetchResponse(options) {
   global.fetch.mockResolvedValueOnce({
+    ok: true,
     text: () => Promise.resolve(JSON.stringify(options)),
   });
 }
@@ -67,7 +68,7 @@ describe('shared dropdown components', () => {
         />
       );
 
-      expect(screen.getByText('Subject Dropdown Loading...')).toBeInTheDocument();
+      expect(screen.getByText('Department Dropdown Loading...')).toBeInTheDocument();
       expect(global.fetch).toHaveBeenCalledWith('/wp-json/ucscgutenbergblocks/v1/departmentcode');
 
       const select = await screen.findByLabelText('Department');
@@ -220,6 +221,36 @@ describe('shared dropdown components', () => {
       );
 
       await waitFor(() => expect(screen.getByLabelText('Division')).toBeDisabled());
+    });
+  });
+
+  // WPM-207: an HTTP error, a non-JSON body (e.g. the CampusPress HTML rate-limit
+  // page), a JSON error object or a network failure must end the loading state
+  // with a visible error, not leave "Loading..." up forever or throw.
+  describe('failed requests (WPM-207)', () => {
+    const dropdowns = [
+      ['DepartmentDropdown', DepartmentDropdown, { department: '---' }, 'departments'],
+      ['SubjectDropdown', SubjectDropdown, { subject: '---' }, 'subjects'],
+      ['DivisionDropdown', DivisionDropdown, { division: '---' }, 'divisions'],
+    ];
+    const failures = [
+      ['a WP REST error object', () => Promise.resolve({ ok: false, status: 503, text: () => Promise.resolve(JSON.stringify({ code: 'x', message: 'down', data: { status: 503 } })) })],
+      ['an HTML 429 page', () => Promise.resolve({ ok: false, status: 429, text: () => Promise.resolve('<html><body>Too Many Requests</body></html>') })],
+      ['a 200 that is not JSON', () => Promise.resolve({ ok: true, status: 200, text: () => Promise.resolve('<html>maintenance</html>') })],
+      ['a 200 JSON object instead of a list', () => Promise.resolve({ ok: true, status: 200, text: () => Promise.resolve('{"unexpected":true}') })],
+      ['a network failure', () => Promise.reject(new TypeError('Failed to fetch'))],
+    ];
+
+    describe.each(dropdowns)('%s', (name, Dropdown, valueProps, noun) => {
+      it.each(failures)('shows an error instead of loading forever on %s', async (_kind, respond) => {
+        global.fetch.mockImplementationOnce(respond);
+
+        render(<Dropdown {...valueProps} setAttributes={jest.fn()} label="Pick" />);
+
+        expect(await screen.findByRole('alert')).toHaveTextContent(`Could not load ${noun}`);
+        expect(screen.queryByText(/Dropdown Loading\.\.\./)).not.toBeInTheDocument();
+        expect(screen.queryByLabelText('Pick')).not.toBeInTheDocument();
+      });
     });
   });
 });

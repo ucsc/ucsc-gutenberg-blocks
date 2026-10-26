@@ -134,13 +134,13 @@ describe.each( [
 	// The dropdowns do fetch().then(res => res.text()).then(JSON.parse) with no
 	// status check and no catch (src/components/*Dropdown.js), so an HTML error
 	// page throws an unhandled rejection.
-	it( '[RED until dropdowns handle HTTP errors] raises no uncaught errors', () => {
+	it( 'raises no uncaught errors (WPM-207)', () => {
 		expect( errors.pageErrors ).toEqual( [] );
 	} );
 
 	// ...and the dropdown never leaves its loading state, so the editor shows
 	// "Dropdown Loading..." forever with no hint that anything failed.
-	it( '[RED until dropdowns handle HTTP errors] does not stay on "Loading..." forever', async () => {
+	it( 'does not stay on "Loading..." forever (WPM-207)', async () => {
 		const { handle } = await editorBlock( p, clientId );
 		expect( await handle.evaluate( ( el ) => el.innerText ) ).not.toMatch(
 			/Dropdown Loading\.\.\./

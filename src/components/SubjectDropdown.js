@@ -1,5 +1,6 @@
 import { SelectControl } from '@wordpress/components';
 import { useEffect, useState } from '@wordpress/element'
+import { fetchOptions } from './shared/fetchJson';
 
 const SubjectDropdown = ({
   subject,
@@ -8,6 +9,7 @@ const SubjectDropdown = ({
   disabled = false
 }) => {
   const [subjects, setSubjects] = useState([]);
+  const [loadFailed, setLoadFailed] = useState(false);
 
   let localSubject;
   let setLocalSubject;
@@ -21,12 +23,9 @@ const SubjectDropdown = ({
   }
 
   useEffect(() => {
-    fetch('/wp-json/ucscgutenbergblocks/v1/subjectcode')
-    .then(res => res.text())
-    .then((text) => {
-      const resp = JSON.parse(text);
-      setSubjects(resp);
-    });
+    fetchOptions('/wp-json/ucscgutenbergblocks/v1/subjectcode')
+    .then(setSubjects)
+    .catch(() => setLoadFailed(true));
   }, []);
 
   return (
@@ -44,8 +43,11 @@ const SubjectDropdown = ({
             disabled={disabled}
           />
         )}
-        {!subjects.length && (
+        {!subjects.length && !loadFailed && (
           <span>Subject Dropdown Loading...</span>
+        )}
+        {loadFailed && (
+          <span role="alert">Could not load subjects. Reload the page to try again.</span>
         )}
       </div>
     </>

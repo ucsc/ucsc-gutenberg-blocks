@@ -1,5 +1,6 @@
 import { SelectControl } from '@wordpress/components';
 import { useEffect, useState } from '@wordpress/element'
+import { fetchOptions } from './shared/fetchJson';
 
 const DivisionDropdown = ({
   division,
@@ -8,6 +9,7 @@ const DivisionDropdown = ({
   disabled = false
 }) => {
   const [divisions, setDivisions] = useState([]);
+  const [loadFailed, setLoadFailed] = useState(false);
 
   let localDivision;
   let setLocalDivision;
@@ -21,12 +23,9 @@ const DivisionDropdown = ({
   }
 
   useEffect(() => {
-    fetch('/wp-json/ucscgutenbergblocks/v1/divisioncode')
-    .then(res => res.text())
-    .then((text) => {
-      const resp = JSON.parse(text);
-      setDivisions(resp);
-    });
+    fetchOptions('/wp-json/ucscgutenbergblocks/v1/divisioncode')
+    .then(setDivisions)
+    .catch(() => setLoadFailed(true));
   }, []);
 
   return (
@@ -44,8 +43,11 @@ const DivisionDropdown = ({
             disabled={disabled}
           />
         )}
-        {!divisions.length && (
+        {!divisions.length && !loadFailed && (
           <span>Divisions Dropdown Loading...</span>
+        )}
+        {loadFailed && (
+          <span role="alert">Could not load divisions. Reload the page to try again.</span>
         )}
       </div>
     </>

@@ -63,6 +63,7 @@ global.wp = {
 beforeEach(() => {
   global.fetch = jest.fn(() =>
     Promise.resolve({
+      ok: true,
       text: () => Promise.resolve(JSON.stringify({ ldap_pass: true, multisite: false })),
     })
   );
@@ -306,6 +307,7 @@ describe('CampusDirectory block', () => {
     it('shows configuration error when LDAP password is missing', async () => {
       global.fetch = jest.fn(() =>
         Promise.resolve({
+          ok: true,
           text: () => Promise.resolve(JSON.stringify({ ldap_pass: false, multisite: false })),
         })
       );
@@ -319,6 +321,7 @@ describe('CampusDirectory block', () => {
     it('shows multisite link when LDAP password is missing and multisite is true', async () => {
       global.fetch = jest.fn(() =>
         Promise.resolve({
+          ok: true,
           text: () => Promise.resolve(JSON.stringify({ ldap_pass: false, multisite: true })),
         })
       );
@@ -332,6 +335,7 @@ describe('CampusDirectory block', () => {
     it('hides the directory panel when not configured correctly', async () => {
       global.fetch = jest.fn(() =>
         Promise.resolve({
+          ok: true,
           text: () => Promise.resolve(JSON.stringify({ ldap_pass: false, multisite: false })),
         })
       );
@@ -340,6 +344,21 @@ describe('CampusDirectory block', () => {
         render(<Edit setAttributes={setAttributes} attributes={defaultAttributes} />);
       });
       expect(screen.queryByTestId('panel')).not.toBeInTheDocument();
+    });
+
+    // WPM-207: a failed requirements check (error page or network failure) must
+    // not throw or claim the block is misconfigured.
+    it.each([
+      ['an HTML error page', () => Promise.resolve({ ok: false, status: 429, text: () => Promise.resolve('<html>Too Many Requests</html>') })],
+      ['a network failure', () => Promise.reject(new TypeError('Failed to fetch'))],
+    ])('keeps the block usable when the requirements check fails with %s', async (_kind, respond) => {
+      global.fetch = jest.fn(respond);
+      const setAttributes = jest.fn();
+      await act(async () => {
+        render(<Edit setAttributes={setAttributes} attributes={defaultAttributes} />);
+      });
+      expect(screen.queryByText('This Block is not Configured Correctly')).not.toBeInTheDocument();
+      expect(screen.getByTestId('panel')).toBeInTheDocument();
     });
   });
 });

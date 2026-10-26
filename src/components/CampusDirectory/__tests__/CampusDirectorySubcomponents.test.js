@@ -154,6 +154,7 @@ describe('CampusDirectory sub-components', () => {
 
     function mockFetch(options) {
       global.fetch.mockResolvedValueOnce({
+        ok: true,
         text: () => Promise.resolve(JSON.stringify(options)),
       });
     }
@@ -210,6 +211,27 @@ describe('CampusDirectory sub-components', () => {
       );
 
       await waitFor(() => expect(screen.getByLabelText('Department')).toBeDisabled());
+    });
+
+    // WPM-237 / WPM-207: during the cddepartmentcode backoff the endpoint answers
+    // 503 with a WP REST error object; the dropdown must say so, not load forever.
+    it.each([
+      ['a 503 WP REST error object', () => Promise.resolve({ ok: false, status: 503, text: () => Promise.resolve(JSON.stringify({ code: 'cddepartmentcode_fetch_error', message: 'Campus Directory is temporarily unavailable', data: { status: 503 } })) })],
+      ['an HTML error page', () => Promise.resolve({ ok: false, status: 504, text: () => Promise.resolve('<html>Gateway Timeout</html>') })],
+      ['a network failure', () => Promise.reject(new TypeError('Failed to fetch'))],
+    ])('shows an error instead of loading forever on %s', async (_kind, respond) => {
+      global.fetch.mockImplementationOnce(respond);
+
+      render(
+        <CampusDirectoryDepartmentDropdown
+          department="---"
+          setAttributes={jest.fn()}
+          label="Department"
+        />
+      );
+
+      expect(await screen.findByRole('alert')).toHaveTextContent('Could not load departments');
+      expect(screen.queryByText('Department Dropdown Loading...')).not.toBeInTheDocument();
     });
   });
 });

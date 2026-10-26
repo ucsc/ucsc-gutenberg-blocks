@@ -1,5 +1,6 @@
 import { SelectControl } from '@wordpress/components';
 import { useEffect, useState } from '@wordpress/element'
+import { fetchOptions } from './shared/fetchJson';
 
 const DepartmentDropdown = ({
   department,
@@ -8,6 +9,7 @@ const DepartmentDropdown = ({
   disabled = false
 }) => {
   const [departments, setDepartments] = useState([]);
+  const [loadFailed, setLoadFailed] = useState(false);
 
 
   let localDepartment;
@@ -21,12 +23,9 @@ const DepartmentDropdown = ({
     [localDepartment, setLocalDepartment] = useState(department);
   }
   useEffect(() => {
-    fetch('/wp-json/ucscgutenbergblocks/v1/departmentcode')
-    .then(res => res.text())
-    .then((text) => {
-      const resp = JSON.parse(text);
-      setDepartments(resp);
-    });
+    fetchOptions('/wp-json/ucscgutenbergblocks/v1/departmentcode')
+    .then(setDepartments)
+    .catch(() => setLoadFailed(true));
   }, []);
 
   return (
@@ -44,8 +43,11 @@ const DepartmentDropdown = ({
             disabled={disabled}
           />
         )}
-        {!departments.length && (
-          <span>Subject Dropdown Loading...</span>
+        {!departments.length && !loadFailed && (
+          <span>Department Dropdown Loading...</span>
+        )}
+        {loadFailed && (
+          <span role="alert">Could not load departments. Reload the page to try again.</span>
         )}
       </div>
     </>

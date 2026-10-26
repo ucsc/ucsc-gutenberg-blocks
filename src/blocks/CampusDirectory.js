@@ -5,6 +5,7 @@ import { useBlockProps } from '@wordpress/block-editor';
 
 import CampusDirectoryDepartmentDropdown from '../components//CampusDirectory/CampusDirectoryDepartmentDropdown';
 import DivisionDropdown from '../components/DivisionDropdown';
+import { fetchJson } from '../components/shared/fetchJson';
 import PageLayout from '../components/CampusDirectory/PageLayout';
 import PeopleAndInformation from '../components/CampusDirectory/PeopleAndInformation';
 
@@ -75,13 +76,14 @@ const CampusDirectory = () => {
       }, [automatedFeeds, department, division, deptOrDiv]);
 
       useEffect(() => {
-        fetch("/wp-json/ucscgutenbergblocks/v1/campusdirectoryrequirements")
-          .then((res) => res.text())
-          .then((text) => {
-            const resp = JSON.parse(text);
+        fetchJson("/wp-json/ucscgutenbergblocks/v1/campusdirectoryrequirements")
+          .then((resp) => {
             if (!resp.ldap_pass) setConfiguredCorrectly(false);
             setResp(resp);
-          });
+          })
+          // WPM-207: if the check itself fails we cannot tell, so leave the
+          // block usable instead of throwing or reporting it misconfigured.
+          .catch(() => {});
       }, []);
 
       return (

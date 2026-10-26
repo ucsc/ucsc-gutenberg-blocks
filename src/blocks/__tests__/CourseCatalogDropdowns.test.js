@@ -53,7 +53,7 @@ const ENDPOINT_OPTIONS = {
 describe('CourseCatalog editor with real department/subject dropdowns (WPM-165)', () => {
   beforeEach(() => {
     global.fetch = jest.fn((url) =>
-      Promise.resolve({ text: () => Promise.resolve(JSON.stringify(ENDPOINT_OPTIONS[url] || [])) })
+      Promise.resolve({ ok: true, text: () => Promise.resolve(JSON.stringify(ENDPOINT_OPTIONS[url] || [])) })
     );
   });
 
