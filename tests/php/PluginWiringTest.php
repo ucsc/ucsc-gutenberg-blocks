@@ -302,17 +302,21 @@ check( 'auto-flush runs on init', in_array( 'ucsc_gutenberg_blocks_maybe_flush_r
 
 echo "\neditor script versioning (WPM-192):\n";
 
+// The plugin Version header, read independently so a release bump does not stale the test.
+preg_match( '/^\s*\*\s*Version:\s*(\S+)/m', file_get_contents( __DIR__ . '/../../index.php' ), $version_match );
+$plugin_version = $version_match[1];
+
 reset_wiring_state();
 do_hook( 'admin_enqueue_scripts' );
 check( 'enqueues build/index.js as the ucscblocks editor script with block-editor deps', ( $scripts['ucscblocks']['enqueued'] ?? false ) && 'https://example.ucsc.edu/wp-content/plugins/ucsc-gutenberg-blocks/build/index.js' === $scripts['ucscblocks']['src'] && in_array( 'wp-blocks', $scripts['ucscblocks']['deps'], true ) && in_array( 'wp-block-editor', $scripts['ucscblocks']['deps'], true ) );
-check( 'production versions the editor script with the plugin Version header', '1.2.1' === $scripts['ucscblocks']['ver'] );
-check( 'localizes ucscBlocksConfig.version as the plugin Version header (WPM-89)', '1.2.1' === ( $scripts['ucscblocks']['l10n']['ucscBlocksConfig']['version'] ?? null ) );
+check( 'production versions the editor script with the plugin Version header', $plugin_version === $scripts['ucscblocks']['ver'] );
+check( 'localizes ucscBlocksConfig.version as the plugin Version header (WPM-89)', $plugin_version === ( $scripts['ucscblocks']['l10n']['ucscBlocksConfig']['version'] ?? null ) );
 
 reset_wiring_state();
 $environment_type = 'local';
 do_hook( 'admin_enqueue_scripts' );
 $build = __DIR__ . '/../../build/index.js';
-check( 'local environments version the editor script by build file mtime', file_exists( $build ) ? filemtime( $build ) === $scripts['ucscblocks']['ver'] : '1.2.1' === $scripts['ucscblocks']['ver'] );
-check( 'local environments still localize the plugin Version header, not the build mtime (WPM-89)', '1.2.1' === ( $scripts['ucscblocks']['l10n']['ucscBlocksConfig']['version'] ?? null ) );
+check( 'local environments version the editor script by build file mtime', file_exists( $build ) ? filemtime( $build ) === $scripts['ucscblocks']['ver'] : $plugin_version === $scripts['ucscblocks']['ver'] );
+check( 'local environments still localize the plugin Version header, not the build mtime (WPM-89)', $plugin_version === ( $scripts['ucscblocks']['l10n']['ucscBlocksConfig']['version'] ?? null ) );
 
 finish_tests();

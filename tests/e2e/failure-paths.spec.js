@@ -44,7 +44,12 @@ describe( 'Campus Directory: a directory photo fails to load', () => {
 		await p.setRequestInterception( true );
 		p.on( 'request', ( req ) => {
 			const url = req.url();
-			if ( url.includes( 'campusdirectory.ucsc.edu/photo.php' ) ) {
+			// Photos load from the plugin's LDAP-backed endpoint first (WPM-226),
+			// then campusdirectory photo.php; break both.
+			if (
+				url.includes( '/ucscgutenbergblocks/v1/directoryphoto/' ) ||
+				url.includes( 'campusdirectory.ucsc.edu/photo.php' )
+			) {
 				req.respond( { status: 404, contentType: 'text/plain', body: 'not found' } );
 			} else if ( url.includes( 'static.ucsc.edu/images/icon-slug.jpg' ) ) {
 				// Serve the fallback locally so the test does not depend on
