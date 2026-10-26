@@ -82,6 +82,8 @@ if (!defined('LDAP_OPT_PROTOCOL_VERSION')) define('LDAP_OPT_PROTOCOL_VERSION', 0
 if (!defined('LDAP_OPT_REFERRALS')) define('LDAP_OPT_REFERRALS', 0);
 if (!defined('LDAP_OPT_NETWORK_TIMEOUT')) define('LDAP_OPT_NETWORK_TIMEOUT', 0);
 if (!defined('LDAP_OPT_SIZELIMIT')) define('LDAP_OPT_SIZELIMIT', 0);
+// Distinct from the zero-valued stubs above so a check cannot match the wrong option.
+if (!defined('LDAP_OPT_TIMEOUT')) define('LDAP_OPT_TIMEOUT', 0x5002);
 if (!defined('LDAP_ESCAPE_FILTER')) define('LDAP_ESCAPE_FILTER', 0);
 
 $ldap_connect_uris  = array();
@@ -160,6 +162,15 @@ function ldap_escape($str, $ignore = '', $flags = 0) {
 		array( '\5c', '\2a', '\28', '\29', '\00' ),
 		$str
 	);
+}
+// TLS preflight before each LDAP connection (WPM-233). Defined before the class
+// file loads, so it replaces the real network check.
+$ldap_handshake_ok    = true;
+$ldap_handshake_calls = array();
+function ucsc_cd_ldap_handshake_ok( $host, $timeout ) {
+	global $ldap_handshake_ok, $ldap_handshake_calls;
+	$ldap_handshake_calls[] = array( 'host' => $host, 'timeout' => $timeout );
+	return $ldap_handshake_ok;
 }
 function get_transient($key) {
 	global $transients;
@@ -268,7 +279,7 @@ function transient_keys() {
 }
 
 function reset_test_state() {
-	global $query_vars, $is_admin, $is_singular, $is_main_query, $queried_object_id, $current_post_id, $ldap_searches, $ldap_options, $ldap_search_result, $ldap_bind_result, $ldap_entries, $ldap_attr_cursor, $transients, $ldap_connect_uris, $ldap_bind_args, $ldap_len_reads, $remote_get_calls, $remote_get_response;
+	global $query_vars, $is_admin, $is_singular, $is_main_query, $queried_object_id, $current_post_id, $ldap_searches, $ldap_options, $ldap_search_result, $ldap_bind_result, $ldap_entries, $ldap_attr_cursor, $transients, $ldap_connect_uris, $ldap_bind_args, $ldap_len_reads, $remote_get_calls, $remote_get_response, $ldap_handshake_ok, $ldap_handshake_calls;
 	$remote_get_calls    = array();
 	$remote_get_response = array( 'code' => 500, 'body' => '' );
 	$ldap_connect_uris  = array();
@@ -287,6 +298,8 @@ function reset_test_state() {
 	$ldap_entries       = array();
 	$ldap_attr_cursor   = array();
 	$transients         = array();
+	$ldap_handshake_ok    = true;
+	$ldap_handshake_calls = array();
 }
 
 /**
@@ -500,6 +513,33 @@ foreach ( $ldap_options as $option ) {
 	}
 }
 check( 'LDAP time limit stays under the 30s edge proxy timeout', $time_limit_ok );
+check( 'sets a 5s client-side LDAP_OPT_TIMEOUT for bind and search',
+	in_array( array( 'option' => LDAP_OPT_TIMEOUT, 'value' => 5 ), $ldap_options, true )
+);
+
+echo "LDAP stall guard tests (WPM-233):\n";
+
+reset_test_state();
+$api = campus_directory_api_fixture();
+$api->getCampusDirData( 'jsmith' );
+check( 'checks the LDAP host answers TLS within 3s before connecting',
+	array( array( 'host' => 'ldap-blue.ucsc.edu', 'timeout' => 3 ) ) === $ldap_handshake_calls && 1 === count( $ldap_connect_uris )
+);
+
+reset_test_state();
+$ldap_handshake_ok = false;
+$api  = campus_directory_api_fixture();
+$data = $api->getCampusDirData( 'jsmith' );
+check( 'a silent LDAP host returns no people without connecting', array() === $data[0] && 0 === count( $ldap_connect_uris ) );
+check( 'a silent LDAP host marks LDAP down for 5 minutes',
+	isset( $transients['ucsc_cd_ldap_down'] ) && 300 === $transients['ucsc_cd_ldap_down']['expiration']
+);
+
+reset_test_state();
+$transients['ucsc_cd_ldap_down'] = array( 'value' => 1, 'expiration' => 300 );
+$api = campus_directory_api_fixture();
+$api->getCampusDirData( 'jsmith' );
+check( 'while LDAP is marked down, skips the check and the connection', 0 === count( $ldap_handshake_calls ) && 0 === count( $ldap_connect_uris ) );
 
 reset_test_state();
 $api = campus_directory_api_fixture();
@@ -995,6 +1035,7 @@ check( 'scoped automated feed (dept=MATH) applies the 1000-record LDAP ceiling',
 echo "directory photo tests (getDirectoryPhoto):\n";
 
 if ( ! defined( 'DAY_IN_SECONDS' ) ) define( 'DAY_IN_SECONDS', 86400 );
+if ( ! defined( 'HOUR_IN_SECONDS' ) ) define( 'HOUR_IN_SECONDS', 3600 );
 $photo_bytes = "\xFF\xD8\xFF\xE0jpeg\x00bytes";
 $photo_key   = 'ucsc_cd_photo_' . md5( 'jdoe' );
 
@@ -1002,6 +1043,7 @@ reset_test_state();
 $ldap_entries = array( ldap_entry_fixture( array( 'uid' => array( 'jdoe' ), 'jpegphoto' => array( $photo_bytes ) ) ) );
 $photo = $campus_directory->getDirectoryPhoto( 'jdoe' );
 check( 'returns the raw jpegPhoto bytes from LDAP', $photo_bytes === $photo );
+check( 'reports ldap as the photo source', 'ldap' === $campus_directory->photoSource );
 check( 'looks the photo up by uid', isset( $ldap_searches[0] ) && false !== strpos( $ldap_searches[0]['filter'], '(uid=jdoe)' ) );
 check( 'caches the photo base64-encoded for a day',
 	isset( $transients[ $photo_key ] )
@@ -1015,12 +1057,22 @@ $transients    = array( $photo_key => $transients[ $photo_key ] );
 $ldap_searches = array();
 $photo = $campus_directory->getDirectoryPhoto( 'jdoe' );
 check( 'serves a cached photo without querying LDAP', $photo_bytes === $photo && 0 === count( $ldap_searches ) );
+check( 'reports cache as the source of a cached photo', 'cache' === $campus_directory->photoSource );
 
 reset_test_state();
 $ldap_entries = array( ldap_entry_fixture( array( 'uid' => array( 'jdoe' ) ) ) );
 $photo = $campus_directory->getDirectoryPhoto( 'jdoe' );
 check( 'returns empty when the person has no jpegPhoto', '' === $photo );
-check( 'does not cache a missing photo', ! isset( $transients[ $photo_key ] ) );
+check( 'caches a missing photo as empty for an hour',
+	isset( $transients[ $photo_key ] ) && '' === $transients[ $photo_key ]['value'] && HOUR_IN_SECONDS === $transients[ $photo_key ]['expiration']
+);
+check( 'reports none when neither LDAP nor campusdirectory has a photo', 'none' === $campus_directory->photoSource );
+
+$transients       = array( $photo_key => $transients[ $photo_key ] );
+$ldap_searches    = array();
+$remote_get_calls = array();
+$photo = $campus_directory->getDirectoryPhoto( 'jdoe' );
+check( 'serves a cached miss without LDAP or campusdirectory', '' === $photo && 0 === count( $ldap_searches ) && 0 === count( $remote_get_calls ) );
 
 reset_test_state();
 $hidden = ldap_entry_fixture( array( 'uid' => array( 'jdoe' ), 'jpegphoto' => array( $photo_bytes ) ) );
@@ -1046,6 +1098,7 @@ $ldap_bind_result    = false;
 $remote_get_response = array( 'code' => 200, 'body' => $photo_bytes );
 $photo = $campus_directory->getDirectoryPhoto( 'jdoe' );
 check( 'falls back to campusdirectory photo.php when LDAP has no photo', $photo_bytes === $photo );
+check( 'reports scrape as the source of a scraped photo', 'scrape' === $campus_directory->photoSource );
 check( 'scrapes photo.php for the requested uid',
 	isset( $remote_get_calls[0] ) && 'https://campusdirectory.ucsc.edu/photo.php?type=people&uid=jdoe' === $remote_get_calls[0]['url']
 );
@@ -1064,7 +1117,16 @@ reset_test_state();
 $ldap_bind_result    = false;
 $remote_get_response = array( 'code' => 200, 'body' => '<html>not an image</html>' );
 $photo = $campus_directory->getDirectoryPhoto( 'jdoe' );
-check( 'rejects a 200 response that is not a JPEG', '' === $photo && ! isset( $transients[ $photo_key ] ) );
+check( 'rejects a 200 response that is not a JPEG', '' === $photo && '' === $transients[ $photo_key ]['value'] );
+check( 'a 200 page that is not a JPEG (e.g. a sign-in page) sets the scrape backoff', isset( $transients['ucsc_cd_photo_scrape_failed'] ) );
+
+reset_test_state();
+$ldap_bind_result    = false;
+$remote_get_response = array( 'code' => 403, 'body' => '<html>Forbidden</html>' );
+$campus_directory->getDirectoryPhoto( 'jdoe' );
+check( 'a 403 from campusdirectory sets the 5-minute scrape backoff',
+	isset( $transients['ucsc_cd_photo_scrape_failed'] ) && 300 === $transients['ucsc_cd_photo_scrape_failed']['expiration']
+);
 
 reset_test_state();
 $ldap_bind_result    = false;

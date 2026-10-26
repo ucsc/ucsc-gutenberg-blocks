@@ -2,6 +2,21 @@
 require_once ABSPATH . 'wp-admin/includes/class-wp-filesystem-base.php';
 require_once ABSPATH . 'wp-admin/includes/class-wp-filesystem-direct.php';
 
+// True when $host completes a TLS handshake within $timeout seconds. libldap's
+// timeouts do not cover the ldaps:// handshake, so a server that accepts the
+// connection and then goes silent would hang ldap_bind() (WPM-233). This only
+// checks that LDAP answers; the real connection still verifies the certificate.
+if (!function_exists('ucsc_cd_ldap_handshake_ok')) {
+  function ucsc_cd_ldap_handshake_ok($host, $timeout) {
+    if (strpos($host, ':') === false) $host .= ':636';
+    $context = stream_context_create(['ssl' => ['verify_peer' => false, 'verify_peer_name' => false]]);
+    $socket = @stream_socket_client('tls://' . $host, $errno, $errstr, $timeout, STREAM_CLIENT_CONNECT, $context);
+    if (!$socket) return false;
+    fclose($socket);
+    return true;
+  }
+}
+
 class CampusDirectoryAPI {
   public $nodeContent;
   public $allStaffTypes;
@@ -143,6 +158,15 @@ class CampusDirectoryAPI {
     // "(|)" — bail here so every caller is protected, not just getCampusDirData.
     if (!strlen($q)) return [];
 
+    // LDAP stalled moments ago: skip it for a few minutes instead of making
+    // every page and photo wait on it again.
+    if (get_transient('ucsc_cd_ldap_down')) return [];
+    if (!ucsc_cd_ldap_handshake_ok($this->ldap_url, 3)) {
+      error_log('CampusDirectory LDAP did not answer within 3s; skipping LDAP for 5 minutes');
+      set_transient('ucsc_cd_ldap_down', 1, 5 * MINUTE_IN_SECONDS);
+      return [];
+    }
+
     // Same connection everywhere (WPM-234): local dev binds as production does,
     // so LDAP behavior (e.g. which attributes the bind can see) matches.
     $rli = ldap_connect("ldaps://" . $this->ldap_url);
@@ -152,6 +176,8 @@ class CampusDirectoryAPI {
       // LDAP server degrades to an empty section instead of a 504 page.
       ldap_set_option($rli, LDAP_OPT_TIMELIMIT, 15);
       ldap_set_option($rli, LDAP_OPT_NETWORK_TIMEOUT, 5);
+      // Client-side limit for bind and search once connected.
+      ldap_set_option($rli, LDAP_OPT_TIMEOUT, 5);
       ldap_set_option($rli, LDAP_OPT_PROTOCOL_VERSION, 3);
 
       if (!$this->deptOrDivSet) {

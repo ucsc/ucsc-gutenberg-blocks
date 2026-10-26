@@ -192,3 +192,10 @@ upstream timeout.
 
 - **WHEN** the directory responds more slowly than the configured limits
 - **THEN** the query is abandoned and the page still renders
+
+#### Scenario: Directory accepts the connection but never answers (WPM-233)
+
+- **WHEN** the directory host accepts the connection but does not complete the
+  TLS handshake within 3 seconds
+- **THEN** the query is abandoned and the listing renders empty
+- **AND** the directory is not contacted again for 5 minutes

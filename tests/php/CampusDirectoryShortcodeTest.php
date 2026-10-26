@@ -83,6 +83,13 @@ if ( ! defined( 'LDAP_OPT_NETWORK_TIMEOUT' ) ) {
 if ( ! defined( 'LDAP_OPT_TIMELIMIT' ) ) {
 	define( 'LDAP_OPT_TIMELIMIT', 0 );
 }
+if ( ! defined( 'LDAP_OPT_TIMEOUT' ) ) {
+	define( 'LDAP_OPT_TIMEOUT', 0 );
+}
+// Skip the real TLS preflight (WPM-233); LDAP itself is stubbed below.
+function ucsc_cd_ldap_handshake_ok() {
+	return true;
+}
 if ( ! defined( 'LDAP_OPT_SIZELIMIT' ) ) {
 	define( 'LDAP_OPT_SIZELIMIT', 0 );
 }

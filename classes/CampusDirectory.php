@@ -5,6 +5,9 @@ include_once(plugin_dir_path(__FILE__) . 'CampusDirectoryAPI.php');
 
 class CampusDirectory
 {
+  // Where the last getDirectoryPhoto() answer came from.
+  public $photoSource = '';
+
   function __construct()
   {
     add_action('init', array($this, 'renderFrontend'));
@@ -41,9 +44,13 @@ class CampusDirectory
 
   // Serve a person's photo from LDAP (jpegPhoto) instead of linking to
   // campusdirectory.ucsc.edu/photo.php, which only answers on campus/VPN.
+  // X-Directory-Photo-Source says where the answer came from (ldap, scrape,
+  // none, or cache), so one request on a live site shows which source works.
   function directoryPhoto($request) {
     $photo = $this->getDirectoryPhoto($request['uid']);
+    header('X-Directory-Photo-Source: ' . $this->photoSource);
     if ($photo === '') {
+      header('Cache-Control: public, max-age=3600');
       wp_redirect('https://static.ucsc.edu/images/icon-slug.jpg', 302);
       exit;
     }
@@ -55,39 +62,50 @@ class CampusDirectory
   }
 
   // Raw JPEG bytes for $uid, or '' when the person has no public photo (or is
-  // not publicly listed, or LDAP failed). Photos are cached for a day; misses
-  // are not, so getCampusDirData()'s own short empty-result cache applies.
+  // not publicly listed, or LDAP failed). Photos are cached for a day. Misses
+  // are cached for an hour (as '') so a person without a photo does not cost
+  // an LDAP lookup and a campusdirectory call on every page view (WPM-233).
   function getDirectoryPhoto($uid) {
     $key = 'ucsc_cd_photo_' . md5($uid);
     $cached = get_transient($key);
-    if ($cached !== false) return base64_decode($cached);
+    if ($cached !== false) {
+      $this->photoSource = 'cache';
+      return base64_decode($cached);
+    }
 
     $campusDirectoryAPI = new CampusDirectoryAPI(['automatedFeeds' => false]);
     $people = $campusDirectoryAPI->getCampusDirData($uid, true)[0];
     $photo = !empty($people[0]['jpegphoto'][0]) ? $people[0]['jpegphoto'][0] : '';
-    if ($photo === '') $photo = $this->scrapeDirectoryPhoto($uid);
+    $this->photoSource = 'ldap';
+    if ($photo === '') {
+      $photo = $this->scrapeDirectoryPhoto($uid);
+      $this->photoSource = $photo === '' ? 'none' : 'scrape';
+    }
     if ($photo !== '') set_transient($key, base64_encode($photo), DAY_IN_SECONDS);
+    else set_transient($key, '', HOUR_IN_SECONDS);
     return $photo;
   }
 
   // Fallback when LDAP gives no photo: ask campusdirectory.ucsc.edu/photo.php.
-  // It is often unreachable (on-campus/VPN only), so fail fast and back off for
-  // 5 minutes after a connection failure rather than stalling every photo.
-  // photo.php answers 500 with an empty body when there is no photo, so only a
-  // 200 JPEG counts.
+  // It is often unreachable or refuses off-campus requests, so fail fast and
+  // back off for 5 minutes after any answer that is not a photo or a "no
+  // photo" rather than stalling or repeating every photo. photo.php answers 500
+  // with an empty body when the person has no photo; that is a per-person miss,
+  // not a reason to back off.
   function scrapeDirectoryPhoto($uid) {
     if (get_transient('ucsc_cd_photo_scrape_failed')) return '';
 
     $response = wp_remote_get('https://campusdirectory.ucsc.edu/photo.php?type=people&uid=' . rawurlencode($uid), [
       'timeout' => 2,
     ]);
-    if (is_wp_error($response)) {
+    $code = is_wp_error($response) ? 0 : wp_remote_retrieve_response_code($response);
+    if ($code === 500) return '';
+
+    $body = $code === 200 ? wp_remote_retrieve_body($response) : '';
+    if (strncmp($body, "\xFF\xD8", 2) !== 0) {
       set_transient('ucsc_cd_photo_scrape_failed', 1, 5 * MINUTE_IN_SECONDS);
       return '';
     }
-
-    $body = wp_remote_retrieve_body($response);
-    if (wp_remote_retrieve_response_code($response) !== 200 || strncmp($body, "\xFF\xD8", 2) !== 0) return '';
     return $body;
   }
 
