@@ -91,7 +91,7 @@ const InformationToDisplay = ({
       </div>
       <div style={{paddingTop: "10px"}} className="flex-labels">
         <CheckboxControl
-          label="Link to campusdirectory.ucsc.edu"
+          label="Link to campusdirectory.ucsc.edu (if unchecked, detailed profiles will be displayed on this website)"
           checked={boolLinkOutToCampusDirectory}
           onChange={newValue => {
             setBoolLinkOutToCampusDirectory(newValue);

@@ -124,7 +124,7 @@ describe('InformationToDisplay', () => {
       );
       setAttributes.mockClear();
 
-      fireEvent.click(screen.getByLabelText('Link to campusdirectory.ucsc.edu'));
+      fireEvent.click(screen.getByLabelText('Link to campusdirectory.ucsc.edu (if unchecked, detailed profiles will be displayed on this website)'));
 
       expect(setAttributes).toHaveBeenCalledWith({ linkOutToCampusDirectory: false });
     });
@@ -139,7 +139,7 @@ describe('InformationToDisplay', () => {
           pageLayout="list"
         />
       );
-      expect(screen.getByLabelText('Link to campusdirectory.ucsc.edu')).toBeDisabled();
+      expect(screen.getByLabelText('Link to campusdirectory.ucsc.edu (if unchecked, detailed profiles will be displayed on this website)')).toBeDisabled();
     });
 
     it('enables the checkbox when linkToProfile is true', () => {
@@ -152,7 +152,7 @@ describe('InformationToDisplay', () => {
           pageLayout="list"
         />
       );
-      expect(screen.getByLabelText('Link to campusdirectory.ucsc.edu')).not.toBeDisabled();
+      expect(screen.getByLabelText('Link to campusdirectory.ucsc.edu (if unchecked, detailed profiles will be displayed on this website)')).not.toBeDisabled();
     });
   });
 
