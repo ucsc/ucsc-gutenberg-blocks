@@ -56,7 +56,7 @@ class CampusDirectory
     }
     header('Content-Type: image/jpeg');
     header('Content-Length: ' . strlen($photo));
-    header('Cache-Control: public, max-age=86400');
+    header('Cache-Control: public, max-age=3600');
     echo $photo;
     exit;
   }
@@ -65,9 +65,10 @@ class CampusDirectory
   // publicly listed, or LDAP failed. LDAP only returns publicly listed people,
   // so nobody else's photo is ever served, and campusdirectory photo.php is
   // never asked: it does not check listing and only mirrors LDAP's jpegPhoto
-  // (WPM-230). Photos are cached for a day. Misses are cached for an hour (as
-  // '') so a person without a photo does not cost an LDAP lookup on every page
-  // view (WPM-233).
+  // (WPM-230). Photos are cached for 4 hours (and an hour in browsers), so a
+  // photo removed or hidden in the directory stops showing within about 5 hours
+  // (WPM-231). Misses are cached for an hour (as '') so a person without a photo
+  // does not cost an LDAP lookup on every page view (WPM-233).
   function getDirectoryPhoto($uid) {
     $key = 'ucsc_cd_photo_' . md5($uid);
     $cached = get_transient($key);
@@ -80,7 +81,7 @@ class CampusDirectory
     $people = $campusDirectoryAPI->getCampusDirData($uid, true)[0];
     $photo = !empty($people[0]['jpegphoto'][0]) ? $people[0]['jpegphoto'][0] : '';
     $this->photoSource = $photo === '' ? 'none' : 'ldap';
-    if ($photo !== '') set_transient($key, base64_encode($photo), DAY_IN_SECONDS);
+    if ($photo !== '') set_transient($key, base64_encode($photo), 4 * HOUR_IN_SECONDS);
     else set_transient($key, '', HOUR_IN_SECONDS);
     return $photo;
   }

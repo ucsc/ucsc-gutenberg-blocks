@@ -203,41 +203,6 @@ class CampusDirectoryAPI {
     return [];
   }
 
-  public function getDirDropdowns($deptOrDiv) {
-    $retDepts = get_transient('ucsc_campus_directory_departments_' . $deptOrDiv);
-    if (!$retDepts) {
-      $people = $this->doLDAPQuery("(|(ucscpersonpubaffiliation=Graduate)(ucscpersonpubaffiliation=Faculty)(ucscpersonpubaffiliation=Staff))", [], [$deptOrDiv, 'ucscpersonpubdisplay']);
-
-      $uniqueDepts = [];
-      for($i=0; $i<count($people); $i++) {
-        for($j=0; $j<$people[$i][$deptOrDiv]['count']; $j++) {
-          $uniqueDepts[$people[$i][$deptOrDiv][$j]] = '';
-        }
-      }
-
-      $retDepts = [];
-      foreach($uniqueDepts as $dept => $emptyStr) {
-        $retDepts[] = [
-          'label' => $dept,
-          'value' => $dept
-        ];
-      }
-
-      usort($retDepts, function ($a, $b) {
-        return strcmp($a['label'], $b['label']);
-      });
-
-      array_unshift($retDepts, [
-        'label' => '---',
-        'value' => '---'
-      ]);
-
-      set_transient('ucsc_campus_directory_departments_' . $deptOrDiv, $retDepts, 86400);
-    }
-
-    return $retDepts;
-  }
-
   public function addVacantPositions($people, $automatedFeed, $arrCruzids)
   {
     $retArr = [];

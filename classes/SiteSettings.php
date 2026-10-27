@@ -106,9 +106,6 @@ class SiteSettings
 
   function divisioncode()
   {
-    // $campusDirectoryAPI = new CampusDirectoryAPI(['automatedFeeds' => true]);
-    // return new WP_REST_Response($campusDirectoryAPI->getDirDropdowns('ucscpersonpubdivision'));
-
     $ret = [];
     $ret[] = [
       "label" => "---",

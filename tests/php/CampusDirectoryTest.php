@@ -541,13 +541,6 @@ $api = campus_directory_api_fixture();
 $api->getCampusDirData( 'jsmith' );
 check( 'while LDAP is marked down, skips the check and the connection', 0 === count( $ldap_handshake_calls ) && 0 === count( $ldap_connect_uris ) );
 
-reset_test_state();
-$api = campus_directory_api_fixture();
-$api->getDirDropdowns( 'ucscpersonpubdepartmentnumber' );
-$api->getDirDropdowns( 'ucscpersonpubdivision' );
-check( 'getDirDropdowns can run twice in one request without redeclaring its sorter', true );
-check( 'getDirDropdowns requests only the grouping attribute from LDAP', isset( $ldap_searches[0] ) && in_array( 'ucscpersonpubdepartmentnumber', $ldap_searches[0]['attributes'], true ) && ! in_array( '*', $ldap_searches[0]['attributes'], true ) );
-
 echo "CampusDirectoryAPI profile-route hardening tests (WPM-152):\n";
 
 // The profile route takes its cruzid straight from the URL
@@ -917,27 +910,6 @@ $data = $api->getCampusDirData( 'jsmith' );
 check( 'LDAP bind failure returns an empty result instead of fataling', array() === $data[0] );
 check( 'LDAP bind failure issues no LDAP search', 0 === count( $ldap_searches ) );
 
-echo "CampusDirectoryAPI getDirDropdowns sort order and TTL tests (WPM-174):\n";
-
-// getDirDropdowns() has no live caller. Its commented-out caller in
-// SiteSettings.php builds the API with automatedFeeds on, so test that shape.
-$attr = 'ucscpersonpubdepartmentnumber';
-$key  = 'ucsc_campus_directory_departments_' . $attr;
-
-reset_test_state();
-$ldap_entries = array(
-	ldap_entry_fixture( array( 'uid' => array( 'zzebra' ), $attr => array( 'Zebra Studies', 'Apple Research' ) ) ),
-	ldap_entry_fixture( array( 'uid' => array( 'mmango' ), $attr => array( 'Mango Institute', 'Apple Research' ) ) ),
-);
-$api    = campus_directory_api_fixture( array( 'automatedFeeds' => true ) );
-$result = $api->getDirDropdowns( $attr );
-check( 'getDirDropdowns puts the --- placeholder first', array( 'label' => '---', 'value' => '---' ) === $result[0] );
-check( 'getDirDropdowns lists each value once, sorted alphabetically', array( 'Apple Research', 'Mango Institute', 'Zebra Studies' ) === array_column( array_slice( $result, 1 ), 'label' ) );
-check( 'getDirDropdowns caches the list for 24 hours (86400s)', isset( $transients[ $key ] ) && 86400 === $transients[ $key ]['expiration'] && $result === $transients[ $key ]['value'] );
-
-$again = $api->getDirDropdowns( $attr );
-check( 'getDirDropdowns serves a repeat call from the cache without an LDAP search', 1 === count( $ldap_searches ) && $result === $again );
-
 echo "directory_profile_title tests (WPM-177):\n";
 
 $host_title_parts = array( 'title' => 'People', 'site' => 'Example Dept' );
@@ -1034,7 +1006,6 @@ check( 'scoped automated feed (dept=MATH) applies the 1000-record LDAP ceiling',
 
 echo "directory photo tests (getDirectoryPhoto):\n";
 
-if ( ! defined( 'DAY_IN_SECONDS' ) ) define( 'DAY_IN_SECONDS', 86400 );
 if ( ! defined( 'HOUR_IN_SECONDS' ) ) define( 'HOUR_IN_SECONDS', 3600 );
 $photo_bytes = "\xFF\xD8\xFF\xE0jpeg\x00bytes";
 $photo_key   = 'ucsc_cd_photo_' . md5( 'jdoe' );
@@ -1045,10 +1016,10 @@ $photo = $campus_directory->getDirectoryPhoto( 'jdoe' );
 check( 'returns the raw jpegPhoto bytes from LDAP', $photo_bytes === $photo );
 check( 'reports ldap as the photo source', 'ldap' === $campus_directory->photoSource );
 check( 'looks the photo up by uid', isset( $ldap_searches[0] ) && false !== strpos( $ldap_searches[0]['filter'], '(uid=jdoe)' ) );
-check( 'caches the photo base64-encoded for a day',
+check( 'caches the photo base64-encoded for 4 hours, so a removed photo stops showing soon (WPM-231)',
 	isset( $transients[ $photo_key ] )
 	&& base64_encode( $photo_bytes ) === $transients[ $photo_key ]['value']
-	&& DAY_IN_SECONDS === $transients[ $photo_key ]['expiration']
+	&& 4 * HOUR_IN_SECONDS === $transients[ $photo_key ]['expiration']
 );
 
 // Cached photo: drop every other cache entry so only the photo cache can
