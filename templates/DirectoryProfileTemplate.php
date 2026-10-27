@@ -21,7 +21,7 @@ if (!$directory_profile_inline) {
 $cruzid = get_query_var('directoryprofilecruzid');
 $campusDirectoryAPI = new CampusDirectoryAPI($attributes);
 $profileData = $campusDirectoryAPI->getCampusDirData($cruzid,true)[0];
-$cruzidEmail = $profileData['0']['mail'][0];
+$cruzidEmail = $profileData[0]['mail'][0] ?? '';
 
 
 if ( ! function_exists( 'linkify' ) ) {

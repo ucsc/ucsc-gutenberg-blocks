@@ -34,7 +34,10 @@ function add_action( $hook, $callback, $priority = 10 ) {
 	add_filter( $hook, $callback, $priority );
 }
 function add_filter( $hook, $callback, $priority = 10 ) {
-	global $template_include_callback, $the_content_callback;
+	global $template_include_callback, $the_content_callback, $template_redirect_callback;
+	if ( 'template_redirect' === $hook ) {
+		$template_redirect_callback = $callback;
+	}
 	if ( 'template_include' === $hook ) {
 		$template_include_callback = $callback;
 	}
@@ -43,6 +46,11 @@ function add_filter( $hook, $callback, $priority = 10 ) {
 	}
 }
 function register_rest_route() {}
+$status_headers = array();
+function status_header( $code ) {
+	global $status_headers;
+	$status_headers[] = $code;
+}
 function add_rewrite_rule() {}
 function get_query_var( $var ) {
 	global $query_vars;
@@ -285,9 +293,10 @@ function transient_keys() {
 }
 
 function reset_test_state() {
-	global $query_vars, $is_admin, $is_singular, $is_main_query, $queried_object_id, $current_post_id, $ldap_searches, $ldap_options, $ldap_search_result, $ldap_bind_result, $ldap_entries, $ldap_attr_cursor, $transients, $ldap_connect_uris, $ldap_bind_args, $ldap_len_reads, $remote_get_calls, $remote_get_response, $ldap_handshake_ok, $ldap_handshake_calls, $site_options, $options;
+	global $query_vars, $is_admin, $is_singular, $is_main_query, $queried_object_id, $current_post_id, $ldap_searches, $ldap_options, $ldap_search_result, $ldap_bind_result, $ldap_entries, $ldap_attr_cursor, $transients, $ldap_connect_uris, $ldap_bind_args, $ldap_len_reads, $remote_get_calls, $remote_get_response, $ldap_handshake_ok, $ldap_handshake_calls, $site_options, $options, $status_headers;
 	$site_options        = array();
 	$options             = array();
+	$status_headers      = array();
 	$remote_get_calls    = array();
 	$remote_get_response = array( 'code' => 500, 'body' => '' );
 	$ldap_connect_uris  = array();
@@ -343,6 +352,29 @@ $query_vars['directoryprofilecruzid'] = 'jsmith';
 $is_singular = false;
 $template = $template_include_callback( 'index.php' );
 check( 'returns standalone DirectoryProfileTemplate when not singular', false !== strpos( $template, 'DirectoryProfileTemplate.php' ) );
+
+echo "profile status tests (WPM-247):\n";
+
+reset_test_state();
+$query_vars = array( 'directoryprofilecruzid' => 'zzqnotreal9' );
+call_user_func( $template_redirect_callback );
+check( 'an unknown CruzID gets a 404 status', array( 404 ) === $status_headers );
+
+reset_test_state();
+$query_vars   = array( 'directoryprofilecruzid' => 'jdoe' );
+$ldap_entries = array( ldap_entry_fixture( array( 'uid' => array( 'jdoe' ) ) ) );
+call_user_func( $template_redirect_callback );
+check( 'a known CruzID keeps the 200 status', array() === $status_headers );
+
+reset_test_state();
+$query_vars = array( 'directoryprofilecruzid' => 'jdoe' );
+$transients['ucsc_cd_ldap_down'] = array( 'value' => 1, 'expiration' => 300 );
+call_user_func( $template_redirect_callback );
+check( 'no 404 while LDAP is marked down', array() === $status_headers );
+
+reset_test_state();
+call_user_func( $template_redirect_callback );
+check( 'pages without a CruzID are left alone', array() === $status_headers );
 
 echo "the_content tests (renderDirectoryProfile):\n";
 
