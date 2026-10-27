@@ -409,6 +409,18 @@ describe('classschedule.js frontend', () => {
       expect(lines[1]).toBe('"CSE-101","Algo ""Advanced""","0 open / 50 total","TTh"');
     });
 
+    it('neutralizes cells that would run as spreadsheet formulas (WPM-249)', async () => {
+      window.classScheduleSearch({ target: { value: 'cse-101' } });
+      const title = Array.from(document.querySelectorAll('.course-row'))
+        .find((row) => row.querySelector('.col-course-id').textContent.trim() === 'CSE-101')
+        .querySelector('.col-title a');
+      title.textContent = '=HYPERLINK("http://x","y")';
+      window.classScheduleDownloadCSV();
+
+      const lines = (await readBlob(capturedBlob)).split('\n');
+      expect(lines[1]).toBe('"CSE-101","\'=HYPERLINK(""http://x"",""y"")","0 open / 50 total","TTh"');
+    });
+
     it('names the file after the selected term', () => {
       const anchors = [];
       const originalCreate = document.createElement.bind(document);
