@@ -495,6 +495,9 @@ function classScheduleDownloadCSV(ref) {
         var cells = row.querySelectorAll('[role="cell"]');
         var csvCols = visibleCols.map(function(c) {
             var text = (cells[c.index] ? cells[c.index].textContent.trim() : '');
+            // A leading = + - @ tab or CR would run as a formula in Excel or
+            // Sheets; a leading ' keeps it text (WPM-249)
+            if (/^[=+\-@\t\r]/.test(text)) text = "'" + text;
             // Escape quotes in CSV
             return '"' + text.replace(/"/g, '""') + '"';
         });
