@@ -41,8 +41,10 @@ class CampusDirectoryAPI {
     if (!$this->ldap_cn) $this->ldap_cn = get_option('ldap_cn');
     if (!$this->ldap_cn) $this->ldap_cn = "pantheon-webapps";
 
-    $this->ldap_url = get_site_option('ldap_url');
-    if (!$this->ldap_url) $this->ldap_url = get_option('ldap_url');
+    // The URL comes from the same scope as the password: a site admin's own
+    // ldap_url must never receive the network password (WPM-244).
+    if (get_site_option('ldap_api_key')) $this->ldap_url = get_site_option('ldap_url');
+    else $this->ldap_url = get_option('ldap_url');
     if (!$this->ldap_url) $this->ldap_url = "ldap-blue.ucsc.edu";
   }
 
