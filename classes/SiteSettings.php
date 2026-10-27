@@ -98,6 +98,18 @@ class SiteSettings
         }
       }
 
+      // A 200 without the department select (a redesign, or a maintenance
+      // page served as 200) is a failure, not an empty list to keep for a
+      // week (WPM-246).
+      if (count($retDepts) < 2) {
+        set_transient('ucsc_cddepartmentcode_failed', 1, 5 * MINUTE_IN_SECONDS);
+        return new WP_Error(
+          'cddepartmentcode_fetch_error',
+          'Campus Directory returned no departments',
+          ['status' => 502]
+        );
+      }
+
       set_transient('ucsc_cddepartmentcode', $retDepts, WEEK_IN_SECONDS);
     }
 
