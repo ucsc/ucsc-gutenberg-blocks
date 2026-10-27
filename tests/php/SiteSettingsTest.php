@@ -234,12 +234,14 @@ list( $result, $warnings ) = capture_warnings( function () use ( $settings ) {
 	return $settings->cddepartmentcode();
 } );
 
-check( 'cddepartmentcode: unparseable HTML does not fatal',
-	$result instanceof WP_REST_Response
+check( 'cddepartmentcode: unparseable HTML returns a 502 WP_Error, not a placeholder-only list (WPM-246)',
+	$result instanceof WP_Error
 );
-check( 'cddepartmentcode: unparseable HTML returns only the placeholder option (empty list)',
-	$result instanceof WP_REST_Response && count( $result->get_data() ) === 1
-	&& $result->get_data()[0]['value'] === '---'
+check( 'cddepartmentcode: unparseable HTML is not cached for a week (WPM-246)',
+	! in_array( 'ucsc_cddepartmentcode', transient_set_keys(), true )
+);
+check( 'cddepartmentcode: unparseable HTML records the failure backoff (WPM-246)',
+	$transient_set_calls === array( array( 'key' => 'ucsc_cddepartmentcode_failed', 'expiration' => 300 ) )
 );
 check( 'cddepartmentcode: unparseable HTML raises no PHP warnings', array() === $warnings );
 
