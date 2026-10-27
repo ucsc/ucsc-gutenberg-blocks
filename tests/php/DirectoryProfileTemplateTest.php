@@ -287,10 +287,17 @@ echo "\nnot-found branch:\n";
 $GLOBALS['_test_profile_data'] = []; // empty array → $profileData is empty
 $GLOBALS['_test_query_vars']   = [ 'directoryprofilecruzid' => 'nobody' ];
 $directory_profile_inline      = true;
+$notfound_warnings             = [];
+set_error_handler( function ( $errno, $errstr ) use ( &$notfound_warnings ) {
+	$notfound_warnings[] = $errstr;
+	return true;
+} );
 ob_start();
 include __DIR__ . '/../../templates/DirectoryProfileTemplate.php';
 $html_notfound = ob_get_clean();
+restore_error_handler();
 unset( $GLOBALS['_test_profile_data'], $GLOBALS['_test_query_vars'] );
+check( 'not-found page raises no PHP warnings (WPM-247)', [] === $notfound_warnings );
 check( 'renders "not found" message when profile data is empty', false !== strpos( $html_notfound, 'not found' ) );
 check( 'includes the queried CruzID in the not-found message', false !== strpos( $html_notfound, 'nobody' ) );
 
