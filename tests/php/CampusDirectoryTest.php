@@ -75,7 +75,10 @@ function plugins_url( $path ) {
 	return 'http://example.com/wp-content/plugins/ucsc-gutenberg-blocks/' . $path;
 }
 function wp_register_style() {}
-function get_site_option() { return ''; }
+function get_site_option( $name ) {
+	global $site_options;
+	return $site_options[ $name ] ?? '';
+}
 
 if (!defined('LDAP_OPT_TIMELIMIT')) define('LDAP_OPT_TIMELIMIT', 0);
 if (!defined('LDAP_OPT_PROTOCOL_VERSION')) define('LDAP_OPT_PROTOCOL_VERSION', 0);
@@ -184,7 +187,10 @@ function set_transient($key, $value, $expiration) {
 	);
 	return true;
 }
-function get_option() { return ''; }
+function get_option( $name ) {
+	global $options;
+	return $options[ $name ] ?? '';
+}
 
 // campusdirectory.ucsc.edu photo.php scrape. Default response mirrors photo.php
 // for a uid with no photo: HTTP 500, empty body.
@@ -279,7 +285,9 @@ function transient_keys() {
 }
 
 function reset_test_state() {
-	global $query_vars, $is_admin, $is_singular, $is_main_query, $queried_object_id, $current_post_id, $ldap_searches, $ldap_options, $ldap_search_result, $ldap_bind_result, $ldap_entries, $ldap_attr_cursor, $transients, $ldap_connect_uris, $ldap_bind_args, $ldap_len_reads, $remote_get_calls, $remote_get_response, $ldap_handshake_ok, $ldap_handshake_calls;
+	global $query_vars, $is_admin, $is_singular, $is_main_query, $queried_object_id, $current_post_id, $ldap_searches, $ldap_options, $ldap_search_result, $ldap_bind_result, $ldap_entries, $ldap_attr_cursor, $transients, $ldap_connect_uris, $ldap_bind_args, $ldap_len_reads, $remote_get_calls, $remote_get_response, $ldap_handshake_ok, $ldap_handshake_calls, $site_options, $options;
+	$site_options        = array();
+	$options             = array();
 	$remote_get_calls    = array();
 	$remote_get_response = array( 'code' => 500, 'body' => '' );
 	$ldap_connect_uris  = array();
@@ -379,6 +387,26 @@ $current_post_id = 1;
 $content = $the_content_callback( '<p>Original</p>' );
 check( 'concatenates the profile output to the original content', false !== strpos( $content, '<p>Original</p>' ) && false !== strpos( $content, 'jsmith' ) );
 check( 'does not render the <main> wrapper since it is inline', false === strpos( $content, '<main class="is-layout-flow' ) );
+
+echo "LDAP settings scope (WPM-244):\n";
+
+function ldap_url_for( $network, $site ) {
+	global $site_options, $options;
+	reset_test_state();
+	$site_options = $network;
+	$options      = $site;
+	$api = new CampusDirectoryAPI( array() );
+	$r   = new ReflectionProperty( $api, 'ldap_url' );
+	$r->setAccessible( true );
+	return $r->getValue( $api );
+}
+
+check( 'network password: a site ldap_url is ignored, the default is used',
+	'ldap-blue.ucsc.edu' === ldap_url_for( array( 'ldap_api_key' => 'netpw' ), array( 'ldap_url' => 'evil.example.com' ) ) );
+check( 'network password: the network ldap_url is used',
+	'ldap-gold.ucsc.edu' === ldap_url_for( array( 'ldap_api_key' => 'netpw', 'ldap_url' => 'ldap-gold.ucsc.edu' ), array( 'ldap_url' => 'evil.example.com' ) ) );
+check( 'site password: the site ldap_url is used',
+	'ldap-gold.ucsc.edu' === ldap_url_for( array(), array( 'ldap_api_key' => 'sitepw', 'ldap_url' => 'ldap-gold.ucsc.edu' ) ) );
 
 echo "CampusDirectoryAPI LDAP query tests:\n";
 
