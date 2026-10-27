@@ -136,7 +136,8 @@ function sortClassSchedule(columnIndex, ref) {
             return (aNum - bNum) * dir;
         }
 
-        return aText.localeCompare(bText) * dir;
+        // numeric: course numbers like CSE-20 sort before CSE-101 (WPM-248)
+        return aText.localeCompare(bText, undefined, { numeric: true }) * dir;
     });
 
     rows.forEach(row => tbody.appendChild(row));
