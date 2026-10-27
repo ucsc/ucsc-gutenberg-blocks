@@ -23,10 +23,12 @@ $calls        = array(); // ordered log of side effects
 $site_options = array();
 $options      = array();
 $nonce_valid  = true;
+$can_manage   = true;
 $admin_pages  = array();
 $settings_api = array();
 
 class Test_Nonce_Failed extends Exception {}
+class Test_Died extends Exception {}
 class Test_Redirect_Called extends Exception {}
 
 function check_admin_referer( $action ) {
@@ -43,6 +45,18 @@ function update_site_option( $name, $value ) {
 	$calls[]               = 'update_site_option:' . $name;
 	$site_options[ $name ] = $value;
 	return true;
+}
+function current_user_can( $cap ) {
+	global $calls, $can_manage;
+	$calls[] = 'current_user_can:' . $cap;
+	return $can_manage;
+}
+function wp_die( $message = '', $status = 500 ) {
+	// WordPress exits here; throw so the test keeps running.
+	throw new Test_Died( $message );
+}
+function wp_unslash( $value ) {
+	return stripslashes( $value );
 }
 function get_site_option( $name, $default = false ) {
 	global $site_options;
@@ -104,8 +118,9 @@ require __DIR__ . '/helpers/harness.php';
 require __DIR__ . '/../../classes/SiteSettings.php';
 
 function reset_admin_state() {
-	global $calls, $site_options, $options, $nonce_valid, $admin_pages, $settings_api;
+	global $calls, $site_options, $options, $nonce_valid, $can_manage, $admin_pages, $settings_api;
 	$calls        = array();
+	$can_manage   = true;
 	$site_options = array();
 	$options      = array();
 	$nonce_valid  = true;
@@ -144,6 +159,28 @@ try {
 } catch ( Test_Nonce_Failed $e ) {
 }
 check( 'a failed nonce check writes no options', array() === $site_options );
+
+reset_admin_state();
+$can_manage = false;
+$_POST      = array( 'ldap_api_key' => 'attacker', 'ldap_cn' => 'x', 'ldap_url' => 'evil.example.com' );
+try {
+	$settings->networkSaveSettings();
+} catch ( Test_Died | Test_Redirect_Called $e ) {
+}
+check( 'checks manage_network_options before writing (WPM-245)', in_array( 'current_user_can:manage_network_options', $calls, true ) );
+check( 'a user without manage_network_options writes no options (WPM-245)', array() === $site_options );
+
+// WordPress slashes $_POST (wp_magic_quotes); this is how a password typed as
+// pa'ss\word"x arrives.
+reset_admin_state();
+$typed = 'pa\'ss\\word"x';
+$_POST = array( 'ldap_api_key' => addslashes( $typed ), 'ldap_cn' => addslashes( "o'cn" ), 'ldap_url' => 'ldap-blue.ucsc.edu' );
+try {
+	$settings->networkSaveSettings();
+} catch ( Test_Redirect_Called $e ) {
+}
+check( 'a password with \' " and \\ is stored as typed (WPM-245)', $typed === ( $site_options['ldap_api_key'] ?? null ) );
+check( 'the CN is stored unslashed (WPM-245)', "o'cn" === ( $site_options['ldap_cn'] ?? null ) );
 
 echo "\nnetwork settings notice:\n";
 
