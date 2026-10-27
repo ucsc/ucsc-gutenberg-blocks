@@ -199,12 +199,12 @@ describe('classschedule.js frontend', () => {
   });
 
   describe('sort', () => {
-    it('sorts text columns ascending, then toggles to descending', () => {
+    it('sorts course numbers numerically ascending, then toggles to descending (WPM-248)', () => {
       window.sortClassSchedule(1);
-      expect(bodyCourseIds()).toEqual(['CSE-101', 'CSE-150', 'CSE-20']);
+      expect(bodyCourseIds()).toEqual(['CSE-20', 'CSE-101', 'CSE-150']);
 
       window.sortClassSchedule(1);
-      expect(bodyCourseIds()).toEqual(['CSE-20', 'CSE-150', 'CSE-101']);
+      expect(bodyCourseIds()).toEqual(['CSE-150', 'CSE-101', 'CSE-20']);
     });
 
     it('sorts the seats column numerically by open seats', () => {
@@ -671,15 +671,15 @@ describe('classschedule.js with two blocks on one page (WPM-180)', () => {
     const secondHeader = within(second, '.col-course-id button');
 
     window.sortClassSchedule(1, secondHeader);
-    expect(orderIn(second)).toEqual(['MATH-100', 'MATH-19A']);
+    expect(orderIn(second)).toEqual(['MATH-19A', 'MATH-100']);
     expect(orderIn(first)).toEqual(['CSE-20', 'CSE-101', 'CSE-150']);
     expect(first.querySelector('[aria-sort]')).toBeNull();
 
     // A fresh sort on the first block starts ascending rather than toggling
     // the second block's direction.
     window.sortClassSchedule(1, firstHeader);
-    expect(orderIn(first)).toEqual(['CSE-101', 'CSE-150', 'CSE-20']);
-    expect(orderIn(second)).toEqual(['MATH-100', 'MATH-19A']);
+    expect(orderIn(first)).toEqual(['CSE-20', 'CSE-101', 'CSE-150']);
+    expect(orderIn(second)).toEqual(['MATH-19A', 'MATH-100']);
   });
 
   it('applying filters in the second block changes only that block and saves under its own key', () => {
