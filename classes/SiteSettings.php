@@ -342,10 +342,15 @@ class SiteSettings
   function networkSaveSettings()
   {
     check_admin_referer('ucscplugin-validate'); // Nonce security check
+    if (!current_user_can('manage_network_options')) {
+      wp_die('Sorry, you are not allowed to manage network options.', 403);
+    }
 
-    update_site_option('ldap_api_key', $_POST['ldap_api_key']);
-    update_site_option('ldap_cn', $_POST['ldap_cn']);
-    update_site_option('ldap_url', $_POST['ldap_url']);
+    // WordPress slashes $_POST; unslash so a password with ' " or \ is stored
+    // as typed and still binds (WPM-245).
+    update_site_option('ldap_api_key', wp_unslash($_POST['ldap_api_key']));
+    update_site_option('ldap_cn', wp_unslash($_POST['ldap_cn']));
+    update_site_option('ldap_url', wp_unslash($_POST['ldap_url']));
 
     wp_redirect(add_query_arg(
       array(
