@@ -25,6 +25,7 @@ class CampusDirectory
 
       return plugin_dir_path(__FILE__) . '../templates/DirectoryProfileTemplate.php';
     });
+    add_action('template_redirect', array($this, 'directoryProfileStatus'));
     add_filter('the_content', array($this, 'renderDirectoryProfile'), 20);
     add_filter('document_title_parts', array($this, 'directory_profile_title'));
     add_action('wp_enqueue_scripts', array($this, 'register_plugin_styles'));
@@ -84,6 +85,17 @@ class CampusDirectory
     if ($photo !== '') set_transient($key, base64_encode($photo), 4 * HOUR_IN_SECONDS);
     else set_transient($key, '', HOUR_IN_SECONDS);
     return $photo;
+  }
+
+  // A CruzID LDAP does not return gets a real 404 status instead of a 200
+  // "not found" page that search engines index; the page itself is unchanged
+  // (WPM-247). Not while LDAP is marked down: those people may well exist.
+  function directoryProfileStatus() {
+    $cruzid = get_query_var('directoryprofilecruzid');
+    if ($cruzid === false || $cruzid === '') return;
+    $campusDirectoryAPI = new CampusDirectoryAPI(['automatedFeeds' => false]);
+    $data = $campusDirectoryAPI->getCampusDirData($cruzid, true);
+    if (empty($data[0]) && !get_transient('ucsc_cd_ldap_down')) status_header(404);
   }
 
   function add_directory_profile_rewrite() {
