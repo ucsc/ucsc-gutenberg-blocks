@@ -24,19 +24,12 @@ const CourseCatalog = () => {
       },
     },
     edit: ({ setAttributes, attributes }) => {
-      const { department, subject, subjectOrDept } = attributes;
+      // WPM-254: an unset subjectOrDept means "dept" (as theHTML() assumes); it is
+      // not written back while rendering, which marked every opened page as edited.
+      const { department, subject, subjectOrDept = "dept" } = attributes;
       const blockProps = useBlockProps();
 
-      let localSubjectOrDept;
-      let setLocalSubjectOrDept;
-      if (typeof subjectOrDept === "undefined") {
-        [localSubjectOrDept, setLocalSubjectOrDept] = useState("dept");
-        setAttributes({
-          subjectOrDept: "dept",
-        });
-      } else {
-        [localSubjectOrDept, setLocalSubjectOrDept] = useState(subjectOrDept);
-      }
+      const [localSubjectOrDept, setLocalSubjectOrDept] = useState(subjectOrDept);
 
       const options = [
         { label: "Department", value: "dept" },

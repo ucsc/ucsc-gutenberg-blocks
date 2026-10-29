@@ -18,6 +18,7 @@
  */
 
 const {
+	SITE_ORIGIN,
 	shimPage,
 	captureErrors,
 	adminPage,
@@ -215,4 +216,99 @@ describe.each( BLOCKS )( 'Editor: %s', ( blockName, { saves } ) => {
 			).toBe( '3' );
 		} );
 	}
+} );
+
+// WPM-254: opening a saved page must not mark it as edited. The blocks used to
+// call setAttributes while rendering whenever an attribute was unset (here
+// `subject`), so every author who opened one of these pages got an "unsaved
+// changes" prompt on leaving. The saved markup matches the e2e pages.
+const SAVED_BLOCKS = [
+	[ 'ucscblocks/coursecatalog', '{"subjectOrDept":"dept","department":"CSE"}' ],
+	[ 'ucscblocks/classschedule', '{"subjectOrDept":"dept","department":"CSE"}' ],
+];
+
+describe.each( SAVED_BLOCKS )( 'Editor, saved page: %s', ( blockName, attrs ) => {
+	let context;
+	let p;
+	let draftId;
+	let pageId;
+
+	beforeAll( async () => {
+		( { context, page: p } = await adminPage() );
+		shimPage( p );
+		await openNewPageInEditor( p );
+		draftId = await p.evaluate( () =>
+			wp.data.select( 'core/editor' ).getCurrentPostId()
+		);
+		pageId = await p.evaluate(
+			( content ) =>
+				wp
+					.apiFetch( {
+						path: '/wp/v2/pages',
+						method: 'POST',
+						data: { title: 'WPM-254 e2e', status: 'draft', content },
+					} )
+					.then( ( r ) => r.id ),
+			`<!-- wp:${ blockName } ${ attrs } /-->`
+		);
+		await p.goto( `${ SITE_ORIGIN }/wp-admin/post.php?post=${ pageId }&action=edit`, {
+			waitUntil: 'domcontentloaded',
+			timeout: 60000,
+		} );
+		await p.waitForFunction(
+			() =>
+				window.wp &&
+				wp.data &&
+				wp.data.select( 'core/editor' ) &&
+				wp.data.select( 'core/editor' ).getCurrentPostId() &&
+				wp.data.select( 'core/block-editor' ).getBlocks().length > 0,
+			{ timeout: 60000 }
+		);
+		const clientId = await p.evaluate(
+			() => wp.data.select( 'core/block-editor' ).getBlocks()[ 0 ].clientId
+		);
+		// Wait for the REST-fed dropdowns, so every component has mounted and run.
+		const { frame } = await editorBlock( p, clientId );
+		await frame.waitForFunction(
+			( re ) =>
+				! new RegExp( re ).test( document.body.innerText ) &&
+				Array.from( document.querySelectorAll( 'select' ) ).some(
+					( s ) => s.options.length > 10
+				),
+			{ timeout: 30000 },
+			STILL_LOADING.source
+		);
+	} );
+
+	afterAll( async () => {
+		if ( p ) {
+			for ( const id of [ pageId, draftId ] ) {
+				if ( ! id ) {
+					continue;
+				}
+				await p
+					.evaluate(
+						( i ) =>
+							wp.apiFetch( {
+								path: `/wp/v2/pages/${ i }?force=true`,
+								method: 'DELETE',
+							} ),
+						id
+					)
+					.catch( () => {} );
+			}
+		}
+		if ( context ) {
+			await context.close();
+		}
+	} );
+
+	it( 'opens without marking the page as edited', async () => {
+		const state = await p.evaluate( () => ( {
+			dirty: wp.data.select( 'core/editor' ).isEditedPostDirty(),
+			edits: Object.keys( wp.data.select( 'core/editor' ).getPostEdits() ),
+		} ) );
+		// On failure the edits list names what changed (e.g. content, blocks).
+		expect( state ).toEqual( { dirty: false, edits: [] } );
+	} );
 } );

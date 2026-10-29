@@ -122,7 +122,7 @@ describe('CourseCatalog block', () => {
       expect(screen.getByTestId('panel')).toHaveAttribute('data-header', 'Course Catalog Block');
     });
 
-    it('defaults subjectOrDept to "dept" when undefined', () => {
+    it('treats an undefined subjectOrDept as "dept" without writing it', () => {
       const setAttributes = jest.fn();
       render(
         <Edit
@@ -130,7 +130,10 @@ describe('CourseCatalog block', () => {
           attributes={{ department: '', subject: '' }}
         />
       );
-      expect(setAttributes).toHaveBeenCalledWith({ subjectOrDept: 'dept' });
+      // WPM-254: writing the default on render marked every opened page as edited.
+      expect(setAttributes).not.toHaveBeenCalled();
+      expect(screen.getByTestId('department-dropdown')).toHaveAttribute('data-disabled', 'false');
+      expect(screen.getByTestId('subject-dropdown')).toHaveAttribute('data-disabled', 'true');
     });
 
     it('disables SubjectDropdown when subjectOrDept is "dept"', () => {

@@ -131,14 +131,17 @@ class CourseCatalog
     // function getCachedCourses($subject, $subjectOrDept) {
     function getCachedCourses($attributes) {
         $peopleSoftTarget = $this->getPeopleSoftTarget();
-        $subjectOrDept = $attributes['subjectOrDept'];
+        // WPM-254: the editor no longer writes these defaults into the block, so a
+        // block saved before the author chose anything arrives without them. Fall
+        // back to the values the editor used to write ('dept', '---').
+        $subjectOrDept = $attributes['subjectOrDept'] ?? 'dept';
         $queryStr = "";
         if ($subjectOrDept == 'dept') {
-            $lowerTitle = strtolower($attributes['department']);
+            $lowerTitle = strtolower($attributes['department'] ?? '---');
             $queryStr = '<acad_org>' . $lowerTitle . '</acad_org>';
 
         } else {
-            $lowerTitle = strtolower($attributes['subject']);
+            $lowerTitle = strtolower($attributes['subject'] ?? '---');
             $queryStr = '<subject>' . $lowerTitle . '</subject>';
         }
         $cacheKey = 'course-catalog-' . $peopleSoftTarget['target'] . '-' . $lowerTitle . '-' . $subjectOrDept;

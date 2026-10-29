@@ -11,16 +11,9 @@ const SubjectDropdown = ({
   const [subjects, setSubjects] = useState([]);
   const [loadFailed, setLoadFailed] = useState(false);
 
-  let localSubject;
-  let setLocalSubject;
-  if (typeof subject === 'undefined') {
-    [localSubject, setLocalSubject] = useState('---');
-    setAttributes({
-      subject: '---'
-    });
-  } else {
-    [localSubject, setLocalSubject] = useState(subject);
-  }
+  // WPM-254: an unset subject shows as '---' but is not written back here;
+  // calling setAttributes while rendering marked every opened page as edited.
+  const [localSubject, setLocalSubject] = useState(subject ?? '---');
 
   useEffect(() => {
     fetchOptions('/wp-json/ucscgutenbergblocks/v1/subjectcode')
@@ -34,7 +27,7 @@ const SubjectDropdown = ({
         {subjects.length > 0 && (
           <SelectControl
             label={ label }
-            value={ subject }
+            value={ subject ?? '---' }
             options={ subjects }
             onChange={ ( newSubject ) => {
               setAttributes( {subject: newSubject} );
