@@ -40,7 +40,8 @@ describe( 'Class Schedule interactions', () => {
 	} );
 
 	it( 'sorting Course ID reorders rows ascending, then descending', async () => {
-		const cmp = ( a, b ) => a.localeCompare( b );
+		// Numeric order, so CSE-3 comes before CSE-12 (WPM-248).
+		const cmp = ( a, b ) => a.localeCompare( b, undefined, { numeric: true } );
 
 		await page.click( '.col-course-id.is-sortable button' );
 		const asc = ( await visibleRows() ).map( ( r ) => r.id );
