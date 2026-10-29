@@ -256,9 +256,10 @@ class CourseCatalog
         libxml_clear_errors();
 
         // Only cache once the body has parsed as XML, so a malformed 200
-        // response can never poison the cache for a week.
+        // response can never poison the cache. WPM-96: 8 hours, not a week,
+        // so catalog corrections (e.g. GE requirements) show up the same day.
         if ($fetchedFromFeed && !$this->shouldBypassCache()) {
-            set_transient($cacheKey, $body, WEEK_IN_SECONDS);
+            set_transient($cacheKey, $body, 8 * HOUR_IN_SECONDS);
         }
 
         return $xmlBody;
