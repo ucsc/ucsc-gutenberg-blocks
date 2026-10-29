@@ -8,6 +8,7 @@
  */
 
 define( 'WEEK_IN_SECONDS', 604800 );
+define( 'HOUR_IN_SECONDS', 3600 );
 
 $actions              = array();
 $current_user_id      = 0;
@@ -259,6 +260,7 @@ $catalog->getCachedCourses(
 	)
 );
 check( 'successful response is cached under target-aware key', isset( $transients['course-catalog-prod-lit-dept'] ) );
+check( 'successful response is cached for 8 hours, not a week (WPM-96)', 28800 === ( $transients['course-catalog-prod-lit-dept']['expiration'] ?? null ) );
 check( 'successful response uses one remote request', 1 === count( $remote_requests ) );
 
 echo "prod vs QA cache coexistence (WPM-167):\n";

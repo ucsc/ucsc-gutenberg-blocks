@@ -78,20 +78,22 @@ override is still needed for QA testing or should be removed.
   `?ucsc_course_catalog_target=qa`
 - **THEN** the configured target (production by default) is still used
 
-### Requirement: Response caching is per-target and per-query, for one week
+### Requirement: Response caching is per-target and per-query, for eight hours
 
 The system SHALL cache a successfully-parsed catalog response body in a
 WordPress transient keyed
 `course-catalog-<target>-<lowercased value>-<subjectOrDept>` for
-`WEEK_IN_SECONDS`. A response MUST NOT be cached until it has been confirmed
+`8 * HOUR_IN_SECONDS` (28800 seconds). A response MUST NOT be cached until it has been confirmed
 to parse as valid, non-empty XML.
 
 When `UCSC_COURSE_CATALOG_BYPASS_CACHE` (constant, else environment variable)
 is truthy, the system SHALL neither read nor write the transient.
 
-**Open policy question (WPM-96):** whether one week is too long for catalog
-data. The issue was raised against Campus Directory (INC2818233) and retitled
-to Course Catalog on 2026-10-09; no shorter lifetime has been decided.
+**WPM-96 (decided 2026-10-20):** the lifetime was one week (`WEEK_IN_SECONDS`)
+until catalog corrections took too long to appear (INC2818233). It is now
+8 hours. An admin-configurable lifetime was discussed but not adopted; the
+`wp ucsc course-catalog-cache clear` WP-CLI command remains the way to force
+an immediate refresh.
 
 #### Scenario: Prod and QA responses do not share a cache entry
 
