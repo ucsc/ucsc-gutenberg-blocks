@@ -170,6 +170,8 @@ describe('InformationToDisplay', () => {
       expect(
         screen.getByText('List Layout Information to Display')
       ).toBeInTheDocument();
+      // WPM-250: editor-only labels must not add headings to the page outline.
+      expect(screen.queryAllByRole('heading')).toHaveLength(0);
     });
 
     it('shows "Tiled Layout Information to Display" when pageLayout is not "list"', () => {

@@ -29,14 +29,14 @@ const AutomatedFeeds = ({
 
   return (
     <div className="flex-labels">
-      <h5>Faculty Types</h5>
+      <p className="cd-option-label">Faculty Types</p>
       <CheckboxGroupControl
         setAttributes={setAttributes}
         currentAttributes={strFacultyTypes}
         arrOfLabels={arrFacultyTypes}
         attributeStr="strFacultyTypes"
       />
-      <h5>Staff Types</h5>
+      <p className="cd-option-label">Staff Types</p>
       <CheckboxGroupControl
         setAttributes={setAttributes}
         currentAttributes={strStaffTypes}
@@ -44,7 +44,7 @@ const AutomatedFeeds = ({
         attributeStr="strStaffTypes"
         flexCheckboxes
       />
-      <h5>Graduate Students</h5>
+      <p className="cd-option-label">Graduate Students</p>
       <CheckboxGroupControl
         setAttributes={setAttributes}
         currentAttributes={strGradTypes}

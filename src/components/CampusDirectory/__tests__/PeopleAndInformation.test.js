@@ -286,4 +286,15 @@ describe('PeopleAndInformation', () => {
       expect(screen.queryByTestId('information-to-display')).not.toBeInTheDocument();
     });
   });
+
+  // WPM-250: editor-only labels must not add headings to the page outline.
+  describe('option labels', () => {
+    it.each([
+      ['manual list', { automatedFeeds: false }],
+      ['automated feed with manual add', { automatedFeeds: true, manualAdd: true, deptOrDiv: 'dept' }],
+    ])('renders %s labels without heading elements', (_name, props) => {
+      render(<PeopleAndInformation {...defaultProps} {...props} />);
+      expect(screen.queryAllByRole('heading')).toHaveLength(0);
+    });
+  });
 });

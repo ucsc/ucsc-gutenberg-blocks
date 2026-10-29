@@ -40,22 +40,27 @@ $cs_header_tabindex = function ($col) use ($default_columns) {
 <div id="classSchedule<?php echo $cs_suffix; ?>" class="class-schedule" data-cs-instance="<?php echo $cs_instance; ?>">
 
   <div class="introText no-print">
-    <label for="quarterDropdown<?php echo $cs_suffix; ?>" class="screen-reader-text">Select Quarter</label>
-    <label for="courseSearch<?php echo $cs_suffix; ?>" class="screen-reader-text">Search Schedule</label>
-
+    <!-- a11y (WPM-95): visible labels; the placeholder is only a hint -->
     <div class="input-with-select">
       <div class="term-select-wrap">
-        <!-- a11y: no inline onchange to avoid jump menu warning; change handled via addEventListener in classschedule.js -->
-        <select id="quarterDropdown<?php echo $cs_suffix; ?>" class="quarter-dropdown">
-          <?php foreach ($terms as $term) : ?>
-            <option value="<?php echo esc_attr($term['code']); ?>"
-              <?php selected($term['code'], $current_term); ?>>
-              <?php echo esc_html($term['description']); ?>
-            </option>
-          <?php endforeach; ?>
-        </select>
+        <label for="quarterDropdown<?php echo $cs_suffix; ?>" class="cs-control-label">Select Quarter</label>
+        <div class="term-select-row">
+          <!-- a11y (WPM-111): choosing a quarter does not navigate; the Go button does (handled in classschedule.js) -->
+          <select id="quarterDropdown<?php echo $cs_suffix; ?>" class="quarter-dropdown">
+            <?php foreach ($terms as $term) : ?>
+              <option value="<?php echo esc_attr($term['code']); ?>"
+                <?php selected($term['code'], $current_term); ?>>
+                <?php echo esc_html($term['description']); ?>
+              </option>
+            <?php endforeach; ?>
+          </select>
+          <button type="button" class="term-go">Go</button>
+        </div>
       </div>
-      <input type="text" id="courseSearch<?php echo $cs_suffix; ?>" class="course-search" placeholder="Search Schedule" onkeyup="classScheduleSearch(event)">
+      <div class="search-wrap">
+        <label for="courseSearch<?php echo $cs_suffix; ?>" class="cs-control-label">Search Schedule</label>
+        <input type="text" id="courseSearch<?php echo $cs_suffix; ?>" class="course-search" placeholder="Course, title or instructor" onkeyup="classScheduleSearch(event)">
+      </div>
     </div>
 
     <div class="button-group">

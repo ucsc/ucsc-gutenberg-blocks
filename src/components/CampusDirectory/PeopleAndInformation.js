@@ -137,7 +137,7 @@ const PeopleAndInformation = ({
       </div>
       {!localAutomatedFeeds && (
         <div>
-          <h5>List Individuals (Enter CruzIDs separated by commas)</h5>
+          <p className="cd-option-label">List Individuals (Enter CruzIDs separated by commas)</p>
           <p><i>List individuals in the order you'd like them to appear on the page.</i></p>
           <TextareaControl
             value={cruzidListState}
@@ -152,7 +152,7 @@ const PeopleAndInformation = ({
       )}
       {localAutomatedFeeds && (
         <div>
-          <h5>Set Department or Division</h5>
+          <p className="cd-option-label">Set Department or Division</p>
           <div className="vertical_radio">
             <RadioControl
                 selected={ deptOrDiv }
@@ -185,7 +185,7 @@ const PeopleAndInformation = ({
             strStaffTypes={strStaffTypes}
             strGradTypes={strGradTypes}
           />
-          <h5>Manually Add or Exclude Individuals from the feed?</h5>
+          <p className="cd-option-label">Manually Add or Exclude Individuals from the feed?</p>
           <div className="vertical_radio">
             <RadioControl
               selected={localManualAdd}
@@ -200,9 +200,9 @@ const PeopleAndInformation = ({
           </div>
           {localManualAdd && (
             <div>
-              <h5>
+              <p className="cd-option-label">
                 Add Individuals to the Feed. (Enter CruzIDs separated by commas)
-              </h5>
+              </p>
               <TextareaControl
                 value={addCruzidsList}
                 onChange={newAddCruzidsList => {
@@ -212,10 +212,10 @@ const PeopleAndInformation = ({
                   });
                 }}
               />
-              <h5>
+              <p className="cd-option-label">
                 Exclude Individuals from the Feed. (Enter CruzIDs separated by
                 commas)
-              </h5>
+              </p>
               <TextareaControl
                 value={excludeCruzidsList}
                 onChange={newExcludeCruzidsList => {
@@ -230,9 +230,9 @@ const PeopleAndInformation = ({
           {deptOrDiv === "dept" && (
             <div>
               <hr />
-              <h5>
+              <p className="cd-option-label">
                 Display Department Affiliates? (Rare for administrative units.)
-              </h5>
+              </p>
               <p>
                 <i>
                   For example, a faculty member is officially associated with the

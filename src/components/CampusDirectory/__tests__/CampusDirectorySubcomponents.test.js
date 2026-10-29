@@ -98,6 +98,8 @@ describe('CampusDirectory sub-components', () => {
 
       expect(screen.getByText('Faculty Types')).toBeInTheDocument();
       expect(screen.getByText('Staff Types')).toBeInTheDocument();
+      // WPM-250: editor-only labels must not add headings to the page outline.
+      expect(screen.queryAllByRole('heading')).toHaveLength(0);
       expect(screen.getByText('Graduate Students')).toBeInTheDocument();
 
       // A representative label from each group

@@ -160,3 +160,39 @@ describe( 'Class Schedule block (frontend)', () => {
 		} );
 	} );
 } );
+
+describe( 'Class Schedule toolbar (WPM-95, WPM-111)', () => {
+	beforeEach( async () => {
+		await page.goto( PAGE_URL, { waitUntil: 'networkidle0', timeout: 60000 } );
+	} );
+
+	it( 'shows the quarter and search labels on screen, not only to screen readers', async () => {
+		for ( const id of [ 'quarterDropdown', 'courseSearch' ] ) {
+			const box = await page.$eval( `label[for="${ id }"]`, ( el ) => {
+				const r = el.getBoundingClientRect();
+				return { width: r.width, height: r.height };
+			} );
+			expect( box.width ).toBeGreaterThan( 20 );
+			expect( box.height ).toBeGreaterThan( 8 );
+		}
+	} );
+
+	it( 'selecting a quarter does not reload the page; Go does', async () => {
+		const other = await page.$eval( '#quarterDropdown', ( select ) => {
+			const option = Array.from( select.options ).find( ( o ) => ! o.selected );
+			return option ? option.value : null;
+		} );
+		expect( other ).not.toBeNull();
+		const before = page.url();
+
+		await page.select( '#quarterDropdown', other );
+		await new Promise( ( resolve ) => setTimeout( resolve, 1000 ) );
+		expect( page.url() ).toBe( before );
+
+		await Promise.all( [
+			page.waitForNavigation( { waitUntil: 'networkidle0', timeout: 60000 } ),
+			page.click( '#classSchedule .term-go' ),
+		] );
+		expect( new URL( page.url() ).searchParams.get( 'class_schedule_term' ) ).toBe( other );
+	} );
+} );

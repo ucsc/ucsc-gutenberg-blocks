@@ -535,11 +535,13 @@ document.addEventListener('DOMContentLoaded', function() {
         restoreColumnState(root);
         applyColumnVisibility(root);
 
-        // a11y: attach change listener here instead of inline onchange to avoid jump menu a11y warning
+        // a11y (WPM-111): selecting a quarter must not navigate by itself (WCAG 3.2.2);
+        // the Go button next to the dropdown loads the chosen quarter
         var quarterDropdown = root.querySelector('.quarter-dropdown');
-        if (quarterDropdown) {
-            quarterDropdown.addEventListener('change', function() {
-                classScheduleChangeTerm(this);
+        var termGo = root.querySelector('.term-go');
+        if (quarterDropdown && termGo) {
+            termGo.addEventListener('click', function() {
+                classScheduleChangeTerm(quarterDropdown);
             });
         }
     });

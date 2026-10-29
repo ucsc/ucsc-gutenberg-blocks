@@ -26,7 +26,8 @@
 .cd-sublabel i {
   font-size: 0.75714rem;
 }
-.editor-styles-wrapper .directory-block h5 {
+.editor-styles-wrapper .directory-block .cd-option-label {
+  font-weight: bold;
   font-size: 16px;
   margin-bottom: 14px;
   margin-top: 10px;

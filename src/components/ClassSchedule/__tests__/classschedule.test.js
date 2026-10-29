@@ -75,6 +75,7 @@ function scheduleHTML(instance = 1, rows = FIXTURE_ROWS, termLabel = 'Fall 2026'
         <option value="2260">Summer 2026</option>
         <option value="2262" selected>${termLabel}</option>
       </select>
+      <button type="button" class="term-go">Go</button>
       <input type="text" id="courseSearch${sfx}" class="course-search">
       <div id="filterModal${sfx}" class="filter-modal">
         <label><input type="checkbox" class="column-toggle" data-column="seats" checked> Seats</label>
@@ -535,8 +536,8 @@ describe('classschedule.js frontend', () => {
 
   describe('term dropdown (WPM-159)', () => {
     // classScheduleChangeTerm() is exposed on window so it can be called directly;
-    // the 'change event' tests below also drive it the way the page does (fire
-    // DOMContentLoaded, then change #quarterDropdown) to cover the listener wiring.
+    // the tests below also drive it the way the page does (fire DOMContentLoaded,
+    // pick a quarter, press Go) to cover the listener wiring (WPM-111).
     function setLocation(href) {
       Object.defineProperty(window, 'location', {
         value: { href },
@@ -545,10 +546,15 @@ describe('classschedule.js frontend', () => {
       });
     }
 
-    function changeTermTo(value) {
+    function selectTerm(value) {
       const dropdown = document.getElementById('quarterDropdown');
       dropdown.value = value;
       dropdown.dispatchEvent(new Event('change'));
+    }
+
+    function changeTermTo(value) {
+      selectTerm(value);
+      document.querySelector('#classSchedule .term-go').click();
     }
 
     describe('classScheduleChangeTerm (direct)', () => {
@@ -600,6 +606,16 @@ describe('classschedule.js frontend', () => {
       changeTermTo('2260');
 
       expect(new URL(window.location.href).searchParams.getAll('class_schedule_term')).toEqual(['2260']);
+    });
+
+    // WPM-111: choosing a quarter must not change the page by itself (WCAG 3.2.2).
+    it('does not navigate when a quarter is selected without pressing Go', () => {
+      setLocation('http://localhost/classes/');
+      document.dispatchEvent(new Event('DOMContentLoaded'));
+
+      selectTerm('2260');
+
+      expect(window.location.href).toBe('http://localhost/classes/');
     });
 
     it('does not throw on DOMContentLoaded when the term dropdown is absent', () => {
