@@ -76,7 +76,7 @@ describe('shared dropdown components', () => {
       expect(screen.getByRole('option', { name: 'Computer Science and Engineering' })).toBeInTheDocument();
     });
 
-    it('defaults an undefined department to placeholder and updates attributes on change', async () => {
+    it('shows an undefined department as the placeholder without writing it, and updates attributes on change', async () => {
       const setAttributes = jest.fn();
       mockFetchResponse(departmentOptions);
 
@@ -88,8 +88,10 @@ describe('shared dropdown components', () => {
         />
       );
 
-      expect(setAttributes).toHaveBeenCalledWith({ department: '---' });
       const select = await screen.findByLabelText('Department');
+      // WPM-254: writing the default on render marked every opened page as edited.
+      expect(setAttributes).not.toHaveBeenCalled();
+      expect(select).toHaveValue('---');
 
       fireEvent.change(select, { target: { value: 'CSE' } });
 
@@ -132,7 +134,7 @@ describe('shared dropdown components', () => {
       expect(screen.getByRole('option', { name: 'Computer Science' })).toBeInTheDocument();
     });
 
-    it('defaults an undefined subject to placeholder and updates attributes on change', async () => {
+    it('shows an undefined subject as the placeholder without writing it, and updates attributes on change', async () => {
       const setAttributes = jest.fn();
       mockFetchResponse(subjectOptions);
 
@@ -144,8 +146,10 @@ describe('shared dropdown components', () => {
         />
       );
 
-      expect(setAttributes).toHaveBeenCalledWith({ subject: '---' });
       const select = await screen.findByLabelText('Subject');
+      // WPM-254: writing the default on render marked every opened page as edited.
+      expect(setAttributes).not.toHaveBeenCalled();
+      expect(select).toHaveValue('---');
 
       fireEvent.change(select, { target: { value: 'CSE' } });
 

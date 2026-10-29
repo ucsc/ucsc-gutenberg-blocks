@@ -396,6 +396,20 @@ $orphaned_labels = array_filter( $labels[1], function ( $inner ) {
 check( 'every label wraps a form control (no orphaned labels)', 0 < count( $labels[1] ) && array() === $orphaned_labels );
 check( 'the course-title hint is not a label', 1 === preg_match( '/<div>\s*Select a course title for details\./', $html ) );
 
+// WPM-254: the editor no longer writes subjectOrDept/department/subject defaults,
+// so a block saved untouched arrives with none of them. It must query exactly what
+// the editor used to write ('dept', '---') and raise no PHP warnings.
+$catalog  = make_catalog();
+$warnings = array();
+set_error_handler( function ( $errno, $errstr ) use ( &$warnings ) {
+	$warnings[] = $errstr;
+	return true;
+} );
+$catalog->theHTML( array() );
+restore_error_handler();
+check( 'a block saved without subjectOrDept/department queries the department placeholder', isset( $remote_requests[0] ) && false !== strpos( $remote_requests[0]['args']['body'], '<acad_org>---</acad_org>' ) );
+check( 'a block saved without subjectOrDept/department raises no PHP warnings', array() === $warnings );
+
 echo "block wrapper custom class support (WPM-23):\n";
 
 $catalog = make_catalog();

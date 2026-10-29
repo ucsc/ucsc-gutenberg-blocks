@@ -12,16 +12,9 @@ const DepartmentDropdown = ({
   const [loadFailed, setLoadFailed] = useState(false);
 
 
-  let localDepartment;
-  let setLocalDepartment;
-  if (typeof department === 'undefined') {
-    [localDepartment, setLocalDepartment] = useState('---');
-    setAttributes({
-      department: '---'
-    });
-  } else {
-    [localDepartment, setLocalDepartment] = useState(department);
-  }
+  // WPM-254: an unset department shows as '---' but is not written back here;
+  // calling setAttributes while rendering marked every opened page as edited.
+  const [localDepartment, setLocalDepartment] = useState(department ?? '---');
   useEffect(() => {
     fetchOptions('/wp-json/ucscgutenbergblocks/v1/departmentcode')
     .then(setDepartments)
@@ -34,7 +27,7 @@ const DepartmentDropdown = ({
         {departments.length > 0 && (
           <SelectControl
             label={ label }
-            value={ department }
+            value={ department ?? '---' }
             options={ departments }
             onChange={ ( newDepartment ) => {
               setAttributes( {department: newDepartment} );

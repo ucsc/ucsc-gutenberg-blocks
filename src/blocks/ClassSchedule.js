@@ -30,10 +30,12 @@ const ClassSchedule = () => {
       },
     },
     edit: ({ setAttributes, attributes }) => {
+      // WPM-254: an unset subjectOrDept means 'dept' (as theHTML() assumes); it is
+      // not written back while rendering, which marked every opened page as edited.
       const {
         department,
         subject,
-        subjectOrDept,
+        subjectOrDept = 'dept',
       } = attributes;
       const blockProps = useBlockProps();
 
@@ -60,16 +62,7 @@ const ClassSchedule = () => {
         setAttributes({ defaultColumns: next });
       };
 
-      let localSubjectOrDept;
-      let setLocalSubjectOrDept;
-      if (typeof subjectOrDept === 'undefined') {
-        [localSubjectOrDept, setLocalSubjectOrDept] = useState("dept");
-        setAttributes({
-          subjectOrDept: "dept",
-        });
-      } else {
-        [localSubjectOrDept, setLocalSubjectOrDept] = useState(subjectOrDept);
-      }
+      const [localSubjectOrDept, setLocalSubjectOrDept] = useState(subjectOrDept);
 
       const isDevEnvironment = () => {
         const isDevEnv = window.location.href.includes('https://wordpress-dev.ucsc.edu/')
