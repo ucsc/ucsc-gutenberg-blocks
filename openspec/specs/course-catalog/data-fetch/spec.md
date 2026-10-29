@@ -55,11 +55,12 @@ an environment variable of the same name), normalizing the aliases `"qa"` and
 accepted, case-insensitively), and defaulting to production for any
 unrecognized value. An empty environment variable is ignored.
 
-A request-parameter target override (`ucsc_course_catalog_target`) is
-implemented but disabled; request parameters SHALL NOT change the target.
+Request parameters SHALL NOT change the target or the cache bypass.
 
-**Open policy question (WPM-156):** whether the dormant request-parameter
-override is still needed for QA testing or should be removed.
+**WPM-156 (decided 2026-10-29):** a GET-parameter override
+(`ucsc_course_catalog_target`, `ucsc_course_catalog_bypass_cache`) for admins
+on dev hosts had been disabled since 2026-07-24 and was removed. QA feed
+testing uses `UCSC_COURSE_CATALOG_PEOPLESOFT_TARGET` instead.
 
 #### Scenario: Unrecognized target value defaults to production
 
