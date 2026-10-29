@@ -47,7 +47,7 @@ describe( 'Campus Directory photos served from LDAP', () => {
 		const response = await page.goto( photos[ 0 ].src );
 		expect( response.status() ).toBe( 200 );
 		expect( response.headers()[ 'content-type' ] ).toBe( 'image/jpeg' );
-		expect( response.headers()[ 'cache-control' ] ).toContain( 'max-age=86400' );
+		expect( response.headers()[ 'cache-control' ] ).toContain( 'max-age=3600' ); // WPM-231: an hour in browsers
 		const body = await response.buffer();
 		// JPEG start-of-image marker
 		expect( body[ 0 ] ).toBe( 0xff );
