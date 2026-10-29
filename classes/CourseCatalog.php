@@ -69,16 +69,6 @@ class CourseCatalog
         return $target;
     }
 
-    function getRequestValue($names) {
-        foreach ($names as $name) {
-            if (isset($_GET[$name])) {
-                return is_array($_GET[$name]) ? '' : wp_unslash($_GET[$name]);
-            }
-        }
-
-        return null;
-    }
-
     function getBooleanConfig($constantName, $envName, $default = false) {
         $value = $default;
         if (defined($constantName)) {
@@ -90,38 +80,6 @@ class CourseCatalog
         return filter_var($value, FILTER_VALIDATE_BOOLEAN);
     }
 
-    function isRequestOverrideAllowed() {
-        if (!is_user_logged_in() || !current_user_can('manage_options')) {
-            return false;
-        }
-
-        if ($this->getBooleanConfig('UCSC_COURSE_CATALOG_ALLOW_REQUEST_OVERRIDE', 'UCSC_COURSE_CATALOG_ALLOW_REQUEST_OVERRIDE')) {
-            return true;
-        }
-
-        $host = isset($_SERVER['HTTP_HOST']) ? strtolower($_SERVER['HTTP_HOST']) : '';
-        $host = preg_replace('/:\d+$/', '', $host);
-        $allowedHosts = array(
-            'wp-dev.ucsc',
-            'wordpress-dev.ucsc.edu',
-            'localhost',
-            '127.0.0.1',
-        );
-
-        return in_array($host, $allowedHosts, true);
-    }
-
-    function getRequestTargetOverride() {
-        if (!$this->isRequestOverrideAllowed()) {
-            return null;
-        }
-
-        return $this->getRequestValue(array(
-            'ucsc_course_catalog_target',
-            'ucsc-course-catalog-target',
-        ));
-    }
-
     function getPeopleSoftTarget() {
         $target = 'prod';
         if (defined('UCSC_COURSE_CATALOG_PEOPLESOFT_TARGET')) {
@@ -129,12 +87,6 @@ class CourseCatalog
         } elseif (getenv('UCSC_COURSE_CATALOG_PEOPLESOFT_TARGET')) {
             $target = getenv('UCSC_COURSE_CATALOG_PEOPLESOFT_TARGET');
         }
-
-        // Stage/QA feed testing override (GET arg based) — disabled now that testing is done.
-        // $requestTarget = $this->getRequestTargetOverride();
-        // if ($requestTarget !== null && $requestTarget !== '') {
-        //     $target = $requestTarget;
-        // }
 
         $target = $this->normalizePeopleSoftTarget($target);
         $config = self::PEOPLESOFT_TARGETS[$target];
@@ -146,16 +98,6 @@ class CourseCatalog
 
     function shouldBypassCache() {
         $bypassCache = $this->getBooleanConfig('UCSC_COURSE_CATALOG_BYPASS_CACHE', 'UCSC_COURSE_CATALOG_BYPASS_CACHE');
-        // Stage/QA feed testing override (GET arg based) — disabled now that testing is done.
-        // if ($this->isRequestOverrideAllowed()) {
-        //     $requestBypassCache = $this->getRequestValue(array(
-        //         'ucsc_course_catalog_bypass_cache',
-        //         'ucsc-course-catalog-bypass-cache',
-        //     ));
-        //     if ($requestBypassCache !== null) {
-        //         $bypassCache = filter_var($requestBypassCache, FILTER_VALIDATE_BOOLEAN);
-        //     }
-        // }
 
         return $bypassCache;
     }

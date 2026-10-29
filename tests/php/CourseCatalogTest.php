@@ -167,7 +167,6 @@ function reset_test_state() {
 
 	putenv( 'UCSC_COURSE_CATALOG_PEOPLESOFT_TARGET' );
 	putenv( 'UCSC_COURSE_CATALOG_BYPASS_CACHE' );
-	putenv( 'UCSC_COURSE_CATALOG_ALLOW_REQUEST_OVERRIDE' );
 }
 
 function make_catalog() {
@@ -193,44 +192,19 @@ putenv( 'UCSC_COURSE_CATALOG_PEOPLESOFT_TARGET=definitely-not-real' );
 $target = $catalog->getPeopleSoftTarget();
 check( 'falls back to production for unknown env target', 'prod' === $target['target'] );
 
-// Stage/QA feed testing override (GET arg based) — disabled in CourseCatalog.php now that testing
-// is done, so these assertions are commented out alongside it.
-// echo "request override gating:\n";
-//
-// $catalog = make_catalog();
-// putenv( 'UCSC_COURSE_CATALOG_PEOPLESOFT_TARGET=csqa' );
-// $_SERVER['HTTP_HOST']                 = 'wp-dev.ucsc:443';
-// $_GET['ucsc_course_catalog_target']   = 'prod';
-// $current_user_id                      = 1;
-// $can_manage_options                   = true;
-// $target                              = $catalog->getPeopleSoftTarget();
-// check( 'admin can override target on dev host with port', 'prod' === $target['target'] );
-//
-// $catalog = make_catalog();
-// putenv( 'UCSC_COURSE_CATALOG_PEOPLESOFT_TARGET=csqa' );
-// $_SERVER['HTTP_HOST']                 = 'wordpress.ucsc.edu:443';
-// $_GET['ucsc_course_catalog_target']   = 'prod';
-// $current_user_id                      = 1;
-// $can_manage_options                   = true;
-// $target                              = $catalog->getPeopleSoftTarget();
-// check( 'admin cannot override target on production host by default', 'csqa' === $target['target'] );
-//
-// $catalog = make_catalog();
-// putenv( 'UCSC_COURSE_CATALOG_PEOPLESOFT_TARGET=csqa' );
-// $_SERVER['HTTP_HOST']                 = 'localhost:8080';
-// $_GET['ucsc_course_catalog_target']   = 'prod';
-// $target                              = $catalog->getPeopleSoftTarget();
-// check( 'logged-out request cannot override target on dev host', 'csqa' === $target['target'] );
-//
-// $catalog = make_catalog();
-// putenv( 'UCSC_COURSE_CATALOG_PEOPLESOFT_TARGET=csqa' );
-// putenv( 'UCSC_COURSE_CATALOG_ALLOW_REQUEST_OVERRIDE=true' );
-// $_SERVER['HTTP_HOST']                 = 'wordpress.ucsc.edu';
-// $_GET['ucsc_course_catalog_target']   = 'prod';
-// $current_user_id                      = 1;
-// $can_manage_options                   = true;
-// $target                              = $catalog->getPeopleSoftTarget();
-// check( 'explicit server opt-in allows production-host admin override', 'prod' === $target['target'] );
+// WPM-156: the GET-parameter override was removed. Request parameters must not
+// change the target, even for an admin on a dev host.
+echo "request parameters are ignored (WPM-156):\n";
+
+$catalog = make_catalog();
+putenv( 'UCSC_COURSE_CATALOG_PEOPLESOFT_TARGET=csqa' );
+$_SERVER['HTTP_HOST']               = 'wp-dev.ucsc';
+$_GET['ucsc_course_catalog_target'] = 'prod';
+$_GET['ucsc-course-catalog-target'] = 'prod';
+$current_user_id                    = 1;
+$can_manage_options                 = true;
+$target                             = $catalog->getPeopleSoftTarget();
+check( 'admin on a dev host cannot switch the target with a request parameter', 'csqa' === $target['target'] );
 
 echo "cache controls:\n";
 
@@ -241,15 +215,20 @@ $catalog = make_catalog();
 putenv( 'UCSC_COURSE_CATALOG_BYPASS_CACHE=true' );
 check( 'env var enables cache bypass', true === $catalog->shouldBypassCache() );
 
-// Stage/QA feed testing override (GET arg based) — disabled in CourseCatalog.php now that testing
-// is done, so this assertion is commented out alongside it.
-// $catalog = make_catalog();
-// putenv( 'UCSC_COURSE_CATALOG_BYPASS_CACHE=true' );
-// $_SERVER['HTTP_HOST']                         = 'wp-dev.ucsc';
-// $_GET['ucsc_course_catalog_bypass_cache']     = '0';
-// $current_user_id                              = 1;
-// $can_manage_options                           = true;
-// check( 'admin request can disable cache bypass on dev host', false === $catalog->shouldBypassCache() );
+$catalog = make_catalog();
+putenv( 'UCSC_COURSE_CATALOG_BYPASS_CACHE=true' );
+$_SERVER['HTTP_HOST']                     = 'wp-dev.ucsc';
+$_GET['ucsc_course_catalog_bypass_cache'] = '0';
+$current_user_id                          = 1;
+$can_manage_options                       = true;
+check( 'admin on a dev host cannot turn cache bypass off with a request parameter (WPM-156)', true === $catalog->shouldBypassCache() );
+
+$catalog = make_catalog();
+$_SERVER['HTTP_HOST']                     = 'wp-dev.ucsc';
+$_GET['ucsc_course_catalog_bypass_cache'] = '1';
+$current_user_id                          = 1;
+$can_manage_options                       = true;
+check( 'admin on a dev host cannot turn cache bypass on with a request parameter (WPM-156)', false === $catalog->shouldBypassCache() );
 
 $catalog = make_catalog();
 $catalog->getCachedCourses(
