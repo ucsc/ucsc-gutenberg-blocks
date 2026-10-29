@@ -180,6 +180,27 @@ describe.each( BLOCKS )( 'Editor: %s', ( blockName, { saves } ) => {
 			).toBe( 0 );
 		} );
 
+		// WPM-250: the editor outline Editoria11y checks on a page like
+		// innovation.ucsc.edu/about-us/contact-us: page title, an author H2,
+		// then this block. No heading may be more than one level deeper than
+		// the heading before it.
+		it( 'keeps the editor heading outline free of skipped levels under an author H2', async () => {
+			await p.evaluate( () => {
+				wp.data.dispatch( 'core/block-editor' ).insertBlocks(
+					wp.blocks.createBlock( 'core/heading', { level: 2, content: 'Contact Us' } ),
+					0
+				);
+			} );
+			const { frame } = await editorBlock( p, clientId );
+			const levels = await frame.evaluate( () =>
+				Array.from( document.querySelectorAll( 'h1, h2, h3, h4, h5, h6' ) ).map(
+					( h ) => Number( h.tagName[ 1 ] )
+				)
+			);
+			const skips = levels.filter( ( level, i ) => i > 0 && level > levels[ i - 1 ] + 1 );
+			expect( { levels, skips } ).toEqual( { levels: expect.arrayContaining( [ 2 ] ), skips: [] } );
+		} );
+
 		// WPM-92: authors pick the person-name heading level.
 		it( 'offers the person-name heading level setting, defaulting to H3', async () => {
 			const { handle } = await editorBlock( p, clientId );
