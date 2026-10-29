@@ -89,10 +89,18 @@ const RATE_LIMITED = {
 	body: '<html><body><h1>429 Too Many Requests</h1></body></html>',
 };
 
+// The network gives up on the request, as when the CampusPress edge hangs
+// until the browser times out (WPM-202).
+const TIMED_OUT = 'timedout';
+
+const DROPDOWN_ENDPOINTS = /\/ucscgutenbergblocks\/v1\/(subjectcode|departmentcode)/;
+
 describe.each( [
-	[ 'ucscblocks/coursecatalog', /\/ucscgutenbergblocks\/v1\/(subjectcode|departmentcode)/ ],
-	[ 'ucscblocks/classschedule', /\/ucscgutenbergblocks\/v1\/(subjectcode|departmentcode)/ ],
-] )( 'Editor: %s when its dropdown endpoints are rate limited', ( blockName, endpoint ) => {
+	[ 'ucscblocks/coursecatalog', 'are rate limited', RATE_LIMITED ],
+	[ 'ucscblocks/classschedule', 'are rate limited', RATE_LIMITED ],
+	[ 'ucscblocks/coursecatalog', 'time out', TIMED_OUT ],
+	[ 'ucscblocks/classschedule', 'time out', TIMED_OUT ],
+] )( 'Editor: %s when its dropdown endpoints %s', ( blockName, _how, failure ) => {
 	let context;
 	let p;
 	let errors;
@@ -108,9 +116,15 @@ describe.each( [
 			wp.data.select( 'core/editor' ).getCurrentPostId()
 		);
 		await p.setRequestInterception( true );
-		p.on( 'request', ( req ) =>
-			endpoint.test( req.url() ) ? req.respond( RATE_LIMITED ) : req.continue()
-		);
+		p.on( 'request', ( req ) => {
+			if ( ! DROPDOWN_ENDPOINTS.test( req.url() ) ) {
+				req.continue();
+			} else if ( failure === TIMED_OUT ) {
+				req.abort( TIMED_OUT );
+			} else {
+				req.respond( failure );
+			}
+		} );
 		clientId = await insertBlock( p, blockName );
 		// Long enough for the intercepted fetch to settle either way.
 		await new Promise( ( r ) => setTimeout( r, 5000 ) );
