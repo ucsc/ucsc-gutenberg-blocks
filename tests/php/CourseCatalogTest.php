@@ -387,6 +387,15 @@ check( 'graduate level maps to sort value 3', false !== strpos( $html, 'Graduate
 check( 'upper division level maps to sort value 2', false !== strpos( $html, 'Upper Division<span class="secret">2</span>' ) );
 check( 'unknown level maps to sort value 0 instead of reusing the previous row', false !== strpos( $html, 'Mystery Level<span class="secret">0</span>' ) );
 
+// WPM-36: a <label> with no form control inside it is an orphaned label (WAVE,
+// WCAG 1.3.1). The "Select a course title" hint is plain text, not a label.
+preg_match_all( '/<label\b[^>]*>(.*?)<\/label>/s', $html, $labels );
+$orphaned_labels = array_filter( $labels[1], function ( $inner ) {
+	return ! preg_match( '/<(input|select|textarea)\b/', $inner );
+} );
+check( 'every label wraps a form control (no orphaned labels)', 0 < count( $labels[1] ) && array() === $orphaned_labels );
+check( 'the course-title hint is not a label', 1 === preg_match( '/<div>\s*Select a course title for details\./', $html ) );
+
 echo "block wrapper custom class support (WPM-23):\n";
 
 $catalog = make_catalog();

@@ -1155,4 +1155,29 @@ $ldap_entries = array( ldap_entry_fixture( array( 'uid' => array( 'jdoe' ), 'jpe
 $campus_directory->getDirectoryPhoto( 'jdoe' );
 check( 'a listed person with an LDAP photo makes no campusdirectory request', 0 === count( $remote_get_calls ) );
 
+echo "theHTML heading level tests (WPM-92):\n";
+
+// The template tests set $headingLevel directly; these go through theHTML() so
+// the block attribute must actually reach the template.
+function render_manual_person_with( $campus_directory, $overrides ) {
+	global $ldap_entries;
+	reset_test_state();
+	$ldap_entries = array( ldap_entry_fixture( array( 'uid' => array( 'jsmith' ), 'cn' => array( 'Jan Smith' ) ) ) );
+	$attributes   = campus_directory_theHTML_attributes_fixture( array_replace( array(
+		'automatedFeeds' => false,
+		'manualAdd'      => true,
+		'cruzidList'     => 'jsmith',
+	), $overrides ) );
+	return run_theHTML_capturing_issues( $campus_directory, $attributes )['output'];
+}
+
+$html = render_manual_person_with( $campus_directory, array() );
+check( 'a block with no headingLevel renders names as H3', 1 === preg_match( '/<h3 class="item-name">.*?Jan Smith.*?<\/h3>/s', $html ) );
+
+$html = render_manual_person_with( $campus_directory, array( 'headingLevel' => 2 ) );
+check( 'a block with headingLevel 2 renders names as H2', 1 === preg_match( '/<h2 class="item-name">.*?Jan Smith.*?<\/h2>/s', $html ) );
+
+$html = render_manual_person_with( $campus_directory, array( 'headingLevel' => 4 ) );
+check( 'a block with headingLevel 4 renders names as H4', 1 === preg_match( '/<h4 class="item-name">.*?Jan Smith.*?<\/h4>/s', $html ) );
+
 finish_tests();
