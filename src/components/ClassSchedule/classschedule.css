@@ -57,29 +57,66 @@ a.cancelled {
    ============================================================ */
 .introText {
   display: flex;
-  align-items: center;
+  flex-wrap: wrap;
+  align-items: flex-end;
   gap: 10px;
   margin-bottom: 10px;
 }
 
-/* Term dropdown + search input grouped together
-   (replaces old el-input with el-select prepend) */
+/* Course Catalog's tablesorter.css fixes .introText at 30px; the labelled toolbar is taller */
+.class-schedule .introText {
+  height: auto;
+}
+
+/* Term dropdown + search input, each with a visible label (WPM-95) */
 .input-with-select {
   display: flex;
+  flex-wrap: wrap;
   flex: 1;
+  gap: 10px;
+}
+
+.term-select-wrap,
+.search-wrap {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  text-align: left;
+}
+
+.search-wrap {
+  flex: 1;
+  min-width: 200px;
+}
+
+.cs-control-label {
+  font-size: 14px;
+  font-weight: 600;
+  color: #303133;
+}
+
+/* Dropdown + Go button share one bordered box (WPM-111) */
+.term-select-row {
+  display: flex;
   border: 1px solid #dcdfe6;
   border-radius: 4px;
   overflow: hidden;
   background-color: #fff;
 }
 
-.term-select-wrap {
+.term-go {
+  padding: 0 16px;
+  font-size: 14px;
+  font-weight: 500;
   background-color: #fff;
-  border-right: 1px solid #dcdfe6;
-  flex-shrink: 0;
-  margin-left: 0;
-  text-align: left;
-  padding-left: 0;
+  color: #606266;
+  border: none;
+  border-left: 1px solid #dcdfe6;
+  cursor: pointer;
+}
+
+.term-go:hover {
+  color: #2272D6;
 }
 
 .term-select-wrap select {
@@ -97,10 +134,13 @@ a.cancelled {
 }
 
 :is(#courseSearch, .course-search) {
-  flex: 1;
+  width: 100%;
+  box-sizing: border-box;
+  height: 40px;
   padding: 10px 10px 10px 30px;
   font-size: 14px;
-  border: none;
+  border: 1px solid #dcdfe6;
+  border-radius: 4px;
   outline: none;
   color: #666;
   min-width: 0;
@@ -112,7 +152,8 @@ a.cancelled {
   color: #bbb;
 }
 
-.input-with-select:focus-within {
+.term-select-row:focus-within,
+:is(#courseSearch, .course-search):focus {
   border-color: #2272D6;
 }
 

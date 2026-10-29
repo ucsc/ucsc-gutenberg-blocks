@@ -251,7 +251,7 @@ check( 'requests courses for the default term', '/ucsc/v1/courses/2262' === $res
 check( 'uppercases the department query parameter', array( 'dept' => 'CSE' ) === $rest_requests[1]->query_params );
 check( 'renders the current ClassSchedule template', false !== strpos( $html, 'id="classSchedule"' ) );
 check( 'renders #classScheduleTable mount node', false !== strpos( $html, 'id="classScheduleTable"' ) );
-check( 'selects the default term in the quarter dropdown', false !== strpos( $html, 'value="2262"' . "\n              " . 'selected="selected"' ) );
+check( 'selects the default term in the quarter dropdown', 1 === preg_match( '/value="2262"\s+selected="selected"/', $html ) );
 check( 'sorts courses numerically by catalog number', strpos( $html, 'CSE-20' ) < strpos( $html, 'CSE-101' ) );
 check( 'renders course detail links', false !== strpos( $html, 'https://example.ucsc.edu/course/2262/54321' ) );
 check( 'renders directory links for instructors', false !== strpos( $html, 'https://example.ucsc.edu/directory/alovelace' ) );

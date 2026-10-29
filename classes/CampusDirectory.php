@@ -192,6 +192,8 @@ class CampusDirectory
     else $attributes['objInformationTypesTable'] = array();
     $campusDirectoryAPI = new CampusDirectoryAPI($attributes);
     $items = $campusDirectoryAPI->setDirectoryData();
+    // WPM-92: authors pick the person-name heading level so it fits the page outline.
+    $headingLevel = (int) ($attributes['headingLevel'] ?? 3);
     ob_start();
     include(plugin_dir_path(__FILE__) . '../templates/CampusDirectoryTemplate.php');
 

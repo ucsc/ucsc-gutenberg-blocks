@@ -162,6 +162,8 @@ describe('InformationToDisplayTable', () => {
       expect(
         screen.getByText('Table Layout Information to Display')
       ).toBeInTheDocument();
+      // WPM-250: editor-only labels must not add headings to the page outline.
+      expect(screen.queryAllByRole('heading')).toHaveLength(0);
     });
   });
 

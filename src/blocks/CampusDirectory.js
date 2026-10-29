@@ -1,6 +1,6 @@
 import { useEffect, useState } from '@wordpress/element';
 import { dispatch } from '@wordpress/data';
-import { Panel, PanelBody, PanelRow, Notice } from '@wordpress/components';
+import { Panel, PanelBody, PanelRow, Notice, SelectControl } from '@wordpress/components';
 import { useBlockProps } from '@wordpress/block-editor';
 
 import CampusDirectoryDepartmentDropdown from '../components//CampusDirectory/CampusDirectoryDepartmentDropdown';
@@ -33,6 +33,7 @@ const CampusDirectory = () => {
       department: { type: "string" },
       division: { type: "string" },
       deptOrDiv: { type: "string" },
+      headingLevel: { type: "number", default: 3 },
     },
     edit: ({ setAttributes, attributes }) => {
       const {
@@ -53,6 +54,7 @@ const CampusDirectory = () => {
         department,
         division,
         deptOrDiv,
+        headingLevel,
       } = attributes;
       const blockProps = useBlockProps();
 
@@ -105,6 +107,22 @@ const CampusDirectory = () => {
                     pageLayout={pageLayout}
                   />
                 </PanelRow>
+                {pageLayout !== 'table' && (
+                  <PanelRow>
+                    {/* WPM-92: let the names fit the page outline (H2 when the page has no section headings) */}
+                    <SelectControl
+                      label="Person name heading level"
+                      help="Pick the level below the nearest heading above this block."
+                      value={String(headingLevel ?? 3)}
+                      options={[
+                        { label: 'H2', value: '2' },
+                        { label: 'H3', value: '3' },
+                        { label: 'H4', value: '4' },
+                      ]}
+                      onChange={(value) => setAttributes({ headingLevel: Number(value) })}
+                    />
+                  </PanelRow>
+                )}
               </PanelBody>
               <PanelBody title="People and Information to Display" initialOpen>
                 <PanelRow>
@@ -134,10 +152,10 @@ const CampusDirectory = () => {
           )}
           {!configuredCorrectly && (
             <>
-              <h2>This Block is not Configured Correctly</h2>
+              <p><strong>This Block is not Configured Correctly</strong></p>
               {!resp.ldap_pass && resp.multisite && (
                 <>
-                  <h4>
+                  <p>
                     The LDAP password can be set at the network level{" "}
                     <a
                       target="_blank"
@@ -145,14 +163,14 @@ const CampusDirectory = () => {
                     >
                       here.
                     </a>
-                  </h4>
-                  <h6>
+                  </p>
+                  <p>
                     Or the LDAP password can be set at the site level below.
-                  </h6>
+                  </p>
                 </>
               )}
               {!resp.ldap_pass && (
-                <h4>
+                <p>
                   The LDAP password needs to be set here{" "}
                   <a
                     target="_blank"
@@ -160,7 +178,7 @@ const CampusDirectory = () => {
                   >
                     here.
                   </a>
-                </h4>
+                </p>
               )}
             </>
           )}

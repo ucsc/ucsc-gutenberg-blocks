@@ -112,7 +112,7 @@ check( 'renders the displayed-class count from the course array', false !== strp
 echo "\nterm dropdown:\n";
 check( 'renders an option for every term', 2 === substr_count( $html, '<option value=' ) );
 check( 'renders the term description text', false !== strpos( $html, 'Fall 2026' ) );
-check( 'marks the current term selected', false !== strpos( $html, 'value="2262"' . "\n              " . 'selected="selected"' ) );
+check( 'marks the current term selected', 1 === preg_match( '/value="2262"\s+selected="selected"/', $html ) );
 
 echo "\ndefault columns:\n";
 check( 'emits the default seats+days columns attribute', false !== strpos( $html, 'data-default-columns="seats,days"' ) );
@@ -287,5 +287,13 @@ check( 'passes the clicked element to every block-scoped handler', 1 === substr_
 
 $html_bad = render_class_schedule_template( ...array_merge( $args, array( '2" onclick="alert(1)' ) ) );
 check( 'casts the instance number to an integer before it reaches the markup', false === strpos( $html_bad, 'alert(1)' ) && false !== strpos( $html_bad, 'data-cs-instance="2"' ) );
+
+// ---------------------------------------------------------------------------
+// Visible control labels (WPM-95) and the quarter Go button (WPM-111)
+// ---------------------------------------------------------------------------
+echo "\ntoolbar labels and Go button (WPM-95, WPM-111):\n";
+check( 'shows the quarter and search labels instead of hiding them for screen readers only', 1 === preg_match( '/<label for="quarterDropdown" class="cs-control-label">Select Quarter<\/label>/', $html_one ) && 1 === preg_match( '/<label for="courseSearch" class="cs-control-label">Search Schedule<\/label>/', $html_one ) && 0 === preg_match( '/<label for="(quarterDropdown|courseSearch)" class="screen-reader-text"/', $html_one ) );
+check( 'does not repeat the search label as its placeholder', false === strpos( $html_one, 'placeholder="Search Schedule"' ) );
+check( 'gives the quarter dropdown a Go button and no inline change handler', 1 === substr_count( $html_one, '<button type="button" class="term-go">Go</button>' ) && false === strpos( $html_one, 'onchange' ) );
 
 finish_tests();

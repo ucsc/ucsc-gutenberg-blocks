@@ -168,5 +168,30 @@ describe.each( BLOCKS )( 'Editor: %s', ( blockName, { saves } ) => {
 				'Unable to publish'
 			);
 		} );
+
+		// WPM-250: Editoria11y flagged an H2 to H5 skip from the settings labels.
+		// The only headings left are the H2 titles WordPress's Panel/PanelBody render.
+		it( 'adds no heading below H2 in the editor, so the outline cannot skip a level', async () => {
+			const { handle } = await editorBlock( p, clientId );
+			expect(
+				await handle.evaluate(
+					( el ) => el.querySelectorAll( 'h3, h4, h5, h6' ).length
+				)
+			).toBe( 0 );
+		} );
+
+		// WPM-92: authors pick the person-name heading level.
+		it( 'offers the person-name heading level setting, defaulting to H3', async () => {
+			const { handle } = await editorBlock( p, clientId );
+			expect(
+				await handle.evaluate( ( el ) => {
+					const label = Array.from( el.querySelectorAll( 'label' ) ).find(
+						( l ) => l.textContent.trim() === 'Person name heading level'
+					);
+					const select = label && el.querySelector( `#${ label.htmlFor }` );
+					return select ? select.value : null;
+				} )
+			).toBe( '3' );
+		} );
 	}
 } );

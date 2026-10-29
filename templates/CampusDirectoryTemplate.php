@@ -18,6 +18,10 @@ for($i=0; $i<count($items['informationToDisplay']); $i++) {
   }
 }
 
+// WPM-92: person names use the heading level chosen in the editor (H2-H4, default H3).
+$nameLevel = (int) ($headingLevel ?? 3);
+$nameTag = 'h' . (in_array($nameLevel, array(2, 3, 4), true) ? $nameLevel : 3);
+
 // CPM-12: a query with no matches must say so instead of rendering bare headers
 // (table) or an empty container (list/tiled).
 $noRecordsMessage = 'No records found.';
@@ -103,7 +107,7 @@ $individualPageUrl = $items['nodeContent']['linkOutToCampusDirectory'] ?
               ?>
               <div class="section-item h-card wrap">
                 <div class="item-body">
-                  <h3 class="item-name">
+                  <<?php echo $nameTag; ?> class="item-name">
                     <?php
                       if ($items['linkToProfile']) {
                         echo '<a class="u-url" href="' . esc_url($individualPageUrl . rawurlencode($people[$i]['uid'][0])) . '">';
@@ -113,7 +117,7 @@ $individualPageUrl = $items['nodeContent']['linkOutToCampusDirectory'] ?
                         echo '</a>';
                       }
                     ?>
-                  </h3>
+                  </<?php echo $nameTag; ?>>
                   <ul class="item-info list-renderer">
                     <?php
                       foreach($items['informationToDisplay'] as $disItem) {

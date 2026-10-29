@@ -21,7 +21,7 @@ function rest_url( $path = '' ) {
 
 require __DIR__ . '/helpers/harness.php';
 
-function render_campus_directory_template( $items ) {
+function render_campus_directory_template( $items, $headingLevel = null ) {
 	ob_start();
 	include __DIR__ . '/../../templates/CampusDirectoryTemplate.php';
 	return ob_get_clean();
@@ -190,5 +190,20 @@ check( 'escapes normal field values', false !== strpos( $html, '&quot;&gt;&lt;im
 check( 'escapes the profile URL attribute', false === strpos( $html, '?directoryprofilecruzid=' . $attack_uid ) );
 check( 'escapes the mailto href attribute', false === strpos( $html, 'mailto:' . $attack_email ) );
 check( 'escapes the website label', false !== strpos( $html, '&lt;script&gt;alert(&quot;label&quot;)&lt;/script&gt;' ) );
+
+// ---------------------------------------------------------------------------
+// Person-name heading level (WPM-92)
+// ---------------------------------------------------------------------------
+echo "\nperson-name heading level (WPM-92):\n";
+foreach ( array( 'list', 'tiled' ) as $layout ) {
+	$html_default = render_campus_directory_template( directory_items_fixture( array( 'dirLayout' => $layout ) ) );
+	check( "$layout: names default to H3", 1 === preg_match( '/<h3 class="item-name">.*?<\/h3>/s', $html_default ) );
+	$html_h2 = render_campus_directory_template( directory_items_fixture( array( 'dirLayout' => $layout ) ), 2 );
+	check( "$layout: names use H2 when chosen", 1 === preg_match( '/<h2 class="item-name">.*?<\/h2>/s', $html_h2 ) && false === strpos( $html_h2, '<h3' ) );
+}
+foreach ( array( 1, 5, 6, 0 ) as $bad_level ) {
+	$html_bad = render_campus_directory_template( directory_items_fixture(), $bad_level );
+	check( "falls back to H3 for out-of-range level $bad_level", 1 === preg_match( '/<h3 class="item-name">.*?<\/h3>/s', $html_bad ) );
+}
 
 finish_tests();

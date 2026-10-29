@@ -76,7 +76,7 @@ const InformationToDisplay = ({
   return (
     <div>
       <hr />
-      <h5>Link Name to Individual Profile?</h5>
+      <p className="cd-option-label">Link Name to Individual Profile?</p>
       <p>
         <i>
           In a small number of cases, units do not want a person's name to link
@@ -110,7 +110,7 @@ const InformationToDisplay = ({
       </div>
       <hr />
       <div className="flex-labels">
-        <h5>{pageLayout === 'list' ? "List" : "Tiled"} Layout Information to Display</h5>
+        <p className="cd-option-label">{pageLayout === 'list' ? "List" : "Tiled"} Layout Information to Display</p>
         <CheckboxGroupControl
           setAttributes={setAttributes}
           currentAttributes={strInformationTypes}

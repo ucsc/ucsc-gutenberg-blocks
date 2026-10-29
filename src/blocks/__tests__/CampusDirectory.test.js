@@ -8,6 +8,14 @@ jest.mock('@wordpress/components', () => ({
   ),
   PanelBody: ({ children, title }) => <div data-testid="panel-body" data-title={title}>{children}</div>,
   PanelRow: ({ children }) => <div data-testid="panel-row">{children}</div>,
+  SelectControl: ({ label, value, options, onChange }) => (
+    <label>
+      {label}
+      <select value={value} onChange={(e) => onChange(e.target.value)}>
+        {options.map((o) => <option key={o.value} value={o.value}>{o.label}</option>)}
+      </select>
+    </label>
+  ),
   Notice: ({ children, status, isDismissible }) => (
     <div data-testid="notice" data-status={status} data-dismissible={isDismissible}>
       {children}
@@ -101,6 +109,10 @@ describe('CampusDirectory block', () => {
 
     it('is in the common category', () => {
       expect(registeredBlock.category).toBe('common');
+    });
+
+    it('defaults the person-name heading level to H3 (WPM-92)', () => {
+      expect(registeredBlock.attributes.headingLevel).toEqual({ type: 'number', default: 3 });
     });
 
     it('defines all expected attributes', () => {
@@ -330,6 +342,43 @@ describe('CampusDirectory block', () => {
         render(<Edit setAttributes={setAttributes} attributes={defaultAttributes} />);
       });
       expect(screen.getByText(/network level/)).toBeInTheDocument();
+    });
+
+    // WPM-92: authors choose the person-name heading level for list and tiled layouts.
+    it('saves the chosen heading level as a number', async () => {
+      const setAttributes = jest.fn();
+      await act(async () => {
+        render(<Edit setAttributes={setAttributes} attributes={{ ...defaultAttributes, headingLevel: 3 }} />);
+      });
+      const select = screen.getByLabelText('Person name heading level');
+      expect(select.value).toBe('3');
+      await act(async () => {
+        select.value = '2';
+        select.dispatchEvent(new Event('change', { bubbles: true }));
+      });
+      expect(setAttributes).toHaveBeenCalledWith({ headingLevel: 2 });
+    });
+
+    it('hides the heading level setting for the table layout, which has no name headings', async () => {
+      await act(async () => {
+        render(<Edit setAttributes={jest.fn()} attributes={{ ...defaultAttributes, pageLayout: 'table' }} />);
+      });
+      expect(screen.queryByLabelText('Person name heading level')).not.toBeInTheDocument();
+    });
+
+    // WPM-250: editor-only text must not add headings to the page outline.
+    it('renders the configuration notice without heading elements', async () => {
+      global.fetch = jest.fn(() =>
+        Promise.resolve({
+          ok: true,
+          text: () => Promise.resolve(JSON.stringify({ ldap_pass: false, multisite: true })),
+        })
+      );
+      await act(async () => {
+        render(<Edit setAttributes={jest.fn()} attributes={defaultAttributes} />);
+      });
+      expect(screen.getByText('This Block is not Configured Correctly')).toBeInTheDocument();
+      expect(screen.queryAllByRole('heading')).toHaveLength(0);
     });
 
     it('hides the directory panel when not configured correctly', async () => {
