@@ -1008,6 +1008,19 @@ reset_test_state();
 $parts = $campus_directory->directory_profile_title( $host_title_parts );
 check( 'non-profile pages keep their title without an LDAP search', $host_title_parts === $parts && 0 === count( $ldap_searches ) );
 
+// WPM-183: the title lookup builds the API with no automatedFeeds setting.
+reset_test_state();
+$query_vars['directoryprofilecruzid'] = 'jsmith';
+$ldap_entries = array( ldap_entry_fixture( array( 'uid' => array( 'jsmith' ), 'cn' => array( 'Jan Smith' ) ) ) );
+$title_warnings = array();
+set_error_handler( function ( $errno, $errstr ) use ( &$title_warnings ) {
+	$title_warnings[] = $errstr;
+	return true;
+} );
+$campus_directory->directory_profile_title( $host_title_parts );
+restore_error_handler();
+check( 'profile document title lookup logs no PHP warnings', array() === $title_warnings );
+
 echo "CampusDirectoryAPI untested branches (WPM-188):\n";
 
 reset_test_state();

@@ -32,6 +32,8 @@ class CampusDirectoryAPI {
   function __construct($content = [])
   {
     $this->nodeContent = $content;
+    // Callers such as directory_profile_title() pass no settings (WPM-183).
+    $this->nodeContent['automatedFeeds'] = $content['automatedFeeds'] ?? false;
     $this->allStaffTypes = [
       "Regular Staff",
       "Researcher",
