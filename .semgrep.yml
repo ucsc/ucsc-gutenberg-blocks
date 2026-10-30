@@ -1,0 +1,113 @@
+# WordPress-aware opengrep/semgrep rules for this plugin. The registry packs
+# (p/php, p/xss) do not know WordPress escaping or block attributes and missed
+# the known WPM-209 bug. ucsc-php-review uses this file instead of p/php when it
+# is present. Run: opengrep scan --config .semgrep.yml .
+rules:
+  - id: wp-echo-unescaped
+    languages: [php]
+    severity: WARNING
+    message: >-
+      Output is echoed without WordPress escaping. Wrap it in esc_html(),
+      esc_attr(), esc_url() or wp_kses_post(), whichever fits where it lands.
+    paths:
+      exclude: [tests/, vendor/, node_modules/, build/]
+    patterns:
+      - pattern-inside: echo ...;
+      - pattern-either:
+          - pattern: $X->$P
+          - pattern: $X[$K]
+          - pattern: $X
+      - metavariable-regex:
+          metavariable: $X
+          regex: ^\$
+      - pattern-not-inside: esc_html(...)
+      - pattern-not-inside: esc_attr(...)
+      - pattern-not-inside: esc_url(...)
+      - pattern-not-inside: esc_textarea(...)
+      - pattern-not-inside: esc_js(...)
+      - pattern-not-inside: wp_kses_post(...)
+      - pattern-not-inside: wp_kses(...)
+      - pattern-not-inside: wp_json_encode(...)
+      - pattern-not-inside: intval(...)
+      - pattern-not-inside: absint(...)
+      - pattern-not-inside: (int) $E
+      - pattern-not-inside: count(...)
+      - pattern-not-inside: isset(...)
+      - pattern-not-inside: empty(...)
+      # Report the outermost expression once, not each variable inside it.
+      - pattern-not-inside: $Y->$Q
+      - pattern-not-inside: $Y[$J]
+
+  - id: wp-superglobal-unsanitized
+    languages: [php]
+    severity: WARNING
+    message: >-
+      Request data is used without sanitizing. Pass it through wp_unslash() and
+      a sanitize_*() function (or absint()) before use.
+    paths:
+      exclude: [tests/, vendor/, node_modules/, build/]
+    patterns:
+      - pattern-either:
+          - pattern: $_GET[$K]
+          - pattern: $_POST[$K]
+          - pattern: $_REQUEST[$K]
+          - pattern: $_COOKIE[$K]
+      - pattern-not-inside: isset(...)
+      - pattern-not-inside: empty(...)
+      - pattern-not-inside: sanitize_text_field(...)
+      - pattern-not-inside: sanitize_key(...)
+      - pattern-not-inside: sanitize_email(...)
+      - pattern-not-inside: esc_url_raw(...)
+      - pattern-not-inside: absint(...)
+      - pattern-not-inside: intval(...)
+      - pattern-not-inside: (int) $E
+
+  - id: ldap-filter-unescaped
+    languages: [php]
+    severity: ERROR
+    message: >-
+      Block or request data reaches an LDAP filter without ldap_escape(...,
+      LDAP_ESCAPE_FILTER), so it can add or change filter clauses.
+    paths:
+      exclude: [tests/, vendor/, node_modules/, build/]
+    mode: taint
+    pattern-sources:
+      - pattern: $this->nodeContent[$K]
+      - pattern: $_GET[$K]
+      - pattern: $_POST[$K]
+      - pattern: get_query_var(...)
+    pattern-sanitizers:
+      - pattern: ldap_escape(...)
+    pattern-sinks:
+      - patterns:
+          - pattern-either:
+              - pattern: $S .= $V
+              - pattern: $S = $V
+          - metavariable-regex:
+              metavariable: $V
+              regex: (?s)^".*\(\w+=.*"$
+          - focus-metavariable: $V
+      - pattern: ldap_search($C, $B, $F, ...)
+
+  - id: xml-query-unescaped
+    languages: [php]
+    severity: WARNING
+    message: >-
+      Block data is concatenated into an XML request body without escaping.
+      Use htmlspecialchars($v, ENT_XML1) or build the body with DOMDocument.
+    paths:
+      exclude: [tests/, vendor/, node_modules/, build/]
+    mode: taint
+    pattern-sources:
+      - pattern: $attributes[$K]
+    pattern-sanitizers:
+      - pattern: htmlspecialchars(...)
+      - pattern: esc_xml(...)
+    pattern-sinks:
+      - patterns:
+          - pattern-inside: $Q = $A . $V . $B;
+          - pattern: $V
+          - metavariable-regex:
+              metavariable: $A
+              regex: ^['"]<\w+>['"]$
+          - focus-metavariable: $V
