@@ -373,6 +373,24 @@ call_user_func( $template_redirect_callback );
 check( 'no 404 while LDAP is marked down', array() === $status_headers );
 
 reset_test_state();
+$query_vars       = array( 'directoryprofilecruzid' => 'jdoe' );
+$ldap_bind_result = false;
+call_user_func( $template_redirect_callback );
+check( 'no 404 when the LDAP bind fails', array() === $status_headers );
+
+reset_test_state();
+$query_vars         = array( 'directoryprofilecruzid' => 'jdoe' );
+$ldap_search_result = false;
+call_user_func( $template_redirect_callback );
+check( 'no 404 when the LDAP search fails', array() === $status_headers );
+
+reset_test_state();
+$query_vars        = array( 'directoryprofilecruzid' => 'jdoe' );
+$ldap_handshake_ok = false;
+call_user_func( $template_redirect_callback );
+check( 'no 404 when LDAP does not answer', array() === $status_headers );
+
+reset_test_state();
 call_user_func( $template_redirect_callback );
 check( 'pages without a CruzID are left alone', array() === $status_headers );
 
@@ -1154,6 +1172,43 @@ reset_test_state();
 $ldap_entries = array( ldap_entry_fixture( array( 'uid' => array( 'jdoe' ), 'jpegphoto' => array( $photo_bytes ) ) ) );
 $campus_directory->getDirectoryPhoto( 'jdoe' );
 check( 'a listed person with an LDAP photo makes no campusdirectory request', 0 === count( $remote_get_calls ) );
+
+echo "LDAP failure is not a miss tests:\n";
+
+// A failed lookup says nothing about the person, so nothing may remember it as
+// "no photo" or "no such person" once LDAP is back.
+
+reset_test_state();
+$ldap_bind_result = false;
+$campus_directory->getDirectoryPhoto( 'jdoe' );
+check( 'a failed LDAP bind does not cache a missing photo', ! isset( $transients[ $photo_key ] ) );
+check( 'reports unavailable when the LDAP bind fails', 'unavailable' === $campus_directory->photoSource );
+
+reset_test_state();
+$transients['ucsc_cd_ldap_down'] = array( 'value' => 1, 'expiration' => 300 );
+$campus_directory->getDirectoryPhoto( 'jdoe' );
+check( 'LDAP marked down does not cache a missing photo', ! isset( $transients[ $photo_key ] ) );
+
+reset_test_state();
+$ldap_handshake_ok = false;
+$campus_directory->getDirectoryPhoto( 'jdoe' );
+check( 'a silent LDAP host does not cache a missing photo', ! isset( $transients[ $photo_key ] ) );
+
+reset_test_state();
+$ldap_bind_result = false;
+$ldap_entries     = array( ldap_entry_fixture( array( 'uid' => array( 'jsmith' ), 'cn' => array( 'Jan Smith' ) ) ) );
+$api  = campus_directory_api_fixture();
+$data = $api->getCampusDirData( 'jsmith' );
+check( 'a failed LDAP bind is not cached as an empty result', ! isset( $transients[ md5( $data[1] ) . '_l' ] ) );
+check( 'a failed LDAP bind skips LDAP for a minute',
+	isset( $transients['ucsc_cd_ldap_down'] ) && 60 === $transients['ucsc_cd_ldap_down']['expiration']
+);
+
+reset_test_state();
+$ldap_search_result = false;
+$api  = campus_directory_api_fixture();
+$data = $api->getCampusDirData( 'jsmith' );
+check( 'a failed LDAP search is not cached as an empty result', ! isset( $transients[ md5( $data[1] ) . '_l' ] ) );
 
 echo "theHTML heading level tests (WPM-92):\n";
 

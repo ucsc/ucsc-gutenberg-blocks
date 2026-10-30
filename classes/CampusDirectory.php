@@ -45,13 +45,14 @@ class CampusDirectory
 
   // Serve a person's photo from LDAP (jpegPhoto) instead of linking to
   // campusdirectory.ucsc.edu/photo.php, which only answers on campus/VPN.
-  // X-Directory-Photo-Source says where the answer came from (ldap, none, or
-  // cache), so one request on a live site shows which source works.
+  // X-Directory-Photo-Source says where the answer came from (ldap, none,
+  // cache, or unavailable), so one request on a live site shows which source works.
   function directoryPhoto($request) {
     $photo = $this->getDirectoryPhoto($request['uid']);
     header('X-Directory-Photo-Source: ' . $this->photoSource);
     if ($photo === '') {
-      header('Cache-Control: public, max-age=3600');
+      // Browsers keep a real "no photo" for an hour, not an LDAP failure (WPM-238).
+      if ($this->photoSource !== 'unavailable') header('Cache-Control: public, max-age=3600');
       wp_redirect('https://static.ucsc.edu/images/icon-slug.jpg', 302);
       exit;
     }
@@ -81,6 +82,12 @@ class CampusDirectory
     $campusDirectoryAPI = new CampusDirectoryAPI(['automatedFeeds' => false]);
     $people = $campusDirectoryAPI->getCampusDirData($uid, true)[0];
     $photo = !empty($people[0]['jpegphoto'][0]) ? $people[0]['jpegphoto'][0] : '';
+    // LDAP not answering is not "no photo": cache nothing, so photos come back
+    // as soon as LDAP does (WPM-238).
+    if ($photo === '' && $campusDirectoryAPI->ldapFailed) {
+      $this->photoSource = 'unavailable';
+      return '';
+    }
     $this->photoSource = $photo === '' ? 'none' : 'ldap';
     if ($photo !== '') set_transient($key, base64_encode($photo), 4 * HOUR_IN_SECONDS);
     else set_transient($key, '', HOUR_IN_SECONDS);
@@ -89,13 +96,14 @@ class CampusDirectory
 
   // A CruzID LDAP does not return gets a real 404 status instead of a 200
   // "not found" page that search engines index; the page itself is unchanged
-  // (WPM-247). Not while LDAP is marked down: those people may well exist.
+  // (WPM-247). Not when LDAP did not answer (down, bind or search failed):
+  // those people may well exist.
   function directoryProfileStatus() {
     $cruzid = get_query_var('directoryprofilecruzid');
     if ($cruzid === false || $cruzid === '') return;
     $campusDirectoryAPI = new CampusDirectoryAPI(['automatedFeeds' => false]);
     $data = $campusDirectoryAPI->getCampusDirData($cruzid, true);
-    if (empty($data[0]) && !get_transient('ucsc_cd_ldap_down')) status_header(404);
+    if (empty($data[0]) && !$campusDirectoryAPI->ldapFailed) status_header(404);
   }
 
   function add_directory_profile_rewrite() {

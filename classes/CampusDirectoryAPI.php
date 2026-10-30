@@ -25,6 +25,9 @@ class CampusDirectoryAPI {
   public $deptOrDivSet = true;
   public $ldap_cn;
   public $ldap_url;
+  // True when the last doLDAPQuery() got no answer from LDAP (down, bind or
+  // search failed), so an empty result says nothing about the people asked for.
+  public $ldapFailed = false;
 
   function __construct($content = [])
   {
@@ -118,9 +121,10 @@ class CampusDirectoryAPI {
       // and shortcode views (profileView) still need the full entry.
       $attributes = $profileView ? [] : $this->listAttributes();
       $people = $this->doLDAPQuery($q, $arrCruzids, $attributes);
-      // Cache empty results too (briefly), so an unreachable LDAP server or a
-      // no-match filter is not re-queried on every page view.
-      set_transient($md5_q, $people, count($people) ? 600 : 60);
+      // Cache empty results too (briefly), so a no-match filter is not
+      // re-queried on every page view. A failed lookup is not cached: it is not
+      // an answer, and doLDAPQuery's ucsc_cd_ldap_down back-off covers it.
+      if (!$this->ldapFailed) set_transient($md5_q, $people, count($people) ? 600 : 60);
     }
     return [$people, $q];
   }
@@ -159,6 +163,7 @@ class CampusDirectoryAPI {
     // Chokepoint guard: an empty filter would become the malformed search
     // "(|)" — bail here so every caller is protected, not just getCampusDirData.
     if (!strlen($q)) return [];
+    $this->ldapFailed = true;
 
     // LDAP stalled moments ago: skip it for a few minutes instead of making
     // every page and photo wait on it again.
@@ -193,12 +198,15 @@ class CampusDirectoryAPI {
       if ($ldapbind) {
         if (!count($attributes)) $attributes = ['*'];
         $sr = ldap_search($rli, "ou=people,dc=ucsc,dc=edu", "(|{$q})", $attributes);
+        if ($sr) $this->ldapFailed = false;
         $people = $this->processSearchResults($rli, $sr);
         $people = $this->addVacantPositions($people, $this->nodeContent['automatedFeeds'], $arrCruzids);
         ldap_close($rli);
         return $people;
       } else {
         error_log('CampusDirectory LDAP bind failed: ' . ldap_error($rli));
+        // Not cached per query (see getCampusDirData), so back off here instead.
+        set_transient('ucsc_cd_ldap_down', 1, MINUTE_IN_SECONDS);
       }
     }
 
