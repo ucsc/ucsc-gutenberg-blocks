@@ -46,13 +46,15 @@ class CampusDirectory
   // Serve a person's photo from LDAP (jpegPhoto) instead of linking to
   // campusdirectory.ucsc.edu/photo.php, which only answers on campus/VPN.
   // X-Directory-Photo-Source says where the answer came from (ldap, none,
-  // cache, or unavailable), so one request on a live site shows which source works.
+  // not-listed, cache, or unavailable), so one request on a live site shows
+  // which source works.
   function directoryPhoto($request) {
     $photo = $this->getDirectoryPhoto($request['uid']);
     header('X-Directory-Photo-Source: ' . $this->photoSource);
     if ($photo === '') {
-      // Browsers keep a real "no photo" for an hour, not an LDAP failure (WPM-238).
-      if ($this->photoSource !== 'unavailable') header('Cache-Control: public, max-age=3600');
+      // Browsers keep a real "no photo" for an hour, not an LDAP failure
+      // (WPM-238) or a lookup LDAP returned no entry for (WPM-257).
+      if ($this->photoSource === 'none' || $this->photoSource === 'cache') header('Cache-Control: public, max-age=3600');
       wp_redirect('https://static.ucsc.edu/images/icon-slug.jpg', 302);
       exit;
     }
@@ -86,6 +88,13 @@ class CampusDirectory
     // as soon as LDAP does (WPM-238).
     if ($photo === '' && $campusDirectoryAPI->ldapFailed) {
       $this->photoSource = 'unavailable';
+      return '';
+    }
+    // No entry at all (not publicly listed, or an answer cut short) is not a
+    // known "no photo": cache nothing here, getCampusDirData() already keeps an
+    // empty result for a minute (WPM-257).
+    if (empty($people)) {
+      $this->photoSource = 'not-listed';
       return '';
     }
     $this->photoSource = $photo === '' ? 'none' : 'ldap';

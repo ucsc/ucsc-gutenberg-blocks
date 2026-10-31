@@ -20,6 +20,7 @@ $ldap_searches             = array();
 $ldap_options              = array();
 $ldap_search_result        = true;
 $ldap_bind_result          = true;
+$ldap_errno_result         = 0;
 $ldap_entries              = array();
 $ldap_attr_cursor          = array();
 $transients                = array();
@@ -165,6 +166,10 @@ function ldap_next_attribute( $link, $entry ) {
 }
 function ldap_close() { return true; }
 function ldap_error() { return ''; }
+function ldap_errno() {
+	global $ldap_errno_result;
+	return $ldap_errno_result;
+}
 // Mirror the real extension's filter escaping for the characters that matter
 // so tests can prove wildcard/injection input is neutralized.
 function ldap_escape($str, $ignore = '', $flags = 0) {
@@ -293,7 +298,7 @@ function transient_keys() {
 }
 
 function reset_test_state() {
-	global $query_vars, $is_admin, $is_singular, $is_main_query, $queried_object_id, $current_post_id, $ldap_searches, $ldap_options, $ldap_search_result, $ldap_bind_result, $ldap_entries, $ldap_attr_cursor, $transients, $ldap_connect_uris, $ldap_bind_args, $ldap_len_reads, $remote_get_calls, $remote_get_response, $ldap_handshake_ok, $ldap_handshake_calls, $site_options, $options, $status_headers;
+	global $query_vars, $is_admin, $is_singular, $is_main_query, $queried_object_id, $current_post_id, $ldap_searches, $ldap_options, $ldap_search_result, $ldap_bind_result, $ldap_entries, $ldap_attr_cursor, $transients, $ldap_connect_uris, $ldap_bind_args, $ldap_len_reads, $remote_get_calls, $remote_get_response, $ldap_handshake_ok, $ldap_handshake_calls, $ldap_errno_result, $site_options, $options, $status_headers;
 	$site_options        = array();
 	$options             = array();
 	$status_headers      = array();
@@ -312,6 +317,7 @@ function reset_test_state() {
 	$ldap_options       = array();
 	$ldap_search_result = true;
 	$ldap_bind_result   = true;
+	$ldap_errno_result  = 0;
 	$ldap_entries       = array();
 	$ldap_attr_cursor   = array();
 	$transients         = array();
@@ -1159,7 +1165,7 @@ reset_test_state();
 $remote_get_response = $photo_php_has_photo;
 $photo = $campus_directory->getDirectoryPhoto( 'jdoe' );
 check( 'a uid LDAP does not return gets no photo and no campusdirectory request', '' === $photo && 0 === count( $remote_get_calls ) );
-check( 'reports none for a uid LDAP does not return', 'none' === $campus_directory->photoSource );
+check( 'reports not-listed for a uid LDAP does not return', 'not-listed' === $campus_directory->photoSource );
 
 reset_test_state();
 $hidden = ldap_entry_fixture( array( 'uid' => array( 'jdoe' ) ) );
@@ -1222,6 +1228,42 @@ $ldap_search_result = false;
 $api  = campus_directory_api_fixture();
 $data = $api->getCampusDirData( 'jsmith' );
 check( 'a failed LDAP search is not cached as an empty result', ! isset( $transients[ md5( $data[1] ) . '_l' ] ) );
+
+echo "no LDAP entry is not a known miss tests (WPM-257):\n";
+
+// Only an entry that came back without jpegPhoto is a real "no photo". No entry
+// at all may be a person who is not listed, or an answer cut short.
+
+reset_test_state();
+$campus_directory->getDirectoryPhoto( 'jdoe' );
+check( 'a uid LDAP returns no entry for does not cache a missing photo', ! isset( $transients[ $photo_key ] ) );
+
+reset_test_state();
+$hidden = ldap_entry_fixture( array( 'uid' => array( 'jdoe' ) ) );
+$hidden['ucscpersonpubdisplay'] = array( 'FALSE', 'count' => 1 );
+$ldap_entries = array( $hidden );
+$campus_directory->getDirectoryPhoto( 'jdoe' );
+check( 'a person who is not publicly listed does not cache a missing photo', ! isset( $transients[ $photo_key ] ) );
+
+reset_test_state();
+$ldap_errno_result = 3;
+$campus_directory->getDirectoryPhoto( 'jdoe' );
+check( 'a search cut short by the LDAP time limit does not cache a missing photo', ! isset( $transients[ $photo_key ] ) );
+check( 'reports unavailable for a search cut short by the LDAP time limit', 'unavailable' === $campus_directory->photoSource );
+
+reset_test_state();
+$ldap_errno_result = 3;
+$ldap_entries      = array( ldap_entry_fixture( array( 'uid' => array( 'jsmith' ), 'cn' => array( 'Jan Smith' ) ) ) );
+$api  = campus_directory_api_fixture();
+$data = $api->getCampusDirData( 'jsmith' );
+check( 'a search cut short by the LDAP time limit is not cached', ! isset( $transients[ md5( $data[1] ) . '_l' ] ) );
+
+reset_test_state();
+$ldap_errno_result = 4;
+$ldap_entries      = array( ldap_entry_fixture( array( 'uid' => array( 'jsmith' ), 'cn' => array( 'Jan Smith' ) ) ) );
+$api  = campus_directory_api_fixture();
+$data = $api->getCampusDirData( 'jsmith' );
+check( 'a search that hits the size limit is still cached', isset( $transients[ md5( $data[1] ) . '_l' ] ) );
 
 echo "theHTML heading level tests (WPM-92):\n";
 

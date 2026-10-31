@@ -169,7 +169,8 @@ $individualPageUrl = $items['nodeContent']['linkOutToCampusDirectory'] ?
                     }
                     if ($items['linkToProfile']) echo '<a class="u-url square-img" href="' . esc_url($individualPageUrl . rawurlencode($people[$i]['uid'][0])) . '">';
                     $fallbackSrc = esc_url('//static.ucsc.edu/images/icon-slug.jpg');
-                    echo '<img src="' . esc_url($imgSrc) . '" onerror="this.onerror=null;this.src=\'' . $fallbackSrc . '\';" class="item-image square-img imgLiquid imgLiquid_bgSize imgLiquid_ready" alt="Profile picture of ' . esc_attr($people[$i]['cn'][0]) . '" />';
+                    // Lazy: a long listing must not request every photo at once (WPM-257).
+                    echo '<img src="' . esc_url($imgSrc) . '" loading="lazy" width="160" height="160" onerror="this.onerror=null;this.src=\'' . $fallbackSrc . '\';" class="item-image square-img imgLiquid imgLiquid_bgSize imgLiquid_ready" alt="Profile picture of ' . esc_attr($people[$i]['cn'][0]) . '" />';
                     if ($items['linkToProfile']) echo '</a>';
                   }
                 ?>

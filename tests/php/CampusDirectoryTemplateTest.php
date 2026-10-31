@@ -154,6 +154,7 @@ check( 'renders profile photo with escaped alt text', false !== strpos( $html, '
 check( 'renders the escaped static fallback image URL', false !== strpos( $html, '//static.ucsc.edu/images/icon-slug.jpg' ) );
 check( 'renders the photo from the local LDAP photo endpoint', false !== strpos( $html, 'src="https://example.test/wp-json/ucscgutenbergblocks/v1/directoryphoto/jdoe"' ) );
 check( 'photo no longer depends on campusdirectory.ucsc.edu', false === strpos( $html, 'photo.php' ) );
+check( 'loads directory photos lazily at their 160px display size (WPM-257)', false !== strpos( $html, 'directoryphoto/jdoe" loading="lazy" width="160" height="160"' ) );
 
 echo "\nescaping LDAP data and block settings:\n";
 $attack_uid     = 'jdoe"><script>alert("uid")</script>';

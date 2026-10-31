@@ -200,7 +200,10 @@ class CampusDirectoryAPI {
       if ($ldapbind) {
         if (!count($attributes)) $attributes = ['*'];
         $sr = ldap_search($rli, "ou=people,dc=ucsc,dc=edu", "(|{$q})", $attributes);
-        if ($sr) $this->ldapFailed = false;
+        // A search cut short by an LDAP error (e.g. time limit) is not a full
+        // answer; only the size limit is an expected, complete-enough result (WPM-257).
+        $errno = ldap_errno($rli);
+        if ($sr && ($errno === 0 || $errno === 4)) $this->ldapFailed = false;
         $people = $this->processSearchResults($rli, $sr);
         $people = $this->addVacantPositions($people, $this->nodeContent['automatedFeeds'], $arrCruzids);
         ldap_close($rli);
