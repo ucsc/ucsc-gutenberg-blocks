@@ -33,6 +33,18 @@ class CampusDirectoryAPI {
     'ucscpersonpubselectedrecording',
   ];
 
+  // Sanitize rich text from LDAP. This is the 'post' allowlist without style,
+  // because anyone who can edit a directory entry could otherwise position an
+  // element or link over the whole page on any site showing that person.
+  public static function sanitizeRichText($html)
+  {
+    $allowed = wp_kses_allowed_html('post');
+    foreach ($allowed as $tag => $attributes) {
+      if (is_array($attributes)) unset($allowed[$tag]['style']);
+    }
+    return force_balance_tags(wp_kses((string) $html, $allowed));
+  }
+
   public $nodeContent;
   public $allStaffTypes;
   public $ldap_password;

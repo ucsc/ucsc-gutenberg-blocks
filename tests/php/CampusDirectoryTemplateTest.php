@@ -15,15 +15,27 @@ function esc_url( $value ) {
 	return preg_match( '/^javascript:/i', $value ) ? '' : $value;
 }
 
-// Stand-ins for the WordPress sanitizers: enough to tell sanitized output from
-// escaped output here. The real wp_kses_post() policy is WordPress's own.
-function wp_kses_post( $value ) {
-	$value = preg_replace( '#<script\b[^>]*>.*?</script>#is', '', $value );
-	return preg_replace( '#\son\w+\s*=\s*("[^"]*"|\'[^\']*\'|[^\s>]+)#i', '', $value );
+// Stand-ins for the WordPress sanitizers. They show which values get sanitized and
+// with what allowlist. tests/e2e/campus-directory-rich-text.spec.js covers what the
+// real functions do. Like the real wp_kses(), this leaves script contents as text.
+function wp_kses_allowed_html( $context = '' ) {
+	return array(
+		'p'      => array( 'style' => true, 'class' => true ),
+		'a'      => array( 'href' => true, 'style' => true ),
+		'strong' => array( 'style' => true ),
+	);
+}
+
+function wp_kses( $value, $allowed ) {
+	$GLOBALS['_test_kses_allowed'] = $allowed;
+	$value = preg_replace( '#</?script\b[^>]*>#i', '', $value );
+	$value = preg_replace( '#\son\w+\s*=\s*("[^"]*"|\'[^\']*\'|[^\s>]+)#i', '', $value );
+	return $value;
 }
 
 function force_balance_tags( $value ) {
-	return str_replace( '</div>', '', $value );
+	$GLOBALS['_test_balance_calls'] = ( $GLOBALS['_test_balance_calls'] ?? 0 ) + 1;
+	return $value;
 }
 
 function wp_strip_all_tags( $value ) {
@@ -266,10 +278,20 @@ foreach ( array( 'list', 'tiled', 'table' ) as $layout ) {
 			)
 		)
 	);
-	check( "$layout strips script from rich text", false === strpos( $html, 'alert("rich")</script>' ) );
+	check( "$layout strips script tags from rich text", false === stripos( $html, '<script' ) );
 	check( "$layout strips event handlers from rich text", false === strpos( $html, 'onerror=' ) );
-	check( "$layout drops stray closing tags from rich text", false === strpos( $html, '</div></div></li>' ) );
+	check( "$layout balances rich text tags", ( $GLOBALS['_test_balance_calls'] ?? 0 ) > 0 );
+	$GLOBALS['_test_balance_calls'] = 0;
 }
+$styled_tags = array_filter(
+	$GLOBALS['_test_kses_allowed'] ?? array( 'unset' => array( 'style' => true ) ),
+	function ( $attributes ) {
+		return isset( $attributes['style'] );
+	}
+);
+check( 'rich text allowlist has no style attribute on any tag', array() === $styled_tags );
+check( 'rich text allowlist keeps the other attributes', true === ( $GLOBALS['_test_kses_allowed']['a']['href'] ?? false ) );
+
 // Scans the whole rendered page, so it also covers the table's <strong> label.
 $rich_all_tags = '<p>One <strong>two</strong> <em>three</em><br /> <a href="https://example.edu/lab">four</a></p><ul><li>five</li></ul><h4>six</h4>';
 foreach ( array( 'list', 'tiled', 'table' ) as $layout ) {

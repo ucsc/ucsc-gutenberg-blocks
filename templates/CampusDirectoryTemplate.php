@@ -26,12 +26,12 @@ $nameTag = 'h' . (in_array($nameLevel, array(2, 3, 4), true) ? $nameLevel : 3);
 // (table) or an empty container (list/tiled).
 $noRecordsMessage = 'No records found.';
 
-// Rich-text fields use the same sanitizer as the profile page's linkify();
-// everything else stays plain text.
+// Rich-text fields share a sanitizer with the profile page's linkify(); everything
+// else stays plain text.
 $renderFieldValue = function ($key, $value) {
   if (in_array($key, CampusDirectoryAPI::RICH_TEXT_FIELDS, true)) {
-    // The wrapper keeps the label styles on <strong> and <span> off this content.
-    return '<div class="directory-rich-text">' . force_balance_tags(wp_kses_post((string) $value)) . '</div>';
+    // The wrapper keeps the block's label and inline-list styles off this content.
+    return '<div class="directory-rich-text">' . CampusDirectoryAPI::sanitizeRichText($value) . '</div>';
   }
   return esc_html($value);
 };

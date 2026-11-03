@@ -166,9 +166,10 @@ URLs as links and removes `javascript:` URLs.
 
 The exception is fields authored as rich text upstream, listed in
 `CampusDirectoryAPI::RICH_TEXT_FIELDS`. Those render as HTML after
-`wp_kses_post()`, which removes script and event-handler markup. In the list,
-tiled, and table layouts the only such field offered is Summary of Expertise
-(`ucscpersonpubareaofexpertise`).
+`CampusDirectoryAPI::sanitizeRichText()`, which removes script tags, event
+handlers, and `style` attributes. The profile page and the list, tiled, and table
+layouts share it. In those layouts the only such field offered is Summary of
+Expertise (`ucscpersonpubareaofexpertise`).
 
 #### Scenario: Markup in a name
 
@@ -182,6 +183,12 @@ tiled, and table layouts the only such field offered is Summary of Expertise
   script tag
 - **THEN** the listing renders the formatting as HTML
 - **AND** the script tag is removed
+
+#### Scenario: Style attribute in a rich-text field
+
+- **WHEN** a rich-text field contains an element with a `style` attribute
+- **THEN** the element renders without that attribute
+- **AND** it cannot be positioned over the rest of the page
 
 #### Scenario: Attribute-breaking value in a link
 
