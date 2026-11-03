@@ -2,6 +2,14 @@
 
 All notable changes to this project will be documented in this file. See [commit-and-tag-version](https://github.com/absolute-version/commit-and-tag-version) for commit guidelines.
 
+## [1.2.4](https://github.com/ucsc/ucsc-gutenberg-blocks/compare/v1.2.3...v1.2.4) (2026-11-03)
+
+
+### Bug Fixes
+
+* WPM-144: allow rich text fields to display properly by sanitizing instead of escaping ([b534497](https://github.com/ucsc/ucsc-gutenberg-blocks/commit/b534497d0272cf49cbf7cf4ddf242a71d4fb56ae))
+* WPM-144: also remove style tags when sanitizing, fix paragraph and list rendering ([4039089](https://github.com/ucsc/ucsc-gutenberg-blocks/commit/403908954ad7ddbc04c065f11f953a42f83af690))
+
 ## [1.2.3](https://github.com/ucsc/ucsc-gutenberg-blocks/compare/v1.2.2...v1.2.3) (2026-11-02)
 
 
