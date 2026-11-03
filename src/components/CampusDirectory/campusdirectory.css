@@ -535,3 +535,48 @@ div.table-wrapper {
 .intro-paragraph {
     padding: 0 2.5em 0 2.5em;
 }
+
+/* Rich text from LDAP: this markup is content, not the block's labels and inline lists. */
+.ucsc-block-directory .section-item .item-body .item-info li .directory-rich-text strong,
+.ucsc-block-directory .section-item .item-body .item-info li .directory-rich-text span,
+.ucsc-block-directory table .section-body tr td .directory-rich-text strong {
+  display: inline;
+  flex: none;
+  padding-right: 0;
+  font-weight: 700;
+  line-height: inherit;
+  text-align: inherit;
+}
+
+.ucsc-block-directory .section-item .item-body .item-info li .directory-rich-text p,
+.ucsc-block-directory table .section-body tr td .directory-rich-text p {
+  margin: 0 0 .75em;
+}
+
+.ucsc-block-directory .section-item .item-body .item-info li .directory-rich-text ul,
+.ucsc-block-directory .section-item .item-body .item-info li .directory-rich-text ol,
+.ucsc-block-directory table .section-body tr td .directory-rich-text ul,
+.ucsc-block-directory table .section-body tr td .directory-rich-text ol {
+  display: block;
+  margin: 0 0 .75em;
+  padding-left: 1.5em;
+  list-style: disc;
+}
+
+.ucsc-block-directory .section-item .item-body .item-info li .directory-rich-text ol,
+.ucsc-block-directory table .section-body tr td .directory-rich-text ol {
+  list-style: decimal;
+}
+
+.ucsc-block-directory .section-item .item-body .item-info li .directory-rich-text li,
+.ucsc-block-directory table .section-body tr td .directory-rich-text li {
+  display: list-item;
+  margin: 0;
+  padding: 0;
+  border: 0;
+}
+
+.ucsc-block-directory .section-item .item-body .item-info li .directory-rich-text > :last-child,
+.ucsc-block-directory table .section-body tr td .directory-rich-text > :last-child {
+  margin-bottom: 0;
+}

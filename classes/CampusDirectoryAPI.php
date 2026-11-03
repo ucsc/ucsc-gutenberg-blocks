@@ -18,6 +18,33 @@ if (!function_exists('ucsc_cd_ldap_handshake_ok')) {
 }
 
 class CampusDirectoryAPI {
+  // LDAP fields authored as rich text upstream. They render as sanitized HTML;
+  // every other field is plain text.
+  const RICH_TEXT_FIELDS = [
+    'ucscpersonpubareaofexpertise',
+    'ucscpersonpubresearchinterest',
+    'ucscpersonpubdescription',
+    'ucscpersonpubteachinginterest',
+    'ucscpersonpubawardshonorsgrants',
+    'ucscpersonpubselectedexhibition',
+    'ucscpersonpubselectedperformance',
+    'ucscpersonpubselectedpresentation',
+    'ucscpersonpubselectedpublication',
+    'ucscpersonpubselectedrecording',
+  ];
+
+  // Sanitize rich text from LDAP. This is the 'post' allowlist without style,
+  // because anyone who can edit a directory entry could otherwise position an
+  // element or link over the whole page on any site showing that person.
+  public static function sanitizeRichText($html)
+  {
+    $allowed = wp_kses_allowed_html('post');
+    foreach ($allowed as $tag => $attributes) {
+      if (is_array($attributes)) unset($allowed[$tag]['style']);
+    }
+    return force_balance_tags(wp_kses((string) $html, $allowed));
+  }
+
   public $nodeContent;
   public $allStaffTypes;
   public $ldap_password;

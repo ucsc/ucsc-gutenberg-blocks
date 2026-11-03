@@ -35,6 +35,11 @@ function check( $label, $condition ) {
 	echo "  FAIL  $label\n";
 }
 
+// True when markup was escaped into visible text, e.g. &lt;p&gt; or a double-escaped &amp;lt;p&amp;gt;.
+function has_escaped_html( $html ) {
+	return 1 === preg_match( '/&(amp;)*(lt|gt|#0*6[02]|#x0*3[ce]);/i', $html );
+}
+
 function finish_tests() {
 	global $tests, $failed, $ucsc_coverage;
 	echo "\n" . ( $tests - $failed ) . "/$tests passed\n";

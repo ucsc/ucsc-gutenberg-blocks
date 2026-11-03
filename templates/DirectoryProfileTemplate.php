@@ -34,7 +34,7 @@ function linkify($key, $str) {
     }
 
     // Sanitize LDAP HTML content — allow safe markup, strip dangerous tags/attributes
-    $str = wp_kses_post($str);
+    $str = CampusDirectoryAPI::sanitizeRichText($str);
 
     // Remove title attributes from links only when they duplicate the link text (a11y: WCAG 2.4.4)
     $dom = new DOMDocument();

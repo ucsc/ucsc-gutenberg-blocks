@@ -55,6 +55,16 @@ if [ -z "${UCSC_CD_E2E_URL:-}" ] && [ -f "$WP_DEV_ROOT/docker-compose.yml" ]; th
 	echo "campus-directory EEB e2e page: $UCSC_CD_E2E_URL"
 fi
 
+# Seed the rich-text pages (WPM-144). These use fake people in the directory cache,
+# so they do not need LDAP or the VPN.
+if [ -f "$WP_DEV_ROOT/docker-compose.yml" ]; then
+	echo "Seeding campus-directory rich-text e2e pages (root: $WP_DEV_ROOT)..."
+	(cd "$WP_DEV_ROOT" && docker compose exec -T wpcli wp eval-file - < "$SCRIPT_DIR/seed-campus-directory-rich-text-e2e.php") || {
+		echo "Could not seed the rich-text e2e pages — is the stack up? (docker compose up -d)" >&2
+		exit 1
+	}
+fi
+
 # Seed the course-catalog page (WPM-168).
 if [ -z "${UCSC_CC_E2E_URL:-}" ] && [ -f "$WP_DEV_ROOT/docker-compose.yml" ]; then
 	echo "Seeding course-catalog e2e page (root: $WP_DEV_ROOT)..."

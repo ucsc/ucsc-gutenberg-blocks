@@ -11,12 +11,9 @@
  *     php tests/php/DirectoryProfileTemplateTest.php
  */
 
-// DirectoryProfileTemplate calls wp_kses_post, get_query_var, get_theme_file_path,
+// DirectoryProfileTemplate calls get_query_var, get_theme_file_path,
 // get_header, get_footer, and instantiates CampusDirectoryAPI — stub them all before
 // requiring the harness so our versions win.
-
-// Stub wp_kses_post so linkify() passes the string through unmodified for test purposes.
-function wp_kses_post( $str ) { return $str; }
 
 // Stub esc_url to strip javascript: URIs (mirrors production behavior) so we can
 // assert XSS is blocked.
@@ -53,6 +50,12 @@ function get_footer( $name = null ) {
 // CampusDirectoryAPI is instantiated inside the template. We stub it so tests
 // control the returned $profileData without an LDAP connection.
 class CampusDirectoryAPI {
+	// linkify() passes the string through unmodified for test purposes; recording the
+	// call shows it is sanitized. CampusDirectoryTemplateTest covers the allowlist.
+	public static function sanitizeRichText( $html ) {
+		$GLOBALS['_test_sanitized'][] = $html;
+		return $html;
+	}
 	public function __construct( $attrs = [] ) {}
 	public function getCampusDirData( $cruzid, $profileView = false ) {
 		return [ $GLOBALS['_test_profile_data'] ?? [], '' ];
@@ -332,6 +335,28 @@ $html_xss = render_profile_template( $attack );
 check( 'does not render a raw script tag from the name field',         false === strpos( $html_xss, '<script>alert(1)</script>' ) );
 check( 'does not render a raw img event handler from the title field', false === strpos( $html_xss, '<img src=x onerror=alert(1)>' ) );
 check( 'blocks a javascript: website href',                            false === strpos( $html_xss, 'href="javascript:' ) );
+
+// -- rich-text sections render as HTML (WPM-144) ------------------------------
+echo "\nrich-text sections:\n";
+$rich_fields = [
+	'ucscpersonpubareaofexpertise'      => 'Summary of Expertise',
+	'ucscpersonpubresearchinterest'     => 'Research Interests',
+	'ucscpersonpubdescription'          => 'Biography, Education and Training',
+	'ucscpersonpubteachinginterest'     => 'Teaching Interests',
+	'ucscpersonpubawardshonorsgrants'   => 'Awards, Honors and Grants',
+	'ucscpersonpubselectedexhibition'   => 'Selected Exhibitions',
+	'ucscpersonpubselectedperformance'  => 'Selected Performances',
+	'ucscpersonpubselectedpresentation' => 'Selected Presentations',
+	'ucscpersonpubselectedpublication'  => 'Selected Publications',
+	'ucscpersonpubselectedrecording'    => 'Selected Recordings',
+];
+foreach ( $rich_fields as $rich_key => $rich_title ) {
+	$rich_value = '<p>rich <strong>' . $rich_key . '</strong> <em>text</em></p>';
+	$html_rich  = render_profile_template( profile_fixture( [ $rich_key => [ 'count' => 1, 0 => $rich_value ] ] ) );
+	check( "$rich_title renders no escaped HTML", ! has_escaped_html( $html_rich ) );
+	check( "$rich_title renders as real tags", false !== strpos( $html_rich, $rich_value ) );
+	check( "$rich_title goes through the shared sanitizer", in_array( $rich_value, $GLOBALS['_test_sanitized'] ?? [], true ) );
+}
 
 // -- linkify() and standalone chrome (WPM-189) -------------------------------
 echo "\nlinkify() (WPM-189):\n";
