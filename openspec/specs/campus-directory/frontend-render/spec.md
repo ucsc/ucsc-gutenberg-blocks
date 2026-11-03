@@ -164,11 +164,24 @@ surface: the list, tiled, and table layouts, the profile page, and the
 shortcode. Profile expertise fields pass through `linkify()`, which renders
 URLs as links and removes `javascript:` URLs.
 
+The exception is fields authored as rich text upstream, listed in
+`CampusDirectoryAPI::RICH_TEXT_FIELDS`. Those render as HTML after
+`wp_kses_post()`, which removes script and event-handler markup. In the list,
+tiled, and table layouts the only such field offered is Summary of Expertise
+(`ucscpersonpubareaofexpertise`).
+
 #### Scenario: Markup in a name
 
 - **WHEN** a person's directory name contains markup
 - **THEN** the listing renders it as literal text
 - **AND** no markup from the value is executed
+
+#### Scenario: Markup in a rich-text field
+
+- **WHEN** a person's Summary of Expertise contains formatting markup and a
+  script tag
+- **THEN** the listing renders the formatting as HTML
+- **AND** the script tag is removed
 
 #### Scenario: Attribute-breaking value in a link
 

@@ -15,9 +15,32 @@ function esc_url( $value ) {
 	return preg_match( '/^javascript:/i', $value ) ? '' : $value;
 }
 
+// Stand-ins for the WordPress sanitizers: enough to tell sanitized output from
+// escaped output here. The real wp_kses_post() policy is WordPress's own.
+function wp_kses_post( $value ) {
+	$value = preg_replace( '#<script\b[^>]*>.*?</script>#is', '', $value );
+	return preg_replace( '#\son\w+\s*=\s*("[^"]*"|\'[^\']*\'|[^\s>]+)#i', '', $value );
+}
+
+function force_balance_tags( $value ) {
+	return str_replace( '</div>', '', $value );
+}
+
+function wp_strip_all_tags( $value ) {
+	return strip_tags( $value );
+}
+
 function rest_url( $path = '' ) {
 	return 'https://example.test/wp-json/' . ltrim( $path, '/' );
 }
+
+// Load the real API class so the template uses the real RICH_TEXT_FIELDS. Its
+// file requires wp-admin classes, so point ABSPATH at empty stand-ins.
+define( 'ABSPATH', sys_get_temp_dir() . '/wp-mock-cdt/' );
+@mkdir( ABSPATH . 'wp-admin/includes', 0777, true );
+@file_put_contents( ABSPATH . 'wp-admin/includes/class-wp-filesystem-base.php', "<?php\nclass WP_Filesystem_Base {}\n" );
+@file_put_contents( ABSPATH . 'wp-admin/includes/class-wp-filesystem-direct.php', "<?php\nclass WP_Filesystem_Direct extends WP_Filesystem_Base {}\n" );
+require __DIR__ . '/../../classes/CampusDirectoryAPI.php';
 
 require __DIR__ . '/helpers/harness.php';
 
@@ -191,6 +214,89 @@ check( 'escapes normal field values', false !== strpos( $html, '&quot;&gt;&lt;im
 check( 'escapes the profile URL attribute', false === strpos( $html, '?directoryprofilecruzid=' . $attack_uid ) );
 check( 'escapes the mailto href attribute', false === strpos( $html, 'mailto:' . $attack_email ) );
 check( 'escapes the website label', false !== strpos( $html, '&lt;script&gt;alert(&quot;label&quot;)&lt;/script&gt;' ) );
+
+// ---------------------------------------------------------------------------
+// Rich-text LDAP fields keep their markup (WPM-144 regression)
+// ---------------------------------------------------------------------------
+echo "\nrich-text fields:\n";
+// The profile template keeps its own field => heading map, so make sure the two can't drift.
+$profile_source = file_get_contents( __DIR__ . '/../../templates/DirectoryProfileTemplate.php' );
+preg_match( '/\$expertiseFields = \[(.*?)\];/s', $profile_source, $profile_map );
+preg_match_all( '/"(ucscpersonpub\w+)"\s*=>/', $profile_map[1] ?? '', $profile_keys );
+$rich_constant = CampusDirectoryAPI::RICH_TEXT_FIELDS;
+sort( $rich_constant );
+sort( $profile_keys[1] );
+check( 'RICH_TEXT_FIELDS matches the profile page expertise fields', 10 === count( $rich_constant ) && $rich_constant === $profile_keys[1] );
+
+$rich_value  = '<p>Studies <strong>kelp</strong> <a href="https://example.edu/lab">lab</a></p>';
+$rich_attack = '<p>Safe</p><script>alert("rich")</script><img src=x onerror=alert("rich")></div>';
+$rich_info   = array(
+	array( 'ucscpersonpubareaofexpertise' => 'Summary of Expertise' ),
+	array( 'ucscpersonpubofficehours' => 'Office Hours' ),
+);
+foreach ( array( 'list', 'tiled', 'table' ) as $layout ) {
+	$html = render_campus_directory_template(
+		directory_items_fixture(
+			array(
+				'dirLayout'            => $layout,
+				'informationToDisplay' => $rich_info,
+				'items'                => array(
+					person_fixture(
+						array(
+							'ucscpersonpubareaofexpertise' => array( $rich_value ),
+							'ucscpersonpubofficehours'     => array( '<em>Tue</em>' ),
+						)
+					),
+				),
+			)
+		)
+	);
+	check( "$layout renders Summary of Expertise markup", false !== strpos( $html, '<li><div class="directory-rich-text">' . $rich_value . '</div></li>' ) );
+	check( "$layout does not show Summary of Expertise tags as text", false === strpos( $html, '&lt;strong&gt;kelp' ) );
+	check( "$layout still escapes fields not marked rich text", false !== strpos( $html, '&lt;em&gt;Tue&lt;/em&gt;' ) );
+
+	$html = render_campus_directory_template(
+		directory_items_fixture(
+			array(
+				'dirLayout'            => $layout,
+				'informationToDisplay' => $rich_info,
+				'items'                => array(
+					person_fixture( array( 'ucscpersonpubareaofexpertise' => array( $rich_attack ) ) ),
+				),
+			)
+		)
+	);
+	check( "$layout strips script from rich text", false === strpos( $html, 'alert("rich")</script>' ) );
+	check( "$layout strips event handlers from rich text", false === strpos( $html, 'onerror=' ) );
+	check( "$layout drops stray closing tags from rich text", false === strpos( $html, '</div></div></li>' ) );
+}
+// Scans the whole rendered page, so it also covers the table's <strong> label.
+$rich_all_tags = '<p>One <strong>two</strong> <em>three</em><br /> <a href="https://example.edu/lab">four</a></p><ul><li>five</li></ul><h4>six</h4>';
+foreach ( array( 'list', 'tiled', 'table' ) as $layout ) {
+	$html = render_campus_directory_template(
+		directory_items_fixture(
+			array(
+				'dirLayout'            => $layout,
+				'informationToDisplay' => array( array( 'ucscpersonpubareaofexpertise' => 'Summary of Expertise' ) ),
+				'items'                => array( person_fixture( array( 'ucscpersonpubareaofexpertise' => array( $rich_all_tags ) ) ) ),
+			)
+		)
+	);
+	check( "$layout renders no escaped HTML anywhere", ! has_escaped_html( $html ) );
+	check( "$layout renders the rich text as real tags", false !== strpos( $html, $rich_all_tags ) );
+}
+$html = render_campus_directory_template(
+	directory_items_fixture(
+		array(
+			'dirLayout'            => 'table',
+			'informationToDisplay' => $rich_info,
+			'items'                => array(
+				person_fixture( array( 'ucscpersonpubareaofexpertise' => array( $rich_value ), 'ucscpersonpubofficehours' => array( 'Tue' ) ) ),
+			),
+		)
+	)
+);
+check( 'table keeps block markup out of the strong label', false !== strpos( $html, '<strong>Studies kelp lab</strong>' ) );
 
 // ---------------------------------------------------------------------------
 // Person-name heading level (WPM-92)

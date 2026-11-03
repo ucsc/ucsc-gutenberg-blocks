@@ -535,3 +535,15 @@ div.table-wrapper {
 .intro-paragraph {
     padding: 0 2.5em 0 2.5em;
 }
+
+/* Rich text from LDAP: <strong> and <span> here are content, not field labels. */
+.ucsc-block-directory .section-item .item-body .item-info li .directory-rich-text strong,
+.ucsc-block-directory .section-item .item-body .item-info li .directory-rich-text span,
+.ucsc-block-directory table .section-body tr td .directory-rich-text strong {
+  display: inline;
+  flex: none;
+  padding-right: 0;
+  font-weight: 700;
+  line-height: inherit;
+  text-align: inherit;
+}

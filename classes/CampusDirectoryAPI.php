@@ -18,6 +18,21 @@ if (!function_exists('ucsc_cd_ldap_handshake_ok')) {
 }
 
 class CampusDirectoryAPI {
+  // LDAP fields authored as rich text upstream. They render as sanitized HTML;
+  // every other field is plain text.
+  const RICH_TEXT_FIELDS = [
+    'ucscpersonpubareaofexpertise',
+    'ucscpersonpubresearchinterest',
+    'ucscpersonpubdescription',
+    'ucscpersonpubteachinginterest',
+    'ucscpersonpubawardshonorsgrants',
+    'ucscpersonpubselectedexhibition',
+    'ucscpersonpubselectedperformance',
+    'ucscpersonpubselectedpresentation',
+    'ucscpersonpubselectedpublication',
+    'ucscpersonpubselectedrecording',
+  ];
+
   public $nodeContent;
   public $allStaffTypes;
   public $ldap_password;

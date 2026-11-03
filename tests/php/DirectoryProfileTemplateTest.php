@@ -333,6 +333,27 @@ check( 'does not render a raw script tag from the name field',         false ===
 check( 'does not render a raw img event handler from the title field', false === strpos( $html_xss, '<img src=x onerror=alert(1)>' ) );
 check( 'blocks a javascript: website href',                            false === strpos( $html_xss, 'href="javascript:' ) );
 
+// -- rich-text sections render as HTML (WPM-144) ------------------------------
+echo "\nrich-text sections:\n";
+$rich_fields = [
+	'ucscpersonpubareaofexpertise'      => 'Summary of Expertise',
+	'ucscpersonpubresearchinterest'     => 'Research Interests',
+	'ucscpersonpubdescription'          => 'Biography, Education and Training',
+	'ucscpersonpubteachinginterest'     => 'Teaching Interests',
+	'ucscpersonpubawardshonorsgrants'   => 'Awards, Honors and Grants',
+	'ucscpersonpubselectedexhibition'   => 'Selected Exhibitions',
+	'ucscpersonpubselectedperformance'  => 'Selected Performances',
+	'ucscpersonpubselectedpresentation' => 'Selected Presentations',
+	'ucscpersonpubselectedpublication'  => 'Selected Publications',
+	'ucscpersonpubselectedrecording'    => 'Selected Recordings',
+];
+foreach ( $rich_fields as $rich_key => $rich_title ) {
+	$rich_value = '<p>rich <strong>' . $rich_key . '</strong> <em>text</em></p>';
+	$html_rich  = render_profile_template( profile_fixture( [ $rich_key => [ 'count' => 1, 0 => $rich_value ] ] ) );
+	check( "$rich_title renders no escaped HTML", ! has_escaped_html( $html_rich ) );
+	check( "$rich_title renders as real tags", false !== strpos( $html_rich, $rich_value ) );
+}
+
 // -- linkify() and standalone chrome (WPM-189) -------------------------------
 echo "\nlinkify() (WPM-189):\n";
 // The template defines linkify() globally; it is loaded by the renders above.

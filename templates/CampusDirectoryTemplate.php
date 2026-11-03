@@ -26,6 +26,16 @@ $nameTag = 'h' . (in_array($nameLevel, array(2, 3, 4), true) ? $nameLevel : 3);
 // (table) or an empty container (list/tiled).
 $noRecordsMessage = 'No records found.';
 
+// Rich-text fields use the same sanitizer as the profile page's linkify();
+// everything else stays plain text.
+$renderFieldValue = function ($key, $value) {
+  if (in_array($key, CampusDirectoryAPI::RICH_TEXT_FIELDS, true)) {
+    // The wrapper keeps the label styles on <strong> and <span> off this content.
+    return '<div class="directory-rich-text">' . force_balance_tags(wp_kses_post((string) $value)) . '</div>';
+  }
+  return esc_html($value);
+};
+
 $individualPageUrl = $items['nodeContent']['linkOutToCampusDirectory'] ?
                         'https://campusdirectory.ucsc.edu/cd_detail?uid=' :
                         '?directoryprofilecruzid=';
@@ -69,13 +79,13 @@ $individualPageUrl = $items['nodeContent']['linkOutToCampusDirectory'] ?
                     foreach($items['informationToDisplay'] as $disItem) {
                       foreach($disItem as $key => $value) {
                         echo '<td class="item-info table-renderer">';
-                          echo '<strong>' . esc_html($people[$i][$key][0]) . '</strong>';
+                          echo '<strong>' . esc_html(wp_strip_all_tags((string) $people[$i][$key][0])) . '</strong>';
                           echo '<ul class="inline-list">';
                             if ($value == "Campus Email" || $value == "Other Email") {
                               echo '<li><a href="' . esc_url('mailto:' . $people[$i][$key][0]) . '">' . esc_html($people[$i][$key][0]) . '</a></li>';
                             } else {
                               if ($value == "Email") continue;
-                              echo '<li>' . esc_html($people[$i][$key][0]) . '</li>';
+                              echo '<li>' . $renderFieldValue($key, $people[$i][$key][0]) . '</li>';
                             }
                           echo '</ul>';
                         echo '</td>';
@@ -149,7 +159,7 @@ $individualPageUrl = $items['nodeContent']['linkOutToCampusDirectory'] ?
                                     echo "<li><span><a class=\"u-website\" href='" . esc_url($url) . "'>" . esc_html($label) . "</a></span></li>";
                                   }
                                 } else {
-                                  echo "<li>" . esc_html($people[$i][$key][0]) . "</li>";
+                                  echo "<li>" . $renderFieldValue($key, $people[$i][$key][0]) . "</li>";
                                 }
                               echo '</ul>';
                             echo "</li>";
