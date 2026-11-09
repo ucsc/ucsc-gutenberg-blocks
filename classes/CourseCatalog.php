@@ -19,15 +19,6 @@ class CourseCatalog
         add_action('wp_enqueue_scripts', array($this, 'register_plugin_styles'));
     }
 
-    function restPermissionsCheck() {
-        // Restrict endpoint to only users who have the edit_posts capability.
-        if ( ! current_user_can( 'edit_posts' ) ) {
-            return new WP_Error( 'rest_forbidden', esc_html__( 'You can not view private data.', 'my-text-domain' ), array( 'status' => 401 ) );
-        }
-
-        return true;
-    }
-
     public function register_plugin_styles() {
         $file = '../src/components/CourseCatalog/tablesorter.js';
         wp_register_script(
