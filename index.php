@@ -4,7 +4,7 @@
  * Plugin Name: UCSC Gutenberg Blocks
  * Plugin URI: https://github.com/ucsc/ucsc-gutenberg-blocks
  * Description: Custom UCSC Gutenberg Blocks.
- * Version: 1.2.4
+ * Version: 1.3.0
  * Author: UC Santa Cruz
  * Author URI: https://github.com/ucsc
  */

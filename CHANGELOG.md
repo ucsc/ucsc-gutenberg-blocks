@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [commit-and-tag-version](https://github.com/absolute-version/commit-and-tag-version) for commit guidelines.
 
+## [1.3.0](https://github.com/ucsc/ucsc-gutenberg-blocks/compare/v1.2.4...v1.3.0) (2026-11-11)
+
+
+### Features
+
+* Cache Campus Directory photos as attachment posts to use CampusPress CDN ([4239401](https://github.com/ucsc/ucsc-gutenberg-blocks/commit/42394015b519b9da8d923c7d143a6405129b3d18))
+
 ## [1.2.4](https://github.com/ucsc/ucsc-gutenberg-blocks/compare/v1.2.3...v1.2.4) (2026-11-03)
 
 
