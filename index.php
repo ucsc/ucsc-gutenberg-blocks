@@ -42,6 +42,7 @@ function ucsc_gutenberg_blocks_activate() {
 function ucsc_gutenberg_blocks_deactivate() {
   flush_rewrite_rules();
   delete_option('ucsc_gutenberg_blocks_rwflush');
+  if (class_exists('CampusDirectoryPhotoCache')) CampusDirectoryPhotoCache::unscheduleNightlyPrune();
 }
 
 // Auto-flush rewrite rules once after any deploy that modifies plugin files.

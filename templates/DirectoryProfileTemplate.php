@@ -83,13 +83,16 @@ if (count($profileData)) {
                     <div class="item-image square-img imgLiquid">
                         <?php
                             $profileUid = !empty($profileData['uid'][0]) ? $profileData['uid'][0] : $cruzid;
+                            // The profile entry already holds jpegPhoto, so the
+                            // cache needs no second LDAP lookup.
+                            $imgSrc = '';
                             if (!empty($profileUid)) {
-                                $imgSrc = rest_url('ucscgutenbergblocks/v1/directoryphoto/' . rawurlencode($profileUid));
-                            } else {
-                                $imgSrc = '//static.ucsc.edu/images/icon-slug.jpg';
+                                $photoUrls = (new CampusDirectoryPhotoCache())->urls([$profileUid], [strtolower($profileUid) => $profileData]);
+                                $imgSrc = $photoUrls[strtolower($profileUid)] ?? '';
                             }
+                            if ($imgSrc === '') $imgSrc = '//static.ucsc.edu/images/icon-slug.jpg';
                         ?>
-                        <img src="<?php echo esc_url($imgSrc); ?>" onerror="this.onerror=null;this.src='<?php echo esc_url('//static.ucsc.edu/images/icon-slug.jpg'); ?>';" alt="Portrait of <?php echo esc_attr($profileData["cn"][0]); ?>">
+                        <img class="cd-photo" src="<?php echo esc_url($imgSrc); ?>" onerror="this.onerror=null;this.src='<?php echo esc_url('//static.ucsc.edu/images/icon-slug.jpg'); ?>';" alt="Portrait of <?php echo esc_attr($profileData["cn"][0]); ?>">
                     </div>
                     <div class="item-body">
                         <dl class="item-info">

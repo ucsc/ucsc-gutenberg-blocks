@@ -160,8 +160,29 @@ if ( ! class_exists( 'WP_REST_Response' ) ) {
 require __DIR__ . '/helpers/harness.php';
 require __DIR__ . '/../../index.php';
 
+// WP-Cron, for the nightly photo prune.
+$cron_events = array();
+function wp_next_scheduled( $hook ) {
+	global $cron_events;
+	return $cron_events[ $hook ]['timestamp'] ?? false;
+}
+function wp_schedule_event( $timestamp, $recurrence, $hook ) {
+	global $cron_events;
+	$cron_events[ $hook ] = array( 'timestamp' => $timestamp, 'recurrence' => $recurrence );
+	return true;
+}
+function wp_clear_scheduled_hook( $hook ) {
+	global $cron_events;
+	unset( $cron_events[ $hook ] );
+	return 1;
+}
+function wp_timezone() {
+	return new DateTimeZone( 'America/Los_Angeles' );
+}
+
 function reset_wiring_state() {
-	global $rest_routes, $rewrite_rules, $block_types, $scripts, $styles, $calls, $options, $site_options, $is_multisite, $environment_type;
+	global $rest_routes, $rewrite_rules, $block_types, $scripts, $styles, $calls, $options, $site_options, $is_multisite, $environment_type, $cron_events;
+	$cron_events      = array();
 	$rest_routes      = array();
 	$rewrite_rules    = array();
 	$block_types      = array();
@@ -279,6 +300,25 @@ reset_wiring_state();
 $options['ucsc_gutenberg_blocks_rwflush'] = '123';
 call_user_func( $activation_hooks['deactivate'] );
 check( 'deactivation flushes and deletes the auto-flush marker', in_array( 'flush_rewrite_rules', $calls, true ) && ! isset( $options['ucsc_gutenberg_blocks_rwflush'] ) );
+
+echo "\nnightly directory photo prune:\n";
+
+reset_wiring_state();
+do_hook( 'init' );
+$prune = $cron_events['ucsc_cd_photo_prune'] ?? null;
+check( 'init schedules the nightly photo prune', null !== $prune && 'daily' === $prune['recurrence'] );
+$at = $prune ? ( new DateTime( '@' . $prune['timestamp'] ) )->setTimezone( wp_timezone() ) : null;
+check( 'the prune runs at 3am site time, within the next day', $at && '03:00' === $at->format( 'H:i' ) && $prune['timestamp'] > time() && $prune['timestamp'] <= time() + 86400 );
+$tz = wp_timezone();
+$t  = function ( $local ) use ( $tz ) { return ( new DateTime( $local, $tz ) )->getTimestamp(); };
+check( 'just after midnight, the prune is that same night', $t( '2026-11-11 03:00' ) === CampusDirectoryPhotoCache::nextPruneTime( $t( '2026-11-11 00:05' ) ) );
+check( 'after 3am, the prune is the next night', $t( '2026-11-12 03:00' ) === CampusDirectoryPhotoCache::nextPruneTime( $t( '2026-11-11 03:00' ) ) );
+check( 'the prune hook runs CampusDirectoryPhotoCache::pruneNightly', in_array( array( 'CampusDirectoryPhotoCache', 'pruneNightly' ), $hooks['ucsc_cd_photo_prune'] ?? array(), true ) );
+$cron_events['ucsc_cd_photo_prune']['timestamp'] = 12345;
+do_hook( 'init' );
+check( 'init does not reschedule a prune already scheduled', 12345 === $cron_events['ucsc_cd_photo_prune']['timestamp'] );
+call_user_func( $activation_hooks['deactivate'] );
+check( 'deactivation unschedules the nightly prune', ! isset( $cron_events['ucsc_cd_photo_prune'] ) );
 
 echo "\ndeploy auto-flush (WPM-192):\n";
 

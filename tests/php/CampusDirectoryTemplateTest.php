@@ -187,9 +187,29 @@ $html = render_campus_directory_template(
 check( 'links names to campusdirectory.ucsc.edu when configured', false !== strpos( $html, 'https://campusdirectory.ucsc.edu/cd_detail?uid=jdoe' ) );
 check( 'renders profile photo with escaped alt text', false !== strpos( $html, 'alt="Profile picture of Jane Doe"' ) );
 check( 'renders the escaped static fallback image URL', false !== strpos( $html, '//static.ucsc.edu/images/icon-slug.jpg' ) );
-check( 'renders the photo from the local LDAP photo endpoint', false !== strpos( $html, 'src="https://example.test/wp-json/ucscgutenbergblocks/v1/directoryphoto/jdoe"' ) );
+check( 'without a stored URL, falls back to the REST photo route', false !== strpos( $html, 'src="https://example.test/wp-json/ucscgutenbergblocks/v1/directoryphoto/jdoe"' ) );
 check( 'photo no longer depends on campusdirectory.ucsc.edu', false === strpos( $html, 'photo.php' ) );
 check( 'loads directory photos lazily at their 160px display size (WPM-257)', false !== strpos( $html, 'directoryphoto/jdoe" loading="lazy" width="160" height="160"' ) );
+check( 'marks directory photos with the cd-photo class', false !== strpos( $html, 'class="cd-photo ' ) );
+
+echo "
+stored photo URLs (CampusDirectoryPhotoCache):\n";
+$photo_items = function ( $photoUrls ) {
+	return directory_items_fixture(
+		array(
+			'informationToDisplay' => array( array( 'b64image' => 'Photo' ) ),
+			'photoUrls'            => $photoUrls,
+		)
+	);
+};
+$stored = 'https://example.test/wp-content/uploads/2026/11/cd-photo-jdoe-0123456789ab.jpg';
+$html   = render_campus_directory_template( $photo_items( array( 'jdoe' => $stored ) ) );
+check( 'links the photo to its stored file', false !== strpos( $html, 'src="' . $stored . '" loading="lazy"' ) );
+check( 'a stored photo makes no REST request', false === strpos( $html, 'directoryphoto/' ) );
+$html = render_campus_directory_template( $photo_items( array( 'jdoe' => '' ) ) );
+check( 'a known "no photo" shows the fallback image directly', false !== strpos( $html, 'src="//static.ucsc.edu/images/icon-slug.jpg" loading="lazy"' ) && false === strpos( $html, 'directoryphoto/' ) );
+$html = render_campus_directory_template( $photo_items( array( 'jdoe' => 'javascript:alert(1)' ) ) );
+check( 'escapes the stored URL', false === strpos( $html, 'javascript:' ) );
 
 echo "\nescaping LDAP data and block settings:\n";
 $attack_uid     = 'jdoe"><script>alert("uid")</script>';
