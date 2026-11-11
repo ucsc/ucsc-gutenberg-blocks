@@ -1,9 +1,11 @@
-// When LDAP is slow or unreachable, each directory photo request can hang for
+// Directory photos are stored files (img.cd-photo), but a photo can still
+// come from the directoryphoto REST route (people over a render's LDAP limit,
+// or HTML cached from before the photo cache), and that request can hang for
 // up to the LDAP timeouts before its onerror fallback fires, keeping the page
 // "loading". If no directory photo has loaded after a few seconds, treat the
 // photo source as down and swap the stalled photos to the fallback image. If
 // any photo did load, the source is up and slow photos are left alone.
-const PHOTO_SELECTOR = 'img[src*="/ucscgutenbergblocks/v1/directoryphoto/"]';
+const PHOTO_SELECTOR = 'img.cd-photo, img[src*="/ucscgutenbergblocks/v1/directoryphoto/"]';
 const FALLBACK_SRC = '//static.ucsc.edu/images/icon-slug.jpg';
 const STALL_TIMEOUT_MS = 4000;
 

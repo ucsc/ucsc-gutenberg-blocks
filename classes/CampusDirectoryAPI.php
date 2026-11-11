@@ -55,6 +55,10 @@ class CampusDirectoryAPI {
   // True when the last doLDAPQuery() got no answer from LDAP (down, bind or
   // search failed), so an empty result says nothing about the people asked for.
   public $ldapFailed = false;
+  // Entries with jpegphoto from the last people query that reached LDAP,
+  // keyed by lowercase uid, for CampusDirectoryPhotoCache. Empty when the
+  // list came from cache.
+  public $photoEntries = [];
 
   function __construct($content = [])
   {
@@ -142,20 +146,41 @@ class CampusDirectoryAPI {
 
     // check to see if $q is in cache; list and profile views request
     // different attribute sets, so they must not share cache entries
-    $md5_q = md5($q) . ($profileView ? '_p' : '_l');
+    // A block showing photos also asks for jpegphoto (its own cache entry, so
+    // a list cached without photos never stands in for it).
+    $withPhotos = !$profileView && $this->showsPhotos();
+    $md5_q = md5($q) . ($profileView ? '_p' : ($withPhotos ? '_lp' : '_l'));
     $people = get_transient($md5_q);
     if ($people === false) {
-      // List/table layouts never render jpegphoto or the profile-only
-      // attributes, so restrict what LDAP returns for those queries; profile
-      // and shortcode views (profileView) still need the full entry.
+      // List/table layouts never render the profile-only attributes, so
+      // restrict what LDAP returns for those queries; profile and shortcode
+      // views (profileView) still need the full entry.
       $attributes = $profileView ? [] : $this->listAttributes();
+      if ($withPhotos) $attributes[] = 'jpegphoto';
       $people = $this->doLDAPQuery($q, $arrCruzids, $attributes);
+      // Photos go to the photo cache, never into the cached list.
+      if ($withPhotos) {
+        foreach ($people as $index => $person) {
+          $uid = strtolower($person['uid'][0] ?? '');
+          if (!$this->ldapFailed && $uid !== '') $this->photoEntries[$uid] = $person;
+          unset($people[$index]['jpegphoto']);
+        }
+      }
       // Cache empty results too (briefly), so a no-match filter is not
       // re-queried on every page view. A failed lookup is not cached: it is not
       // an answer, and doLDAPQuery's ucsc_cd_ldap_down back-off covers it.
       if (!$this->ldapFailed) set_transient($md5_q, $people, count($people) ? 600 : 60);
     }
     return [$people, $q];
+  }
+
+  // True when this block's chosen fields include Photo.
+  public function showsPhotos()
+  {
+    $types = ($this->nodeContent['pageLayout'] ?? '') === 'table'
+      ? ($this->nodeContent['objInformationTypesTable'] ?? [])
+      : ($this->nodeContent['objInformationTypes'] ?? []);
+    return !empty($types['Photo']);
   }
 
   // Trim, drop blanks, escape, and OR-combine uids into an LDAP clause.

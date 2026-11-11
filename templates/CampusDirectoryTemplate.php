@@ -172,15 +172,21 @@ $individualPageUrl = $items['nodeContent']['linkOutToCampusDirectory'] ?
                 <?php
                   if ($displayPhoto) {
                     $profileUid = !empty($people[$i]['uid'][0]) ? $people[$i]['uid'][0] : '';
-                    if (!empty($profileUid)) {
-                      $imgSrc = rest_url('ucscgutenbergblocks/v1/directoryphoto/' . rawurlencode($profileUid));
+                    // Stored photo URL from CampusDirectoryPhotoCache; '' is a
+                    // known "no photo", so it gets the fallback without a request.
+                    $photoKey = strtolower($profileUid);
+                    if (empty($profileUid)) {
+                      $imgSrc = '';
+                    } elseif (isset($items['photoUrls'][$photoKey])) {
+                      $imgSrc = $items['photoUrls'][$photoKey];
                     } else {
-                      $imgSrc = '//static.ucsc.edu/images/icon-slug.jpg';
+                      $imgSrc = rest_url('ucscgutenbergblocks/v1/directoryphoto/' . rawurlencode($profileUid));
                     }
+                    if ($imgSrc === '') $imgSrc = '//static.ucsc.edu/images/icon-slug.jpg';
                     if ($items['linkToProfile']) echo '<a class="u-url square-img" href="' . esc_url($individualPageUrl . rawurlencode($people[$i]['uid'][0])) . '">';
                     $fallbackSrc = esc_url('//static.ucsc.edu/images/icon-slug.jpg');
                     // Lazy: a long listing must not request every photo at once (WPM-257).
-                    echo '<img src="' . esc_url($imgSrc) . '" loading="lazy" width="160" height="160" onerror="this.onerror=null;this.src=\'' . $fallbackSrc . '\';" class="item-image square-img imgLiquid imgLiquid_bgSize imgLiquid_ready" alt="Profile picture of ' . esc_attr($people[$i]['cn'][0]) . '" />';
+                    echo '<img src="' . esc_url($imgSrc) . '" loading="lazy" width="160" height="160" onerror="this.onerror=null;this.src=\'' . $fallbackSrc . '\';" class="cd-photo item-image square-img imgLiquid imgLiquid_bgSize imgLiquid_ready" alt="Profile picture of ' . esc_attr($people[$i]['cn'][0]) . '" />';
                     if ($items['linkToProfile']) echo '</a>';
                   }
                 ?>

@@ -46,6 +46,20 @@ describe('Campus Directory photo fallback', () => {
     expect(first.onerror).toBeNull();
   });
 
+  it('also watches stored photos marked with the cd-photo class', () => {
+    const img = document.createElement('img');
+    img.className = 'cd-photo';
+    img.setAttribute('src', 'https://example.test/wp-content/uploads/2026/11/cd-photo-jdoe-abc.jpg');
+    Object.defineProperty(img, 'complete', { configurable: true, get: () => false });
+    Object.defineProperty(img, 'naturalWidth', { configurable: true, get: () => 0 });
+    document.body.appendChild(img);
+    loadScript();
+
+    jest.advanceTimersByTime(4000);
+
+    expect(img.getAttribute('src')).toBe(FALLBACK_SRC);
+  });
+
   it('leaves photos alone before the stall timeout', () => {
     const photo = addPhoto('jdoe');
     loadScript();

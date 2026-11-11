@@ -2,14 +2,17 @@
 
 
 include_once(plugin_dir_path(__FILE__) . 'CampusDirectoryAPI.php');
+include_once(plugin_dir_path(__FILE__) . 'CampusDirectoryPhotoCache.php');
 
 class CampusDirectory
 {
-  // Where the last getDirectoryPhoto() answer came from.
+  // Where the last directoryPhoto() answer came from.
   public $photoSource = '';
 
   function __construct()
   {
+    CampusDirectoryPhotoCache::hideFromMediaLibrary();
+    CampusDirectoryPhotoCache::scheduleNightlyPrune();
     add_action('init', array($this, 'renderFrontend'));
     add_action('init', array($this, 'add_directory_profile_rewrite'));
     add_filter('query_vars', function($query_vars) {
@@ -43,64 +46,38 @@ class CampusDirectory
     });
   }
 
-  // Serve a person's photo from LDAP (jpegPhoto) instead of linking to
-  // campusdirectory.ucsc.edu/photo.php, which only answers on campus/VPN.
-  // X-Directory-Photo-Source says where the answer came from (ldap, none,
-  // not-listed, cache, or unavailable), so one request on a live site shows
-  // which source works.
+  // Pages link straight to stored photos (CampusDirectoryPhotoCache). This
+  // route is only for photos not stored yet (over a render's write limit) and
+  // HTML cached from before the photo cache: it reads the person's entry with
+  // the profile query, stores the photo, and redirects to it.
+  // X-Directory-Photo-Source says where the answer came from.
   function directoryPhoto($request) {
-    $photo = $this->getDirectoryPhoto($request['uid']);
-    header('X-Directory-Photo-Source: ' . $this->photoSource);
-    if ($photo === '') {
-      // Browsers keep a real "no photo" for an hour, not an LDAP failure
-      // (WPM-238) or a lookup LDAP returned no entry for (WPM-257).
-      if ($this->photoSource === 'none' || $this->photoSource === 'cache') header('Cache-Control: public, max-age=3600');
-      wp_redirect('https://static.ucsc.edu/images/icon-slug.jpg', 302);
-      exit;
+    $uid = strtolower((string) $request['uid']);
+    $api = new CampusDirectoryAPI(['automatedFeeds' => false]);
+    $person = $api->getCampusDirData($uid, true)[0][0] ?? null;
+    if ($person) {
+      $cache = new CampusDirectoryPhotoCache();
+      $url = $cache->urls([$uid], [$uid => $person])[$uid] ?? '';
+      $this->photoSource = $cache->photoSources[$uid] ?? '';
+    } else {
+      // LDAP down, or the person is not publicly listed (WPM-230, WPM-238).
+      $url = '';
+      $this->photoSource = $api->ldapFailed ? 'unavailable' : 'not-listed';
     }
-    header('Content-Type: image/jpeg');
-    header('Content-Length: ' . strlen($photo));
-    header('Cache-Control: public, max-age=3600');
-    echo $photo;
+    header('X-Directory-Photo-Source: ' . $this->photoSource);
+    // Browsers keep a real answer for an hour, not an LDAP failure (WPM-238)
+    // or a lookup LDAP returned no entry for (WPM-257).
+    if (in_array($this->photoSource, ['ldap', 'none'], true)) header('Cache-Control: public, max-age=3600');
+    wp_redirect($url !== '' && strpos($url, '/directoryphoto/') === false ? $url : CampusDirectoryPhotoCache::FALLBACK_SRC, 302);
     exit;
   }
 
-  // Raw JPEG bytes for $uid, or '' when the person has no LDAP photo, is not
-  // publicly listed, or LDAP failed. LDAP only returns publicly listed people,
-  // so nobody else's photo is ever served, and campusdirectory photo.php is
-  // never asked: it does not check listing and only mirrors LDAP's jpegPhoto
-  // (WPM-230). Photos are cached for 4 hours (and an hour in browsers), so a
-  // photo removed or hidden in the directory stops showing within about 5 hours
-  // (WPM-231). Misses are cached for an hour (as '') so a person without a photo
-  // does not cost an LDAP lookup on every page view (WPM-233).
-  function getDirectoryPhoto($uid) {
-    $key = 'ucsc_cd_photo_' . md5($uid);
-    $cached = get_transient($key);
-    if ($cached !== false) {
-      $this->photoSource = 'cache';
-      return base64_decode($cached);
+  // True when the block shows photos.
+  function displaysPhoto($informationToDisplay) {
+    foreach ((array) $informationToDisplay as $field) {
+      if (is_array($field) && array_key_exists('b64image', $field)) return true;
     }
-
-    $campusDirectoryAPI = new CampusDirectoryAPI(['automatedFeeds' => false]);
-    $people = $campusDirectoryAPI->getCampusDirData($uid, true)[0];
-    $photo = !empty($people[0]['jpegphoto'][0]) ? $people[0]['jpegphoto'][0] : '';
-    // LDAP not answering is not "no photo": cache nothing, so photos come back
-    // as soon as LDAP does (WPM-238).
-    if ($photo === '' && $campusDirectoryAPI->ldapFailed) {
-      $this->photoSource = 'unavailable';
-      return '';
-    }
-    // No entry at all (not publicly listed, or an answer cut short) is not a
-    // known "no photo": cache nothing here, getCampusDirData() already keeps an
-    // empty result for a minute (WPM-257).
-    if (empty($people)) {
-      $this->photoSource = 'not-listed';
-      return '';
-    }
-    $this->photoSource = $photo === '' ? 'none' : 'ldap';
-    if ($photo !== '') set_transient($key, base64_encode($photo), 4 * HOUR_IN_SECONDS);
-    else set_transient($key, '', HOUR_IN_SECONDS);
-    return $photo;
+    return false;
   }
 
   // A CruzID LDAP does not return gets a real 404 status instead of a 200
@@ -221,6 +198,12 @@ class CampusDirectory
     else $attributes['objInformationTypesTable'] = array();
     $campusDirectoryAPI = new CampusDirectoryAPI($attributes);
     $items = $campusDirectoryAPI->setDirectoryData();
+    // One batched lookup for every photo on the page, so each <img> links to
+    // a stored file instead of a REST request.
+    if ($this->displaysPhoto($items['informationToDisplay'] ?? [])) {
+      $uids = array_map(function ($person) { return $person['uid'][0] ?? ''; }, (array) ($items['items'] ?? []));
+      $items['photoUrls'] = (new CampusDirectoryPhotoCache())->urls($uids, $campusDirectoryAPI->photoEntries);
+    }
     // WPM-92: authors pick the person-name heading level so it fits the page outline.
     $headingLevel = (int) ($attributes['headingLevel'] ?? 3);
     ob_start();

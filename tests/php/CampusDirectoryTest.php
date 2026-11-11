@@ -235,6 +235,7 @@ require __DIR__ . '/../../classes/CampusDirectory.php';
 // WPM-117: Use the shared instrumented harness. The harness guards all its stubs
 // with function_exists, so our custom test-specific stubs above win.
 require __DIR__ . '/helpers/harness.php';
+require __DIR__ . '/helpers/media-store.php';
 
 function campus_directory_api_fixture( $overrides = array() ) {
 	$defaults = array(
@@ -323,6 +324,7 @@ function reset_test_state() {
 	$transients         = array();
 	$ldap_handshake_ok    = true;
 	$ldap_handshake_calls = array();
+	reset_media_store();
 }
 
 /**
@@ -1101,117 +1103,277 @@ $api = campus_directory_api_fixture(
 $api->getCampusDirData( '' );
 check( 'scoped automated feed (dept=MATH) applies the 1000-record LDAP ceiling', ldap_size_limit_was_set_to( 1000 ) );
 
-echo "directory photo tests (getDirectoryPhoto):\n";
+echo "directory photo cache tests (CampusDirectoryPhotoCache):\n";
 
 if ( ! defined( 'HOUR_IN_SECONDS' ) ) define( 'HOUR_IN_SECONDS', 3600 );
 $photo_bytes = "\xFF\xD8\xFF\xE0jpeg\x00bytes";
-$photo_key   = 'ucsc_cd_photo_' . md5( 'jdoe' );
+$new_bytes   = "\xFF\xD8\xFF\xE0new\x00photo";
+$K_UID       = CampusDirectoryPhotoCache::META_UID;
+$K_MD5       = CampusDirectoryPhotoCache::META_HASH;
+$K_CHECKED   = CampusDirectoryPhotoCache::META_LAST_CHECKED;
+$long_ago    = time() - HOUR_IN_SECONDS;
+
+function stored_ids() {
+	global $media_store;
+	return array_keys( $media_store['posts'] );
+}
+function photo_entry( $uid, $bytes = null ) {
+	$attrs = array( 'uid' => array( $uid ) );
+	if ( null !== $bytes ) $attrs['jpegphoto'] = array( $bytes );
+	return ldap_entry_fixture( $attrs );
+}
+function no_photo_remembered( $uid ) {
+	global $media_store;
+	return isset( $media_store['site_transients'][ CampusDirectoryPhotoCache::noPhotoKey( $uid ) ] );
+}
 
 reset_test_state();
-$ldap_entries = array( ldap_entry_fixture( array( 'uid' => array( 'jdoe' ), 'jpegphoto' => array( $photo_bytes ) ) ) );
-$photo = $campus_directory->getDirectoryPhoto( 'jdoe' );
-check( 'returns the raw jpegPhoto bytes from LDAP', $photo_bytes === $photo );
-check( 'reports ldap as the photo source', 'ldap' === $campus_directory->photoSource );
-check( 'looks the photo up by uid', isset( $ldap_searches[0] ) && false !== strpos( $ldap_searches[0]['filter'], '(uid=jdoe)' ) );
-check( 'caches the photo base64-encoded for 4 hours, so a removed photo stops showing soon (WPM-231)',
-	isset( $transients[ $photo_key ] )
-	&& base64_encode( $photo_bytes ) === $transients[ $photo_key ]['value']
-	&& 4 * HOUR_IN_SECONDS === $transients[ $photo_key ]['expiration']
+$cache = new CampusDirectoryPhotoCache();
+$urls  = $cache->urls( array( 'jdoe' ), array( 'jdoe' => photo_entry( 'jdoe', $photo_bytes ) ) );
+$id    = stored_ids()[0] ?? null;
+check( 'stores a new photo as one attachment', 1 === count( stored_ids() ) && 1 === count( $media_store['uploads'] ) );
+check( 'writes the exact LDAP bytes, NUL included', $photo_bytes === ( $media_store['uploads'][0]['bits'] ?? null ) );
+check( 'links to the stored file', isset( $urls['jdoe'] ) && $urls['jdoe'] === $media_store['posts'][ $id ]['url'] );
+check( 'file name carries part of the md5, so a changed photo gets a new URL', 'cd-photo-jdoe-' . substr( md5( $photo_bytes ), 0, 12 ) . '.jpg' === $media_store['uploads'][0]['name'] );
+check( 'records uid, md5, and check time on the attachment',
+	'jdoe' === $media_store['posts'][ $id ]['meta'][ $K_UID ]
+	&& md5( $photo_bytes ) === $media_store['posts'][ $id ]['meta'][ $K_MD5 ]
+	&& abs( time() - $media_store['posts'][ $id ]['meta'][ $K_CHECKED ] ) < 5
 );
-
-// Cached photo: drop every other cache entry so only the photo cache can
-// answer, then confirm LDAP is not queried again.
-$transients    = array( $photo_key => $transients[ $photo_key ] );
-$ldap_searches = array();
-$photo = $campus_directory->getDirectoryPhoto( 'jdoe' );
-check( 'serves a cached photo without querying LDAP', $photo_bytes === $photo && 0 === count( $ldap_searches ) );
-check( 'reports cache as the source of a cached photo', 'cache' === $campus_directory->photoSource );
+check( 'generates no intermediate sizes', array() === $media_store['posts'][ $id ]['metadata']['sizes'] );
+check( 'stores photos as private attachments, so the public media API does not list them', 'private' === $media_store['posts'][ $id ]['args']['post_status'] );
+check( 'the cache never queries LDAP itself', 0 === count( $ldap_searches ) );
+check( 'reports ldap as the source', 'ldap' === $cache->photoSources['jdoe'] );
 
 reset_test_state();
-$ldap_entries = array( ldap_entry_fixture( array( 'uid' => array( 'jdoe' ) ) ) );
-$photo = $campus_directory->getDirectoryPhoto( 'jdoe' );
-check( 'returns empty when the person has no jpegPhoto', '' === $photo );
-check( 'caches a missing photo as empty for an hour',
-	isset( $transients[ $photo_key ] ) && '' === $transients[ $photo_key ]['value'] && HOUR_IN_SECONDS === $transients[ $photo_key ]['expiration']
+$id = seed_stored_photo( 'jdoe', $photo_bytes, $long_ago );
+$urls = ( new CampusDirectoryPhotoCache() )->urls( array( 'jdoe' ), array( 'jdoe' => photo_entry( 'jdoe', $photo_bytes ) ) );
+check( 'an unchanged photo is not rewritten', 0 === count( $media_store['uploads'] ) && array( $id ) === stored_ids() );
+check( 'an unchanged photo keeps its URL', $media_store['posts'][ $id ]['url'] === $urls['jdoe'] );
+check( 'an unchanged photo gets a new check time', $media_store['posts'][ $id ]['meta'][ $K_CHECKED ] > $long_ago );
+
+reset_test_state();
+$id = seed_stored_photo( 'jdoe', $photo_bytes, time() - 60 );
+( new CampusDirectoryPhotoCache() )->urls( array( 'jdoe' ), array( 'jdoe' => photo_entry( 'jdoe', $photo_bytes ) ) );
+check( 'a just-confirmed unchanged photo does not rewrite its check time', time() - 60 === $media_store['posts'][ $id ]['meta'][ $K_CHECKED ] );
+
+reset_test_state();
+$old  = seed_stored_photo( 'jdoe', $photo_bytes, $long_ago );
+$urls = ( new CampusDirectoryPhotoCache() )->urls( array( 'jdoe' ), array( 'jdoe' => photo_entry( 'jdoe', $new_bytes ) ) );
+$ids  = stored_ids();
+check( 'a changed photo is stored anew', 1 === count( $media_store['uploads'] ) && $new_bytes === $media_store['uploads'][0]['bits'] );
+check( 'a changed photo replaces the old attachment', array( $old ) === $media_store['deleted'] && 1 === count( $ids ) && $ids[0] !== $old );
+check( 'a changed photo gets a new URL', false !== strpos( $urls['jdoe'], substr( md5( $new_bytes ), 0, 12 ) ) );
+
+echo "directory photo cache: an entry without jpegPhoto deletes (photo removed or hidden):\n";
+
+reset_test_state();
+$old   = seed_stored_photo( 'jdoe', $photo_bytes, time() - 60 );
+$cache = new CampusDirectoryPhotoCache();
+$urls  = $cache->urls( array( 'jdoe' ), array( 'jdoe' => photo_entry( 'jdoe' ) ) );
+check( 'deletes the stored photo, however recently confirmed', array( $old ) === $media_store['deleted'] && array() === stored_ids() );
+check( 'gives no URL', '' === $urls['jdoe'] );
+check( 'remembers "no photo" for an hour',
+	no_photo_remembered( 'jdoe' )
+	&& HOUR_IN_SECONDS === $media_store['site_transients'][ CampusDirectoryPhotoCache::noPhotoKey( 'jdoe' ) ]['expiration']
 );
-check( 'reports none when neither LDAP nor campusdirectory has a photo', 'none' === $campus_directory->photoSource );
-
-$transients       = array( $photo_key => $transients[ $photo_key ] );
-$ldap_searches    = array();
-$remote_get_calls = array();
-$photo = $campus_directory->getDirectoryPhoto( 'jdoe' );
-check( 'serves a cached miss without LDAP or campusdirectory', '' === $photo && 0 === count( $ldap_searches ) && 0 === count( $remote_get_calls ) );
+check( 'reports none', 'none' === $cache->photoSources['jdoe'] );
 
 reset_test_state();
-$hidden = ldap_entry_fixture( array( 'uid' => array( 'jdoe' ), 'jpegphoto' => array( $photo_bytes ) ) );
+$media_store['site_transients'][ CampusDirectoryPhotoCache::noPhotoKey( 'jdoe' ) ] = array( 'value' => 1, 'expiration' => 3600 );
+( new CampusDirectoryPhotoCache() )->urls( array( 'jdoe' ), array( 'jdoe' => photo_entry( 'jdoe', $photo_bytes ) ) );
+check( 'a newly added photo clears the remembered "no photo"', ! no_photo_remembered( 'jdoe' ) );
+
+echo "directory photo cache without an entry (people list served from cache):\n";
+
+reset_test_state();
+$id    = seed_stored_photo( 'jdoe', $photo_bytes, $long_ago );
+$cache = new CampusDirectoryPhotoCache();
+$urls  = $cache->urls( array( 'jdoe' ) );
+check( 'uses the stored photo, with no LDAP and no write', $media_store['posts'][ $id ]['url'] === $urls['jdoe'] && 0 === count( $ldap_searches ) && 0 === count( $media_store['uploads'] ) );
+check( 'reports media', 'media' === $cache->photoSources['jdoe'] );
+
+reset_test_state();
+$media_store['site_transients'][ CampusDirectoryPhotoCache::noPhotoKey( 'jdoe' ) ] = array( 'value' => 1, 'expiration' => 3600 );
+$urls = ( new CampusDirectoryPhotoCache() )->urls( array( 'jdoe' ) );
+check( 'a remembered "no photo" shows the fallback without a REST request', '' === $urls['jdoe'] );
+
+reset_test_state();
+$cache = new CampusDirectoryPhotoCache();
+$urls  = $cache->urls( array( 'jdoe' ) );
+check( 'nothing stored and nothing remembered links to the REST route', 'https://example.test/wp-json/ucscgutenbergblocks/v1/directoryphoto/jdoe' === $urls['jdoe'] );
+check( 'reports unknown', 'unknown' === $cache->photoSources['jdoe'] );
+
+reset_test_state();
+$urls = ( new CampusDirectoryPhotoCache() )->urls( array( 'JDoe', '', ' jdoe ' ), array( 'JDOE' => photo_entry( 'jdoe', $photo_bytes ) ) );
+check( 'answers each uid once, lowercased, ignoring blanks', array( 'jdoe' ) === array_keys( $urls ) && 1 === count( $media_store['uploads'] ) );
+
+echo "directory photo cache write limit:\n";
+
+reset_test_state();
+$max     = CampusDirectoryPhotoCache::MAX_WRITES_PER_RENDER;
+$entries = array();
+for ( $i = 0; $i <= $max; $i++ ) $entries[ 'p' . $i ] = photo_entry( 'p' . $i, $photo_bytes . $i );
+$changed = seed_stored_photo( 'p' . ( $max + 1 ), $photo_bytes, $long_ago );
+$entries[ 'p' . ( $max + 1 ) ] = photo_entry( 'p' . ( $max + 1 ), $new_bytes );
+$cache = new CampusDirectoryPhotoCache();
+$urls  = $cache->urls( array_keys( $entries ), $entries );
+check( "one render writes at most $max photos", $max === count( $media_store['uploads'] ) );
+check( 'a new photo over the limit links to the REST route', 'https://example.test/wp-json/ucscgutenbergblocks/v1/directoryphoto/p' . $max === $urls[ 'p' . $max ] );
+check( 'a changed photo over the limit keeps showing the old one', $media_store['posts'][ $changed ]['url'] === $urls[ 'p' . ( $max + 1 ) ] );
+check( 'reports deferred', 'deferred' === $cache->photoSources[ 'p' . $max ] );
+
+reset_test_state();
+$media_store['upload_error'] = 'disk full';
+$cache = new CampusDirectoryPhotoCache();
+$urls  = @$cache->urls( array( 'jdoe' ), array( 'jdoe' => photo_entry( 'jdoe', $photo_bytes ) ) );
+check( 'a failed write gives no URL instead of a broken one', '' === $urls['jdoe'] && 'store-failed' === $cache->photoSources['jdoe'] );
+
+reset_test_state();
+$older = seed_stored_photo( 'jdoe', $photo_bytes, $long_ago );
+$newer = seed_stored_photo( 'jdoe', $photo_bytes, $long_ago );
+$urls  = ( new CampusDirectoryPhotoCache() )->urls( array( 'jdoe' ) );
+check( 'a duplicate left by two simultaneous renders is deleted, newest kept', array( $older ) === $media_store['deleted'] && $media_store['posts'][ $newer ]['url'] === $urls['jdoe'] );
+
+echo "directory photo cache store site tests:\n";
+
+reset_test_state();
+$media_store['multisite'] = true;
+$media_store['main_site'] = 1;
+$media_store['blog']      = 7;
+( new CampusDirectoryPhotoCache() )->urls( array( 'jdoe', 'nobody' ), array( 'jdoe' => photo_entry( 'jdoe', $photo_bytes ) ) );
+check( 'on a network, photos are stored on the main site', 1 === ( $media_store['uploads'][0]['blog'] ?? null ) && array( 1 ) === array_unique( $media_store['get_posts_blogs'] ) );
+check( 'switches back to the viewing site afterwards', 7 === $media_store['blog'] && array() === $media_store['blog_stack'] );
+check( 'REST URLs come from the viewing site, not the store site', array( 7 ) === array_unique( $media_store['rest_url_blogs'] ) );
+$media_store['blog'] = 9;
+$urls = ( new CampusDirectoryPhotoCache() )->urls( array( 'jdoe' ) );
+check( 'a second site reuses the photo the first one stored', 1 === count( $media_store['uploads'] ) && false !== strpos( $urls['jdoe'], '/site-1/' ) );
+
+reset_test_state();
+$media_store['multisite'] = true;
+$media_store['blog']      = 7;
+$media_store['filters']['ucsc_cd_photo_store_site_id'] = function () { return 3; };
+( new CampusDirectoryPhotoCache() )->urls( array( 'jdoe' ), array( 'jdoe' => photo_entry( 'jdoe', $photo_bytes ) ) );
+check( 'the ucsc_cd_photo_store_site_id filter picks the store site', 3 === ( $media_store['uploads'][0]['blog'] ?? null ) );
+
+reset_test_state();
+( new CampusDirectoryPhotoCache() )->urls( array( 'jdoe' ), array( 'jdoe' => photo_entry( 'jdoe', $photo_bytes ) ) );
+check( 'a single site stores photos in its own Media Library without switching', array() === $media_store['switches'] && 1 === count( $media_store['uploads'] ) );
+
+echo "nightly prune tests (WP-Cron):\n";
+
+reset_test_state();
+$gone = seed_stored_photo( 'gone', $photo_bytes, time() - 2 * 86400 );
+( new CampusDirectoryPhotoCache() )->urls( array( 'gone' ) );
+check( 'a page view never prunes', isset( $media_store['posts'][ $gone ] ) && array() === $media_store['deleted'] );
+
+reset_test_state();
+$gone = seed_stored_photo( 'gone', $photo_bytes, time() - 2 * 86400 );
+$kept = seed_stored_photo( 'kept', $photo_bytes, time() - 12 * HOUR_IN_SECONDS );
+$deleted = CampusDirectoryPhotoCache::pruneNightly();
+check( 'deletes photos no entry has confirmed for a day', in_array( $gone, $media_store['deleted'], true ) && 1 === $deleted );
+check( 'keeps photos confirmed within the day', isset( $media_store['posts'][ $kept ] ) );
+$gone2 = seed_stored_photo( 'gone2', $photo_bytes, time() - 2 * 86400 );
+check( 'only the first site\'s job each night does the work', 0 === CampusDirectoryPhotoCache::pruneNightly() && isset( $media_store['posts'][ $gone2 ] ) );
+
+reset_test_state();
+$batch = CampusDirectoryPhotoCache::PRUNE_BATCH;
+for ( $i = 0; $i < $batch * 2 + 5; $i++ ) seed_stored_photo( 'old' . $i, $photo_bytes, time() - 2 * 86400 );
+check( 'deletes every stale photo in one run, past a single batch', $batch * 2 + 5 === CampusDirectoryPhotoCache::pruneNightly() && array() === stored_ids() );
+
+reset_test_state();
+for ( $i = 0; $i < $batch; $i++ ) $ids[ $i ] = seed_stored_photo( 'old' . $i, $photo_bytes, time() - 2 * 86400 );
+$media_store['delete_fails'] = array( $ids[0] );
+$deleted = CampusDirectoryPhotoCache::pruneNightly();
+check( 'a failed delete stops the run instead of looping', $batch - 1 === $deleted );
+
+reset_test_state();
+$media_store['multisite'] = true;
+$media_store['blog']      = 7;
+$gone = seed_stored_photo( 'gone', $photo_bytes, time() - 2 * 86400, 1 );
+CampusDirectoryPhotoCache::pruneNightly();
+check( 'a job fired on any site prunes the main site\'s photos', in_array( $gone, $media_store['deleted'], true ) );
+check( 'and switches back afterwards', 7 === $media_store['blog'] && array() === $media_store['blog_stack'] );
+
+echo "people query carries photos for blocks that show them:\n";
+
+reset_test_state();
+$ldap_entries = array( ldap_entry_fixture( array( 'uid' => array( 'JSmith' ), 'cn' => array( 'Jan Smith' ), 'jpegphoto' => array( $photo_bytes ) ) ) );
+$api  = campus_directory_api_fixture( array( 'cruzidList' => 'JSmith', 'objInformationTypes' => array( 'Photo' => true ) ) );
+$data = $api->getCampusDirData( 'JSmith' );
+check( 'a block showing photos asks for jpegphoto in its one people query', 1 === count( $ldap_searches ) && in_array( 'jpegphoto', $ldap_searches[0]['attributes'], true ) );
+check( 'hands the photo over for the cache', $photo_bytes === ( $api->photoEntries['jsmith']['jpegphoto'][0] ?? null ) );
+check( 'never returns or caches photo bytes with the people list',
+	! isset( $data[0][0]['jpegphoto'] ) && ! isset( $transients[ md5( $data[1] ) . '_lp' ]['value'][0]['jpegphoto'] )
+	&& isset( $transients[ md5( $data[1] ) . '_lp' ] )
+);
+$api2 = campus_directory_api_fixture( array( 'cruzidList' => 'JSmith', 'objInformationTypes' => array( 'Photo' => true ) ) );
+$api2->getCampusDirData( 'JSmith' );
+check( 'a cached people list hands over no photos', array() === $api2->photoEntries && 1 === count( $ldap_searches ) );
+
+reset_test_state();
+$transients = array();
+$ldap_entries = array( ldap_entry_fixture( array( 'uid' => array( 'jsmith' ) ) ) );
+campus_directory_api_fixture()->getCampusDirData( 'jsmith' );
+$api = campus_directory_api_fixture( array( 'objInformationTypes' => array( 'Photo' => true ) ) );
+$api->getCampusDirData( 'jsmith' );
+check( 'a list cached without photos never stands in for a block showing them', 2 === count( $ldap_searches ) && in_array( 'jpegphoto', $ldap_searches[1]['attributes'], true ) );
+
+reset_test_state();
+$ldap_entries = array( ldap_entry_fixture( array( 'uid' => array( 'jsmith' ), 'jpegphoto' => array( $photo_bytes ) ) ) );
+$api = campus_directory_api_fixture( array( 'pageLayout' => 'table', 'objInformationTypesTable' => array( 'Photo' => true ) ) );
+$api->getCampusDirData( 'jsmith' );
+check( 'table layouts showing photos ask for jpegphoto too', in_array( 'jpegphoto', $ldap_searches[0]['attributes'] ?? array(), true ) );
+
+reset_test_state();
+$hidden = ldap_entry_fixture( array( 'uid' => array( 'jsmith' ), 'jpegphoto' => array( $photo_bytes ) ) );
 $hidden['ucscpersonpubdisplay'] = array( 'FALSE', 'count' => 1 );
 $ldap_entries = array( $hidden );
-$photo = $campus_directory->getDirectoryPhoto( 'jdoe' );
-check( 'does not serve the photo of a person who is not publicly listed', '' === $photo );
+$api = campus_directory_api_fixture( array( 'objInformationTypes' => array( 'Photo' => true ) ) );
+$api->getCampusDirData( 'jsmith' );
+check( 'never hands over the photo of a person who is not publicly listed', array() === $api->photoEntries );
 
 reset_test_state();
-$ldap_bind_result = false;
-$photo = $campus_directory->getDirectoryPhoto( 'jdoe' );
-check( 'returns empty when the LDAP bind fails', '' === $photo );
+$ldap_errno_result = 3;
+$ldap_entries      = array( ldap_entry_fixture( array( 'uid' => array( 'jsmith' ), 'jpegphoto' => array( $photo_bytes ) ) ) );
+$api = campus_directory_api_fixture( array( 'objInformationTypes' => array( 'Photo' => true ) ) );
+$api->getCampusDirData( 'jsmith' );
+check( 'a people query cut short hands over no photos', array() === $api->photoEntries );
 
-echo "directory photo never asks campusdirectory photo.php tests (WPM-230):\n";
+echo "theHTML photo tests:\n";
 
-// photo.php does not check public listing, so asking it would expose people
-// who are not publicly listed. Every case below offers a JPEG from photo.php;
-// none may fetch it.
-$photo_php_has_photo = array( 'code' => 200, 'body' => $photo_bytes );
-
-reset_test_state();
-$remote_get_response = $photo_php_has_photo;
-$photo = $campus_directory->getDirectoryPhoto( 'jdoe' );
-check( 'a uid LDAP does not return gets no photo and no campusdirectory request', '' === $photo && 0 === count( $remote_get_calls ) );
-check( 'reports not-listed for a uid LDAP does not return', 'not-listed' === $campus_directory->photoSource );
+$photo_block = campus_directory_theHTML_attributes_fixture( array( 'automatedFeeds' => false, 'cruzidList' => 'jdoe', 'strInformationTypes' => json_encode( array( 'Photo' => true ) ) ) );
 
 reset_test_state();
-$hidden = ldap_entry_fixture( array( 'uid' => array( 'jdoe' ) ) );
-$hidden['ucscpersonpubdisplay'] = array( 'FALSE', 'count' => 1 );
-$ldap_entries        = array( $hidden );
-$remote_get_response = $photo_php_has_photo;
-$photo = $campus_directory->getDirectoryPhoto( 'jdoe' );
-check( 'a person who is not publicly listed gets no photo and no campusdirectory request', '' === $photo && 0 === count( $remote_get_calls ) );
+$ldap_entries = array( ldap_entry_fixture( array( 'uid' => array( 'jdoe' ), 'cn' => array( 'Jane Doe' ), 'jpegphoto' => array( $photo_bytes ) ) ) );
+$html = $campus_directory->theHTML( $photo_block );
+$id   = stored_ids()[0] ?? null;
+check( 'stores photos from the people query, with no second LDAP query', 1 === count( $ldap_searches ) && 1 === count( $media_store['uploads'] ) );
+check( 'links each photo to its stored file', $id && false !== strpos( $html, 'src="' . $media_store['posts'][ $id ]['url'] . '"' ) );
+check( 'stored photos carry the cd-photo class', false !== strpos( $html, 'class="cd-photo ' ) );
+check( 'no photo goes through the REST route', false === strpos( $html, 'directoryphoto/' ) );
+$ldap_searches = array();
+$html = $campus_directory->theHTML( $photo_block );
+check( 'a cached render uses the stored photo with no LDAP at all', 0 === count( $ldap_searches ) && false !== strpos( $html, 'src="' . $media_store['posts'][ $id ]['url'] . '"' ) );
 
 reset_test_state();
-$ldap_bind_result    = false;
-$remote_get_response = $photo_php_has_photo;
-$photo = $campus_directory->getDirectoryPhoto( 'jdoe' );
-check( 'a failed LDAP bind gets no photo and no campusdirectory request', '' === $photo && 0 === count( $remote_get_calls ) );
+$ldap_entries = array( ldap_entry_fixture( array( 'uid' => array( 'jdoe' ), 'cn' => array( 'Jane Doe' ) ) ) );
+$old  = seed_stored_photo( 'jdoe', $photo_bytes, time() - 60 );
+$html = $campus_directory->theHTML( $photo_block );
+check( 'a photo hidden in the directory is deleted when the people list refreshes', array( $old ) === $media_store['deleted'] );
+check( 'and the page shows the fallback image', false !== strpos( $html, 'src="//static.ucsc.edu/images/icon-slug.jpg" loading="lazy"' ) );
 
 reset_test_state();
-$ldap_entries        = array( ldap_entry_fixture( array( 'uid' => array( 'jdoe' ) ) ) );
-$remote_get_response = $photo_php_has_photo;
-$photo = $campus_directory->getDirectoryPhoto( 'jdoe' );
-check( 'a listed person without an LDAP photo gets no photo and no campusdirectory request', '' === $photo && 0 === count( $remote_get_calls ) );
-
-reset_test_state();
-$ldap_entries = array( ldap_entry_fixture( array( 'uid' => array( 'jdoe' ), 'jpegphoto' => array( $photo_bytes ) ) ) );
-$campus_directory->getDirectoryPhoto( 'jdoe' );
-check( 'a listed person with an LDAP photo makes no campusdirectory request', 0 === count( $remote_get_calls ) );
+$ldap_entries = array( ldap_entry_fixture( array( 'uid' => array( 'jdoe' ), 'cn' => array( 'Jane Doe' ) ) ) );
+$campus_directory->theHTML( campus_directory_theHTML_attributes_fixture( array( 'automatedFeeds' => false, 'cruzidList' => 'jdoe' ) ) );
+check( 'a block not showing photos touches no photo storage', array() === $media_store['get_posts_blogs'] );
+check( 'a block not showing photos does not ask LDAP for them', ! in_array( 'jpegphoto', $ldap_searches[0]['attributes'] ?? array(), true ) );
+check( 'no photo path ever asks campusdirectory photo.php (WPM-230)', 0 === count( $remote_get_calls ) );
 
 echo "LDAP failure is not a miss tests:\n";
 
 // A failed lookup says nothing about the person, so nothing may remember it as
 // "no photo" or "no such person" once LDAP is back.
-
-reset_test_state();
-$ldap_bind_result = false;
-$campus_directory->getDirectoryPhoto( 'jdoe' );
-check( 'a failed LDAP bind does not cache a missing photo', ! isset( $transients[ $photo_key ] ) );
-check( 'reports unavailable when the LDAP bind fails', 'unavailable' === $campus_directory->photoSource );
-
-reset_test_state();
-$transients['ucsc_cd_ldap_down'] = array( 'value' => 1, 'expiration' => 300 );
-$campus_directory->getDirectoryPhoto( 'jdoe' );
-check( 'LDAP marked down does not cache a missing photo', ! isset( $transients[ $photo_key ] ) );
-
-reset_test_state();
-$ldap_handshake_ok = false;
-$campus_directory->getDirectoryPhoto( 'jdoe' );
-check( 'a silent LDAP host does not cache a missing photo', ! isset( $transients[ $photo_key ] ) );
 
 reset_test_state();
 $ldap_bind_result = false;
@@ -1233,23 +1395,6 @@ echo "no LDAP entry is not a known miss tests (WPM-257):\n";
 
 // Only an entry that came back without jpegPhoto is a real "no photo". No entry
 // at all may be a person who is not listed, or an answer cut short.
-
-reset_test_state();
-$campus_directory->getDirectoryPhoto( 'jdoe' );
-check( 'a uid LDAP returns no entry for does not cache a missing photo', ! isset( $transients[ $photo_key ] ) );
-
-reset_test_state();
-$hidden = ldap_entry_fixture( array( 'uid' => array( 'jdoe' ) ) );
-$hidden['ucscpersonpubdisplay'] = array( 'FALSE', 'count' => 1 );
-$ldap_entries = array( $hidden );
-$campus_directory->getDirectoryPhoto( 'jdoe' );
-check( 'a person who is not publicly listed does not cache a missing photo', ! isset( $transients[ $photo_key ] ) );
-
-reset_test_state();
-$ldap_errno_result = 3;
-$campus_directory->getDirectoryPhoto( 'jdoe' );
-check( 'a search cut short by the LDAP time limit does not cache a missing photo', ! isset( $transients[ $photo_key ] ) );
-check( 'reports unavailable for a search cut short by the LDAP time limit', 'unavailable' === $campus_directory->photoSource );
 
 reset_test_state();
 $ldap_errno_result = 3;

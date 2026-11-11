@@ -62,6 +62,20 @@ class CampusDirectoryAPI {
 	}
 }
 
+// The template asks the photo cache for the profile photo URL. Record what it
+// passes (the profile entry, so no second LDAP lookup) and answer from
+// $GLOBALS['_test_photo_urls'].
+class CampusDirectoryPhotoCache {
+	public function urls( $uids, $entries = [] ) {
+		$GLOBALS['_test_photo_calls'][] = [ 'uids' => $uids, 'entries' => $entries ];
+		$urls = [];
+		foreach ( $uids as $uid ) {
+			$urls[ strtolower( $uid ) ] = $GLOBALS['_test_photo_urls'][ strtolower( $uid ) ] ?? '';
+		}
+		return $urls;
+	}
+}
+
 // Stubs needed by CampusDirectory.php (the template does NOT require it, but the
 // harness is shared — guard with function_exists is enough).
 if ( ! defined( 'ABSPATH' ) ) define( 'ABSPATH', sys_get_temp_dir() . '/wp-mock-dpt/' );
@@ -276,8 +290,16 @@ check( 'omits all expertise headings when all expertise fields are absent', fals
 // -- photo and fallback ------------------------------------------------------
 echo "\nphoto and fallback:\n";
 $html = render_profile_template( profile_fixture() );
-check( 'renders a profile photo from the local LDAP photo endpoint', false !== strpos( $html, 'src="https://example.test/wp-json/ucscgutenbergblocks/v1/directoryphoto/jdoe"' ) );
+check( 'with no stored photo, shows the fallback image without a REST request', false !== strpos( $html, 'class="cd-photo" src="//static.ucsc.edu/images/icon-slug.jpg"' ) && false === strpos( $html, 'directoryphoto/' ) );
 check( 'profile photo no longer depends on campusdirectory.ucsc.edu', false === strpos( $html, 'photo.php' ) );
+$GLOBALS['_test_photo_calls'] = [];
+$GLOBALS['_test_photo_urls']  = [ 'jdoe' => 'https://example.test/wp-content/uploads/cd-photo-jdoe-abc.jpg' ];
+$html = render_profile_template( profile_fixture() );
+$GLOBALS['_test_photo_urls']  = [];
+check( 'links the profile photo to its stored file', false !== strpos( $html, 'src="https://example.test/wp-content/uploads/cd-photo-jdoe-abc.jpg"' ) );
+$call = $GLOBALS['_test_photo_calls'][0] ?? [];
+check( 'hands the cache the profile entry it already has, so LDAP is not asked again',
+	[ 'jdoe' ] === ( $call['uids'] ?? null ) && 'jdoe' === ( $call['entries']['jdoe']['uid'][0] ?? null ) );
 check( 'photo carries an onerror fallback to the slug image', false !== strpos( $html, 'icon-slug.jpg' ) );
 check( 'photo alt text identifies the person', false !== strpos( $html, 'alt="Portrait of Jane Doe"' ) );
 
