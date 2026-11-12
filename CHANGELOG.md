@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [commit-and-tag-version](https://github.com/absolute-version/commit-and-tag-version) for commit guidelines.
 
+## [1.3.1](https://github.com/ucsc/ucsc-gutenberg-blocks/compare/v1.3.0...v1.3.1) (2026-11-12)
+
+
+### Bug Fixes
+
+* use a custom upload directory for campus directory photo cache and reduce scandir calls with file list hook ([4a0ef01](https://github.com/ucsc/ucsc-gutenberg-blocks/commit/4a0ef01d09f70a83c833b63a2c4039e1c08b5345))
+
 ## [1.3.0](https://github.com/ucsc/ucsc-gutenberg-blocks/compare/v1.2.4...v1.3.0) (2026-11-11)
 
 
