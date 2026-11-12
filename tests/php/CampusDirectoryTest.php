@@ -177,6 +177,11 @@ function ldap_next_attribute( $link, $entry ) {
 }
 function ldap_close() { return true; }
 function ldap_error() { return ''; }
+$ldap_freed_results = 0;
+function ldap_free_result( $result ) {
+	$GLOBALS['ldap_freed_results']++;
+	return true;
+}
 function ldap_errno() {
 	global $ldap_errno_result;
 	return $ldap_errno_result;
@@ -336,6 +341,10 @@ function reset_test_state() {
 	$ldap_handshake_ok    = true;
 	$ldap_handshake_calls = array();
 	reset_media_store();
+	// Each case is its own request.
+	$GLOBALS['ldap_freed_results'] = 0;
+	CampusDirectoryAPI::resetSharedConnections();
+	CampusDirectoryPhotoCache::resetRequestBudget();
 }
 
 /**
@@ -637,6 +646,56 @@ $transients['ucsc_cd_ldap_down'] = array( 'value' => 1, 'expiration' => 300 );
 $api = campus_directory_api_fixture();
 $api->getCampusDirData( 'jsmith' );
 check( 'while LDAP is marked down, skips the check and the connection', 0 === count( $ldap_handshake_calls ) && 0 === count( $ldap_connect_uris ) );
+
+echo "shared LDAP connection tests:\n";
+
+function size_limits_set() {
+	global $ldap_options;
+	$limits = array();
+	foreach ( $ldap_options as $option ) {
+		if ( LDAP_OPT_SIZELIMIT === $option['option'] ) $limits[] = $option['value'];
+	}
+	return $limits;
+}
+
+reset_test_state();
+campus_directory_api_fixture()->getCampusDirData( 'jsmith' );
+$unscoped               = campus_directory_api_fixture();
+$unscoped->deptOrDivSet = false;
+$unscoped->getCampusDirData( 'jdoe' );
+check( 'blocks on one page share one TLS check, connection, and bind',
+	1 === count( $ldap_handshake_calls ) && 1 === count( $ldap_connect_uris ) && 1 === count( $ldap_bind_args ) && 2 === count( $ldap_searches )
+);
+// Most mock LDAP_OPT_* constants are 0, so this also sees the connection's
+// options; the last two are the two searches' size limits.
+check( 'each search sets its own size limit on the shared connection', array( 1000, 50 ) === array_slice( size_limits_set(), -2 ) );
+check( 'frees each search\'s results, since the connection stays open', 2 === $ldap_freed_results );
+
+reset_test_state();
+campus_directory_api_fixture()->getCampusDirData( 'jsmith' );
+$other_account          = campus_directory_api_fixture();
+$other_account->ldap_cn = 'other-site-app';
+$other_account->getCampusDirData( 'jdoe' );
+$other_password                = campus_directory_api_fixture();
+$other_password->ldap_password = 'other-site-key';
+$other_password->getCampusDirData( 'jroe' );
+check( 'a different bind account on the same host gets its own connection, never a shared one', 3 === count( $ldap_bind_args ) && 3 === count( $ldap_connect_uris ) );
+
+reset_test_state();
+$ldap_bind_result = false;
+@campus_directory_api_fixture()->getCampusDirData( 'jsmith' );
+$ldap_bind_result = true;
+@campus_directory_api_fixture()->getCampusDirData( 'jdoe' );
+check( 'a failed bind is not shared, and marks LDAP down so the next block skips it',
+	1 === count( $ldap_bind_args ) && 0 === count( $ldap_searches ) && isset( $transients['ucsc_cd_ldap_down'] )
+);
+
+reset_test_state();
+$ldap_errno_result = -1;
+campus_directory_api_fixture()->getCampusDirData( 'jsmith' );
+$ldap_errno_result = 0;
+campus_directory_api_fixture()->getCampusDirData( 'jdoe' );
+check( 'a connection the server dropped is not reused: the next block reconnects', 2 === count( $ldap_connect_uris ) && 2 === count( $ldap_handshake_calls ) );
 
 echo "CampusDirectoryAPI profile-route hardening tests (WPM-152):\n";
 
@@ -1228,18 +1287,35 @@ check( 'answers each uid once, lowercased, ignoring blanks', array( 'jdoe' ) ===
 
 echo "directory photo cache write limit:\n";
 
+// The fake clock moves a second per read: 0 when urls() starts, then 1, 2,
+// ... at each new photo's budget check. Checks at 1 to TIME_BUDGET - 1
+// write; the one at TIME_BUDGET is out of time.
+class SlowStorePhotoCache extends CampusDirectoryPhotoCache {
+	public $ticks = 0;
+	protected function clock() {
+		return (float) $this->ticks++;
+	}
+}
+
 reset_test_state();
-$max     = CampusDirectoryPhotoCache::MAX_WRITES_PER_RENDER;
+$max     = (int) CampusDirectoryPhotoCache::TIME_BUDGET - 1;
 $entries = array();
 for ( $i = 0; $i <= $max; $i++ ) $entries[ 'p' . $i ] = photo_entry( 'p' . $i, $photo_bytes . $i );
 $changed = seed_stored_photo( 'p' . ( $max + 1 ), $photo_bytes, $long_ago );
 $entries[ 'p' . ( $max + 1 ) ] = photo_entry( 'p' . ( $max + 1 ), $new_bytes );
-$cache = new CampusDirectoryPhotoCache();
+$cache = new SlowStorePhotoCache();
 $urls  = $cache->urls( array_keys( $entries ), $entries );
-check( "one render writes at most $max photos", $max === count( $media_store['uploads'] ) );
+check( 'stops storing photos once urls() has run for the time budget', $max === count( $media_store['uploads'] ) );
 check( 'a new photo over the limit links to the REST route', 'https://example.test/wp-json/ucscgutenbergblocks/v1/directoryphoto/p' . $max === $urls[ 'p' . $max ] );
 check( 'a changed photo over the limit keeps showing the old one', $media_store['posts'][ $changed ]['url'] === $urls[ 'p' . ( $max + 1 ) ] );
 check( 'reports deferred', 'deferred' === $cache->photoSources[ 'p' . $max ] );
+$next_block = new SlowStorePhotoCache();
+$urls       = $next_block->urls( array( 'jdoe' ), array( 'jdoe' => photo_entry( 'jdoe', $photo_bytes ) ) );
+check( 'the budget is shared by every block in the request: a later block gets none once it is spent', $max === count( $media_store['uploads'] ) && 'deferred' === $next_block->photoSources['jdoe'] );
+CampusDirectoryPhotoCache::resetRequestBudget();
+$next_request = new SlowStorePhotoCache();
+$next_request->urls( array( 'jdoe' ), array( 'jdoe' => photo_entry( 'jdoe', $photo_bytes ) ) );
+check( 'a new request starts with the full budget', $max + 1 === count( $media_store['uploads'] ) );
 
 reset_test_state();
 $media_store['upload_error'] = 'disk full';
@@ -1292,26 +1368,26 @@ check( 'a single site stores photos in its own Media Library without switching',
 echo "nightly prune tests (WP-Cron):\n";
 
 reset_test_state();
-$gone = seed_stored_photo( 'gone', $photo_bytes, time() - 2 * 86400 );
+$gone = seed_stored_photo( 'gone', $photo_bytes, time() - 15 * 86400 );
 ( new CampusDirectoryPhotoCache() )->urls( array( 'gone' ) );
 check( 'a page view never prunes', isset( $media_store['posts'][ $gone ] ) && array() === $media_store['deleted'] );
 
 reset_test_state();
-$gone = seed_stored_photo( 'gone', $photo_bytes, time() - 2 * 86400 );
-$kept = seed_stored_photo( 'kept', $photo_bytes, time() - 12 * HOUR_IN_SECONDS );
+$gone = seed_stored_photo( 'gone', $photo_bytes, time() - 15 * 86400 );
+$kept = seed_stored_photo( 'kept', $photo_bytes, time() - 13 * 86400 );
 $deleted = CampusDirectoryPhotoCache::pruneNightly();
-check( 'deletes photos no entry has confirmed for a day', in_array( $gone, $media_store['deleted'], true ) && 1 === $deleted );
-check( 'keeps photos confirmed within the day', isset( $media_store['posts'][ $kept ] ) );
-$gone2 = seed_stored_photo( 'gone2', $photo_bytes, time() - 2 * 86400 );
+check( 'deletes photos no entry has confirmed for 14 days', in_array( $gone, $media_store['deleted'], true ) && 1 === $deleted );
+check( 'keeps photos confirmed within 14 days, so a page viewed less than daily keeps its photos', isset( $media_store['posts'][ $kept ] ) );
+$gone2 = seed_stored_photo( 'gone2', $photo_bytes, time() - 15 * 86400 );
 check( 'only the first site\'s job each night does the work', 0 === CampusDirectoryPhotoCache::pruneNightly() && isset( $media_store['posts'][ $gone2 ] ) );
 
 reset_test_state();
 $batch = CampusDirectoryPhotoCache::PRUNE_BATCH;
-for ( $i = 0; $i < $batch * 2 + 5; $i++ ) seed_stored_photo( 'old' . $i, $photo_bytes, time() - 2 * 86400 );
+for ( $i = 0; $i < $batch * 2 + 5; $i++ ) seed_stored_photo( 'old' . $i, $photo_bytes, time() - 15 * 86400 );
 check( 'deletes every stale photo in one run, past a single batch', $batch * 2 + 5 === CampusDirectoryPhotoCache::pruneNightly() && array() === stored_ids() );
 
 reset_test_state();
-for ( $i = 0; $i < $batch; $i++ ) $ids[ $i ] = seed_stored_photo( 'old' . $i, $photo_bytes, time() - 2 * 86400 );
+for ( $i = 0; $i < $batch; $i++ ) $ids[ $i ] = seed_stored_photo( 'old' . $i, $photo_bytes, time() - 15 * 86400 );
 $media_store['delete_fails'] = array( $ids[0] );
 $deleted = CampusDirectoryPhotoCache::pruneNightly();
 check( 'a failed delete stops the run instead of looping', $batch - 1 === $deleted );
@@ -1319,7 +1395,7 @@ check( 'a failed delete stops the run instead of looping', $batch - 1 === $delet
 reset_test_state();
 $media_store['multisite'] = true;
 $media_store['blog']      = 7;
-$gone = seed_stored_photo( 'gone', $photo_bytes, time() - 2 * 86400, 1 );
+$gone = seed_stored_photo( 'gone', $photo_bytes, time() - 15 * 86400, 1 );
 CampusDirectoryPhotoCache::pruneNightly();
 check( 'a job fired on any site prunes the main site\'s photos', in_array( $gone, $media_store['deleted'], true ) );
 check( 'and switches back afterwards', 7 === $media_store['blog'] && array() === $media_store['blog_stack'] );

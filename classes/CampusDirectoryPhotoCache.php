@@ -32,15 +32,21 @@ class CampusDirectoryPhotoCache
   // A person LDAP returned without a photo is shown the fallback without a
   // REST request while their block's people list is served from cache.
   const NO_PHOTO_FOR = 3600;
-  const PRUNE_AFTER = 86400;
+  // Long enough that a page viewed less than daily keeps its photos instead
+  // of re-storing them all on its next view (a cold 100-person page ran past
+  // the CampusPress dev gateway timeout).
+  const PRUNE_AFTER = 14 * 86400;
   const PRUNE_HOOK = 'ucsc_cd_photo_prune';
   const PRUNE_AT = '03:00';
   const PRUNED_TONIGHT = 'ucsc_cd_photo_pruned';
   const PRUNE_BATCH = 200;
-  // Bounds the time one render spends writing photos (~27ms each), so the
-  // first view of a big page stays well under CampusPress's 30s cutoff. People
-  // over the limit get the REST route, which stores their photo.
-  const MAX_WRITES_PER_RENDER = 100;
+  // Seconds all urls() calls in one request may spend going through and
+  // storing photos, together: a page can have many directory blocks, so a
+  // per-block budget would not bound the page. Keeps the first view of a big
+  // page under the gateway timeout. A time budget, not a count, since a
+  // write's cost depends on the host's storage. People past it get the REST
+  // route, which stores their photo.
+  const TIME_BUDGET = 5.0;
 
   const FALLBACK_SRC = '//static.ucsc.edu/images/icon-slug.jpg';
 
@@ -58,7 +64,17 @@ class CampusDirectoryPhotoCache
   // stored), deferred (over the write limit), or store-failed.
   public $photoSources = [];
 
-  private $writesThisRender = 0;
+  // When the current urls() call started, and the seconds earlier urls()
+  // calls in this request already spent, for TIME_BUDGET.
+  private $startedAt = 0.0;
+  private static $requestSeconds = 0.0;
+
+  // For tests and long-running processes (e.g. WP-CLI) that render many
+  // pages in one PHP process.
+  public static function resetRequestBudget()
+  {
+    self::$requestSeconds = 0.0;
+  }
 
   public static function storeSiteId()
   {
@@ -87,6 +103,7 @@ class CampusDirectoryPhotoCache
     if (!$uids) return [];
     $ldapEntries = array_change_key_case((array) $ldapEntries, CASE_LOWER);
 
+    $this->startedAt = $this->clock();
     $storeSiteId = self::storeSiteId();
     $mustSwitchSite = is_multisite() && $storeSiteId !== (int) get_current_blog_id();
     if ($mustSwitchSite) switch_to_blog($storeSiteId);
@@ -94,6 +111,7 @@ class CampusDirectoryPhotoCache
       $photoUrls = $this->photoUrlsOnStoreSite($uids, $ldapEntries);
     } finally {
       if ($mustSwitchSite) restore_current_blog();
+      self::$requestSeconds += $this->clock() - $this->startedAt;
     }
 
     // Built after switching back: the REST route belongs to the site showing
@@ -171,11 +189,10 @@ class CampusDirectoryPhotoCache
 
     // New or changed photo. A changed photo is not a hidden one, so the old
     // one may show a little longer if this render is out of writes.
-    if ($this->writesThisRender >= self::MAX_WRITES_PER_RENDER) {
+    if (self::$requestSeconds + ($this->clock() - $this->startedAt) >= self::TIME_BUDGET) {
       $this->photoSources[$uid] = 'deferred';
       return $storedPhoto ? $storedPhoto['url'] : self::NOT_STORED_YET;
     }
-    $this->writesThisRender++;
     $newUrl = $this->storePhoto($uid, $photoBytes, $photoHash, $now);
     if ($newUrl === '') {
       $this->photoSources[$uid] = 'store-failed';
@@ -184,6 +201,12 @@ class CampusDirectoryPhotoCache
     if ($storedPhoto) $this->deletePhoto($storedPhoto['id']);
     $this->photoSources[$uid] = 'ldap';
     return $newUrl;
+  }
+
+  // Seconds, for TIME_BUDGET; tests override it.
+  protected function clock()
+  {
+    return microtime(true);
   }
 
   // uid => ['id', 'hash', 'lastChecked', 'url'] for the stored photos of
