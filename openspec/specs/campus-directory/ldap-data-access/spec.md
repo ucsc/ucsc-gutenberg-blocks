@@ -137,36 +137,6 @@ list and table layouts do not render it from that request.
 - **WHEN** an individual profile is rendered
 - **THEN** the complete directory entry is requested
 
-### Requirement: Results are cached
-
-Directory results SHALL be cached so that repeated page views do not re-query
-the directory.
-
-Listing results and profile results MUST NOT share a cache entry, because they
-request different fields for the same person. Successful results MUST be cached
-for 10 minutes and empty results for 1 minute, so an unreachable directory is
-retried soon rather than being cached as "nobody works here".
-
-The department list shown in the editor MUST be cached for one week
-(`ucsc_cddepartmentcode`); a failed fetch returns an error and is not cached.
-The division list is static and not cached.
-
-#### Scenario: Repeat view is served from cache
-
-- **WHEN** the same listing is viewed twice within 10 minutes
-- **THEN** the directory is queried once
-
-#### Scenario: Listing and profile caches are separate
-
-- **WHEN** a person appears in a cached listing and their profile is then viewed
-- **THEN** the profile renders the full record rather than the narrowed listing
-  record
-
-#### Scenario: Empty result expires quickly
-
-- **WHEN** a query returns nobody
-- **THEN** the empty result is retried after 1 minute
-
 ### Requirement: Directory failure degrades gracefully
 
 When the directory cannot be reached, refuses the bind, or fails a search, the
