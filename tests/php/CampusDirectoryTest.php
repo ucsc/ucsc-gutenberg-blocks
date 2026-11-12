@@ -1154,7 +1154,11 @@ check( 'records uid, md5, and check time on the attachment',
 check( 'generates no intermediate sizes', array() === $media_store['posts'][ $id ]['metadata']['sizes'] );
 check( 'stores photos as private attachments, so the public media API does not list them', 'private' === $media_store['posts'][ $id ]['args']['post_status'] );
 check( 'the cache never queries LDAP itself', 0 === count( $ldap_searches ) );
-check( 'writes to the photo folder, not the YYYY/MM one', '/uploads/campus-directory-photos' === ( $media_store['uploads'][0]['path'] ?? null ) );
+check( 'writes to the photo folder, not the YYYY/MM one', '/uploads/site-1/campus-directory-photos' === ( $media_store['uploads'][0]['path'] ?? null ) );
+check( 'the stored file and its URL are in the photo folder',
+	'/uploads/site-1/campus-directory-photos/' . $media_store['uploads'][0]['name'] === $media_store['posts'][ $id ]['file']
+	&& 'https://example.test/uploads/site-1/campus-directory-photos/' . $media_store['uploads'][0]['name'] === $urls['jdoe']
+);
 check( 'skips listing the upload folder', array() === ( $media_store['uploads'][0]['file_list'] ?? null ) );
 check( 'removes both upload filters after the write', empty( $GLOBALS['upload_filters'] ) );
 check( 'reports ldap as the source', 'ldap' === $cache->photoSources['jdoe'] );
@@ -1243,6 +1247,16 @@ $cache = new CampusDirectoryPhotoCache();
 $urls  = @$cache->urls( array( 'jdoe' ), array( 'jdoe' => photo_entry( 'jdoe', $photo_bytes ) ) );
 check( 'a failed write gives no URL instead of a broken one', '' === $urls['jdoe'] && 'store-failed' === $cache->photoSources['jdoe'] );
 check( 'removes both upload filters after a failed write', empty( $GLOBALS['upload_filters'] ) );
+
+reset_test_state();
+$media_store['upload_throws'] = true;
+$threw = false;
+try {
+	( new CampusDirectoryPhotoCache() )->urls( array( 'jdoe' ), array( 'jdoe' => photo_entry( 'jdoe', $photo_bytes ) ) );
+} catch ( RuntimeException $e ) {
+	$threw = true;
+}
+check( 'removes both upload filters when the write throws', $threw && empty( $GLOBALS['upload_filters'] ) );
 
 reset_test_state();
 $older = seed_stored_photo( 'jdoe', $photo_bytes, $long_ago );
