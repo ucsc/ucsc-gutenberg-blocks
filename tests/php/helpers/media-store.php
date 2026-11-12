@@ -24,6 +24,7 @@ function reset_media_store() {
 		'uploads'         => array(),
 		'deleted'         => array(),
 		'upload_error'    => false,
+		'upload_throws'   => false,
 		'get_posts_blogs' => array(),
 		'rest_url_blogs'  => array(),
 		'delete_fails'    => array(),
@@ -134,13 +135,33 @@ function update_post_meta( $id, $key, $value ) {
 }
 function wp_upload_bits( $name, $deprecated, $bits ) {
 	global $media_store;
+	if ( $media_store['upload_throws'] ) {
+		throw new RuntimeException( 'storage unavailable' );
+	}
 	if ( $media_store['upload_error'] ) {
 		return array( 'error' => $media_store['upload_error'] );
 	}
-	$media_store['uploads'][] = array( 'name' => $name, 'bits' => $bits, 'blog' => $media_store['blog'] );
+	// Like core: upload_dir decides the folder (default YYYY/MM), and
+	// wp_unique_filename() lists it unless pre_wp_unique_filename_file_list
+	// hands back a list (null = it would scandir).
+	$filters = $GLOBALS['upload_filters'] ?? array();
+	$base    = '/uploads/site-' . $media_store['blog'];
+	$dir     = array(
+		'basedir' => $base,
+		'baseurl' => 'https://example.test' . $base,
+		'subdir'  => '/2026/11',
+		'path'    => $base . '/2026/11',
+		'url'     => 'https://example.test' . $base . '/2026/11',
+		'error'   => false,
+	);
+	if ( isset( $filters['upload_dir'] ) ) $dir = call_user_func( $filters['upload_dir'], $dir );
+	$file_list = isset( $filters['pre_wp_unique_filename_file_list'] )
+		? call_user_func( $filters['pre_wp_unique_filename_file_list'], null, $dir['path'], $name )
+		: null;
+	$media_store['uploads'][] = array( 'name' => $name, 'bits' => $bits, 'blog' => $media_store['blog'], 'path' => $dir['path'], 'file_list' => $file_list );
 	return array(
-		'file'  => '/uploads/site-' . $media_store['blog'] . '/' . $name,
-		'url'   => 'https://example.test/uploads/site-' . $media_store['blog'] . '/' . $name,
+		'file'  => $dir['path'] . '/' . $name,
+		'url'   => $dir['url'] . '/' . $name,
 		'error' => false,
 	);
 }

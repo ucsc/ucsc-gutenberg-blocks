@@ -44,6 +44,10 @@ class CampusDirectoryPhotoCache
 
   const FALLBACK_SRC = '//static.ucsc.edu/images/icon-slug.jpg';
 
+  // Photos are written to this folder under the store site's uploads, not
+  // the current YYYY/MM one (see storePhoto).
+  const UPLOAD_SUBDIR = '/campus-directory-photos';
+
   // Internal marker: the photo is not stored yet, so the page links to the
   // REST route, which stores it on first request.
   const NOT_STORED_YET = null;
@@ -220,10 +224,25 @@ class CampusDirectoryPhotoCache
   //  - The file name carries part of the hash, so a changed photo gets a new
   //    URL and the CDN cannot keep serving the old one under the same name.
   //  - No intermediate sizes are generated: pages show the original at 160px.
+  //  - Written to UPLOAD_SUBDIR with no folder listing, which CampusPress
+  //    asked for to cut filesystem calls on their storage. By default
+  //    wp_upload_bits() writes to the YYYY/MM folder that holds every other
+  //    upload, and wp_unique_filename() lists that whole folder (scandir)
+  //    for each image to avoid sub-size name clashes. Our names carry the uid
+  //    and hash and we make no sub-sizes, so an empty list is safe; the
+  //    single file_exists() on the name itself still runs. Both filters
+  //    apply to this write only.
   private function storePhoto($uid, $photoBytes, $photoHash, $now)
   {
     $fileName = 'cd-photo-' . sanitize_file_name($uid) . '-' . substr($photoHash, 0, 12) . '.jpg';
-    $upload = wp_upload_bits($fileName, null, $photoBytes);
+    add_filter('upload_dir', [self::class, 'photoUploadDir']);
+    add_filter('pre_wp_unique_filename_file_list', [self::class, 'noFileList']);
+    try {
+      $upload = wp_upload_bits($fileName, null, $photoBytes);
+    } finally {
+      remove_filter('upload_dir', [self::class, 'photoUploadDir']);
+      remove_filter('pre_wp_unique_filename_file_list', [self::class, 'noFileList']);
+    }
     if (!empty($upload['error'])) {
       error_log('CampusDirectory photo store failed for ' . $uid . ': ' . $upload['error']);
       return '';
@@ -253,6 +272,21 @@ class CampusDirectoryPhotoCache
     update_post_meta($attachmentId, self::META_LAST_CHECKED, $now);
 
     return wp_get_attachment_url($attachmentId);
+  }
+
+  // upload_dir filter for storePhoto(): same uploads root, fixed folder.
+  public static function photoUploadDir($uploads)
+  {
+    $uploads['subdir'] = self::UPLOAD_SUBDIR;
+    $uploads['path'] = $uploads['basedir'] . self::UPLOAD_SUBDIR;
+    $uploads['url'] = $uploads['baseurl'] . self::UPLOAD_SUBDIR;
+    return $uploads;
+  }
+
+  // pre_wp_unique_filename_file_list filter for storePhoto(): skip scandir.
+  public static function noFileList()
+  {
+    return [];
   }
 
   // Removes the attachment and its file. True on success.
