@@ -45,6 +45,17 @@ function add_filter( $hook, $callback, $priority = 10 ) {
 	if ( 'the_content' === $hook ) {
 		$the_content_callback = $callback;
 	}
+	// Filters the photo cache adds around one write; the media-store
+	// wp_upload_bits() applies them the way core does.
+	if ( in_array( $hook, array( 'upload_dir', 'pre_wp_unique_filename_file_list' ), true ) ) {
+		$GLOBALS['upload_filters'][ $hook ] = $callback;
+	}
+}
+function remove_filter( $hook, $callback, $priority = 10 ) {
+	if ( ( $GLOBALS['upload_filters'][ $hook ] ?? null ) === $callback ) {
+		unset( $GLOBALS['upload_filters'][ $hook ] );
+	}
+	return true;
 }
 function register_rest_route() {}
 $status_headers = array();
@@ -1143,6 +1154,9 @@ check( 'records uid, md5, and check time on the attachment',
 check( 'generates no intermediate sizes', array() === $media_store['posts'][ $id ]['metadata']['sizes'] );
 check( 'stores photos as private attachments, so the public media API does not list them', 'private' === $media_store['posts'][ $id ]['args']['post_status'] );
 check( 'the cache never queries LDAP itself', 0 === count( $ldap_searches ) );
+check( 'writes to the photo folder, not the YYYY/MM one', '/uploads/campus-directory-photos' === ( $media_store['uploads'][0]['path'] ?? null ) );
+check( 'skips listing the upload folder', array() === ( $media_store['uploads'][0]['file_list'] ?? null ) );
+check( 'removes both upload filters after the write', empty( $GLOBALS['upload_filters'] ) );
 check( 'reports ldap as the source', 'ldap' === $cache->photoSources['jdoe'] );
 
 reset_test_state();
@@ -1228,6 +1242,7 @@ $media_store['upload_error'] = 'disk full';
 $cache = new CampusDirectoryPhotoCache();
 $urls  = @$cache->urls( array( 'jdoe' ), array( 'jdoe' => photo_entry( 'jdoe', $photo_bytes ) ) );
 check( 'a failed write gives no URL instead of a broken one', '' === $urls['jdoe'] && 'store-failed' === $cache->photoSources['jdoe'] );
+check( 'removes both upload filters after a failed write', empty( $GLOBALS['upload_filters'] ) );
 
 reset_test_state();
 $older = seed_stored_photo( 'jdoe', $photo_bytes, $long_ago );

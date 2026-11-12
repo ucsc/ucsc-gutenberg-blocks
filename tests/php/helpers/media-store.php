@@ -137,7 +137,23 @@ function wp_upload_bits( $name, $deprecated, $bits ) {
 	if ( $media_store['upload_error'] ) {
 		return array( 'error' => $media_store['upload_error'] );
 	}
-	$media_store['uploads'][] = array( 'name' => $name, 'bits' => $bits, 'blog' => $media_store['blog'] );
+	// Like core: upload_dir decides the folder (default YYYY/MM), and
+	// wp_unique_filename() lists it unless pre_wp_unique_filename_file_list
+	// hands back a list (null = it would scandir).
+	$filters = $GLOBALS['upload_filters'] ?? array();
+	$dir     = array(
+		'basedir' => '/uploads',
+		'baseurl' => 'https://example.test/uploads',
+		'subdir'  => '/2026/11',
+		'path'    => '/uploads/2026/11',
+		'url'     => 'https://example.test/uploads/2026/11',
+		'error'   => false,
+	);
+	if ( isset( $filters['upload_dir'] ) ) $dir = call_user_func( $filters['upload_dir'], $dir );
+	$file_list = isset( $filters['pre_wp_unique_filename_file_list'] )
+		? call_user_func( $filters['pre_wp_unique_filename_file_list'], null, $dir['path'], $name )
+		: null;
+	$media_store['uploads'][] = array( 'name' => $name, 'bits' => $bits, 'blog' => $media_store['blog'], 'path' => $dir['path'], 'file_list' => $file_list );
 	return array(
 		'file'  => '/uploads/site-' . $media_store['blog'] . '/' . $name,
 		'url'   => 'https://example.test/uploads/site-' . $media_store['blog'] . '/' . $name,
