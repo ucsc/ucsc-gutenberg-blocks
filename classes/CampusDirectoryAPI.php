@@ -213,6 +213,70 @@ class CampusDirectoryAPI {
     ];
   }
 
+  // One bound connection per host and bind account per request, shared by
+  // every directory block and lookup on the page: a page with several blocks
+  // does the TLS check and bind once instead of once per block. Keyed by the
+  // bind account too, since sites can bind to the same host as different
+  // accounts (network vs. site settings), so a block rendered for another
+  // site in the same request (switch_to_blog) never searches as this one's
+  // account. PHP closes them when the request ends.
+  private static $sharedConnections = [];
+
+  // For tests and long-running processes (e.g. WP-CLI) that need a fresh
+  // connection.
+  public static function resetSharedConnections()
+  {
+    self::$sharedConnections = [];
+  }
+
+  // This request's bound connection, or null when LDAP is not answering (the
+  // TLS check or bind failed, which also marks LDAP down so the rest of the
+  // page and the next few minutes of requests skip it).
+  private function sharedConnection()
+  {
+    $key = $this->connectionKey();
+    if (isset(self::$sharedConnections[$key])) {
+      return self::$sharedConnections[$key];
+    }
+
+    if (!ucsc_cd_ldap_handshake_ok($this->ldap_url, 3)) {
+      error_log('CampusDirectory LDAP did not answer within 3s; skipping LDAP for 5 minutes');
+      set_transient('ucsc_cd_ldap_down', 1, 5 * MINUTE_IN_SECONDS);
+      return null;
+    }
+
+    // Same connection everywhere (WPM-234): local dev binds as production does,
+    // so LDAP behavior (e.g. which attributes the bind can see) matches.
+    $rli = ldap_connect("ldaps://" . $this->ldap_url);
+    if (!$rli) return null;
+
+    // Keep well under the CampusPress edge's 30s proxy timeout so a slow
+    // LDAP server degrades to an empty section instead of a 504 page.
+    ldap_set_option($rli, LDAP_OPT_TIMELIMIT, 15);
+    ldap_set_option($rli, LDAP_OPT_NETWORK_TIMEOUT, 5);
+    // Client-side limit for bind and search once connected.
+    ldap_set_option($rli, LDAP_OPT_TIMEOUT, 5);
+    ldap_set_option($rli, LDAP_OPT_PROTOCOL_VERSION, 3);
+
+    @$ldapbind = ldap_bind($rli,"cn=" . $this->ldap_cn . ",ou=apps,dc=ucsc,dc=edu", $this->ldap_password);
+    if (!$ldapbind) {
+      error_log('CampusDirectory LDAP bind failed: ' . ldap_error($rli));
+      // Not cached per query (see getCampusDirData), so back off here instead.
+      set_transient('ucsc_cd_ldap_down', 1, MINUTE_IN_SECONDS);
+      ldap_close($rli);
+      return null;
+    }
+
+    self::$sharedConnections[$key] = $rli;
+    return $rli;
+  }
+
+  // Host and bind account; the password is hashed so it is not kept as a key.
+  private function connectionKey()
+  {
+    return $this->ldap_url . '|' . $this->ldap_cn . '|' . hash('sha256', (string) $this->ldap_password);
+  }
+
   public function doLDAPQuery($q, $arrCruzids, $attributes = []) {
     // Chokepoint guard: an empty filter would become the malformed search
     // "(|)" — bail here so every caller is protected, not just getCampusDirData.
@@ -222,52 +286,31 @@ class CampusDirectoryAPI {
     // LDAP stalled moments ago: skip it for a few minutes instead of making
     // every page and photo wait on it again.
     if (get_transient('ucsc_cd_ldap_down')) return [];
-    if (!ucsc_cd_ldap_handshake_ok($this->ldap_url, 3)) {
-      error_log('CampusDirectory LDAP did not answer within 3s; skipping LDAP for 5 minutes');
-      set_transient('ucsc_cd_ldap_down', 1, 5 * MINUTE_IN_SECONDS);
-      return [];
+    $rli = $this->sharedConnection();
+    if (!$rli) return [];
+
+    // Set per search, since blocks on one connection differ.
+    if (!$this->deptOrDivSet) {
+      ldap_set_option($rli, LDAP_OPT_SIZELIMIT, 50);
+    } else {
+      // Hard ceiling so no block configuration can pull the whole directory.
+      ldap_set_option($rli, LDAP_OPT_SIZELIMIT, 1000);
     }
 
-    // Same connection everywhere (WPM-234): local dev binds as production does,
-    // so LDAP behavior (e.g. which attributes the bind can see) matches.
-    $rli = ldap_connect("ldaps://" . $this->ldap_url);
-
-    if ($rli) {
-      // Keep well under the CampusPress edge's 30s proxy timeout so a slow
-      // LDAP server degrades to an empty section instead of a 504 page.
-      ldap_set_option($rli, LDAP_OPT_TIMELIMIT, 15);
-      ldap_set_option($rli, LDAP_OPT_NETWORK_TIMEOUT, 5);
-      // Client-side limit for bind and search once connected.
-      ldap_set_option($rli, LDAP_OPT_TIMEOUT, 5);
-      ldap_set_option($rli, LDAP_OPT_PROTOCOL_VERSION, 3);
-
-      if (!$this->deptOrDivSet) {
-        ldap_set_option($rli, LDAP_OPT_SIZELIMIT, 50);
-      } else {
-        // Hard ceiling so no block configuration can pull the whole directory.
-        ldap_set_option($rli, LDAP_OPT_SIZELIMIT, 1000);
-      }
-
-      @$ldapbind = ldap_bind($rli,"cn=" . $this->ldap_cn . ",ou=apps,dc=ucsc,dc=edu", $this->ldap_password);
-      if ($ldapbind) {
-        if (!count($attributes)) $attributes = ['*'];
-        $sr = ldap_search($rli, "ou=people,dc=ucsc,dc=edu", "(|{$q})", $attributes);
-        // A search cut short by an LDAP error (e.g. time limit) is not a full
-        // answer; only the size limit is an expected, complete-enough result (WPM-257).
-        $errno = ldap_errno($rli);
-        if ($sr && ($errno === 0 || $errno === 4)) $this->ldapFailed = false;
-        $people = $this->processSearchResults($rli, $sr);
-        $people = $this->addVacantPositions($people, $this->nodeContent['automatedFeeds'], $arrCruzids);
-        ldap_close($rli);
-        return $people;
-      } else {
-        error_log('CampusDirectory LDAP bind failed: ' . ldap_error($rli));
-        // Not cached per query (see getCampusDirData), so back off here instead.
-        set_transient('ucsc_cd_ldap_down', 1, MINUTE_IN_SECONDS);
-      }
-    }
-
-    return [];
+    if (!count($attributes)) $attributes = ['*'];
+    $sr = ldap_search($rli, "ou=people,dc=ucsc,dc=edu", "(|{$q})", $attributes);
+    // A search cut short by an LDAP error (e.g. time limit) is not a full
+    // answer; only the size limit is an expected, complete-enough result (WPM-257).
+    $errno = ldap_errno($rli);
+    if ($sr && ($errno === 0 || $errno === 4)) $this->ldapFailed = false;
+    // Server gone (-1, LDAP_SERVER_DOWN): drop the connection so the next
+    // lookup reconnects (and its TLS check marks LDAP down if it stays gone).
+    if ($errno === -1) unset(self::$sharedConnections[$this->connectionKey()]);
+    $people = $this->processSearchResults($rli, $sr);
+    // The connection outlives this search, so free its results now rather
+    // than at request end.
+    if ($sr) ldap_free_result($sr);
+    return $this->addVacantPositions($people, $this->nodeContent['automatedFeeds'], $arrCruzids);
   }
 
   public function addVacantPositions($people, $automatedFeed, $arrCruzids)
